@@ -1,0 +1,48 @@
+/**
+ * SomeWM Documentation Theme
+ * Primary color: Blue/Cyan to differentiate from AwesomeWM's green/teal
+ */
+
+:root {
+  --ifm-color-primary: #3b82f6;
+  --ifm-color-primary-dark: #2563eb;
+  --ifm-color-primary-darker: #1d4ed8;
+  --ifm-color-primary-darkest: #1e40af;
+  --ifm-color-primary-light: #60a5fa;
+  --ifm-color-primary-lighter: #93c5fd;
+  --ifm-color-primary-lightest: #dbeafe;
+  --ifm-color-primary-rgb: 59, 130, 246;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #3b82f6;
+  --ifm-color-primary-darker: #2563eb;
+  --ifm-color-primary-darkest: #1d4ed8;
+  --ifm-color-primary-light: #93c5fd;
+  --ifm-color-primary-lighter: #bfdbfe;
+  --ifm-color-primary-lightest: #dbeafe;
+  --ifm-color-primary-rgb: 96, 165, 250;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Improve code block styling */
+.prism-code {
+  font-size: 0.9rem;
+}
+
+/* Better table styling */
+table {
+  display: table;
+  width: 100%;
+}
+
+table th {
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+[data-theme='dark'] table th {
+  background-color: var(--ifm-color-emphasis-200);
+}

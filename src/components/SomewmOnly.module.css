@@ -1,0 +1,12 @@
+.badge {
+  background-color: var(--ifm-color-primary);
+  border-radius: 4px;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  text-transform: lowercase;
+  vertical-align: middle;
+}
