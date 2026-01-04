@@ -476,5 +476,4 @@ theme.layout_tile = themes_path .. "default/layouts/tilew.png"
 ## Next Steps
 
 - **[First Widget](/tutorials/first-widget)** - Create custom widgets
-- **[Theme Variables Reference](/reference/theme-variables)** - Complete list of all theme variables
-- **[AwesomeWM Theme Docs](https://awesomewm.org/doc/api/libraries/beautiful.html)** - Full beautiful module reference
+- **[AwesomeWM Theme Docs](https://awesomewm.org/doc/api/libraries/beautiful.html)** - Full theme variable reference

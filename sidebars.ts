@@ -34,6 +34,8 @@ const sidebars: SidebarsConfig = {
         'guides/autostart',
         'guides/notifications',
         'guides/screenshots',
+        'guides/fractional-scaling',
+        'guides/widget-timers',
       ],
     },
     {
@@ -51,6 +53,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Concepts',
       items: [
+        'concepts/object-model',
         'concepts/architecture',
         'concepts/wayland-vs-x11',
         'concepts/scene-graph',
