@@ -21,6 +21,7 @@ const sidebars: SidebarsConfig = {
         'tutorials/first-widget',
         'tutorials/first-keybinding',
         'tutorials/first-theme',
+        'tutorials/first-wibar',
       ],
     },
     {
