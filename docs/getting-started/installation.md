@@ -4,26 +4,26 @@ title: Installation
 description: Build and install SomeWM on your system
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Installation
-
-<YouWillLearn>
-
-- Install dependencies for your distribution
-- Build SomeWM from source
-- Choose between system-wide and user-local installation
-
-</YouWillLearn>
 
 ## Dependencies
 
 ### Arch Linux
 
 ```bash
+# Required dependencies
 # Note: lua51-lgi is required for LuaJIT (the default Lua for SomeWM)
-sudo pacman -S wlroots luajit lua51-lgi cairo pango gdk-pixbuf2 \
-    wayland-protocols libinput libxkbcommon
+sudo pacman -S \
+    wlroots \
+    luajit \
+    lua51-lgi \
+    cairo \
+    pango \
+    gdk-pixbuf2 \
+    wayland-protocols \
+    libinput \
+    libxkbcommon
+
 # Optional: XWayland support
 sudo pacman -S xorg-xwayland libxcb
 ```
@@ -31,9 +31,18 @@ sudo pacman -S xorg-xwayland libxcb
 ### Debian/Ubuntu (25.04+ or unstable)
 
 ```bash
-sudo apt install libwlroots-dev luajit lua-lgi libcairo2-dev \
-    libpango1.0-dev libgdk-pixbuf-2.0-dev \
-    wayland-protocols libinput-dev libxkbcommon-dev
+# Required dependencies
+sudo apt install \
+    libwlroots-dev \
+    luajit \
+    lua-lgi \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libgdk-pixbuf-2.0-dev \
+    wayland-protocols \
+    libinput-dev \
+    libxkbcommon-dev
+
 # Optional: XWayland support
 sudo apt install xwayland libxcb1-dev libxcb-icccm4-dev
 ```
@@ -45,9 +54,18 @@ wlroots 0.18+ is required. Debian stable and Ubuntu 24.04 LTS ship older version
 ### Fedora
 
 ```bash
-sudo dnf install wlroots-devel luajit lua-lgi cairo-devel pango-devel \
-    gdk-pixbuf2-devel wayland-protocols-devel libinput-devel \
+# Required dependencies
+sudo dnf install \
+    wlroots-devel \
+    luajit \
+    lua-lgi \
+    cairo-devel \
+    pango-devel \
+    gdk-pixbuf2-devel \
+    wayland-protocols-devel \
+    libinput-devel \
     libxkbcommon-devel
+
 # Optional: XWayland support
 sudo dnf install xorg-x11-server-Xwayland libxcb-devel xcb-util-wm-devel
 ```
