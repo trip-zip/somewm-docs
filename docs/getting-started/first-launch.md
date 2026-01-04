@@ -1,20 +1,10 @@
 ---
 sidebar_position: 2
-title: First Launch
+title: Launch
 description: Running SomeWM and essential configuration
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
-# First Launch
-
-<YouWillLearn>
-
-- How to start SomeWM from a display manager or TTY
-- Where configuration files are located
-- Essential keybindings to navigate
-
-</YouWillLearn>
+# Launch
 
 ## Starting SomeWM
 
@@ -59,6 +49,10 @@ cp /etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
 # cp ~/.local/etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
 ```
 
+:::note NixOS
+The `nix-build` approach installs only binaries. Get the default config from the [source repository](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua).
+:::
+
 ## Essential Keybindings
 
 The default configuration uses these keybindings (where **Mod4** is usually the Super/Windows key):
@@ -80,7 +74,7 @@ The default configuration uses these keybindings (where **Mod4** is usually the 
 See [Default Keybindings](/reference/default-keybindings) for the complete list.
 :::
 
-## Troubleshooting First Launch
+## Troubleshooting
 
 ### "No config found" error
 

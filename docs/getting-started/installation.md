@@ -8,13 +8,16 @@ description: Build and install SomeWM on your system
 
 ## Dependencies
 
+:::note wlroots
+SomeWM is tightly coupled to wlroots 0.19. Meson fetches it automatically as a subproject during the build.
+:::
+
 ### Arch Linux
 
 ```bash
 # Required dependencies
 # Note: lua51-lgi is required for LuaJIT (the default Lua for SomeWM)
 sudo pacman -S \
-    wlroots \
     luajit \
     lua51-lgi \
     cairo \
@@ -33,7 +36,6 @@ sudo pacman -S xorg-xwayland libxcb
 ```bash
 # Required dependencies
 sudo apt install \
-    libwlroots-dev \
     luajit \
     lua-lgi \
     libcairo2-dev \
@@ -47,16 +49,11 @@ sudo apt install \
 sudo apt install xwayland libxcb1-dev libxcb-icccm4-dev
 ```
 
-:::caution wlroots Version
-wlroots 0.18+ is required. Debian stable and Ubuntu 24.04 LTS ship older versions - you'll need to [build wlroots from source](https://gitlab.freedesktop.org/wlroots/wlroots) first.
-:::
-
 ### Fedora
 
 ```bash
 # Required dependencies
 sudo dnf install \
-    wlroots-devel \
     luajit \
     lua-lgi \
     cairo-devel \
@@ -175,4 +172,4 @@ sudo make uninstall-session
 
 ## Next Steps
 
-Once installed, proceed to [First Launch](/getting-started/first-launch) to run SomeWM for the first time.
+Once installed, proceed to [Launch](/getting-started/first-launch) to run SomeWM for the first time.
