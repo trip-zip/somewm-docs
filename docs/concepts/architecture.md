@@ -216,4 +216,4 @@ end)
 
 - **[The Object Model](/concepts/object-model)** - Understanding screens, tags, clients, widgets
 - **[AwesomeWM Compatibility](/concepts/awesomewm-compat)** - How SomeWM maintains compatibility
-- **[My First SomeWM](/tutorials/my-first-somewm)** - Put these concepts into practice
+- **[Basics](/tutorials/basics)** - Put these concepts into practice

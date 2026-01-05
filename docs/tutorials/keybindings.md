@@ -417,5 +417,5 @@ Check the notification for error messages. Common issues:
 ## Next Steps
 
 - **[Default Keybindings](/reference/default-keybindings)** - Complete list of built-in shortcuts
-- **[First Widget](/tutorials/first-widget)** - Create custom widgets
+- **[Widgets](/tutorials/widgets)** - Create custom widgets
 - **[AwesomeWM Key Docs](https://awesomewm.org/doc/api/libraries/awful.key.html)** - Full awful.key reference

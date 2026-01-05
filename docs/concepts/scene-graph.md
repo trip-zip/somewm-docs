@@ -208,4 +208,4 @@ Background| Wallpaper, desktop icons
 
 - **[The Object Model](/concepts/object-model)** - Understanding clients and wibars
 - **[Architecture](/concepts/architecture)** - How the compositor is structured
-- **[First Wibar](/tutorials/first-wibar)** - Create your own panel
+- **[Wibar](/tutorials/wibar)** - Create your own panel

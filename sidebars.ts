@@ -17,11 +17,11 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Tutorials',
       items: [
-        'tutorials/my-first-somewm',
-        'tutorials/first-widget',
-        'tutorials/first-keybinding',
-        'tutorials/first-theme',
-        'tutorials/first-wibar',
+        'tutorials/basics',
+        'tutorials/widgets',
+        'tutorials/keybindings',
+        'tutorials/theme',
+        'tutorials/wibar',
       ],
     },
     {

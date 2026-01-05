@@ -284,4 +284,4 @@ wl-paste  # Should print "test"
 ## See Also
 
 - **[CLI Control](/guides/cli-control)** - More somewm-client commands
-- **[First Keybinding](/tutorials/first-keybinding)** - Setting up keybindings
+- **[Keybindings](/tutorials/keybindings)** - Setting up keybindings

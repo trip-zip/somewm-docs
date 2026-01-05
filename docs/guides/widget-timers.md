@@ -434,6 +434,6 @@ end
 
 ## See Also
 
-- **[First Widget](/tutorials/first-widget)** - Complete widget tutorial
+- **[Widgets](/tutorials/widgets)** - Complete widget tutorial
 - **[Architecture](/concepts/architecture)** - Understanding signals
 - **[AwesomeWM Timer Docs](https://awesomewm.org/doc/api/libraries/gears.timer.html)** - Full timer API

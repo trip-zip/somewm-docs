@@ -360,5 +360,5 @@ export ELECTRON_OZONE_PLATFORM_HINT=auto
 
 ## See Also
 
-- **[First Widget](/tutorials/first-widget)** - Build notification-triggering widgets
+- **[Widgets](/tutorials/widgets)** - Build notification-triggering widgets
 - **[AwesomeWM Naughty Docs](https://awesomewm.org/doc/api/libraries/naughty.html)** - Full naughty API

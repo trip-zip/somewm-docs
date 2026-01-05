@@ -102,5 +102,5 @@ This usually means LGI isn't found or is the wrong version. See [Installation - 
 ## Next Steps
 
 - **Have an existing AwesomeWM config?** See [Migrating from AwesomeWM](/getting-started/migrating)
-- **Starting fresh?** Try the [My First SomeWM](/tutorials/my-first-somewm) tutorial
+- **Starting fresh?** Try the [Basics](/tutorials/basics) tutorial
 - **Want to customize input?** See [Input Device Configuration](/guides/input-devices)

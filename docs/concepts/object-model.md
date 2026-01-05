@@ -297,5 +297,5 @@ Common signals:
 Now that you understand the object model:
 
 - **[Architecture](/concepts/architecture)** - How the layers communicate
-- **[My First SomeWM](/tutorials/my-first-somewm)** - Hands-on practice with these concepts
-- **[First Widget](/tutorials/first-widget)** - Build widgets that use these objects
+- **[Basics](/tutorials/basics)** - Hands-on practice with these concepts
+- **[Widgets](/tutorials/widgets)** - Build widgets that use these objects

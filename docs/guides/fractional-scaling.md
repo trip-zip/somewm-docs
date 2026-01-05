@@ -273,4 +273,4 @@ end
 
 - **[Multi-Monitor Setup](/guides/multi-monitor)** - Per-screen configuration
 - **[CLI Control](/guides/cli-control)** - somewm-client screen commands
-- **[First Theme](/tutorials/first-theme)** - Creating DPI-aware themes
+- **[Theme](/tutorials/theme)** - Creating DPI-aware themes

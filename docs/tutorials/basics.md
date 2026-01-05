@@ -314,9 +314,9 @@ Here are the essential keybindings to memorize:
 
 Congratulations! You now know the basics of SomeWM. Here's where to go from here:
 
-- **[First Theme](/tutorials/first-theme)** - Change colors, fonts, and appearance
-- **[First Keybinding](/tutorials/first-keybinding)** - Add your own keyboard shortcuts
-- **[First Widget](/tutorials/first-widget)** - Build a custom widget for your wibar
+- **[Theme](/tutorials/theme)** - Change colors, fonts, and appearance
+- **[Keybindings](/tutorials/keybindings)** - Add your own keyboard shortcuts
+- **[Widgets](/tutorials/widgets)** - Build a custom widget for your wibar
 - **[Default Keybindings](/reference/default-keybindings)** - Complete list of all shortcuts
 
 :::tip Pro Tips

@@ -468,6 +468,6 @@ end
 
 ## Next Steps
 
-- **[First Widget](/tutorials/first-widget)** - Create custom widgets for your wibar
-- **[First Theme](/tutorials/first-theme)** - Style your wibar
+- **[Widgets](/tutorials/widgets)** - Create custom widgets for your wibar
+- **[Theme](/tutorials/theme)** - Style your wibar
 - **[AwesomeWM Wibar Docs](https://awesomewm.org/doc/api/classes/awful.wibar.html)** - Full wibar reference

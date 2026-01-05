@@ -74,7 +74,7 @@ const config: Config = {
           title: 'Documentation',
           items: [
             {label: 'Getting Started', to: '/getting-started/installation'},
-            {label: 'Tutorials', to: '/tutorials/my-first-somewm'},
+            {label: 'Tutorials', to: '/tutorials/basics'},
             {label: 'Reference', to: '/reference/awful-input'},
           ],
         },

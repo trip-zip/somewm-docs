@@ -471,6 +471,6 @@ image = os.getenv("HOME") .. "/.config/somewm/icons/clock.svg"
 
 ## Next Steps
 
-- **[First Wibar](/tutorials/first-wibar)** - Build a complete status bar
-- **[First Theme](/tutorials/first-theme)** - Style your widgets
+- **[Wibar](/tutorials/wibar)** - Build a complete status bar
+- **[Theme](/tutorials/theme)** - Style your widgets
 - **[AwesomeWM Widget Docs](https://awesomewm.org/doc/api/classes/wibox.widget.html)** - Full widget reference

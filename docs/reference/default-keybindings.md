@@ -94,5 +94,5 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 
 ## See Also
 
-- [First Keybinding Tutorial](/tutorials/first-keybinding)
+- [Keybindings Tutorial](/tutorials/keybindings)
 - [AwesomeWM Key Docs](https://awesomewm.org/doc/api/libraries/awful.key.html)

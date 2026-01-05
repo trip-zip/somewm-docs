@@ -26,7 +26,7 @@ These docs focus on:
     <ul>
       <li><a href="/getting-started/installation">Installation Guide</a></li>
       <li><a href="/getting-started/first-launch">Launch</a></li>
-      <li><a href="/tutorials/my-first-somewm">My First SomeWM</a></li>
+      <li><a href="/tutorials/basics">Basics</a></li>
     </ul>
   </div>
   <div className="col col--6">
