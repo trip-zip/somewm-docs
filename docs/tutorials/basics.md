@@ -40,9 +40,6 @@ If you prefer starting from a terminal:
 somewm
 ```
 
-:::tip
-SomeWM runs directly on Wayland - no X11 server needed. This means better performance, security, and modern features like fractional scaling.
-:::
 
 ## Understanding the Desktop
 

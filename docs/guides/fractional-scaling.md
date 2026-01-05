@@ -4,19 +4,9 @@ title: Fractional Scaling
 description: Configure HiDPI displays with fractional scaling
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Fractional Scaling <SomewmOnly />
-
-<YouWillLearn>
-
-- What fractional scaling is and when you need it
-- Setting screen scale from Lua and CLI
-- Making themes DPI-aware
-- Handling mixed-DPI multi-monitor setups
-
-</YouWillLearn>
 
 SomeWM supports fractional output scaling for HiDPI displays through the `screen.scale` property.
 

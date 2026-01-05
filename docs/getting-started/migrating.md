@@ -4,17 +4,7 @@ title: Migrating from AwesomeWM
 description: Adapting your AwesomeWM config for Wayland
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Migrating from AwesomeWM
-
-<YouWillLearn>
-
-- How to check your config for Wayland compatibility
-- Common X11 patterns and their Wayland alternatives
-- Understanding what works unchanged
-
-</YouWillLearn>
 
 ## Quick Compatibility Check
 

@@ -4,18 +4,7 @@ title: Widget Timers and Updates
 description: Keep widgets updated with timers and signals
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Widget Timers and Updates
-
-<YouWillLearn>
-
-- Using gears.timer for periodic updates
-- Efficient update patterns
-- Signal-based updates vs polling
-- Handling async operations in widgets
-
-</YouWillLearn>
 
 Widgets often need to update their content - clocks tick, battery levels change, network status updates. This guide covers the patterns for keeping widgets current.
 

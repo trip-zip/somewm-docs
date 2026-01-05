@@ -4,18 +4,7 @@ title: AwesomeWM Compatibility
 description: SomeWM's compatibility philosophy and status
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # AwesomeWM Compatibility
-
-<YouWillLearn>
-
-- What "compatibility" means in practice
-- Which APIs work identically to AwesomeWM
-- Why some APIs are stubbed or different
-- How to migrate existing configs
-
-</YouWillLearn>
 
 SomeWM's goal is **drop-in Lua API compatibility** with AwesomeWM. Your existing rc.lua should work with minimal or no changes.
 

@@ -4,19 +4,9 @@ title: Screenshots
 description: Taking screenshots with SomeWM
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Screenshots
-
-<YouWillLearn>
-
-- Taking screenshots with somewm-client
-- Using grim and slurp for flexible screenshots
-- Setting up screenshot keybindings
-- Copying screenshots to clipboard
-
-</YouWillLearn>
 
 SomeWM provides built-in screenshot support via `somewm-client`, and you can also use external Wayland-native tools like grim and slurp.
 

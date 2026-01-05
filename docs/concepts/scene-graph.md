@@ -4,18 +4,7 @@ title: Scene Graph
 description: Understanding layers and stacking order
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Scene Graph
-
-<YouWillLearn>
-
-- What the scene graph is and why it matters
-- The layers that control stacking order
-- How wibars, windows, and notifications stack
-- How to control what appears above what
-
-</YouWillLearn>
 
 The scene graph determines what appears above or below everything else on your screen. Understanding it helps you control layer ordering for panels, notifications, and windows.
 

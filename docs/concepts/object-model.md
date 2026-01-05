@@ -4,18 +4,7 @@ title: The Object Model
 description: Understanding screens, tags, clients, and widgets
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # The Object Model
-
-<YouWillLearn>
-
-- What screens, tags, clients, and widgets are
-- How these objects relate to each other
-- The difference between "focused" and "selected"
-- How to think about your desktop hierarchy
-
-</YouWillLearn>
 
 Understanding SomeWM's object model is the foundation for everything else. Once you grasp how screens, tags, clients, and widgets relate, configuration becomes intuitive.
 

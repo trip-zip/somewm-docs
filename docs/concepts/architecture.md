@@ -4,18 +4,7 @@ title: Architecture
 description: Understanding SomeWM's three-layer design
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Architecture
-
-<YouWillLearn>
-
-- The three-layer design and what each layer does
-- How the layers communicate via signals, properties, and methods
-- The order things load at startup
-- Where to look when you want to change something
-
-</YouWillLearn>
 
 SomeWM uses a three-layer architecture inherited from AwesomeWM. Understanding this separation helps you know where to make changes and what's possible.
 

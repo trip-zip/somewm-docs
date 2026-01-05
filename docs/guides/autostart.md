@@ -4,18 +4,7 @@ title: Autostart Applications
 description: Start apps automatically when SomeWM launches
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Autostart Applications
-
-<YouWillLearn>
-
-- Different methods to start apps on login
-- Ensuring apps only start once (not on config reload)
-- Handling apps that need delays
-- When to use systemd user services instead
-
-</YouWillLearn>
 
 Most setups need background services started automatically: clipboard managers, notification daemons, authentication agents. SomeWM provides several ways to autostart applications.
 

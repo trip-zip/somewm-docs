@@ -4,18 +4,7 @@ title: Notifications
 description: Configure desktop notifications with naughty
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Notifications
-
-<YouWillLearn>
-
-- How naughty handles desktop notifications
-- Customizing notification appearance and position
-- Creating notification rules for specific apps
-- Sending notifications from Lua
-
-</YouWillLearn>
 
 SomeWM includes `naughty`, a notification daemon that receives notifications from applications via D-Bus and displays them on screen.
 

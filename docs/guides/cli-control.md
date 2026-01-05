@@ -4,20 +4,9 @@ title: CLI Control
 description: Control SomeWM from the command line with somewm-client
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # CLI Control <SomewmOnly />
-
-<YouWillLearn>
-
-- Using somewm-client for IPC control
-- Window management from the command line
-- Changing input settings at runtime
-- Evaluating Lua code from scripts
-- Building rofi/dmenu integrations
-
-</YouWillLearn>
 
 `somewm-client` is SomeWM's IPC tool for controlling the compositor from scripts and the command line. It communicates with SomeWM via a Unix socket.
 

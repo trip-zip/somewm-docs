@@ -4,18 +4,7 @@ title: Multi-Monitor Setup
 description: Configure multiple screens and outputs
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Multi-Monitor Setup
-
-<YouWillLearn>
-
-- How SomeWM detects and handles multiple screens
-- Setting up per-screen tags and wibars
-- Moving windows between screens
-- Handling monitor hotplug (connect/disconnect)
-
-</YouWillLearn>
 
 SomeWM handles multiple monitors automatically. Each monitor becomes a `screen` object with its own tags, wibar, and workspace.
 

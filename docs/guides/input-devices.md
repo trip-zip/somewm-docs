@@ -4,19 +4,9 @@ title: Input Device Configuration
 description: Configure pointer and keyboard settings at runtime
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Input Device Configuration <SomewmOnly />
-
-<YouWillLearn>
-
-- How to configure tap-to-click and natural scrolling
-- Setting pointer speed and acceleration
-- Changing keyboard layouts at runtime
-- Persisting input settings in rc.lua
-
-</YouWillLearn>
 
 ## Overview
 
