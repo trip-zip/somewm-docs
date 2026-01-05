@@ -1,10 +1,10 @@
 ---
 sidebar_position: 2
-title: Your First Widget
+title: Widgets
 description: Build a simple clock widget from scratch
 ---
 
-# Your First Widget
+# Widgets
 
 Widgets are the building blocks of your SomeWM interface. In this tutorial, you'll build a custom clock widget from scratch to understand how the widget system works.
 

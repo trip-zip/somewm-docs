@@ -1,10 +1,10 @@
 ---
 sidebar_position: 4
-title: Your First Theme
+title: Theme
 description: Customize SomeWM colors, fonts, and appearance
 ---
 
-# Your First Theme
+# Theme
 
 SomeWM's appearance is fully customizable through the **beautiful** module. In this tutorial, we'll create a custom theme from scratch.
 
@@ -30,7 +30,7 @@ First, create a directory for your theme:
 mkdir -p ~/.config/somewm/theme
 ```
 
-## Your First Theme File
+## Theme File
 
 Create `~/.config/somewm/theme/theme.lua`:
 

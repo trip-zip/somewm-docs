@@ -1,10 +1,10 @@
 ---
 sidebar_position: 3
-title: Your First Keybinding
+title: Keybindings
 description: Add custom keyboard shortcuts to SomeWM
 ---
 
-# Your First Keybinding
+# Keybindings
 
 Keybindings are the heart of a tiling window manager. In this tutorial, you'll learn how to add your own custom shortcuts.
 

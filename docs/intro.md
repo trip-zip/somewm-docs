@@ -1,17 +1,22 @@
 ---
 slug: /
 sidebar_position: 1
-title: Welcome to SomeWM
+title: SomeWM
 description: AwesomeWM on Wayland - 100% Lua API compatibility
 ---
 
-# Welcome to SomeWM
+# SomeWM
 
 **SomeWM** is a Wayland compositor that brings AwesomeWM's Lua API to Wayland, built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots). The goal is 100% compatibility with AwesomeWM's Lua configuration.
 
-## What is SomeWM?
+## About These Docs
 
-If you love AwesomeWM but want to run on Wayland, SomeWM is for you. Your existing `rc.lua` should work with minimal changes.
+SomeWM targets AwesomeWM git (not the v4.3 stable release). The official [AwesomeWM API documentation](https://awesomewm.org/apidoc/) applies directly to SomeWM and remains the primary reference for the Lua API.
+
+These docs focus on:
+- **Getting started** with SomeWM specifically
+- **SomeWM-only features** not in AwesomeWM (like `awful.input` and the SNI systray)
+- **Wayland differences** and migration notes for AwesomeWM users
 
 ## Quick Links
 
@@ -20,7 +25,7 @@ If you love AwesomeWM but want to run on Wayland, SomeWM is for you. Your existi
     <h3>New to SomeWM?</h3>
     <ul>
       <li><a href="/getting-started/installation">Installation Guide</a></li>
-      <li><a href="/getting-started/first-launch">First Launch</a></li>
+      <li><a href="/getting-started/first-launch">Launch</a></li>
       <li><a href="/tutorials/my-first-somewm">My First SomeWM</a></li>
     </ul>
   </div>

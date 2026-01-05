@@ -1,10 +1,10 @@
 ---
 sidebar_position: 5
-title: Your First Wibar
+title: Wibar
 description: Build a custom status bar from scratch
 ---
 
-# Your First Wibar
+# Wibar
 
 The wibar is the status bar at the top (or bottom) of your screen. In this tutorial, you'll build a custom wibar from scratch.
 

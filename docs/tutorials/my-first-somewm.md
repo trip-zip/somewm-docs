@@ -1,10 +1,10 @@
 ---
 sidebar_position: 1
-title: My First SomeWM
+title: Basics
 description: A beginner-friendly walkthrough of SomeWM basics
 ---
 
-# My First SomeWM
+# Basics
 
 This tutorial will guide you through your first session with SomeWM, from logging in to making your first customization. No programming experience required - just a willingness to try something new.
 
