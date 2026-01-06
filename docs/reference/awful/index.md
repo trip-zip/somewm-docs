@@ -8,7 +8,10 @@ description: Window management, keybindings, layouts, and client rules
 
 The `awful` library is the core of AwesomeWM's window management functionality. It handles keybindings, mouse bindings, client rules, layouts, tags, and more.
 
-**Upstream documentation:** [awesomewm.org/apidoc/libraries/awful.html](https://awesomewm.org/apidoc/libraries/awful.html)
+**Upstream documentation:** The `awful` library spans multiple sections in the AwesomeWM docs:
+- [input_handling](https://awesomewm.org/apidoc/input_handling/awful.key.html) - keybindings, mouse bindings
+- [libraries](https://awesomewm.org/apidoc/libraries/awful.spawn.html) - spawn, layout, completion
+- [core_components](https://awesomewm.org/apidoc/core_components/screen.html) - screen, client, tag
 
 ## Key Modules
 

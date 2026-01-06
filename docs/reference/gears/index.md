@@ -8,7 +8,9 @@ description: Utility functions and helpers
 
 The `gears` library provides utility functions used throughout AwesomeWM/SomeWM. It includes timers, shapes, color manipulation, filesystem helpers, and more.
 
-**Upstream documentation:** [awesomewm.org/apidoc/libraries/gears.html](https://awesomewm.org/apidoc/libraries/gears.html)
+**Upstream documentation:** The `gears` library spans multiple sections in the AwesomeWM docs:
+- [theme_related_libraries](https://awesomewm.org/apidoc/theme_related_libraries/gears.shape.html) - shape, color
+- [utility_libraries](https://awesomewm.org/apidoc/) - timer, filesystem, string, table
 
 ## Key Modules
 

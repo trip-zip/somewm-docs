@@ -14,11 +14,13 @@ This section documents SomeWM-specific extensions and notes any behavioral diffe
 
 | Library | Purpose | Docs |
 |---------|---------|------|
-| [awful](./awful/) | Window management, keybindings, layouts, client rules | [AwesomeWM docs](https://awesomewm.org/apidoc/libraries/awful.html) |
-| [beautiful](./beautiful/) | Theming and appearance | [AwesomeWM docs](https://awesomewm.org/apidoc/libraries/beautiful.html) |
-| [wibox](./wibox/) | Widgets, containers, and the wibar | [AwesomeWM docs](https://awesomewm.org/apidoc/libraries/wibox.html) |
+| [awful](./awful/) | Window management, keybindings, layouts, client rules | [AwesomeWM docs](https://awesomewm.org/apidoc/) ¹ |
+| [beautiful](./beautiful/) | Theming and appearance | [AwesomeWM docs](https://awesomewm.org/apidoc/theme_related_libraries/beautiful.html) |
+| [wibox](./wibox/) | Widgets, containers, and the wibar | [AwesomeWM docs](https://awesomewm.org/apidoc/popups_and_bars/wibox.html) |
 | [naughty](./naughty/) | Notifications | [AwesomeWM docs](https://awesomewm.org/apidoc/libraries/naughty.html) |
-| [gears](./gears/) | Utilities (timers, shapes, colors, filesystem) | [AwesomeWM docs](https://awesomewm.org/apidoc/libraries/gears.html) |
+| [gears](./gears/) | Utilities (timers, shapes, colors, filesystem) | [AwesomeWM docs](https://awesomewm.org/apidoc/) ¹ |
+
+¹ *awful and gears span multiple categories in the AwesomeWM docs (input_handling, libraries, core_components, etc.)*
 
 ## SomeWM Extensions
 

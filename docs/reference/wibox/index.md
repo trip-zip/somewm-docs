@@ -8,7 +8,7 @@ description: Widgets, containers, and the wibar
 
 The `wibox` library provides the widget system for AwesomeWM/SomeWM. It includes primitive widgets, containers, layouts, and the `wibar` (status bar).
 
-**Upstream documentation:** [awesomewm.org/apidoc/libraries/wibox.html](https://awesomewm.org/apidoc/libraries/wibox.html)
+**Upstream documentation:** [awesomewm.org/apidoc/popups_and_bars/wibox.html](https://awesomewm.org/apidoc/popups_and_bars/wibox.html)
 
 ## Key Modules
 

@@ -8,7 +8,7 @@ description: Theming and appearance configuration
 
 The `beautiful` library handles theming in AwesomeWM/SomeWM. It loads theme files and provides access to theme variables throughout your configuration.
 
-**Upstream documentation:** [awesomewm.org/apidoc/libraries/beautiful.html](https://awesomewm.org/apidoc/libraries/beautiful.html)
+**Upstream documentation:** [awesomewm.org/apidoc/theme_related_libraries/beautiful.html](https://awesomewm.org/apidoc/theme_related_libraries/beautiful.html)
 
 ## Usage
 
