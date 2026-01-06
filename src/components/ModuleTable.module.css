@@ -1,0 +1,21 @@
+.moduleTable {
+  margin: 1.5rem 0;
+}
+
+.title {
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-800);
+}
+
+[data-theme='dark'] .title {
+  color: var(--ifm-color-emphasis-700);
+}
+
+.moduleName {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
