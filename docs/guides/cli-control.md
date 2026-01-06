@@ -10,6 +10,10 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 `somewm-client` is SomeWM's IPC tool for controlling the compositor from scripts and the command line. It communicates with SomeWM via a Unix socket.
 
+:::note
+AwesomeWM has its own CLI tool (`awesome-client`), but it uses a different protocol. This guide covers `somewm-client`, which is specific to SomeWM.
+:::
+
 ## Basic Usage
 
 ### Check If Running

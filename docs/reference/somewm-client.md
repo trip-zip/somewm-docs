@@ -8,9 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # somewm-client Reference <SomewmOnly />
 
-IPC command-line tool for controlling SomeWM.
-
-<!-- TODO: Complete command documentation from somewm-client.c print_usage() -->
+IPC command-line tool for controlling SomeWM. This is SomeWM's equivalent to AwesomeWM's `awesome-client`, but uses a different protocol and command set.
 
 ## Usage
 
