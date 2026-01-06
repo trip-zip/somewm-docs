@@ -181,4 +181,4 @@ end)
 
 - See [Wayland vs X11](/concepts/wayland-vs-x11) for a deeper understanding of the differences
 - Check [AwesomeWM Compatibility](/concepts/awesomewm-compat) for the full compatibility matrix
-- Explore [SomeWM-only features](/reference/awful-input) like `awful.input`
+- Explore [SomeWM-only features](/reference/awful/input) like `awful.input`

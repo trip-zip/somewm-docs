@@ -220,43 +220,16 @@ end
 },
 ```
 
-## Wibar Positioning
+## Wibar Properties
 
-### Position Options
+For a complete reference of all wibar properties, see the [Wibar Properties Reference](/reference/wibox/wibar).
 
-```lua
-awful.wibar {
-    position = "top",     -- "top", "bottom", "left", "right"
-    screen = s,
-}
-```
-
-### Margins and Gaps
-
-Create a floating wibar effect:
-
-```lua
-awful.wibar {
-    position = "top",
-    screen = s,
-    margins = {
-        top = 8,
-        left = 8,
-        right = 8,
-    },
-    shape = gears.shape.rounded_rect,
-}
-```
-
-### Height and Width
-
-```lua
-awful.wibar {
-    position = "top",
-    height = 32,  -- For top/bottom bars
-    -- width = 48,  -- For left/right bars
-}
-```
+Key properties include:
+- `position` - `"top"`, `"bottom"`, `"left"`, `"right"`
+- `height`/`width` - Size in pixels
+- `margins` - Create floating effect with gaps
+- `shape` - Custom shape function (e.g., rounded corners)
+- `bg`/`fg` - Colors (can include alpha for transparency)
 
 ## Styling the Wibar
 
@@ -468,6 +441,7 @@ end
 
 ## Next Steps
 
+- **[Wibar Properties Reference](/reference/wibox/wibar)** - Complete wibar configuration reference
 - **[Widgets](/tutorials/widgets)** - Create custom widgets for your wibar
 - **[Theme](/tutorials/theme)** - Style your wibar
-- **[AwesomeWM Wibar Docs](https://awesomewm.org/doc/api/classes/awful.wibar.html)** - Full wibar reference
+- **[awful.wibar (AwesomeWM docs)](https://awesomewm.org/apidoc/classes/awful.wibar.html)** - Upstream API reference

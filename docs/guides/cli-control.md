@@ -373,5 +373,5 @@ somewm-client eval "return client.focus and client.focus.name or 'none'"
 ## See Also
 
 - **[somewm-client Reference](/reference/somewm-client)** - Complete command reference
-- **[awful.input Reference](/reference/awful-input)** - All input properties
+- **[awful.input Reference](/reference/awful/input)** - All input properties
 - **[Fractional Scaling](/guides/fractional-scaling)** - Using screen scale commands

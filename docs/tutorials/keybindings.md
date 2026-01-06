@@ -74,35 +74,13 @@ end)
 
 Now **Mod4 + o** will toggle transparency on the focused window.
 
-## Modifier Key Reference
+## Key Names Reference
 
-| Modifier | Common Name | Key |
-|----------|-------------|-----|
-| `"Mod4"` | Super/Windows | The key with the Windows logo |
-| `"Mod1"` | Alt | Left or Right Alt |
-| `"Shift"` | Shift | Either Shift key |
-| `"Control"` | Ctrl | Either Control key |
+For a complete list of modifier keys, key names, and mouse buttons, see the [Key Names Reference](/reference/key-names).
 
-Combine modifiers in a table:
+Common modifiers: `"Mod4"` (Super), `"Mod1"` (Alt), `"Shift"`, `"Control"`
 
-```lua
-{ modkey, "Shift" }     -- Mod4 + Shift
-{ modkey, "Control" }   -- Mod4 + Ctrl
-{ "Mod1", "Shift" }     -- Alt + Shift
-```
-
-## Common Key Names
-
-| Key | Name in Lua |
-|-----|-------------|
-| Enter | `"Return"` |
-| Space | `"space"` |
-| Tab | `"Tab"` |
-| Escape | `"Escape"` |
-| Arrows | `"Left"`, `"Right"`, `"Up"`, `"Down"` |
-| Function keys | `"F1"` through `"F12"` |
-| Letters | `"a"` through `"z"` (lowercase) |
-| Numbers | `"1"` through `"0"` |
+Common keys: `"Return"` (Enter), `"space"`, `"Tab"`, `"Escape"`, `"Left"`/`"Right"`/`"Up"`/`"Down"` (arrows)
 
 ## Media Keys
 
@@ -416,6 +394,7 @@ Check the notification for error messages. Common issues:
 
 ## Next Steps
 
-- **[Default Keybindings](/reference/default-keybindings)** - Complete list of built-in shortcuts
+- **[Key Names Reference](/reference/key-names)** - Complete list of key names and modifiers
+- **[Default Keybindings](/reference/default-keybindings)** - Built-in shortcuts
 - **[Widgets](/tutorials/widgets)** - Create custom widgets
-- **[AwesomeWM Key Docs](https://awesomewm.org/doc/api/libraries/awful.key.html)** - Full awful.key reference
+- **[awful.key (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/awful.key.html)** - Upstream API reference

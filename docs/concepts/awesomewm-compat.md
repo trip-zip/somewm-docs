@@ -154,4 +154,4 @@ If you find something that works in AwesomeWM but not in SomeWM:
 
 - **[Migrating from AwesomeWM](/getting-started/migrating)** - Step-by-step migration guide
 - **[Wayland vs X11](/concepts/wayland-vs-x11)** - Fundamental protocol differences
-- **[AwesomeWM API Reference](/reference/awesomewm-apis)** - Links to upstream docs
+- **[Lua Libraries Reference](/reference/lua-libraries)** - Links to upstream docs

@@ -174,45 +174,15 @@ theme.fg_normal = c.fg
    - Show the same desktop with different color schemes
 */}
 
-## Essential Theme Variables
+## Theme Variable Reference
 
-Here are the most commonly customized variables:
+For a complete list of all theme variables, see the [Theme Variables Reference](/reference/beautiful/theme-variables).
 
-### Core Colors
-
-| Variable | Description |
-|----------|-------------|
-| `bg_normal` | Default background color |
-| `bg_focus` | Background when focused |
-| `bg_urgent` | Background for urgent items |
-| `fg_normal` | Default text color |
-| `fg_focus` | Text color when focused |
-| `fg_urgent` | Text color for urgent items |
-
-### Window Borders
-
-| Variable | Description |
-|----------|-------------|
-| `border_width` | Window border thickness |
-| `border_color_normal` | Unfocused window border |
-| `border_color_active` | Focused window border |
-| `useless_gap` | Gap between tiled windows |
-
-### Fonts
-
-| Variable | Description |
-|----------|-------------|
-| `font` | Default font (Pango format) |
-| `hotkeys_font` | Font for hotkeys popup |
-| `notification_font` | Font for notifications |
-
-### Wibar
-
-| Variable | Description |
-|----------|-------------|
-| `wibar_bg` | Wibar background |
-| `wibar_fg` | Wibar text color |
-| `wibar_height` | Wibar height |
+The most commonly customized categories include:
+- **Core colors** - `bg_normal`, `fg_normal`, `bg_focus`, etc.
+- **Window borders** - `border_width`, `border_color_active`, `useless_gap`
+- **Fonts** - `font`, `hotkeys_font`, `notification_font`
+- **Wibar** - `wibar_bg`, `wibar_fg`, `wibar_height`
 
 ## Setting a Wallpaper
 
@@ -475,5 +445,6 @@ theme.layout_tile = themes_path .. "default/layouts/tilew.png"
 
 ## Next Steps
 
+- **[Theme Variables Reference](/reference/beautiful/theme-variables)** - Complete list of all theme variables
 - **[Widgets](/tutorials/widgets)** - Create custom widgets
-- **[AwesomeWM Theme Docs](https://awesomewm.org/doc/api/libraries/beautiful.html)** - Full theme variable reference
+- **[beautiful (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/beautiful.html)** - Upstream API reference

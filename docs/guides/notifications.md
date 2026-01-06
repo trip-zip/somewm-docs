@@ -349,5 +349,7 @@ export ELECTRON_OZONE_PLATFORM_HINT=auto
 
 ## See Also
 
-- **[Widgets](/tutorials/widgets)** - Build notification-triggering widgets
-- **[AwesomeWM Naughty Docs](https://awesomewm.org/doc/api/libraries/naughty.html)** - Full naughty API
+- **[naughty Library](/reference/naughty/)** - Notification system reference
+- **[Theme Variables](/reference/beautiful/theme-variables)** - Notification theme variables
+- **[Widgets Tutorial](/tutorials/widgets)** - Build notification-triggering widgets
+- **[naughty (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/naughty.html)** - Upstream API reference

@@ -87,7 +87,7 @@ const config: Config = {
           items: [
             {label: 'Getting Started', to: '/getting-started/installation'},
             {label: 'Tutorials', to: '/tutorials/basics'},
-            {label: 'Reference', to: '/reference/awful-input'},
+            {label: 'Reference', to: '/reference/lua-libraries'},
           ],
         },
         {

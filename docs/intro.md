@@ -15,7 +15,7 @@ A Wayland compositor that brings AwesomeWM's Lua API to Wayland, built on [wlroo
 
 ## How to Use These Docs
 
-This documentation follows the [Diátaxis framework](https://diataxis.fr/), organizing content into four distinct types:
+This documentation attempts to follow the [Diátaxis framework](https://diataxis.fr/), organizing content into four distinct types:
 
 | Type | Purpose | When to use |
 |------|---------|-------------|
@@ -64,14 +64,17 @@ Practical recipes for specific tasks.
 
 ## Reference
 
-Technical specifications and API details.
+Technical specifications and API details. Organized by Lua library, with links to upstream AwesomeWM docs.
 
 <ModuleTable modules={[
-  { name: 'awful.input', description: 'Input device configuration API (SomeWM-only)', link: '/reference/awful-input' },
-  { name: 'somewm-client', description: 'IPC CLI tool for external control (SomeWM-only)', link: '/reference/somewm-client' },
-  { name: 'Default Keybindings', description: 'Built-in keyboard shortcuts', link: '/reference/default-keybindings' },
-  { name: 'Signals', description: 'Available signals for event handling', link: '/reference/signals' },
-  { name: 'AwesomeWM APIs', description: 'Links to upstream API documentation', link: '/reference/awesomewm-apis' },
+  { name: 'Lua Libraries', description: 'Overview of all libraries with upstream links', link: '/reference/lua-libraries' },
+  { name: 'awful', description: 'Window management, keybindings, layouts', link: '/reference/awful/' },
+  { name: 'beautiful', description: 'Theming and theme variables', link: '/reference/beautiful/' },
+  { name: 'wibox', description: 'Widgets and the wibar', link: '/reference/wibox/' },
+  { name: 'naughty', description: 'Notifications', link: '/reference/naughty/' },
+  { name: 'gears', description: 'Utilities (timers, shapes, colors)', link: '/reference/gears/' },
+  { name: 'Key Names', description: 'Modifier keys and key name reference', link: '/reference/key-names' },
+  { name: 'somewm-client', description: 'IPC CLI tool (SomeWM-only)', link: '/reference/somewm-client' },
 ]} />
 
 ## Concepts

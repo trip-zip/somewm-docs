@@ -54,7 +54,7 @@ awful.input.repeat_delay = 600  -- ms before repeat starts
 
 ## All Properties
 
-See [awful.input Reference](/reference/awful-input) for the complete property list.
+See [awful.input Reference](/reference/awful/input) for the complete property list.
 
 ## Next Steps
 

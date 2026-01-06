@@ -42,11 +42,37 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Reference',
       items: [
-        'reference/awful-input',
+        'reference/lua-libraries',
+        {
+          type: 'category',
+          label: 'awful',
+          items: [
+            'reference/awful/index',
+            'reference/awful/input',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'beautiful',
+          items: [
+            'reference/beautiful/index',
+            'reference/beautiful/theme-variables',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'wibox',
+          items: [
+            'reference/wibox/index',
+            'reference/wibox/wibar',
+          ],
+        },
+        'reference/naughty/index',
+        'reference/gears/index',
+        'reference/key-names',
+        'reference/signals',
         'reference/somewm-client',
         'reference/default-keybindings',
-        'reference/signals',
-        'reference/awesomewm-apis',
       ],
     },
     {
