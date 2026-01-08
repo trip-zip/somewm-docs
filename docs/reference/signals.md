@@ -23,11 +23,16 @@ SomeWM uses signals for event-driven programming. Connect to signals to react to
 | `unmanage` | `c` | Client closed |
 | `focus` | `c` | Client gained focus |
 | `unfocus` | `c` | Client lost focus |
+| `raised` | `c` | Client moved to top of stack (see [Client Stacking](/concepts/client-stack)) |
+| `lowered` | `c` | Client moved to bottom of stack |
 | `property::name` | `c` | Title changed |
 | `property::class` | `c` | Class changed |
 | `property::geometry` | `c` | Size/position changed |
 | `property::floating` | `c` | Floating state changed |
 | `property::fullscreen` | `c` | Fullscreen state changed |
+| `property::ontop` | `c` | Ontop layer state changed |
+| `property::above` | `c` | Above layer state changed |
+| `property::below` | `c` | Below layer state changed |
 | `property::urgent` | `c` | Urgency changed |
 | `request::titlebars` | `c` | Client requests titlebars |
 

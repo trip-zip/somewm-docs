@@ -80,6 +80,10 @@ Clients belong to:
 - **One screen** - the display they're on
 - **One or more tags** - the workspaces they appear in
 
+Clients also have ordering in:
+- **[The stack](/concepts/client-stack)** - z-order for visual overlap
+- **[Focus history](/concepts/focus-history)** - determines what gets focus when you close a window
+
 ### Wibox and Wibar
 
 A **wibox** is a box that holds widgets. A **wibar** is a wibox that's docked to a screen edge (top, bottom, left, or right).

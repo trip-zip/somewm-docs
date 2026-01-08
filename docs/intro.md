@@ -24,7 +24,7 @@ This documentation attempts to follow the [Diátaxis framework](https://diataxis
 | **Reference** | Technical specifications | You need exact details about an API or feature |
 | **Concepts** | Understanding the "why" | You want deeper knowledge of how things work |
 
-Each section serves a different need—pick the one that matches what you're trying to do.
+Each section serves a different need. Pick the one that matches what you're trying to do.
 
 ---
 

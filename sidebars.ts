@@ -82,6 +82,8 @@ const sidebars: SidebarsConfig = {
         'concepts/object-model',
         'concepts/architecture',
         'concepts/wayland-vs-x11',
+        'concepts/client-stack',
+        'concepts/focus-history',
         'concepts/scene-graph',
         'concepts/awesomewm-compat',
       ],
