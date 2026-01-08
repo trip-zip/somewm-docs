@@ -31,21 +31,20 @@ These three concepts control different aspects of window behavior:
 
 The key insight: **layout algorithms use creation order, NOT stack order**. Raising a window to the top doesn't make it the "master" in a tiling layout because layouts ignore the stack entirely.
 
-## The Layer System
+## Client Layers
 
-Within the stack, clients are grouped by **layer**. Stack position only matters within the same layer. A `normal` client can never appear above an `ontop` client, regardless of stack position.
+Client properties determine which compositor layer a window belongs to:
 
-Layers from bottom to top:
+| Property | Effect |
+|----------|--------|
+| `c.below` | Renders behind normal windows |
+| `c.above` | Renders above normal windows |
+| `c.ontop` | Renders above most windows |
+| `c.fullscreen` | Renders above everything when focused |
 
-| Layer | Property | Use case |
-|-------|----------|----------|
-| `below` | `c.below = true` | Background windows, wallpaper managers |
-| `normal` | (default) | Most windows |
-| `above` | `c.above = true` | Stays above normal windows |
-| `ontop` | `c.ontop = true` | Highest priority (music players, notifications) |
-| `fullscreen` | `c.fullscreen = true` | Above everything when focused |
+See [Scene Graph](/concepts/scene-graph) for the full layer hierarchy including wibars and notifications.
 
-Within each layer, clients are ordered by their stack position.
+Within a layer, the **stack** controls which client appears in front. A `normal` client can never appear above an `ontop` client, regardless of stack position.
 
 ## Stack Operations
 
@@ -172,6 +171,6 @@ end)
 
 ## See Also
 
+- [Scene Graph](/concepts/scene-graph) - Full compositor layer hierarchy
 - [Focus History](/concepts/focus-history) - What determines focus when a client closes
 - [Object Model](/concepts/object-model) - Understanding clients, tags, screens
-- [Architecture](/concepts/architecture) - Compositor layer design

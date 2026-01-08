@@ -105,6 +105,17 @@ Wibox types and their layers:
 
 Naughty notifications appear in the **Top** layer, above wibars and windows but below fullscreen content.
 
+## Client Stacking Within Layers
+
+The Scene Graph determines which *type* of element appears above others (wibars above windows, notifications above wibars). But what about multiple windows in the same layer?
+
+Within the Tiled, Floating, and other client layers, windows have a **stacking order** controlled by `c:raise()` and `c:lower()`. This is separate from the layer system.
+
+See [Client Stacking](/concepts/client-stack) for details on:
+- The global client stack
+- How raise/lower works
+- Why focus and stack are independent
+
 ## Practical Implications
 
 ### Why your wibar stays above windows
@@ -195,6 +206,7 @@ Background| Wallpaper, desktop icons
 
 ## See Also
 
-- **[The Object Model](/concepts/object-model)** - Understanding clients and wibars
-- **[Architecture](/concepts/architecture)** - How the compositor is structured
-- **[Wibar](/tutorials/wibar)** - Create your own panel
+- [Client Stacking](/concepts/client-stack) - How windows order within layers
+- [The Object Model](/concepts/object-model) - Understanding clients and wibars
+- [Architecture](/concepts/architecture) - How the compositor is structured
+- [Wibar](/tutorials/wibar) - Create your own panel
