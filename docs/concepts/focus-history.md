@@ -181,7 +181,48 @@ end
 
 This shows the complete history in order, so you can see why a particular client got focus.
 
+## Layer Shell Focus Restoration
+
+Layer shell surfaces (rofi, wofi, fuzzel, and other launchers) are not clients - they're special Wayland surfaces that can grab keyboard focus for input.
+
+When a layer shell surface closes after having keyboard focus, somewm automatically restores focus to the most recent client from focus history. This is handled by `awful.permissions.handle_layer_shell_closed`.
+
+### How It Works
+
+1. Layer shell surface opens (e.g., rofi launcher)
+2. It grabs keyboard focus for input
+3. User makes a selection or presses Escape
+4. Layer shell surface closes
+5. somewm emits `layer_shell::closed` signal
+6. Default handler calls `awful.client.focus.history.get()` to find the previous client
+7. That client receives focus via `request::autoactivate`
+
+### Customizing the Behavior
+
+Replace the default handler with your own:
+
+```lua
+-- Disconnect the default handler
+awesome.disconnect_signal("layer_shell::closed", awful.permissions.handle_layer_shell_closed)
+
+-- Connect your own
+awesome.connect_signal("layer_shell::closed", function()
+    -- Your custom logic here
+    -- For example, always focus the master client:
+    local s = awful.screen.focused()
+    local master = awful.client.getmaster(s)
+    if master then
+        master:emit_signal("request::activate", "layer_shell_closed", {raise = true})
+    end
+end)
+```
+
+### Note for AwesomeWM Users
+
+This is a **somewm-specific feature**. AwesomeWM doesn't have layer shell (it's a Wayland protocol), so `layer_shell::closed` signal and `handle_layer_shell_closed` don't exist there.
+
 ## See Also
 
 - [Client Stacking](/concepts/client-stack) - Z-order and visual overlap (independent from focus history)
 - [Object Model](/concepts/object-model) - Understanding clients, tags, screens
+- [Wayland vs X11](/concepts/wayland-vs-x11) - Why some things work differently
