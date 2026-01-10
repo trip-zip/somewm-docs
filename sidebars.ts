@@ -67,6 +67,7 @@ const sidebars: SidebarsConfig = {
             'reference/wibox/wibar',
           ],
         },
+        'reference/layer_surface/index',
         'reference/naughty/index',
         'reference/gears/index',
         'reference/key-names',

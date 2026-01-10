@@ -4,6 +4,8 @@ title: Signals Reference
 description: Common signals for event handling
 ---
 
+import SomewmOnly from '@site/src/components/SomewmOnly';
+
 # Signals Reference
 
 <!-- TODO: Document common signals
@@ -53,6 +55,17 @@ SomeWM uses signals for event-driven programming. Connect to signals to react to
 | `property::activated` | `t` | Tag activated/deactivated |
 | `tagged` | `t, c` | Client added to tag |
 | `untagged` | `t, c` | Client removed from tag |
+
+## Layer Surface Signals <SomewmOnly />
+
+| Signal | Arguments | Description |
+|--------|-----------|-------------|
+| `request::manage` | `l, context, hints` | Layer surface appeared |
+| `request::unmanage` | `l, context, hints` | Layer surface closing |
+| `request::keyboard` | `l, context, hints` | Layer surface wants keyboard |
+| `property::has_keyboard_focus` | `l` | Keyboard focus changed |
+
+See [layer_surface reference](/reference/layer_surface/) for details.
 
 ## Global Signals
 
