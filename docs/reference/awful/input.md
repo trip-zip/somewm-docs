@@ -76,6 +76,10 @@ print(awful.input.pointer_speed)
 | `grp:alt_shift_toggle` | Alt+Shift switches layouts |
 | `grp:win_space_toggle` | Super+Space switches layouts |
 
+:::warning Wayland Limitation
+`grp:*` toggle options do not automatically switch layouts on Wayland. Use explicit keybindings instead. See [Keyboard Layout Switching](/guides/keyboard-layouts) for workarounds.
+:::
+
 ## Example Configuration
 
 ```lua

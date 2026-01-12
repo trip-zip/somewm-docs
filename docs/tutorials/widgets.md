@@ -10,7 +10,7 @@ Widgets are the building blocks of your SomeWM interface. In this tutorial, you'
 
 ## Widget Basics
 
-Everything visible in SomeWM is made of widgets. There are three main types:
+Wibars, titlebars, notifications, and tooltips are all built from widgets. There are three main types:
 
 | Type | Purpose | Examples |
 |------|---------|----------|

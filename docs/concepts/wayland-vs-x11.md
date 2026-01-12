@@ -70,7 +70,13 @@ Single panel struts work correctly. Multiple panels on the same screen edge may 
 
 ### XKB Layout Toggle
 
-XKB toggle options like `grp:alt_shift_toggle` don't automatically change layouts. Use explicit keybindings instead:
+**X11**: Toggle options like `grp:alt_shift_toggle` work because the X server intercepts the key combination and executes the layout switch.
+
+**Wayland**: No X server exists to execute toggle logic. The key combination is just a regular key press that does nothing.
+
+**Impact**: Sway, Hyprland, and other Wayland compositors have the same limitation.
+
+**Workaround**: Use explicit keybindings to switch layouts programmatically. See [Keyboard Layout Switching](/guides/keyboard-layouts) for complete examples.
 
 ```lua
 awful.key({ "Mod1", "Shift" }, "space", function()
@@ -78,6 +84,8 @@ awful.key({ "Mod1", "Shift" }, "space", function()
     awesome.xkb_set_layout_group((current + 1) % 2)
 end)
 ```
+
+**Note**: Static XKB options like `ctrl:nocaps` and `compose:ralt` work normally - only `grp:*` toggle options are affected.
 
 ## See Also
 

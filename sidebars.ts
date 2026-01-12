@@ -29,6 +29,7 @@ const sidebars: SidebarsConfig = {
       label: 'How-To Guides',
       items: [
         'guides/input-devices',
+        'guides/keyboard-layouts',
         'guides/cli-control',
         'guides/multi-monitor',
         'guides/autostart',
