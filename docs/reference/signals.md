@@ -46,6 +46,8 @@ SomeWM uses signals for event-driven programming. Connect to signals to react to
 | `removed` | `s` | Screen disconnected |
 | `property::geometry` | `s` | Screen geometry changed |
 | `property::workarea` | `s` | Workarea changed |
+| `property::scale` | `s` | Output scale changed <SomewmOnly /> |
+| `property::outputs` | `s` | Output metadata changed |
 
 ## Tag Signals
 

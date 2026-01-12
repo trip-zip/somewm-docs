@@ -43,6 +43,7 @@ const sidebars: SidebarsConfig = {
       label: 'Reference',
       items: [
         'reference/lua-libraries',
+        'reference/screen',
         {
           type: 'category',
           label: 'awful',
@@ -83,6 +84,7 @@ const sidebars: SidebarsConfig = {
         'concepts/object-model',
         'concepts/architecture',
         'concepts/wayland-vs-x11',
+        'concepts/display-scaling',
         'concepts/client-stack',
         'concepts/focus-history',
         'concepts/scene-graph',

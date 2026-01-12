@@ -261,6 +261,8 @@ end
 
 ## See Also
 
+- **[screen Reference](/reference/screen)** - Full screen API documentation
+- **[Display Scaling Concepts](/concepts/display-scaling)** - How scaling works under the hood
 - **[Multi-Monitor Setup](/guides/multi-monitor)** - Per-screen configuration
 - **[CLI Control](/guides/cli-control)** - somewm-client screen commands
 - **[Theme](/tutorials/theme)** - Creating DPI-aware themes
