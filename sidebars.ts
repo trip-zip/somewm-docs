@@ -36,6 +36,7 @@ const sidebars: SidebarsConfig = {
         'guides/multi-monitor',
         'guides/notifications',
         'guides/screenshots',
+        'guides/shadows',
         'guides/widget-timers',
       ],
     },
@@ -44,7 +45,7 @@ const sidebars: SidebarsConfig = {
       label: 'Reference',
       items: [
         'reference/lua-libraries',
-        'reference/screen',
+        // AwesomeWM libraries (alphabetical)
         {
           type: 'category',
           label: 'awful',
@@ -61,6 +62,8 @@ const sidebars: SidebarsConfig = {
             'reference/beautiful/theme-variables',
           ],
         },
+        'reference/gears/index',
+        'reference/naughty/index',
         {
           type: 'category',
           label: 'wibox',
@@ -69,13 +72,14 @@ const sidebars: SidebarsConfig = {
             'reference/wibox/wibar',
           ],
         },
-        'reference/layer_surface/index',
-        'reference/naughty/index',
-        'reference/gears/index',
+        // SomeWM-specific (alphabetical)
+        'reference/default-keybindings',
         'reference/key-names',
+        'reference/layer_surface/index',
+        'reference/screen',
+        'reference/shadows',
         'reference/signals',
         'reference/somewm-client',
-        'reference/default-keybindings',
       ],
     },
     {

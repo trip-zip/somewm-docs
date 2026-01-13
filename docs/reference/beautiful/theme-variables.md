@@ -4,6 +4,8 @@ title: Theme Variables
 description: Complete list of beautiful theme variables
 ---
 
+import SomewmOnly from '@site/src/components/SomewmOnly';
+
 # Theme Variables
 
 This is a reference of commonly used theme variables in the `beautiful` module. For a tutorial on creating themes, see [Theme Tutorial](/tutorials/theme).
@@ -117,6 +119,25 @@ This is a reference of commonly used theme variables in the `beautiful` module. 
 | Variable | Description |
 |----------|-------------|
 | `wallpaper` | Path to wallpaper image |
+
+## Shadows <SomewmOnly />
+
+Compositor-level shadows for windows and wiboxes. See [Shadows Reference](/reference/shadows) for full documentation.
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `shadow_enabled` | boolean | `false` | Enable shadows globally for clients |
+| `shadow_radius` | integer | `12` | Blur radius in pixels |
+| `shadow_offset_x` | integer | `-15` | Horizontal offset (negative = left) |
+| `shadow_offset_y` | integer | `-15` | Vertical offset (negative = up) |
+| `shadow_opacity` | number | `0.75` | Shadow opacity (0.0-1.0) |
+| `shadow_color` | string | `"#000000"` | Shadow color as hex |
+| `shadow_drawin_enabled` | boolean | (inherits) | Enable shadows for wiboxes |
+| `shadow_drawin_radius` | integer | (inherits) | Blur radius for wiboxes |
+| `shadow_drawin_offset_x` | integer | (inherits) | Horizontal offset for wiboxes |
+| `shadow_drawin_offset_y` | integer | (inherits) | Vertical offset for wiboxes |
+| `shadow_drawin_opacity` | number | (inherits) | Opacity for wiboxes |
+| `shadow_drawin_color` | string | (inherits) | Color for wiboxes |
 
 ## Layout Icons
 
