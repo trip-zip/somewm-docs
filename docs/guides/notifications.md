@@ -139,9 +139,22 @@ end)
 |----------|-------------|
 | `app_name` | Application name (e.g., "Spotify", "discord") |
 | `title` | Notification title |
-| `message` | Notification body text |
+| `message` | Notification body text (supports Lua patterns) |
 | `urgency` | Urgency level: "low", "normal", "critical" |
 | `category` | Notification category |
+
+### Rule Settable Properties
+
+| Property | Description |
+|----------|-------------|
+| `timeout` | Auto-dismiss time in seconds (0 = never) |
+| `position` | Screen position |
+| `ignore_suspend` | If `true`, notification shows even when suspended |
+| `ignore` | If `true`, notification is completely ignored |
+| `never_timeout` | Force timeout to 0 |
+| `implicit_timeout` | Fallback timeout if notification doesn't specify one |
+| `bg`, `fg` | Background and foreground colors |
+| `icon`, `icon_size` | Notification icon |
 
 ## Sending Notifications from Lua
 
@@ -299,24 +312,151 @@ naughty.connect_signal("destroyed", function(n, reason)
 end)
 ```
 
-## Do Not Disturb
+## Do Not Disturb / Suspension
 
-Implement a simple do-not-disturb mode:
+Suspend notifications temporarily (e.g., during presentations):
+
+### Basic Suspension
 
 ```lua
-local dnd = false
+-- Modern API (recommended)
+naughty.suspended = true   -- Suspend all
+naughty.suspended = false  -- Resume
 
--- Toggle DND with keybinding
-awful.key({ modkey }, "n", function()
-    dnd = not dnd
-    if dnd then
-        naughty.suspend()
-        naughty.notify { title = "Do Not Disturb", text = "Enabled" }
-    else
-        naughty.resume()
-        naughty.notify { title = "Do Not Disturb", text = "Disabled" }
-    end
+-- Legacy functions (deprecated but still work)
+naughty.suspend()
+naughty.resume()
+naughty.toggle()
+```
+
+### Selective Suspension with `ignore_suspend`
+
+The key to letting critical notifications through: the `ignore_suspend` property.
+
+When `naughty.suspended = true`, notifications with `ignore_suspend = true` **still display**.
+
+#### Manual Approach
+
+```lua
+-- This notification ignores suspension
+naughty.notify {
+    title = "Battery Critical!",
+    text = "5% remaining",
+    urgency = "critical",
+    ignore_suspend = true,  -- Shows even when suspended
+}
+```
+
+#### Rule-Based Approach (Recommended)
+
+Let critical notifications through automatically using `ruled.notification`:
+
+```lua
+local ruled = require("ruled")
+
+ruled.notification.connect_signal("request::rules", function()
+    -- Critical notifications bypass suspension
+    ruled.notification.append_rule {
+        rule = { urgency = "critical" },
+        properties = {
+            ignore_suspend = true,
+        },
+    }
 end)
+```
+
+Now when you toggle DND, critical notifications (like low battery warnings) still appear.
+
+### Creative Filtering: The "Principal's Office" Rule
+
+Rules can match on `message` content using Lua patterns. Here's one you can do if you're in a meeting but want to know if your kid texts you about being sent to the principal's office:
+
+```lua
+ruled.notification.connect_signal("request::rules", function()
+    -- Only Signal messages from my kid mentioning school emergencies
+    ruled.notification.append_rule {
+        rule = { app_name = "Signal" },
+        rule_any = {
+            -- Lua patterns: case-insensitive matching
+            message = {
+                "[Pp]rincipal",
+                "[Ee]mergency",
+                "Bit another student"
+            },
+        },
+        properties = {
+            ignore_suspend = true,
+            bg = "#ff6600",  -- Make it obvious
+        },
+    }
+
+    -- Boss messages always get through
+    ruled.notification.append_rule {
+        rule = {
+            app_name = "Slack",
+            title = "Direct message from: CEO.*",
+        },
+        properties = { ignore_suspend = true },
+    }
+
+    -- Doorbell camera - always show
+    ruled.notification.append_rule {
+        rule = { app_name = "Ring" },
+        properties = { ignore_suspend = true },
+    }
+end)
+```
+
+The `message` field supports Lua patterns, so you can get creative with what breaks through your focus time.
+
+### Complete Presentation Mode Example
+
+```lua
+local awful = require("awful")
+local naughty = require("naughty")
+local ruled = require("ruled")
+
+-- Setup: Critical notifications always show
+ruled.notification.connect_signal("request::rules", function()
+    ruled.notification.append_rule {
+        rule = { urgency = "critical" },
+        properties = { ignore_suspend = true },
+    }
+
+    -- Also let through specific categories
+    ruled.notification.append_rule {
+        rule_any = {
+            category = { "device.error", "network.error" },
+        },
+        properties = { ignore_suspend = true },
+    }
+end)
+
+-- Keybinding to toggle presentation mode
+awful.keyboard.append_global_keybindings({
+    awful.key({ modkey }, "n", function()
+        naughty.suspended = not naughty.suspended
+
+        -- Show brief confirmation (this one ignores suspend too)
+        naughty.notify {
+            title = naughty.suspended and "Presentation Mode" or "Notifications",
+            text = naughty.suspended and "Only critical alerts will show" or "All notifications enabled",
+            timeout = 2,
+            ignore_suspend = true,
+        }
+    end, {description = "toggle presentation mode", group = "notifications"}),
+})
+```
+
+### Accessing Suspended Notifications
+
+When resumed, suspended notifications appear. You can also access them programmatically:
+
+```lua
+-- Get list of currently suspended notifications
+for _, n in ipairs(naughty.notifications.suspended) do
+    print(n.title)
+end
 ```
 
 ## Troubleshooting
