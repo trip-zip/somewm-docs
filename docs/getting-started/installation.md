@@ -89,22 +89,6 @@ sudo make install
 
 The build will verify that LGI is correctly installed for your Lua version. If the check fails, you'll see instructions for which package to install.
 
-### User-Local Installation
-
-For installation without root (installs to `~/.local`):
-
-```bash
-make install-local
-```
-
-### Display Manager Session
-
-To add SomeWM to your display manager's session list:
-
-```bash
-sudo make install-session
-```
-
 ## LGI Troubleshooting
 
 SomeWM requires LGI (Lua GObject Introspection bindings) for widget rendering. **The LGI package must match your Lua version.**
@@ -160,14 +144,11 @@ in
 ## Uninstallation
 
 ```bash
-# Remove system-wide installation
+# Remove installed files
 sudo make uninstall
 
-# Remove user-local installation
-make uninstall-local
-
-# Remove session from display manager
-sudo make uninstall-session
+# Remove build directory
+make clean
 ```
 
 ## Next Steps
