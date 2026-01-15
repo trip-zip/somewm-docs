@@ -26,7 +26,7 @@ somewm-client <command> [arguments...]
 
 ## Client Commands {#client-commands}
 
-Commands for window management.
+Commands for window management. Client IDs are simple integers (1, 2, 3...) assigned when windows open. IDs increment but don't reuse within a session, and reset when the compositor restarts.
 
 | Command | Description |
 |---------|-------------|
@@ -81,6 +81,12 @@ somewm-client ping
 
 # List windows
 somewm-client client list
+# Output:
+# id=1 title="Firefox" class="firefox" tags=1 floating=false
+# id=2 title="Terminal" class="Alacritty" tags=1 floating=false
+
+# Focus window by ID
+somewm-client client focus 1
 
 # Enable tap-to-click
 somewm-client input tap_to_click 1

@@ -45,23 +45,25 @@ somewm-client client list
 
 Output format:
 ```
-12345 Firefox
-12346 Alacritty
-12347 Code - project
+id=1 title="Firefox" class="firefox" tags=1 floating=false
+id=2 title="Alacritty" class="Alacritty" tags=1 floating=false
+id=3 title="Code - project" class="code" tags=2 floating=false
 ```
+
+Client IDs are simple integers assigned when windows open. They increment but don't reuse within a session, and reset when the compositor restarts.
 
 ### Focus Window
 
 ```bash
 # Focus window by ID
-somewm-client client focus 12345
+somewm-client client focus 1
 ```
 
 ### Close Window
 
 ```bash
 # Close window by ID
-somewm-client client close 12345
+somewm-client client close 1
 
 # Close focused window
 somewm-client client close
@@ -247,12 +249,12 @@ fi
 # Get window list
 windows=$(somewm-client client list)
 
-# Show in rofi
-selected=$(echo "$windows" | rofi -dmenu -p "Window" -format "s")
+# Show in rofi (display full line, return selected)
+selected=$(echo "$windows" | rofi -dmenu -p "Window")
 
 if [ -n "$selected" ]; then
-    # Extract ID (first field)
-    id=$(echo "$selected" | cut -d' ' -f1)
+    # Extract numeric ID from "id=N ..."
+    id=$(echo "$selected" | sed 's/id=\([0-9]*\).*/\1/')
     somewm-client client focus "$id"
 fi
 ```
@@ -292,18 +294,18 @@ click-left = somewm-client input xkb_layout "$([ $(somewm-client input xkb_layou
 class="$1"
 command="$2"
 
-# Check if window with class exists
-window=$(somewm-client eval "
+# Check if window with class exists, return its ID
+window_id=$(somewm-client eval "
 for _, c in ipairs(client.get()) do
     if c.class == '$class' then
-        return c.window
+        return c.id
     end
 end
 return nil
 ")
 
-if [ "$window" != "nil" ] && [ -n "$window" ]; then
-    somewm-client client focus "$window"
+if [ "$window_id" != "nil" ] && [ -n "$window_id" ]; then
+    somewm-client client focus "$window_id"
 else
     $command &
 fi
