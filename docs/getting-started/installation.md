@@ -14,6 +14,20 @@ SomeWM is tightly coupled to wlroots 0.19. Meson fetches it automatically as a s
 
 ### Arch Linux
 
+#### From the AUR (recommended)
+
+```bash
+yay -S somewm-git
+# or with paru:
+paru -S somewm-git
+```
+
+This installs somewm and all dependencies. After installation, skip directly to [Launch](/getting-started/first-launch).
+
+#### Manual Build
+
+If you prefer to build from source:
+
 ```bash
 # Required dependencies
 # Note: lua51-lgi is required for LuaJIT (the default Lua for SomeWM)
