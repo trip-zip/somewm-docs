@@ -55,16 +55,21 @@ These APIs exist so configs don't error, but they don't do anything meaningful:
 | `awesome.set_xproperty()` | Write X11 root window property | No-op, prints warning |
 | `c:get_xproperty()` | Read X11 client property | Always returns nil |
 | `c:set_xproperty()` | Write X11 client property | No-op |
-| `root.fake_input()` | Inject synthetic keyboard/mouse | Requires wlr_virtual_keyboard protocol |
-| `awesome.restart()` | Restart the window manager | Wayland compositors can't restart in place |
 
-#### Why These Can't Work
+#### Why X Properties Can't Work
 
-**X Properties**: In X11, windows have arbitrary named properties (atoms) that apps and WMs use to communicate. Examples: `_NET_WM_NAME`, `_MOTIF_WM_HINTS`, custom properties. Wayland has no equivalent - apps communicate via Wayland protocols instead.
+In X11, windows have arbitrary named properties (atoms) that apps and WMs use to communicate. Examples: `_NET_WM_NAME`, `_MOTIF_WM_HINTS`, custom properties. Wayland has no equivalent - apps communicate via Wayland protocols instead.
 
-**Fake Input**: X11 allows any client to inject keyboard/mouse events into the root window. This is a security hole that Wayland deliberately closes. Virtual input requires privileged protocols.
+### Working APIs (Previously Stubbed)
 
-**Restart**: In X11, the WM is a client like any other - it can quit and let another start. In Wayland, the compositor IS the display server. If it quits, all apps die.
+These were stubs but are now fully implemented:
+
+| API | Status | Notes |
+|-----|--------|-------|
+| `root.fake_input()` | **Working** | Injects key/button/motion events via wlr_seat |
+| `awesome.restart()` | **Working** | Exec's self to restart (clients reconnect) |
+
+`root.fake_input()` supports all event types: `key_press`, `key_release`, `button_press`, `button_release`, and `motion_notify`.
 
 ### Behavioral Differences
 
@@ -91,9 +96,7 @@ AwesomeWM embeds X11 windows directly via the `_NET_SYSTEMTRAY` protocol. SomeWM
 ### Before Migrating
 
 1. **Check for X11-specific code**:
-   - `root.fake_input()` calls
-   - `get_xproperty()` / `set_xproperty()` usage
-   - `awesome.restart()` calls
+   - `get_xproperty()` / `set_xproperty()` usage (these are stubs)
 
 2. **Check for external X11 tools**:
    - Replace `xclip` with `wl-copy`/`wl-paste`
@@ -113,10 +116,12 @@ awful.spawn("scrot ~/screenshot.png")
 -- NEW (Wayland)
 awful.spawn("grim ~/screenshot.png")
 
--- OLD (X11) - Remove these, they're no-ops
-awesome.restart()
-c:set_xproperty("MY_PROP", value)
-root.fake_input("key_press", "a")
+-- These X property APIs are no-ops on Wayland
+c:set_xproperty("MY_PROP", value)  -- Does nothing
+
+-- These now work on SomeWM!
+awesome.restart()  -- Restarts the compositor
+root.fake_input("key_press", "a")  -- Injects input
 ```
 
 ### Running AwesomeWM Tests

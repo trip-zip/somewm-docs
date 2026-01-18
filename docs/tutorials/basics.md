@@ -202,6 +202,8 @@ In tiling layouts, you can adjust how much space the master area takes:
 | **Mod4 + l** | Increase master width |
 | **Mod4 + h** | Decrease master width |
 
+This works with tile, spiral, and dwindle layouts.
+
 ## Using the Mouse
 
 While SomeWM is keyboard-focused, mouse support is excellent:

@@ -50,7 +50,7 @@ id=2 title="Alacritty" class="Alacritty" tags=1 floating=false
 id=3 title="Code - project" class="code" tags=2 floating=false
 ```
 
-Client IDs are simple integers assigned when windows open. They increment but don't reuse within a session, and reset when the compositor restarts.
+Client IDs are simple integers assigned when windows open. They increment but don't reuse within a session, and reset when the compositor restarts. The `id` property is read-only in Lua (`c.id`).
 
 ### Focus Window
 

@@ -19,15 +19,31 @@ After installation, SomeWM searches for configs in this order:
 
 ### Config loads but crashes immediately
 
-Enable debug logging:
+Enable logging to see what's happening. SomeWM has three log levels:
+
+| Flag | Level | Shows |
+|------|-------|-------|
+| (none) | error | Errors only (default) |
+| `--verbose` | info | Errors + info messages |
+| `-d` | debug | Everything |
 
 ```bash
+# Info level (recommended starting point)
+somewm --verbose 2>&1 | tee somewm.log
+
+# Debug level (verbose)
 somewm -d 2>&1 | tee somewm.log
 ```
 
-Or with full wlroots debug output:
+You can also set the log level at runtime from your `rc.lua`:
+
+```lua
+awesome.log_level = "debug"  -- or "info", "error"
+```
+
+For full wlroots debug output, add the environment variable:
 ```bash
-WLR_DEBUG=1 somewm 2>&1 | tee somewm.log
+WLR_DEBUG=1 somewm -d 2>&1 | tee somewm.log
 ```
 
 Look for lines containing `error loading` or `error executing`.
@@ -117,9 +133,7 @@ These features are not yet implemented:
 
 | Feature | Status |
 |---------|--------|
-| Strut aggregation | Single panel works |
 | XKB toggle options | Use keybindings instead |
-| Scroll wheel bindings | On root/clients TODO |
 
 ## Getting Help
 

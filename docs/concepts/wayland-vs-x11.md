@@ -6,8 +6,6 @@ description: Why some things work differently on Wayland
 
 # Wayland vs X11
 
-<!-- TODO: Adapt content from ideas/DEVIATIONS.md -->
-
 This page explains why some AwesomeWM features work differently (or don't work) on Wayland.
 
 ## Fundamental Differences
@@ -64,10 +62,6 @@ This page explains why some AwesomeWM features work differently (or don't work) 
 
 ## Partially Working Features
 
-### Strut Aggregation
-
-Single panel struts work correctly. Multiple panels on the same screen edge may not reserve space properly.
-
 ### XKB Layout Toggle
 
 **X11**: Toggle options like `grp:alt_shift_toggle` work because the X server intercepts the key combination and executes the layout switch.
@@ -90,4 +84,3 @@ end)
 ## See Also
 
 - [AwesomeWM Compatibility](/concepts/awesomewm-compat) - Full compatibility matrix
-- [DEVIATIONS.md](https://github.com/trip-zip/somewm/blob/main/ideas/DEVIATIONS.md) - Source file
