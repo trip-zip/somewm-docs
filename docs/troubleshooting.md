@@ -124,7 +124,6 @@ These features are not yet implemented:
 |---------|--------|-------|
 | Systray (XEmbed apps) | Partial | SNI works, XEmbed doesn't |
 | `root.fake_input()` | Stub | Virtual input not implemented |
-| `root.cursor()` | Stub | Cursor theme changing |
 | X property APIs | Stub | X11 doesn't exist on Wayland |
 | Keybinding removal | Stub | `root._remove_key()` is no-op |
 | WM restart | N/A | Wayland architecture limitation |

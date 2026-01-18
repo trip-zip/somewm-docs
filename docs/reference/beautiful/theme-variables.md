@@ -42,6 +42,28 @@ This is a reference of commonly used theme variables in the `beautiful` module. 
 | `hotkeys_description_font` | Font for hotkeys descriptions |
 | `notification_font` | Font for notifications |
 
+## Cursors
+
+Cursor names used during window operations. These accept standard X cursor names like `"left_ptr"`, `"fleur"`, `"cross"`, `"watch"`, etc.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `cursor_mouse_resize` | `"cross"` | Cursor during window resize |
+| `cursor_mouse_move` | `"fleur"` | Cursor during window move |
+| `wibar_cursor` | (none) | Cursor when hovering wibar |
+| `slider_handle_cursor` | `"fleur"` | Cursor when grabbing slider handle |
+| `enable_spawn_cursor` | `true` | Show "watch" cursor during app startup |
+
+:::tip Cursor Theme
+The cursor theme itself is set via environment variables before launching SomeWM:
+```bash
+export XCURSOR_THEME="Adwaita"
+export XCURSOR_SIZE="24"
+somewm
+```
+See [Input Devices: Cursor Theming](/guides/input-devices#cursor-theming) for details.
+:::
+
 ## Wibar
 
 | Variable | Description |
@@ -164,3 +186,4 @@ Compositor-level shadows for windows and wiboxes. See [Shadows Reference](/refer
 
 - [Theme Tutorial](/tutorials/theme) - Learn how to create themes
 - [beautiful (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/beautiful.html) - Complete upstream reference
+- [Appearance (AwesomeWM docs)](https://awesomewm.org/apidoc/documentation/06-appearance.md.html) - All theme variables including cursors

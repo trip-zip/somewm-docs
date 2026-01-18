@@ -56,6 +56,56 @@ awful.input.repeat_delay = 600  -- ms before repeat starts
 
 See [awful.input Reference](/reference/awful/input) for the complete property list.
 
+## Cursor Theming {#cursor-theming}
+
+### Setting the Cursor Theme
+
+Cursor themes are configured via environment variables before launching SomeWM:
+
+```bash
+export XCURSOR_THEME="Adwaita"  # Theme name (from /usr/share/icons/)
+export XCURSOR_SIZE="24"        # Size in pixels
+somewm
+```
+
+You can also set these in your shell profile (`~/.bashrc`, `~/.zshrc`) or in a wrapper script.
+
+### Cursor APIs
+
+SomeWM supports AwesomeWM's cursor APIs:
+
+```lua
+-- Set the root/desktop cursor
+root.cursor("left_ptr")
+
+-- Set cursor for a wibox (changes when mouse hovers over it)
+mywibox.cursor = "hand1"
+```
+
+### Theme Variables
+
+Customize cursors for specific operations in your theme:
+
+```lua
+-- In theme.lua
+theme.cursor_mouse_move = "fleur"      -- During window move
+theme.cursor_mouse_resize = "cross"    -- During window resize
+theme.enable_spawn_cursor = true       -- Show "watch" during app startup
+```
+
+See [Theme Variables: Cursors](/reference/beautiful/theme-variables#cursors) for all options.
+
+### Common Cursor Names
+
+Standard X cursor names include: `left_ptr`, `right_ptr`, `hand1`, `hand2`, `watch`, `xterm`, `crosshair`, `fleur`, `sb_h_double_arrow`, `sb_v_double_arrow`, `top_left_corner`, `top_right_corner`, `bottom_left_corner`, `bottom_right_corner`.
+
+### AwesomeWM Reference
+
+For complete API documentation, see the AwesomeWM docs:
+- [root.cursor()](https://awesomewm.org/apidoc/core_components/root.html#cursor)
+- [wibox.cursor](https://awesomewm.org/apidoc/popups_and_layered_windows/wibox.html#cursor)
+- [Appearance](https://awesomewm.org/apidoc/documentation/06-appearance.md.html) - All theme variables including cursors
+
 ## Next Steps
 
 - [CLI Control](/guides/cli-control) - Control SomeWM from scripts
