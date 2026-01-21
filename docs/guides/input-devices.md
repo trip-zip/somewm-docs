@@ -14,7 +14,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
      - Source: lua/awful/input.lua
      - Explain awful.input module (somewm-only)
      - Pointer settings (tap_to_click, natural_scrolling, etc.)
-     - Keyboard settings (repeat_rate, repeat_delay, layout)
+     - Keyboard settings (keyboard_repeat_rate, keyboard_repeat_delay, layout)
      - Example rc.lua configuration
 -->
 
@@ -48,8 +48,8 @@ awful.input.xkb_variant = ""
 awful.input.xkb_options = "ctrl:nocaps"
 
 -- Repeat settings
-awful.input.repeat_rate = 25    -- keys per second
-awful.input.repeat_delay = 600  -- ms before repeat starts
+awful.input.keyboard_repeat_rate = 25    -- keys per second
+awful.input.keyboard_repeat_delay = 600  -- ms before repeat starts
 ```
 
 ## All Properties

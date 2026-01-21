@@ -159,8 +159,8 @@ If you're spawning X11 tools on startup:
 awful.spawn.once("xset r rate 200 30")  -- Keyboard repeat
 
 -- Wayland (use awful.input)
-awful.input.repeat_delay = 200
-awful.input.repeat_rate = 30
+awful.input.keyboard_repeat_delay = 200
+awful.input.keyboard_repeat_rate = 30
 ```
 
 ### Status Bar with X11 Tools

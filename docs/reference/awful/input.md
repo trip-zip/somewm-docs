@@ -87,8 +87,8 @@ The `scroll_button` setting specifies which button activates scroll-on-button mo
 | `xkb_variant` | string | "" | Layout variant (e.g., "dvorak", "colemak") |
 | `xkb_options` | string | "" | XKB options (e.g., "ctrl:nocaps") |
 | `xkb_model` | string | "" | Keyboard model |
-| `repeat_rate` | number | 25 | Key repeat rate (keys per second) |
-| `repeat_delay` | number | 600 | Delay before repeat starts (milliseconds) |
+| `keyboard_repeat_rate` | number | 25 | Key repeat rate (keys per second) |
+| `keyboard_repeat_delay` | number | 600 | Delay before repeat starts (milliseconds) |
 
 ### Common XKB Options
 
@@ -121,8 +121,8 @@ awful.input.dwtp = 1  -- Disable touchpad while using trackpoint (ThinkPad)
 -- Keyboard settings
 awful.input.xkb_layout = "us"
 awful.input.xkb_options = "ctrl:nocaps,compose:ralt"
-awful.input.repeat_rate = 30
-awful.input.repeat_delay = 300
+awful.input.keyboard_repeat_rate = 30
+awful.input.keyboard_repeat_delay = 300
 ```
 
 ## See Also

@@ -64,7 +64,7 @@ Commands for input device configuration.
 | `input <property>` | Get input property value |
 | `input <property> <value>` | Set input property value |
 
-Available properties: `tap_to_click`, `natural_scrolling`, `pointer_speed`, `scroll_button`, `left_handed`, `repeat_rate`, `repeat_delay`, `xkb_layout`, `xkb_variant`, `xkb_options`
+Available properties: `tap_to_click`, `natural_scrolling`, `pointer_speed`, `scroll_button`, `left_handed`, `keyboard_repeat_rate`, `keyboard_repeat_delay`, `xkb_layout`, `xkb_variant`, `xkb_options`
 
 ## Screenshot Commands
 

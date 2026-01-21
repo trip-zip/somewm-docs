@@ -146,10 +146,10 @@ somewm-client input scroll_button 274
 
 ```bash
 # Repeat rate (keys per second)
-somewm-client input repeat_rate 30
+somewm-client input keyboard_repeat_rate 30
 
 # Repeat delay (milliseconds)
-somewm-client input repeat_delay 300
+somewm-client input keyboard_repeat_delay 300
 
 # Keyboard layout
 somewm-client input xkb_layout "us"
