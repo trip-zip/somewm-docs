@@ -121,40 +121,43 @@ On cache hit, we skip:
 
 The entire Lua pipeline is bypassed.
 
-## Cache Structure
+## Per-Screen Caching
 
-The cache is a simple LRU (Least Recently Used) list:
+Wallpapers are cached per-screen. The cache key is `(path, screen_index)`, meaning the same image file can be cached separately for different screens with different positions and sizes.
 
 ```c
 typedef struct wallpaper_cache_entry {
     struct wl_list link;              // Linked list for LRU ordering
-    char *path;                       // Filepath as cache key
-    struct wlr_scene_buffer *scene_node;  // GPU texture (hidden when not active)
+    char *path;                       // Filepath (part of cache key)
+    int screen_index;                 // Screen index (part of cache key)
+    struct wlr_scene_buffer *scene_node;  // GPU texture positioned at screen coords
     cairo_surface_t *surface;         // For getter compatibility
 } wallpaper_cache_entry_t;
 ```
+
+Each cached entry's scene node is positioned at the screen's coordinates and sized to match the screen's dimensions. This means switching tags on screen 1 only toggles screen 1's wallpaper node, leaving screen 2's wallpaper untouched.
 
 ### Cache Operations
 
 | Operation | Complexity | Description |
 |-----------|------------|-------------|
-| Lookup | O(n) | Linear scan by filepath |
+| Lookup | O(n) | Linear scan by (filepath, screen) |
 | Insert | O(1) | Add to head of list |
-| Evict | O(n) | Remove tail (oldest) |
-| Show | O(1) | Toggle visibility flags |
+| Evict | O(n) | Remove oldest not currently displayed |
+| Show | O(1) | Toggle visibility flags for screen |
 
-With a max of 16 entries, O(n) operations are fast enough.
+With a max of 32 entries, O(n) operations are fast enough.
 
 ### LRU Eviction
 
-When the cache is full (16 entries), the least recently used wallpaper is evicted:
+When the cache is full (32 entries), the least recently used wallpaper is evicted:
 
 ```c
 void wallpaper_cache_evict_oldest(void) {
-    // Find oldest (tail of list, excluding current)
+    // Find oldest not currently displayed on any screen
     wallpaper_cache_entry_t *oldest = NULL;
     wl_list_for_each(entry, &cache, link) {
-        if (entry != current_wallpaper)
+        if (!is_current_on_any_screen(entry))
             oldest = entry;
     }
 
@@ -176,9 +179,13 @@ Memory = width × height × 4 bytes (ARGB32)
 3840×2160 = 33,177,600 bytes ≈ 32 MB
 ```
 
-With 16 cached wallpapers:
-- 1080p: ~128 MB GPU memory
-- 4K: ~512 MB GPU memory
+With 32 cached wallpapers (max cache size):
+- 1080p: ~256 MB GPU memory
+- 4K: ~1 GB GPU memory
+
+A typical dual-monitor setup with 9 tags per screen = 18 cached wallpapers:
+- 1080p: ~144 MB GPU memory
+- 4K: ~576 MB GPU memory
 
 This is typically acceptable for modern GPUs, but users with many 4K wallpapers should be mindful of memory usage.
 

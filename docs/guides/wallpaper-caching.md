@@ -52,6 +52,22 @@ root.wallpaper_cache_preload({
 
 This loads all images during startup so even the first visit to each tag is instant.
 
+## Multi-Monitor Support
+
+The cache is per-screen. Each screen has its own set of cached wallpapers, so switching tags on one screen doesn't affect wallpapers on other screens.
+
+```lua
+-- With multiple screens, each gets its own wallpaper cache
+tag.connect_signal("property::selected", function(t)
+    if not t or not t.selected then return end
+    local wp = tag_wallpapers[t.index]
+    if wp then
+        -- This caches separately for t.screen
+        gears.wallpaper.maximized(wp, t.screen, true)
+    end
+end)
+```
+
 ## Cache API
 
 SomeWM provides four functions for cache control:
@@ -59,8 +75,9 @@ SomeWM provides four functions for cache control:
 ### Check if Cached
 
 ```lua
-if root.wallpaper_cache_has("/path/to/wallpaper.jpg") then
-    -- Already in cache
+-- Check if wallpaper is cached for a specific screen
+if root.wallpaper_cache_has("/path/to/wallpaper.jpg", screen.primary) then
+    -- Already in cache for this screen
 end
 ```
 
@@ -68,27 +85,38 @@ end
 
 ```lua
 -- Returns true if cache hit, false if not cached
-local hit = root.wallpaper_cache_show("/path/to/wallpaper.jpg")
+-- You normally don't need to call this directly
+local hit = root.wallpaper_cache_show("/path/to/wallpaper.jpg", screen.primary)
 ```
 
-This is used internally by the automatic caching. You normally don't need to call it directly.
+This is used internally by the automatic caching.
 
 ### Preload Multiple Wallpapers
 
 ```lua
--- Returns number of successfully preloaded images
+-- Preload wallpapers for a specific screen
+-- Screen defaults to primary if not specified
 local count = root.wallpaper_cache_preload({
     "/path/to/image1.jpg",
     "/path/to/image2.png",
     "/path/to/image3.jpg",
-})
+}, screen.primary)
 print("Preloaded " .. count .. " wallpapers")
+
+-- For multi-monitor, preload for each screen:
+for s in screen do
+    root.wallpaper_cache_preload({
+        tag_wallpapers[1],
+        tag_wallpapers[2],
+        -- ...
+    }, s)
+end
 ```
 
 ### Clear Cache
 
 ```lua
--- Free all cached wallpaper textures
+-- Free all cached wallpaper textures (all screens)
 root.wallpaper_cache_clear()
 ```
 
@@ -96,9 +124,9 @@ Use this to free GPU memory if needed. The cache will rebuild as you switch tags
 
 ## Cache Limits
 
-The cache holds up to 16 wallpapers. When full, the least recently used wallpaper is evicted to make room for new ones.
+The cache holds up to 32 wallpapers total (all screens combined). With a typical 2-screen setup and 9 tags each, that's 18 wallpapers which fits comfortably.
 
-For a typical setup with 9 tags, all wallpapers fit in cache. If you have more than 16 unique wallpapers, the oldest ones get evicted and will reload on next visit.
+When the cache is full, the least recently used wallpaper is evicted to make room for new ones.
 
 ## Memory Usage
 
