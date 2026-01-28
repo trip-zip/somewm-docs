@@ -60,7 +60,7 @@ See [awful.input Reference](/reference/awful/input) for the complete property li
 
 ### Setting the Cursor Theme
 
-Cursor themes are configured via environment variables before launching SomeWM:
+Cursor themes can be configured via environment variables before launching SomeWM:
 
 ```bash
 export XCURSOR_THEME="Adwaita"  # Theme name (from /usr/share/icons/)
@@ -69,6 +69,30 @@ somewm
 ```
 
 You can also set these in your shell profile (`~/.bashrc`, `~/.zshrc`) or in a wrapper script.
+
+### Runtime Cursor Theme Changes <SomewmOnly />
+
+You can change the cursor theme and size at runtime without restarting:
+
+```lua
+-- In rc.lua or via somewm-client eval
+root.cursor_theme("Adwaita")  -- Change theme
+root.cursor_theme()           -- Returns current theme name
+
+root.cursor_size(32)          -- Change size in pixels
+root.cursor_size()            -- Returns current size
+```
+
+Via CLI:
+```bash
+somewm-client eval 'root.cursor_theme("Adwaita")'
+somewm-client eval 'root.cursor_size(48)'
+somewm-client eval 'return root.cursor_theme(), root.cursor_size()'
+```
+
+:::note Fallback Behavior
+If a cursor theme cannot be loaded (e.g., theme not installed), wlroots provides built-in fallback cursors. These are basic black-and-white cursors that ensure your mouse always works, even on minimal systems.
+:::
 
 ### Cursor APIs
 

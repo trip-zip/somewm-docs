@@ -55,12 +55,19 @@ Cursor names used during window operations. These accept standard X cursor names
 | `enable_spawn_cursor` | `true` | Show "watch" cursor during app startup |
 
 :::tip Cursor Theme
-The cursor theme itself is set via environment variables before launching SomeWM:
+The cursor theme can be set via environment variables before launching:
 ```bash
 export XCURSOR_THEME="Adwaita"
 export XCURSOR_SIZE="24"
 somewm
 ```
+
+Or changed at runtime (SomeWM-only):
+```lua
+root.cursor_theme("Adwaita")
+root.cursor_size(32)
+```
+
 See [Input Devices: Cursor Theming](/guides/input-devices#cursor-theming) for details.
 :::
 
