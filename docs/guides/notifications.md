@@ -6,106 +6,17 @@ description: Configure desktop notifications with naughty
 
 # Notifications
 
-SomeWM includes `naughty`, a notification daemon that receives notifications from applications via D-Bus and displays them on screen.
+This guide covers common notification configuration tasks. For API details and property tables, see the [naughty reference](/reference/naughty/).
 
-## How Notifications Work
+## Filter Notifications by App
 
-When an app sends a notification:
-
-1. App calls the D-Bus `org.freedesktop.Notifications` interface
-2. Naughty receives the notification
-3. Rules are applied (if any)
-4. Notification displays on screen
-5. After timeout, it disappears (or user dismisses it)
-
-## Basic Setup
-
-The default config enables naughty automatically. If you're building from scratch:
-
-```lua
-local naughty = require("naughty")
-
--- Enable the notification daemon
-naughty.connect_signal("request::display", function(n)
-    naughty.layout.box { notification = n }
-end)
-```
-
-That's it - apps can now send notifications.
-
-## Customizing Defaults
-
-Configure default behavior via `naughty.config.defaults`:
-
-```lua
-local naughty = require("naughty")
-
--- Default timeout (seconds, 0 = never auto-dismiss)
-naughty.config.defaults.timeout = 5
-
--- Default position on screen
-naughty.config.defaults.position = "top_right"
-
--- Margin from screen edge
-naughty.config.defaults.margin = 10
-
--- Default icon size
-naughty.config.defaults.icon_size = 48
-
--- Gap between notifications
-naughty.config.spacing = 4
-```
-
-### Position Options
-
-| Position | Location |
-|----------|----------|
-| `"top_left"` | Top-left corner |
-| `"top_middle"` | Top center |
-| `"top_right"` | Top-right corner (default) |
-| `"bottom_left"` | Bottom-left corner |
-| `"bottom_middle"` | Bottom center |
-| `"bottom_right"` | Bottom-right corner |
-
-## Preset Urgency Levels
-
-Notifications have urgency levels: `low`, `normal`, `critical`. Configure each:
-
-```lua
--- Low urgency (subtle)
-naughty.config.presets.low.bg = "#222222"
-naughty.config.presets.low.fg = "#888888"
-naughty.config.presets.low.timeout = 3
-
--- Normal urgency (default)
-naughty.config.presets.normal.bg = "#333333"
-naughty.config.presets.normal.fg = "#ffffff"
-naughty.config.presets.normal.timeout = 5
-
--- Critical urgency (attention-grabbing)
-naughty.config.presets.critical.bg = "#ff0000"
-naughty.config.presets.critical.fg = "#ffffff"
-naughty.config.presets.critical.timeout = 0  -- Don't auto-dismiss
-```
-
-## Notification Rules
-
-Use `ruled.notification` to customize notifications based on their properties:
+To change timeout, position, or appearance for specific applications, use `ruled.notification`:
 
 ```lua
 local ruled = require("ruled")
 
 ruled.notification.connect_signal("request::rules", function()
-    -- Default rule for all notifications
-    ruled.notification.append_rule {
-        rule = {},
-        properties = {
-            screen = awful.screen.preferred,
-            implicit_timeout = 5,
-        },
-    }
-
-    -- Spotify notifications: shorter timeout
+    -- Spotify: shorter timeout
     ruled.notification.append_rule {
         rule = { app_name = "Spotify" },
         properties = {
@@ -113,7 +24,7 @@ ruled.notification.connect_signal("request::rules", function()
         },
     }
 
-    -- Discord: different position
+    -- Discord: show in bottom-right
     ruled.notification.append_rule {
         rule = { app_name = "discord" },
         properties = {
@@ -121,141 +32,145 @@ ruled.notification.connect_signal("request::rules", function()
         },
     }
 
-    -- Critical notifications: never timeout
+    -- Silence a noisy app entirely
     ruled.notification.append_rule {
-        rule = { urgency = "critical" },
+        rule = { app_name = "NoisyApp" },
         properties = {
-            timeout = 0,
-            bg = "#ff0000",
-            fg = "#ffffff",
+            ignore = true,
         },
     }
 end)
 ```
 
-### Rule Matching Properties
+See [Rule Matching Fields](/reference/naughty/#rule-matching-fields) and [Rule Settable Properties](/reference/naughty/#rule-settable-properties) for all available fields.
 
-| Property | Description |
-|----------|-------------|
-| `app_name` | Application name (e.g., "Spotify", "discord") |
-| `title` | Notification title |
-| `message` | Notification body text (supports Lua patterns) |
-| `urgency` | Urgency level: "low", "normal", "critical" |
-| `category` | Notification category |
+## Set Up Urgency Styles
 
-### Rule Settable Properties
-
-| Property | Description |
-|----------|-------------|
-| `timeout` | Auto-dismiss time in seconds (0 = never) |
-| `position` | Screen position |
-| `ignore_suspend` | If `true`, notification shows even when suspended |
-| `ignore` | If `true`, notification is completely ignored |
-| `never_timeout` | Force timeout to 0 |
-| `implicit_timeout` | Fallback timeout if notification doesn't specify one |
-| `bg`, `fg` | Background and foreground colors |
-| `icon`, `icon_size` | Notification icon |
-
-## Sending Notifications from Lua
-
-Send notifications from your rc.lua or widgets:
+Configure how each urgency level looks:
 
 ```lua
 local naughty = require("naughty")
 
--- Simple notification
-naughty.notify {
-    title = "Hello",
-    text = "This is a notification",
-}
+-- Low urgency: subtle
+naughty.config.presets.low.bg = "#222222"
+naughty.config.presets.low.fg = "#888888"
+naughty.config.presets.low.timeout = 3
 
--- With more options
-naughty.notify {
-    title = "Volume Changed",
-    text = "Volume: 50%",
-    icon = "/usr/share/icons/Adwaita/48x48/status/audio-volume-medium.png",
-    timeout = 2,
-    urgency = "low",
-}
+-- Normal urgency
+naughty.config.presets.normal.bg = "#333333"
+naughty.config.presets.normal.fg = "#ffffff"
+naughty.config.presets.normal.timeout = 5
 
--- Critical notification (won't auto-dismiss)
-naughty.notify {
-    title = "Battery Low!",
-    text = "Battery at 10%",
-    urgency = "critical",
-}
+-- Critical: attention-grabbing, no auto-dismiss
+naughty.config.presets.critical.bg = "#ff0000"
+naughty.config.presets.critical.fg = "#ffffff"
+naughty.config.presets.critical.timeout = 0
 ```
 
-### Notification with Actions
+## Set Up Do Not Disturb
 
-Add clickable buttons to notifications:
+Toggle notification suspension with a keybinding:
 
 ```lua
-naughty.notify {
-    title = "Meeting in 5 minutes",
-    text = "Standup with team",
-    actions = {
-        naughty.action { name = "Join" },
-        naughty.action { name = "Snooze" },
-    },
-}
+local awful = require("awful")
+local naughty = require("naughty")
+
+awful.keyboard.append_global_keybindings({
+    awful.key({ modkey }, "n", function()
+        naughty.suspended = not naughty.suspended
+
+        naughty.notify {
+            title = naughty.suspended and "Presentation Mode" or "Notifications",
+            text = naughty.suspended and "Only critical alerts will show" or "All notifications enabled",
+            timeout = 2,
+            ignore_suspend = true,
+        }
+    end, {description = "toggle presentation mode", group = "notifications"}),
+})
 ```
 
-Handle action clicks:
+### Let Critical Notifications Through
+
+Use a rule to let critical notifications bypass suspension:
 
 ```lua
-local n = naughty.notify {
-    title = "File download complete",
-    text = "document.pdf",
-    actions = {
-        naughty.action { name = "Open" },
-        naughty.action { name = "Show in folder" },
-    },
-}
+local ruled = require("ruled")
 
-n:connect_signal("invoked", function(_, action_index)
-    if action_index == 1 then
-        awful.spawn("xdg-open ~/Downloads/document.pdf")
-    elseif action_index == 2 then
-        awful.spawn("nautilus ~/Downloads")
-    end
+ruled.notification.connect_signal("request::rules", function()
+    ruled.notification.append_rule {
+        rule = { urgency = "critical" },
+        properties = { ignore_suspend = true },
+    }
+
+    -- Also let through system errors
+    ruled.notification.append_rule {
+        rule_any = {
+            category = { "device.error", "network.error" },
+        },
+        properties = { ignore_suspend = true },
+    }
 end)
 ```
 
-## Theming Notifications
+### Filter by Message Content
 
-Use `beautiful` variables to style notifications globally:
+Rules support Lua patterns in the `message` field. This is useful for letting specific messages through during DND:
+
+```lua
+ruled.notification.connect_signal("request::rules", function()
+    -- Signal messages about school emergencies bypass DND
+    ruled.notification.append_rule {
+        rule = { app_name = "Signal" },
+        rule_any = {
+            message = {
+                "[Pp]rincipal",
+                "[Ee]mergency",
+                "Bit another student"
+            },
+        },
+        properties = {
+            ignore_suspend = true,
+            bg = "#ff6600",
+        },
+    }
+
+    -- Boss messages always get through
+    ruled.notification.append_rule {
+        rule = {
+            app_name = "Slack",
+            title = "Direct message from: CEO.*",
+        },
+        properties = { ignore_suspend = true },
+    }
+end)
+```
+
+## Theme Notifications
+
+Style notifications globally in your `theme.lua`:
 
 ```lua
 -- In theme.lua
-local theme = {}
-
--- Notification colors
 theme.notification_bg = "#282828"
 theme.notification_fg = "#ebdbb2"
 theme.notification_border_color = "#504945"
 theme.notification_border_width = 2
-
--- Notification size
 theme.notification_width = 300
 theme.notification_max_width = 400
 theme.notification_max_height = 200
 theme.notification_icon_size = 48
-
--- Notification font
 theme.notification_font = "monospace 10"
 
--- Notification shape
 theme.notification_shape = function(cr, w, h)
     gears.shape.rounded_rect(cr, w, h, 8)
 end
-
-return theme
 ```
 
-## Custom Notification Widget
+See [Theme Variables: Notifications](/reference/beautiful/theme-variables#notifications) for all available variables.
 
-For complete control, create a custom notification display:
+## Create a Custom Notification Widget
+
+For full control over notification layout, provide a `widget_template` in your `request::display` handler:
 
 ```lua
 naughty.connect_signal("request::display", function(n)
@@ -296,167 +211,22 @@ naughty.connect_signal("request::display", function(n)
 end)
 ```
 
-## Notification Signals
+The available widget building blocks are `naughty.widget.icon`, `naughty.widget.title`, `naughty.widget.message`, and `naughty.list.actions`. Combine them with standard [wibox layouts and containers](/reference/wibox/).
 
-React to notification events:
+## Send Notifications from Lua
 
-```lua
--- When a notification is created
-naughty.connect_signal("added", function(n)
-    print("New notification: " .. n.title)
-end)
-
--- When a notification is destroyed
-naughty.connect_signal("destroyed", function(n, reason)
-    print("Notification dismissed: " .. n.title)
-end)
-```
-
-## Do Not Disturb / Suspension
-
-Suspend notifications temporarily (e.g., during presentations):
-
-### Basic Suspension
+Trigger notifications from keybindings, widgets, or scripts:
 
 ```lua
--- Modern API (recommended)
-naughty.suspended = true   -- Suspend all
-naughty.suspended = false  -- Resume
-
--- Legacy functions (deprecated but still work)
-naughty.suspend()
-naughty.resume()
-naughty.toggle()
-```
-
-### Selective Suspension with `ignore_suspend`
-
-The key to letting critical notifications through: the `ignore_suspend` property.
-
-When `naughty.suspended = true`, notifications with `ignore_suspend = true` **still display**.
-
-#### Manual Approach
-
-```lua
--- This notification ignores suspension
-naughty.notify {
-    title = "Battery Critical!",
-    text = "5% remaining",
-    urgency = "critical",
-    ignore_suspend = true,  -- Shows even when suspended
-}
-```
-
-#### Rule-Based Approach (Recommended)
-
-Let critical notifications through automatically using `ruled.notification`:
-
-```lua
-local ruled = require("ruled")
-
-ruled.notification.connect_signal("request::rules", function()
-    -- Critical notifications bypass suspension
-    ruled.notification.append_rule {
-        rule = { urgency = "critical" },
-        properties = {
-            ignore_suspend = true,
-        },
-    }
-end)
-```
-
-Now when you toggle DND, critical notifications (like low battery warnings) still appear.
-
-### Creative Filtering: The "Principal's Office" Rule
-
-Rules can match on `message` content using Lua patterns. Here's one you can do if you're in a meeting but want to know if your kid texts you about being sent to the principal's office:
-
-```lua
-ruled.notification.connect_signal("request::rules", function()
-    -- Only Signal messages from my kid mentioning school emergencies
-    ruled.notification.append_rule {
-        rule = { app_name = "Signal" },
-        rule_any = {
-            -- Lua patterns: case-insensitive matching
-            message = {
-                "[Pp]rincipal",
-                "[Ee]mergency",
-                "Bit another student"
-            },
-        },
-        properties = {
-            ignore_suspend = true,
-            bg = "#ff6600",  -- Make it obvious
-        },
-    }
-
-    -- Boss messages always get through
-    ruled.notification.append_rule {
-        rule = {
-            app_name = "Slack",
-            title = "Direct message from: CEO.*",
-        },
-        properties = { ignore_suspend = true },
-    }
-
-    -- Doorbell camera - always show
-    ruled.notification.append_rule {
-        rule = { app_name = "Ring" },
-        properties = { ignore_suspend = true },
-    }
-end)
-```
-
-The `message` field supports Lua patterns, so you can get creative with what breaks through your focus time.
-
-### Complete Presentation Mode Example
-
-```lua
-local awful = require("awful")
 local naughty = require("naughty")
-local ruled = require("ruled")
 
--- Setup: Critical notifications always show
-ruled.notification.connect_signal("request::rules", function()
-    ruled.notification.append_rule {
-        rule = { urgency = "critical" },
-        properties = { ignore_suspend = true },
-    }
-
-    -- Also let through specific categories
-    ruled.notification.append_rule {
-        rule_any = {
-            category = { "device.error", "network.error" },
-        },
-        properties = { ignore_suspend = true },
-    }
-end)
-
--- Keybinding to toggle presentation mode
-awful.keyboard.append_global_keybindings({
-    awful.key({ modkey }, "n", function()
-        naughty.suspended = not naughty.suspended
-
-        -- Show brief confirmation (this one ignores suspend too)
-        naughty.notify {
-            title = naughty.suspended and "Presentation Mode" or "Notifications",
-            text = naughty.suspended and "Only critical alerts will show" or "All notifications enabled",
-            timeout = 2,
-            ignore_suspend = true,
-        }
-    end, {description = "toggle presentation mode", group = "notifications"}),
-})
-```
-
-### Accessing Suspended Notifications
-
-When resumed, suspended notifications appear. You can also access them programmatically:
-
-```lua
--- Get list of currently suspended notifications
-for _, n in ipairs(naughty.notifications.suspended) do
-    print(n.title)
-end
+naughty.notify {
+    title = "Volume Changed",
+    text = "Volume: 50%",
+    icon = "/usr/share/icons/Adwaita/48x48/status/audio-volume-medium.png",
+    timeout = 2,
+    urgency = "low",
+}
 ```
 
 ## Troubleshooting
@@ -489,7 +259,7 @@ export ELECTRON_OZONE_PLATFORM_HINT=auto
 
 ## See Also
 
-- **[naughty Library](/reference/naughty/)** - Notification system reference
+- **[naughty Reference](/reference/naughty/)** - API details, all properties, signals, and positions
 - **[Theme Variables](/reference/beautiful/theme-variables)** - Notification theme variables
-- **[Widgets Tutorial](/tutorials/widgets)** - Build notification-triggering widgets
+- **[Widgets Tutorial](/tutorials/widgets)** - Build widgets that send notifications
 - **[naughty (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/naughty.html)** - Upstream API reference
