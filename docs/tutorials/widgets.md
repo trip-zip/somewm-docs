@@ -405,37 +405,7 @@ text.text = "Updated!"
 
 ## Widget Reference
 
-### Primitives
-
-| Widget | Use |
-|--------|-----|
-| `wibox.widget.textbox` | Display text |
-| `wibox.widget.imagebox` | Display images/icons |
-| `wibox.widget.progressbar` | Progress bars |
-| `wibox.widget.slider` | Sliders |
-| `wibox.widget.checkbox` | Checkboxes |
-| `wibox.widget.graph` | Line graphs |
-
-### Containers
-
-| Container | Effect |
-|-----------|--------|
-| `wibox.container.background` | Add bg color, fg color, shape |
-| `wibox.container.margin` | Add padding |
-| `wibox.container.constraint` | Set min/max size |
-| `wibox.container.place` | Align widget (center, left, etc.) |
-| `wibox.container.rotate` | Rotate content |
-
-### Layouts
-
-| Layout | Arrangement |
-|--------|-------------|
-| `wibox.layout.fixed.horizontal` | Side by side, fixed sizes |
-| `wibox.layout.fixed.vertical` | Stacked, fixed sizes |
-| `wibox.layout.flex.horizontal` | Side by side, equal widths |
-| `wibox.layout.flex.vertical` | Stacked, equal heights |
-| `wibox.layout.align.horizontal` | Left, center, right sections |
-| `wibox.layout.align.vertical` | Top, center, bottom sections |
+For the full list of all primitives, containers, and layouts, see the [wibox reference](/reference/wibox/).
 
 ## Troubleshooting
 

@@ -14,6 +14,12 @@ Before migrating, scan your config for potential issues:
 somewm --check ~/.config/awesome/rc.lua
 ```
 
+To only fail on issues that would actually hang the compositor (ignoring warnings):
+
+```bash
+somewm --check ~/.config/awesome/rc.lua --check-level=critical
+```
+
 This checks for:
 - **Lua syntax errors** - Caught before execution
 - **X11-specific APIs** - Functions like `awesome.get_xproperty()` that don't exist on Wayland
@@ -44,6 +50,16 @@ X CRITICAL:
 
 Summary: 1 critical, 1 warning
 ```
+
+### Suppressing False Positives
+
+If `--check` flags a pattern you've already handled (e.g. behind a runtime guard), add `-- somewm:ignore` to that line:
+
+```lua
+awful.spawn("flameshot gui") -- somewm:ignore using XDG portal on Wayland
+```
+
+The suppression also works at runtime, not just in `--check` mode. SomeWM's startup prescan will skip suppressed lines too.
 
 ## X11 Pattern Replacements
 
@@ -113,6 +129,26 @@ awful.spawn("grim ~/screenshot.png")
 `root.fake_input()` is currently a stub in SomeWM. Virtual input requires wlroots virtual pointer/keyboard protocols which are planned for a future release.
 :::
 
+### GTK/GDK via LGI
+
+| Pattern | Severity | Notes |
+|---------|----------|-------|
+| `lgi.require("Gtk")` | WARNING | SomeWM preloads an empty override to prevent deadlock, but display-dependent GTK features won't work |
+| `lgi.require("Gdk")` | CRITICAL | No mitigation. GDK init connects to the display server and will deadlock during config load |
+
+If you need GTK for icon lookup or similar, load it lazily after startup:
+
+```lua
+-- Don't load at the top level
+-- local Gtk = lgi.require("Gtk")
+
+-- Load lazily inside a callback instead
+awful.spawn.easy_async("true", function()
+    local Gtk = lgi.require("Gtk")
+    -- safe to use here, event loop is running
+end)
+```
+
 ## What Works Unchanged
 
 Most of your config will work without changes:
@@ -128,6 +164,18 @@ Most of your config will work without changes:
 ## Automatic Detection
 
 SomeWM will automatically detect and skip configs that contain X11-specific code. If your config is skipped, SomeWM will show a notification explaining which X11 pattern was detected and suggest alternatives.
+
+If you share a config between AwesomeWM and SomeWM, you can detect which compositor is running:
+
+```lua
+local is_somewm = awesome.release == "somewm"
+
+if is_somewm then
+    awful.spawn("grim ~/screenshot.png")
+else
+    awful.spawn("scrot ~/screenshot.png")
+end
+```
 
 ## Testing Your Config
 
