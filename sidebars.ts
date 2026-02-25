@@ -29,7 +29,9 @@ const sidebars: SidebarsConfig = {
       label: 'How-To Guides',
       items: [
         'guides/autostart',
+        'guides/client-rules',
         'guides/cli-control',
+        'guides/debugging',
         'guides/fractional-scaling',
         'guides/input-devices',
         'guides/keyboard-layouts',
