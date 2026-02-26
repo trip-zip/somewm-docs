@@ -290,6 +290,24 @@ ruled.client.append_rule {
 }
 ```
 
+### Send New Windows to the Stack
+
+By default, new windows become the master window, pushing everything else down. Most people expect the opposite. Add a callback to your default rule so new windows go to the stack instead:
+
+```lua
+ruled.client.append_rule {
+    rule = {},
+    properties = {
+        -- your existing default properties
+    },
+    callback = function(c)
+        c:to_secondary_section()
+    end,
+}
+```
+
+See [Master and Stack](/concepts/master-and-stack) for the full explanation of how client list order determines layout position.
+
 ## Complete Example
 
 A realistic set of rules for a development setup:
@@ -309,6 +327,8 @@ ruled.client.connect_signal("request::rules", function()
             placement = awful.placement.no_overlap + awful.placement.no_offscreen,
             border_width = 2,
         },
+        -- New windows go to the stack instead of becoming master
+        callback = function(c) c:to_secondary_section() end,
     }
 
     -- Float all dialogs
@@ -411,6 +431,7 @@ Rules are applied in order. If a later rule sets the same property, it wins. Che
 
 ## See Also
 
+- **[Master and Stack](/concepts/master-and-stack)** - How layout order and master/stack sections work
 - **[Notifications](/guides/notifications)** - Uses `ruled.notification` with the same pattern
 - **[Multi-Monitor](/guides/multi-monitor)** - Screen-specific placement rules
 - **[Shadows](/guides/shadows)** - Per-app shadow rules
