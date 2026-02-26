@@ -55,6 +55,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'reference/awful/index',
             'reference/awful/input',
+            'reference/awful/screenshot',
           ],
         },
         {
@@ -97,6 +98,7 @@ const sidebars: SidebarsConfig = {
         'concepts/client-stack',
         'concepts/master-and-stack',
         'concepts/focus-history',
+        'concepts/screenshots',
         'concepts/scene-graph',
         'concepts/awesomewm-compat',
       ],

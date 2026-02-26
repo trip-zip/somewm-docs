@@ -8,9 +8,103 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Screenshots
 
-SomeWM provides built-in screenshot support via `somewm-client`, and you can also use external Wayland-native tools like grim and slurp.
+SomeWM provides built-in screenshot support through `awful.screenshot` (interactive region selection), `somewm-client` (CLI), and external Wayland-native tools like grim and slurp.
 
-## Method 1: somewm-client <SomewmOnly />
+## Method 1: awful.screenshot (Interactive)
+
+`awful.screenshot` provides a built-in interactive snipping tool. It captures the desktop, shows an overlay, and lets you draw a selection rectangle.
+
+### Basic Usage
+
+```lua
+awful.key({ modkey }, "Print", function()
+    local s = awful.screenshot({ interactive = true })
+    s:refresh()
+end, { description = "interactive screenshot", group = "screenshot" }),
+```
+
+This captures the screen, shows it as a fullscreen overlay, and lets you drag a rectangle. The screenshot saves to `$HOME` by default.
+
+### Customizing Save Location
+
+```lua
+awful.key({ modkey }, "Print", function()
+    local s = awful.screenshot({
+        interactive = true,
+        directory = os.getenv("HOME") .. "/Pictures/screenshots/",
+        prefix = "shot",
+    })
+    s:refresh()
+end, { description = "interactive screenshot", group = "screenshot" }),
+```
+
+### Smooth Interactive Mode on HiDPI
+
+On HiDPI displays, the default overlay repaints the full captured image on every mouse move, which can be slow. A faster approach: hide the screenshot background and show only a dimmed overlay over the live desktop. The final crop still uses the pre-captured surface, so image quality is unaffected.
+
+```lua
+awful.key({ modkey }, "Print", function()
+    local s = awful.screenshot({ interactive = true })
+    s:connect_signal("snipping::start", function(self)
+        if self._private.frame then
+            -- Hide the screenshot background, show selection over live desktop
+            self._private.imagebox.visible = false
+            self._private.frame.bg = "#00000040"
+            self._private.frame.surface_scale = 1.0
+        end
+    end)
+    s:refresh()
+end, { description = "interactive screenshot", group = "screenshot" }),
+```
+
+Why this works:
+
+- `imagebox.visible = false` prevents expensive image repaints on every mouse move
+- `bg = "#00000040"` adds a semi-transparent dim so the selection rectangle is visible against the live desktop
+- `surface_scale = 1.0` keeps even the dim overlay redraws cheap (no HiDPI upscaling)
+- `accept()` still crops from the pre-captured surface, so the saved screenshot is full quality
+
+### Notifications on Save
+
+```lua
+awful.key({ modkey }, "Print", function()
+    local s = awful.screenshot({
+        interactive = true,
+        directory = os.getenv("HOME") .. "/Pictures/screenshots/",
+    })
+    s:connect_signal("snipping::start", function(self)
+        if self._private.frame then
+            self._private.imagebox.visible = false
+            self._private.frame.bg = "#00000040"
+            self._private.frame.surface_scale = 1.0
+        end
+    end)
+    s:connect_signal("file::saved", function(self, path)
+        naughty.notify {
+            title = "Screenshot saved",
+            text = path,
+            timeout = 3,
+        }
+    end)
+    s:refresh()
+end, { description = "interactive screenshot", group = "screenshot" }),
+```
+
+### Delayed Capture
+
+Use `auto_save_delay` to wait before entering interactive mode (useful for capturing menus):
+
+```lua
+local s = awful.screenshot({
+    interactive = true,
+    auto_save_delay = 3,
+})
+s:connect_signal("timer::tick", function(self, remaining)
+    naughty.notify { title = "Screenshot in " .. remaining .. "s", timeout = 1 }
+end)
+```
+
+## Method 2: somewm-client <SomewmOnly />
 
 The simplest method - use `somewm-client screenshot`:
 
@@ -31,7 +125,7 @@ This captures the focused screen and saves to the specified path (or a default l
 awful.spawn("somewm-client screenshot ~/Pictures/screenshot.png")
 ```
 
-## Method 2: grim + slurp (Recommended)
+## Method 3: grim + slurp
 
 For more flexibility, use the external Wayland-native tools:
 
@@ -273,5 +367,7 @@ wl-paste  # Should print "test"
 
 ## See Also
 
+- **[Screenshots Concepts](/concepts/screenshots)** - How the capture pipeline works
+- **[awful.screenshot Reference](/reference/awful/screenshot)** - Full API documentation
 - **[CLI Control](/guides/cli-control)** - More somewm-client commands
 - **[Keybindings](/tutorials/keybindings)** - Setting up keybindings

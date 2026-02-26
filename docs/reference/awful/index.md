@@ -27,6 +27,7 @@ The `awful` library is the core of AwesomeWM's window management functionality. 
 | `awful.spawn` | Launch applications |
 | `awful.prompt` | Input prompts |
 | `awful.menu` | Context menus |
+| [awful.screenshot](./screenshot) | Screenshot capture and interactive snipping |
 
 ## SomeWM Extensions
 
