@@ -161,6 +161,7 @@ Compositor-level shadows for windows and wiboxes. See [Shadows Reference](/refer
 | `shadow_offset_y` | integer | `-15` | Vertical offset (negative = up) |
 | `shadow_opacity` | number | `0.75` | Shadow opacity (0.0-1.0) |
 | `shadow_color` | string | `"#000000"` | Shadow color as hex |
+| `shadow_clip` | boolean/string | `true` | Only show shadow on offset side |
 | `shadow_drawin_enabled` | boolean | (inherits) | Enable shadows for wiboxes |
 | `shadow_drawin_radius` | integer | (inherits) | Blur radius for wiboxes |
 | `shadow_drawin_offset_x` | integer | (inherits) | Horizontal offset for wiboxes |

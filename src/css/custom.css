@@ -126,3 +126,21 @@ table tr:last-child td {
 .markdown a:hover {
   text-decoration: underline;
 }
+
+/* Compact footer */
+.footer {
+  --ifm-footer-padding-vertical: 1.25rem;
+}
+
+.footer__links {
+  margin-bottom: 0.5rem;
+}
+
+.footer__copyright {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.footer__link-separator {
+  opacity: 0.4;
+}

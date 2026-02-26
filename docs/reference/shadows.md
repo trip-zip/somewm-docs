@@ -10,7 +10,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 SomeWM provides built-in compositor-level shadows for windows and wiboxes. This replaces the need for external compositors like picom, which only work on X11.
 
-Shadows are rendered using Cairo with a box blur approximation of Gaussian blur, displayed via the wlroots scene graph. They support full customization including color, blur radius, offset, and opacity.
+Shadows are rendered using a smoothstep gradient falloff, displayed via the wlroots scene graph. They support full customization including color, blur radius, offset, and opacity.
 
 :::note What gets shadows?
 This feature applies to **clients** (application windows) and **drawins/wiboxes** (containers like panels and popups). Individual widgets inside a wibox do not get separate shadows. For widget-level shadow effects, use Lua/Cairo drawing techniques.
@@ -32,6 +32,7 @@ These control shadows for application windows (clients):
 | `shadow_offset_y` | integer | `-15` | Vertical offset (negative = up/behind window) |
 | `shadow_opacity` | number | `0.75` | Shadow opacity (0.0 = invisible, 1.0 = solid) |
 | `shadow_color` | string | `"#000000"` | Shadow color as hex string |
+| `shadow_clip` | boolean/string | `true` | Only show shadow on offset side (`true`, `false`, or `"directional"`) |
 
 ### Drawin/Wibox Shadow Variables
 
@@ -87,6 +88,7 @@ When set to a table, you can override individual shadow parameters:
 | `offset_y` | integer | Vertical offset |
 | `opacity` | number | Shadow opacity (0.0-1.0) |
 | `color` | string or table | Color as `"#RRGGBB"` string or `{r, g, b, a}` table (values 0.0-1.0) |
+| `clip_directional` | boolean | Only show shadow on the offset side (default: `true`) |
 
 **Examples:**
 
@@ -225,17 +227,26 @@ ruled.client.append_rule {
 Use `somewm-client` to control shadows at runtime:
 
 ```bash
-# Enable shadows on all clients
+# Enable shadows on all clients (uses theme defaults)
 somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = true end'
 
-# Set a specific color
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { color = "#888888" } end'
+# Classic drop shadow (bottom-right)
+somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { offset_x = 8, offset_y = 8, radius = 12, opacity = 0.6, clip_directional = true } end'
+
+# Soft halo (all sides)
+somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { offset_x = 0, offset_y = 0, radius = 24, opacity = 0.5, clip_directional = false } end'
+
+# Blue glow
+somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { color = "#3399FF", radius = 20, opacity = 0.6, offset_x = 0, offset_y = 0, clip_directional = false } end'
+
+# Tight, sharp shadow
+somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { radius = 4, offset_x = 3, offset_y = 3, opacity = 0.9, clip_directional = true } end'
+
+# Wibar panel shadow (downward)
+somewm-client eval 'for s in screen do if s.mywibox then s.mywibox.shadow = { radius = 12, offset_x = 0, offset_y = 4, opacity = 0.7, clip_directional = true } end end'
 
 # Disable shadows
 somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = false end'
-
-# Fun: rainbow effect on focused client
-somewm-client eval 'client.focus.shadow = { color = "#FF00FF", radius = 20, opacity = 0.8 }'
 ```
 
 ## Complete Example
@@ -289,8 +300,8 @@ ruled.client.append_rule {
 ## Technical Notes
 
 - Shadows are rendered using a 9-slice technique: 4 corners and 4 edges, allowing efficient resizing
-- Shadow textures are cached based on radius, color, and opacity to avoid redundant rendering
-- The blur is a 3-pass box blur approximation of Gaussian blur
+- Each shadow renders its own gradient textures (4 corners + 2 edges + 1 fill pixel, ~2.5KB total)
+- The falloff uses a smoothstep function that visually approximates Gaussian blur
 - Shadow nodes are placed below content in the wlroots scene graph
 
 ## See Also

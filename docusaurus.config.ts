@@ -82,42 +82,14 @@ const config: Config = {
     footer: {
       style: 'dark',
       links: [
-        {
-          title: 'Documentation',
-          items: [
-            {label: 'Getting Started', to: '/getting-started/installation'},
-            {label: 'Tutorials', to: '/tutorials/basics'},
-            {label: 'Reference', to: '/reference/lua-libraries'},
-          ],
-        },
-        {
-          title: 'Community',
-          items: [
-            {
-              label: 'GitHub Discussions',
-              href: 'https://github.com/trip-zip/somewm/discussions',
-            },
-            {
-              label: 'AwesomeWM Community',
-              href: 'https://awesomewm.org/community/',
-            },
-          ],
-        },
-        {
-          title: 'More',
-          items: [
-            {
-              label: 'Source Code',
-              href: 'https://github.com/trip-zip/somewm',
-            },
-            {
-              label: 'AwesomeWM Docs',
-              href: 'https://awesomewm.org/doc/api/',
-            },
-          ],
-        },
+        {label: 'Getting Started', to: '/getting-started/installation'},
+        {label: 'Tutorials', to: '/tutorials/basics'},
+        {label: 'Reference', to: '/reference/lua-libraries'},
+        {label: 'Discussions', href: 'https://github.com/trip-zip/somewm/discussions'},
+        {label: 'AwesomeWM', href: 'https://awesomewm.org/community/'},
+        {label: 'Source Code', href: 'https://github.com/trip-zip/somewm'},
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} SomeWM Contributors. Built with Docusaurus.`,
+      copyright: `© ${new Date().getFullYear()} SomeWM Contributors`,
     },
     prism: {
       theme: prismThemes.github,

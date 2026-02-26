@@ -67,6 +67,22 @@ theme.shadow_offset_x = 10
 theme.shadow_offset_y = 10
 ```
 
+By default, shadows are clipped to only appear on the offset side (`shadow_clip = true`). This prevents shadows from showing on both sides of the window. To show a full shadow on all sides, disable clipping:
+
+```lua
+theme.shadow_clip = false
+```
+
+Or control it per-window:
+
+```lua
+c.shadow = {
+    offset_x = -15,
+    offset_y = -15,
+    clip_directional = false  -- Show shadow on all sides
+}
+```
+
 ## Using Colored Shadows
 
 Shadows don't have to be black! Create glow effects or match your color scheme:
@@ -251,6 +267,108 @@ local popup = wibox {
 }
 ```
 
+## Shadow Recipes
+
+Tested configurations you can copy directly into your setup.
+
+### Classic Drop Shadow
+
+A traditional shadow cast to the bottom-right, as if the light source is at the top-left:
+
+```lua
+-- In theme.lua
+theme.shadow_enabled = true
+theme.shadow_radius = 12
+theme.shadow_offset_x = 8
+theme.shadow_offset_y = 8
+theme.shadow_opacity = 0.6
+
+-- Or per-window
+c.shadow = {
+    radius = 12,
+    offset_x = 8,
+    offset_y = 8,
+    opacity = 0.6,
+    clip_directional = true
+}
+```
+
+### Soft Halo
+
+An even glow on all sides, giving windows a floating appearance:
+
+```lua
+-- In theme.lua
+theme.shadow_enabled = true
+theme.shadow_radius = 24
+theme.shadow_offset_x = 0
+theme.shadow_offset_y = 0
+theme.shadow_opacity = 0.5
+theme.shadow_clip = false
+
+-- Or per-window
+c.shadow = {
+    radius = 24,
+    offset_x = 0,
+    offset_y = 0,
+    opacity = 0.5,
+    clip_directional = false
+}
+```
+
+### Colored Glow
+
+A blue neon glow surrounding the window. Works well as a focused-window indicator:
+
+```lua
+-- Per-window (e.g., in a focus signal handler)
+c.shadow = {
+    color = "#3399FF",
+    radius = 20,
+    offset_x = 0,
+    offset_y = 0,
+    opacity = 0.6,
+    clip_directional = false
+}
+```
+
+### Tight, Sharp Shadow
+
+A small, crisp shadow for a subtle beveled look:
+
+```lua
+-- In theme.lua
+theme.shadow_enabled = true
+theme.shadow_radius = 4
+theme.shadow_offset_x = 3
+theme.shadow_offset_y = 3
+theme.shadow_opacity = 0.9
+
+-- Or per-window
+c.shadow = {
+    radius = 4,
+    offset_x = 3,
+    offset_y = 3,
+    opacity = 0.9,
+    clip_directional = true
+}
+```
+
+### Wibar Panel Shadow
+
+A downward shadow on the top panel, making it float above the desktop:
+
+```lua
+-- In rc.lua, after creating the wibar
+s.mywibox.shadow = {
+    radius = 12,
+    offset_x = 0,
+    offset_y = 4,
+    opacity = 0.7,
+    clip_directional = true
+}
+```
+
 ## Troubleshooting
 
 ### Shadows not appearing
@@ -274,8 +392,8 @@ theme.shadow_color = "red"
 
 ### Performance concerns
 
-Shadow textures are cached, so identical shadow configurations share the same textures. If you notice any performance issues:
-- Reduce `shadow_radius` (smaller blur = faster rendering)
+Shadow textures are tiny (~2.5KB per shadow), so performance impact is minimal. If you notice any issues:
+- Reduce `shadow_radius` (smaller blur = fewer pixels)
 - Lower the number of windows with unique shadow configurations
 
 ## See Also
