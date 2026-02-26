@@ -44,6 +44,8 @@ print(awful.input.pointer_speed)
 | `clickfinger_button_map` | string | nil | Button map for clickfinger mode (see below) |
 | `tap_button_map` | string | nil | Button map for tap-to-click mode (see below) |
 
+For Boolean number arguments (0/1) a value of -1 means leave it untouched (i.e., at the device default).
+
 ### Button Maps
 
 The `tap_button_map` and `clickfinger_button_map` settings control which mouse button is triggered by multi-finger taps/clicks:
