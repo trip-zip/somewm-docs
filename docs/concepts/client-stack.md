@@ -171,6 +171,7 @@ end)
 
 ## See Also
 
+- [Master and Stack](/concepts/master-and-stack) - How tiling layouts divide the screen into primary and secondary sections
 - [Scene Graph](/concepts/scene-graph) - Full compositor layer hierarchy
 - [Focus History](/concepts/focus-history) - What determines focus when a client closes
 - [Object Model](/concepts/object-model) - Understanding clients, tags, screens

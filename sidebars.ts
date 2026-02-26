@@ -95,6 +95,7 @@ const sidebars: SidebarsConfig = {
         'concepts/display-scaling',
         'concepts/wallpaper-caching',
         'concepts/client-stack',
+        'concepts/master-and-stack',
         'concepts/focus-history',
         'concepts/scene-graph',
         'concepts/awesomewm-compat',

@@ -102,7 +102,7 @@ Open a few more terminals with **Mod4 + Enter**. Watch how they automatically ar
    - Show the master-stack layout clearly
 */}
 
-The first window takes the left half (the "master" area), and additional windows stack on the right.
+The first window takes the left half (the "master" area), and additional windows stack on the right. See [Master and Stack](/concepts/master-and-stack) to learn how this works and how to customize it.
 
 ### Switching Focus
 
