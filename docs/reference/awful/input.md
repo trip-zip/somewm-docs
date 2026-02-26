@@ -38,7 +38,7 @@ print(awful.input.pointer_speed)
 | `drag` | number (0/1) | 1 | Enable tap-and-drag |
 | `drag_lock` | number (0/1) | 0 | Enable drag lock |
 | `tap_3fg_drag` | number (0/1) | -1 | Three-finger drag (tap 3 fingers, drag with 1) |
-| `dwt` | number (0/1) | 1 | Disable-while-typing |
+| `disable_while_typing` | number (0/1) | 1 | Disable while typing |
 | `dwtp` | number (0/1) | -1 | Disable touchpad while trackpoint in use (ThinkPad) |
 | `scroll_button_lock` | number (0/1) | -1 | Scroll button toggle vs hold (1=toggle, 0=hold) |
 | `clickfinger_button_map` | string | nil | Button map for clickfinger mode (see below) |
@@ -115,7 +115,7 @@ awful.input.tap_to_click = 1
 awful.input.natural_scrolling = 1
 awful.input.pointer_speed = 0.3
 awful.input.tap_3fg_drag = 1  -- Three-finger drag
-awful.input.dwt = 1   -- Disable touchpad while typing
+awful.input.disable_while_typing = 1   -- Disable touchpad while typing
 awful.input.dwtp = 1  -- Disable touchpad while using trackpoint (ThinkPad)
 
 -- Keyboard settings
