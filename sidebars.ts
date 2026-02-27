@@ -77,6 +77,7 @@ const sidebars: SidebarsConfig = {
           ],
         },
         // SomeWM-specific (alphabetical)
+        'reference/output',
         'reference/default-keybindings',
         'reference/key-names',
         'reference/layer_surface/index',

@@ -1,14 +1,40 @@
 ---
 sidebar_position: 0
 title: The Object Model
-description: Understanding screens, tags, clients, and widgets
+description: Understanding outputs, screens, tags, clients, and widgets
 ---
+
+import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # The Object Model
 
-Understanding SomeWM's object model is the foundation for everything else. Once you grasp how screens, tags, clients, and widgets relate, configuration becomes intuitive.
+Understanding SomeWM's object model is the foundation for everything else. Once you grasp how outputs, screens, tags, clients, and widgets relate, configuration becomes intuitive.
 
 ## The Core Objects
+
+### Output <SomewmOnly />
+
+An **output** represents a physical monitor connector (HDMI-A-1, DP-2, eDP-1). Output objects persist from the moment a monitor is plugged in until it is physically disconnected, even if the display is temporarily disabled.
+
+```lua
+-- Iterate outputs
+for o in output do
+    print(o.name, o.make, o.enabled)
+end
+
+-- Find by connector name
+local hdmi = output.get_by_name("HDMI-A-1")
+
+-- Access from a screen
+local o = screen.primary.output
+```
+
+Each output has:
+- **Hardware info** - make, model, serial, physical size
+- **Display state** - scale, transform, mode, position, enabled
+- **Screen link** - the associated screen object (nil when disabled)
+
+The distinction from screens: a screen is destroyed when a monitor is disabled and recreated when re-enabled. The output object survives that cycle, making it a stable key for per-monitor configuration.
 
 ### Screen
 
@@ -136,21 +162,23 @@ wibox.widget {
 Here's how everything fits together:
 
 ```
-Screen 1                          Screen 2
-├── Tag "1" (selected)            ├── Tag "1"
-│   ├── Client: Firefox           │   └── Client: Slack
-│   └── Client: Terminal          │
-├── Tag "2"                       ├── Tag "2" (selected)
-│   └── Client: VS Code           │   └── Client: Spotify
-├── Tag "3" (empty)               │
-│                                 └── Wibar (top)
-└── Wibar (top)                       └── [widgets...]
-    ├── Taglist widget
-    ├── Tasklist widget
-    └── Clock widget
+Output "HDMI-A-1"                 Output "DP-2"
+└── Screen 1                      └── Screen 2
+    ├── Tag "1" (selected)            ├── Tag "1"
+    │   ├── Client: Firefox           │   └── Client: Slack
+    │   └── Client: Terminal          │
+    ├── Tag "2"                       ├── Tag "2" (selected)
+    │   └── Client: VS Code           │   └── Client: Spotify
+    ├── Tag "3" (empty)               │
+    │                                 └── Wibar (top)
+    └── Wibar (top)                       └── [widgets...]
+        ├── Taglist widget
+        ├── Tasklist widget
+        └── Clock widget
 ```
 
 Key points:
+- Each **output** has zero or one screen (zero when disabled)
 - Each **screen** has its own tags and wibars
 - Each **tag** belongs to exactly one screen
 - Each **client** belongs to one screen but can have multiple tags
@@ -212,6 +240,9 @@ client.get()
 -- All screens
 for s in screen do ... end
 
+-- All outputs
+for o in output do ... end
+
 -- Primary screen
 screen.primary
 
@@ -235,6 +266,7 @@ c.first_tag       -- the first tag (useful for single-tag clients)
 ```lua
 local s = awful.screen.focused()
 
+s.output          -- the backing output object (SomeWM only)
 s.tags            -- all tags for this screen
 s.selected_tags   -- currently visible tags
 s.clients         -- all clients on this screen
@@ -279,10 +311,12 @@ Common signals:
 
 | Object | Signal | When |
 |--------|--------|------|
+| output | `added` / `removed` | Monitor plugged/unplugged |
+| output | `property::scale` | Display scale changed |
+| screen | `added` / `removed` | Screen created/destroyed |
 | client | `manage` | New client created |
 | client | `focus` / `unfocus` | Focus changes |
 | client | `property::name` | Window title changes |
-| screen | `added` / `removed` | Monitor (dis)connected |
 | tag | `property::selected` | Tag visibility changes |
 
 ## Next Steps

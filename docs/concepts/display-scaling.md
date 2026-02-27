@@ -150,14 +150,24 @@ Multiple monitors with different pixel densities are challenging:
 
 ### SomeWM's Approach
 
-Each screen has its own `scale` property:
+Each screen has its own `scale` property. Under the hood, `screen.scale` delegates to `output.scale` on the backing [output](/reference/output) object, keeping a single source of truth:
 
 ```lua
 awful.screen.connect_for_each_screen(function(s)
     if s.geometry.width > 3000 then
-        s.scale = 1.5
+        s.scale = 1.5   -- equivalent to s.output.scale = 1.5
     else
         s.scale = 1.0
+    end
+end)
+```
+
+You can also configure scale on the output directly, which is useful in `output.connect_signal("added", ...)` handlers where you want to set scale before the screen is created:
+
+```lua
+output.connect_signal("added", function(o)
+    if o.name:match("^eDP") then
+        o.scale = 1.5
     end
 end)
 ```
@@ -222,5 +232,6 @@ theme.useless_gap = dpi(4)
 ## See Also
 
 - [Fractional Scaling Guide](/guides/fractional-scaling) - Practical configuration
+- [output Reference](/reference/output) - Output object API (hardware identification, display configuration)
 - [screen Reference](/reference/screen) - API documentation
 - [Wayland vs X11](/concepts/wayland-vs-x11) - Platform differences

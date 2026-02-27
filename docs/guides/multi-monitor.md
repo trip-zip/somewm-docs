@@ -4,6 +4,8 @@ title: Multi-Monitor Setup
 description: Configure multiple screens and outputs
 ---
 
+import SomewmOnly from '@site/src/components/SomewmOnly';
+
 # Multi-Monitor Setup
 
 SomeWM handles multiple monitors automatically. Each monitor becomes a `screen` object with its own tags, wibar, and workspace.
@@ -170,6 +172,72 @@ tag.connect_signal("request::screen", function(t)
 end)
 ```
 
+## Using the Output Object <SomewmOnly />
+
+Every screen has a backing `output` object representing the physical monitor connector. Unlike screens (which are destroyed when a monitor is disabled), output objects persist from plug to unplug.
+
+Access it via `s.output`:
+
+```lua
+local s = screen.primary
+print(s.output.name)   -- "HDMI-A-1"
+print(s.output.make)   -- "Dell" or nil
+print(s.output.model)  -- "U2723QE" or nil
+```
+
+### Configure by Hardware
+
+Use output properties to identify monitors reliably, instead of guessing by geometry or index:
+
+```lua
+output.connect_signal("added", function(o)
+    if o.name:match("^eDP") then
+        o.scale = 1.5  -- Laptop panel
+    elseif o.make == "Dell" and o.model == "U2723QE" then
+        o.scale = 1.25  -- Known external monitor
+    end
+end)
+```
+
+### Persistent Per-Output Config
+
+The output object persists across enable/disable, making it a stable key for configuration. This pattern survives monitor sleep, docking, and undocking:
+
+```lua
+local output_config = {}
+
+output.connect_signal("added", function(o)
+    if o.name:match("^eDP") then
+        output_config[o] = { tags = {"1","2","3","4","5"}, scale = 1.5 }
+    else
+        output_config[o] = { tags = {"web","code","docs"}, scale = 1.0 }
+    end
+    o.scale = output_config[o].scale
+end)
+
+screen.connect_signal("request::desktop_decoration", function(s)
+    local config = output_config[s.output]
+    if config then
+        awful.tag(config.tags, s, awful.layout.suit.tile)
+    end
+end)
+```
+
+### Set Resolution and Transform
+
+```lua
+-- Set resolution
+output.get_by_name("DP-1").mode = { width = 2560, height = 1440 }
+
+-- Rotate a portrait monitor
+output.get_by_name("DP-2").transform = "90"
+
+-- Position monitors side by side
+output.get_by_name("DP-2").position = { x = 2560, y = 0 }
+```
+
+For more details, see the [output reference](/reference/output).
+
 ## Different Configurations Per Screen
 
 ### Different Tags Per Screen
@@ -297,6 +365,7 @@ ruled.client.append_rule {
 
 ## See Also
 
-- **[The Object Model](/concepts/object-model)** - Understanding screens and clients
+- **[output Reference](/reference/output)** - Output object API (hardware identification, display configuration)
+- **[The Object Model](/concepts/object-model)** - Understanding screens, outputs, and clients
 - **[Fractional Scaling](/guides/fractional-scaling)** - HiDPI configuration per screen
 - **[AwesomeWM Screen Docs](https://awesomewm.org/doc/api/classes/screen.html)** - Full screen API
