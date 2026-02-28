@@ -35,7 +35,7 @@ print(awful.input.pointer_speed)
 | `middle_emulation` | number (0/1) | 0 | Emulate middle button with left+right |
 | `scroll_method` | number | 0 | Scroll method (see below) |
 | `accel_profile` | number | 0 | Acceleration profile (see below) |
-| `drag` | number (0/1) | 1 | Enable tap-and-drag |
+| `tap_and_drag` | number (0/1) | 1 | Enable tap-and-drag |
 | `drag_lock` | number (0/1) | 0 | Enable drag lock |
 | `tap_3fg_drag` | number (0/1) | -1 | Three-finger drag (tap 3 fingers, drag with 1) |
 | `disable_while_typing` | number (0/1) | 1 | Disable while typing |
