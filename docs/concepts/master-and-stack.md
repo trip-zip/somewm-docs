@@ -152,6 +152,8 @@ The [tasklist widget](https://awesomewm.org/apidoc/widgets/awful.widget.tasklist
 
 ## See Also
 
+- [Layout Protocol Reference](/reference/awful/layout) - The `arrange(p)` contract and built-in layouts
+- [Custom Layouts Guide](/guides/custom-layouts) - Write your own tiling layout from scratch
 - [Client Stacking](/concepts/client-stack) - Z-order and visual overlap (different from layout order)
 - [Client Rules](/guides/client-rules) - Automatically set properties when windows open
 - [Focus History](/concepts/focus-history) - What determines focus when a client closes

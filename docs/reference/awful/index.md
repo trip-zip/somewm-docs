@@ -20,7 +20,7 @@ The `awful` library is the core of AwesomeWM's window management functionality. 
 | `awful.key` | Define keyboard shortcuts |
 | `awful.button` | Define mouse bindings |
 | `awful.rules` | Automatic client rules |
-| `awful.layout` | Tiling layouts |
+| [awful.layout](./layout) | Tiling layouts |
 | `awful.tag` | Tag (workspace) management |
 | `awful.client` | Client (window) operations |
 | `awful.screen` | Screen management |

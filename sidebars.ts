@@ -31,6 +31,7 @@ const sidebars: SidebarsConfig = {
         'guides/autostart',
         'guides/client-rules',
         'guides/cli-control',
+        'guides/custom-layouts',
         'guides/debugging',
         'guides/fractional-scaling',
         'guides/input-devices',
@@ -54,6 +55,7 @@ const sidebars: SidebarsConfig = {
           label: 'awful',
           items: [
             'reference/awful/index',
+            'reference/awful/layout',
             'reference/awful/input',
             'reference/awful/screenshot',
           ],
