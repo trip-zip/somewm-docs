@@ -206,5 +206,6 @@ end
 
 - [Fractional Scaling Guide](/guides/fractional-scaling) - Configure HiDPI displays
 - [Multi-Monitor Setup](/guides/multi-monitor) - Per-screen configuration
+- [Tag Persistence](/concepts/tag-persistence) - How tags survive monitor hotplug
 - [Display Scaling Concepts](/concepts/display-scaling) - How scaling works
 - [Object Model](/concepts/object-model) - How screens relate to tags and clients

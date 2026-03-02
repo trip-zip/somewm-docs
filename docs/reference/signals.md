@@ -44,6 +44,7 @@ SomeWM uses signals for event-driven programming. Connect to signals to react to
 |--------|-----------|-------------|
 | `added` | `s` | New screen connected |
 | `removed` | `s` | Screen disconnected |
+| `request::desktop_decoration` | `s` | Screen needs tags and wibars. See [Tag Persistence](/reference/tag-persistence) |
 | `property::geometry` | `s` | Screen geometry changed |
 | `property::workarea` | `s` | Workarea changed |
 | `property::scale` | `s` | Output scale changed <SomewmOnly /> |
@@ -53,6 +54,7 @@ SomeWM uses signals for event-driven programming. Connect to signals to react to
 
 | Signal | Arguments | Description |
 |--------|-----------|-------------|
+| `request::screen` | `t, reason` | Tag's screen removed, needs new home. See [Tag Persistence](/reference/tag-persistence) |
 | `property::selected` | `t` | Tag selection changed |
 | `property::activated` | `t` | Tag activated/deactivated |
 | `tagged` | `t, c` | Client added to tag |

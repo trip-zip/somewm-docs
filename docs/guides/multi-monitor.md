@@ -365,6 +365,7 @@ ruled.client.append_rule {
 
 ## See Also
 
+- **[Tag Persistence](/guides/tag-persistence)** - Save and restore tags across hotplug
 - **[output Reference](/reference/output)** - Output object API (hardware identification, display configuration)
 - **[The Object Model](/concepts/object-model)** - Understanding screens, outputs, and clients
 - **[Fractional Scaling](/guides/fractional-scaling)** - HiDPI configuration per screen

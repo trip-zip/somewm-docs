@@ -83,4 +83,5 @@ end)
 
 ## See Also
 
+- [Tag Persistence](/concepts/tag-persistence) - How SomeWM handles monitor hotplug differently
 - [AwesomeWM Compatibility](/concepts/awesomewm-compat) - Full compatibility matrix
