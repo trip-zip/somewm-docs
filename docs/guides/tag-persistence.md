@@ -8,35 +8,37 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Tag Persistence <SomewmOnly />
 
-SomeWM's default config saves tag state when a monitor disconnects and restores it when the monitor reconnects. This guide shows how to customize that behavior.
+SomeWM's default config saves tag state when a monitor disconnects and restores it when the monitor reconnects. You can customize what gets saved, key by monitor identity instead of connector name, or disable persistence entirely.
 
 ## How the Default Config Works
 
-The default `somewmrc.lua` handles two signals:
+Tag persistence uses two signals with handlers in two different places:
 
-1. **`tag` `request::screen`** fires when a screen is removed. The handler saves each tag's metadata keyed by connector name.
-2. **`screen` `request::desktop_decoration`** fires when a screen is added. The handler checks for saved state and restores tags instead of creating defaults.
+1. **`tag` `request::screen`** fires when a screen is removed. The default handler is `awful.permissions.tag_screen`, which is connected automatically when `awful.permissions` is loaded. It saves each tag's metadata into `awful.permissions.saved_tags`, keyed by connector name.
+2. **`screen` `request::desktop_decoration`** fires when a screen is added. The handler in `somewmrc.lua` checks `awful.permissions.saved_tags` for saved state and restores tags instead of creating defaults.
 
 This means unplugging and replugging a monitor restores your tag names, layouts, and window placement automatically.
 
 ## Save Additional Properties
 
-The default config saves a core set of properties. To save additional state, add fields to the save table in `request::screen` and apply them in `request::desktop_decoration`.
+The default save handler (`awful.permissions.tag_screen`) saves a core set of properties. To save additional state, disconnect the default handler, connect a replacement that saves extra fields into `awful.permissions.saved_tags`, and update the restore handler in `request::desktop_decoration` to apply them.
 
 For example, to also save `column_count` and `volatile`:
 
 ```lua
-local _saved_tags = {}
+-- Disconnect the default save handler
+tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
 
+-- Connect a replacement that saves extra fields
 tag.connect_signal("request::screen", function(t, reason)
     if reason ~= "removed" then return end
     local s = t.screen
     local output_name = s and s.output and s.output.name
     if not output_name then return end
-    if not _saved_tags[output_name] then
-        _saved_tags[output_name] = {}
+    if not awful.permissions.saved_tags[output_name] then
+        awful.permissions.saved_tags[output_name] = {}
     end
-    table.insert(_saved_tags[output_name], {
+    table.insert(awful.permissions.saved_tags[output_name], {
         name = t.name,
         selected = t.selected,
         layout = t.layout,
@@ -50,14 +52,16 @@ tag.connect_signal("request::screen", function(t, reason)
 end)
 ```
 
-Then in the restore handler:
+Then in the restore handler, use a two-pass approach so clients on multiple tags keep their full tag list:
 
 ```lua
 screen.connect_signal("request::desktop_decoration", function(s)
     local output_name = s.output and s.output.name
-    local restore = output_name and _saved_tags[output_name]
+    local restore = output_name and awful.permissions.saved_tags[output_name]
     if restore then
-        _saved_tags[output_name] = nil
+        awful.permissions.saved_tags[output_name] = nil
+        -- Pass 1: recreate tags and build per-client tag lists
+        local client_tags = {}
         for _, td in ipairs(restore) do
             local t = awful.tag.add(td.name, {
                 screen = s,
@@ -71,10 +75,17 @@ screen.connect_signal("request::desktop_decoration", function(s)
             })
             for _, c in ipairs(td.clients) do
                 if c.valid then
-                    c:move_to_screen(s)
-                    c:tags({t})
+                    if not client_tags[c] then
+                        client_tags[c] = {}
+                    end
+                    table.insert(client_tags[c], t)
                 end
             end
+        end
+        -- Pass 2: move clients and assign full tag lists
+        for c, tags in pairs(client_tags) do
+            c:move_to_screen(s)
+            c:tags(tags)
         end
     else
         awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
@@ -86,9 +97,12 @@ end)
 
 ## Disable Tag Persistence
 
-To opt out entirely, remove the `request::screen` handler from your config and use a plain `request::desktop_decoration` that always creates fresh tags:
+To opt out entirely, disconnect the default save handler and use a plain `request::desktop_decoration` that always creates fresh tags:
 
 ```lua
+-- Disconnect the default save handler
+tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
+
 screen.connect_signal("request::desktop_decoration", function(s)
     awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
     -- ... wibar setup
@@ -99,14 +113,15 @@ Without a `request::screen` handler, disconnected tags are simply dropped, match
 
 ## Persist Different Tags Per Output
 
-You can combine tag persistence with per-output tag names. The restore handler runs first, so only new (never-seen) outputs get custom defaults:
+You can combine tag persistence with per-output tag names. The restore handler checks `awful.permissions.saved_tags` first, so only new (never-seen) outputs get custom defaults:
 
 ```lua
 screen.connect_signal("request::desktop_decoration", function(s)
     local output_name = s.output and s.output.name
-    local restore = output_name and _saved_tags[output_name]
+    local restore = output_name and awful.permissions.saved_tags[output_name]
     if restore then
-        _saved_tags[output_name] = nil
+        awful.permissions.saved_tags[output_name] = nil
+        local client_tags = {}
         for _, td in ipairs(restore) do
             local t = awful.tag.add(td.name, {
                 screen = s,
@@ -116,10 +131,16 @@ screen.connect_signal("request::desktop_decoration", function(s)
             })
             for _, c in ipairs(td.clients) do
                 if c.valid then
-                    c:move_to_screen(s)
-                    c:tags({t})
+                    if not client_tags[c] then
+                        client_tags[c] = {}
+                    end
+                    table.insert(client_tags[c], t)
                 end
             end
+        end
+        for c, tags in pairs(client_tags) do
+            c:move_to_screen(s)
+            c:tags(tags)
         end
     elseif output_name and output_name:match("^eDP") then
         -- Laptop screen: work-focused tags
@@ -135,7 +156,7 @@ end)
 
 ## Match by Monitor Identity Instead of Connector
 
-The default config keys saved state by connector name (`HDMI-A-1`). If you use a USB-C dock where connector names can change, you can key by a combination of make, model, and serial instead:
+The default handler keys saved state by connector name (`HDMI-A-1`). If you use a USB-C dock where connector names can change, you can disconnect the default handler and key by a combination of make, model, and serial instead:
 
 ```lua
 local function output_key(s)
@@ -147,14 +168,18 @@ local function output_key(s)
     return o.name
 end
 
+-- Disconnect the default save handler
+tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
+
+-- Connect a replacement that keys by monitor identity
 tag.connect_signal("request::screen", function(t, reason)
     if reason ~= "removed" then return end
     local key = output_key(t.screen)
     if not key then return end
-    if not _saved_tags[key] then
-        _saved_tags[key] = {}
+    if not awful.permissions.saved_tags[key] then
+        awful.permissions.saved_tags[key] = {}
     end
-    table.insert(_saved_tags[key], {
+    table.insert(awful.permissions.saved_tags[key], {
         name = t.name,
         selected = t.selected,
         layout = t.layout,
@@ -167,9 +192,9 @@ end)
 
 screen.connect_signal("request::desktop_decoration", function(s)
     local key = output_key(s)
-    local restore = key and _saved_tags[key]
+    local restore = key and awful.permissions.saved_tags[key]
     if restore then
-        _saved_tags[key] = nil
+        awful.permissions.saved_tags[key] = nil
         -- ... restore tags as shown above
     else
         awful.tag({ "1", "2", "3", "4", "5" }, s, awful.layout.layouts[1])
