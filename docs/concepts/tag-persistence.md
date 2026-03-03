@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Tag Persistence <SomewmOnly />
 
-When you unplug a monitor and plug it back in, SomeWM's default config restores the tags that were on it: same names, same layouts, same clients. This page explains why this matters on Wayland and how it works.
+When you unplug a monitor and plug it back in, SomeWM's default config restores the tags that were on it: same names, same layouts, same clients.
 
 ## The Problem: Hotplug on Wayland
 
@@ -25,7 +25,7 @@ Each of these events destroys the `screen` object and all its tags. When the mon
 
 ## The Save/Restore Cycle
 
-The default `somewmrc.lua` uses two signals to save and restore tag state:
+Two signals drive the save/restore cycle. The save handler (`awful.permissions.tag_screen`) lives in `awful.permissions` and is connected automatically. The restore handler lives in `somewmrc.lua`'s `request::desktop_decoration`:
 
 ```
 Monitor disconnects        Monitor reconnects
@@ -82,7 +82,7 @@ This means:
 
 - **Connector name only.** State is not matched by monitor make/model/serial. If you move a monitor to a different port, the saved state won't follow it.
 - **In-memory only.** State does not persist across compositor restarts. Restarting SomeWM starts fresh.
-- **Default config feature.** Tag persistence is implemented in `somewmrc.lua`, not in the C core. Custom configs that override `request::screen` or `request::desktop_decoration` must implement their own persistence if desired.
+- **Default config feature.** The save handler lives in `awful.permissions` (connected automatically), and the restore handler lives in `somewmrc.lua`. Both are in Lua, not the C core. Custom configs that disconnect the default `request::screen` handler or override `request::desktop_decoration` must implement their own persistence if desired.
 
 ## See Also
 

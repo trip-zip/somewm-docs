@@ -54,7 +54,7 @@ SomeWM uses signals for event-driven programming. Connect to signals to react to
 
 | Signal | Arguments | Description |
 |--------|-----------|-------------|
-| `request::screen` | `t, reason` | Tag's screen removed, needs new home. See [Tag Persistence](/reference/tag-persistence) |
+| `request::screen` | `t, reason` | Tag's screen removed, needs new home. Default handler: `awful.permissions.tag_screen`. See [Tag Persistence](/reference/tag-persistence) |
 | `property::selected` | `t` | Tag selection changed |
 | `property::activated` | `t` | Tag activated/deactivated |
 | `tagged` | `t, c` | Client added to tag |

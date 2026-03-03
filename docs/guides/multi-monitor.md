@@ -156,9 +156,12 @@ screen.connect_signal("removed", function(s)
 end)
 ```
 
-By default, windows from a removed screen migrate to another available screen. You can customize this:
+By default, windows from a removed screen migrate to another available screen via `awful.permissions.tag_screen`, which saves tag state for later restoration. You can replace this with custom migration logic:
 
 ```lua
+-- Disconnect the default save handler
+tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
+
 -- Custom handling for screen removal
 tag.connect_signal("request::screen", function(t)
     -- Called when a tag's screen is removed
