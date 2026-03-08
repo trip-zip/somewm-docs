@@ -73,6 +73,12 @@ Available properties: `tap_to_click`, `natural_scrolling`, `pointer_speed`, `scr
 | `screenshot` | Take full screenshot |
 | `screenshot <filename>` | Save screenshot to file |
 
+## Session Commands {#session-commands}
+
+| Command | Description |
+|---------|-------------|
+| `lock` | Lock the session |
+
 ## Examples
 
 ```bash
@@ -96,6 +102,9 @@ somewm-client eval "return client.focus and client.focus.name"
 
 # View tag 3
 somewm-client tag viewidx 3
+
+# Lock the session
+somewm-client lock
 ```
 
 ## Exit Codes

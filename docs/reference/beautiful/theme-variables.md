@@ -169,6 +169,20 @@ Compositor-level shadows for windows and wiboxes. See [Shadows Reference](/refer
 | `shadow_drawin_opacity` | number | (inherits) | Opacity for wiboxes |
 | `shadow_drawin_color` | string | (inherits) | Color for wiboxes |
 
+## Lockscreen <SomewmOnly />
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `lockscreen_bg_color` | string | `"#1a1a2e"` | Lock screen background color |
+| `lockscreen_fg_color` | string | `"#e0e0e0"` | Lock screen text color |
+| `lockscreen_input_bg` | string | `"#2a2a4e"` | Password input background |
+| `lockscreen_border_color` | string | `"#4a4a6e"` | Input box border color |
+| `lockscreen_error_color` | string | `"#ff6b6b"` | Error message color |
+| `lockscreen_font` | string | (inherits `font`) | Lock screen text font |
+| `lockscreen_font_large` | string | `"sans bold 48"` | Clock display font |
+| `lockscreen_clock_format` | string | `"%H:%M"` | Clock format (strftime) |
+| `lockscreen_date_format` | string | `"%A, %B %d"` | Date format (strftime) |
+
 ## Layout Icons
 
 | Variable | Description |

@@ -41,8 +41,8 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 |------------|--------|
 | `Mod4 + Space` | Next layout |
 | `Mod4 + Shift + Space` | Previous layout |
-| `Mod4 + l` | Increase master width |
 | `Mod4 + h` | Decrease master width |
+| `Mod4 + l` | Increase master width |
 | `Mod4 + Shift + h` | Increase master count |
 | `Mod4 + Shift + l` | Decrease master count |
 
@@ -80,6 +80,7 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 
 | Keybinding | Action |
 |------------|--------|
+| `Mod4 + Shift + Escape` | Lock screen |
 | `Mod4 + Ctrl + r` | Reload configuration |
 | `Mod4 + Shift + q` | Quit SomeWM |
 

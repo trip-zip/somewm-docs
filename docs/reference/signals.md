@@ -71,6 +71,34 @@ SomeWM uses signals for event-driven programming. Connect to signals to react to
 
 See [layer_surface reference](/reference/layer_surface/) for details.
 
+## Lock Signals <SomewmOnly />
+
+| Signal | Arguments | Description |
+|--------|-----------|-------------|
+| `lock::activate` | source (string) | Session locked |
+| `lock::deactivate` | none | Session unlocked |
+| `lock::auth_failed` | none | Password authentication failed |
+
+See [Lock, Idle, and DPMS reference](/reference/lock) for details.
+
+## Idle Signals <SomewmOnly />
+
+| Signal | Arguments | Description |
+|--------|-----------|-------------|
+| `idle::start` | none | User became idle (first timeout fired) |
+| `idle::stop` | none | User activity detected after being idle |
+
+See [Lock, Idle, and DPMS reference](/reference/lock) for details.
+
+## DPMS Signals <SomewmOnly />
+
+| Signal | Arguments | Description |
+|--------|-----------|-------------|
+| `dpms::off` | none | At least one display entered sleep mode |
+| `dpms::on` | none | At least one display woke up |
+
+See [Lock, Idle, and DPMS reference](/reference/lock) for details.
+
 ## Global Signals
 
 | Signal | Description |

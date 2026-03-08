@@ -180,6 +180,14 @@ somewm-client screenshot
 somewm-client screenshot ~/Pictures/shot.png
 ```
 
+## Session Locking <SomewmOnly />
+
+```bash
+somewm-client lock
+```
+
+This triggers `awesome.lock()` via IPC. Requires a lock surface to be registered (i.e., `require("lockscreen").init()` must have been called in rc.lua).
+
 ## Lua Evaluation
 
 Run arbitrary Lua code in SomeWM's context:
