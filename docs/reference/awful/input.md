@@ -20,7 +20,7 @@ awful.input.tap_to_click = 1
 awful.input.natural_scrolling = 1
 
 -- Get properties
-print(awful.input.pointer_speed)
+print(awful.input.accel_speed)
 ```
 
 ## Pointer Properties
@@ -29,12 +29,12 @@ print(awful.input.pointer_speed)
 |----------|------|---------|-------------|
 | `tap_to_click` | number (0/1) | 0 | Enable tap-to-click on touchpads |
 | `natural_scrolling` | number (0/1) | 0 | Invert scroll direction (macOS-style) |
-| `pointer_speed` | number | 0.0 | Pointer acceleration (-1.0 to 1.0) |
+| `accel_speed` | number | 0.0 | Pointer acceleration (-1.0 to 1.0) |
 | `scroll_button` | number | 0 | Button for scroll-on-button-down |
 | `left_handed` | number (0/1) | 0 | Swap left/right mouse buttons |
-| `middle_emulation` | number (0/1) | 0 | Emulate middle button with left+right |
-| `scroll_method` | number | 0 | Scroll method (see below) |
-| `accel_profile` | number | 0 | Acceleration profile (see below) |
+| `middle_button_emulation` | number (0/1) | 0 | Emulate middle button with left+right |
+| `scroll_method` | string | nil | Scroll method (see below) |
+| `accel_profile` | string | nil | Acceleration profile (see below) |
 | `tap_and_drag` | number (0/1) | 1 | Enable tap-and-drag |
 | `drag_lock` | number (0/1) | 0 | Enable drag lock |
 | `tap_3fg_drag` | number (0/1) | -1 | Three-finger drag (tap 3 fingers, drag with 1) |
@@ -43,6 +43,8 @@ print(awful.input.pointer_speed)
 | `scroll_button_lock` | number (0/1) | -1 | Scroll button toggle vs hold (1=toggle, 0=hold) |
 | `clickfinger_button_map` | string | nil | Button map for clickfinger mode (see below) |
 | `tap_button_map` | string | nil | Button map for tap-to-click mode (see below) |
+| `click_method` | string | nil | Click method: `"none"`, `"button_areas"`, `"clickfinger"` |
+| `send_events_mode` | string | nil | Send events mode: `"enabled"`, `"disabled"`, `"disabled_on_external_mouse"` |
 
 For Boolean number arguments (0/1) a value of -1 means leave it untouched (i.e., at the device default).
 
@@ -69,17 +71,17 @@ The `scroll_button` setting specifies which button activates scroll-on-button mo
 
 | Value | Method |
 |-------|--------|
-| 0 | Default (device-dependent) |
-| 1 | Two-finger scrolling |
-| 2 | Edge scrolling |
-| 3 | Button scrolling |
+| `nil` | Default (device-dependent) |
+| `"two_finger"` | Two-finger scrolling |
+| `"edge"` | Edge scrolling |
+| `"button"` | Button scrolling |
 
 ### Acceleration Profiles
 
 | Value | Profile |
 |-------|---------|
-| 0 | Adaptive (accelerates with speed) |
-| 1 | Flat (constant speed) |
+| `"adaptive"` | Adaptive (accelerates with speed) |
+| `"flat"` | Flat (constant speed) |
 
 ## Keyboard Properties
 
@@ -88,7 +90,7 @@ The `scroll_button` setting specifies which button activates scroll-on-button mo
 | `xkb_layout` | string | "us" | Keyboard layout (e.g., "us", "de", "us,ru") |
 | `xkb_variant` | string | "" | Layout variant (e.g., "dvorak", "colemak") |
 | `xkb_options` | string | "" | XKB options (e.g., "ctrl:nocaps") |
-| `xkb_model` | string | "" | Keyboard model |
+| `numlock` | boolean | - | Toggle NumLock on/off |
 | `keyboard_repeat_rate` | number | 25 | Key repeat rate (keys per second) |
 | `keyboard_repeat_delay` | number | 600 | Delay before repeat starts (milliseconds) |
 
@@ -115,7 +117,7 @@ local awful = require("awful")
 -- Touchpad settings
 awful.input.tap_to_click = 1
 awful.input.natural_scrolling = 1
-awful.input.pointer_speed = 0.3
+awful.input.accel_speed = 0.3
 awful.input.tap_3fg_drag = 1  -- Three-finger drag
 awful.input.disable_while_typing = 1   -- Disable touchpad while typing
 awful.input.dwtp = 1  -- Disable touchpad while using trackpoint (ThinkPad)

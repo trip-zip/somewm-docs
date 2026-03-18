@@ -130,13 +130,13 @@ somewm-client input tap_to_click 1
 somewm-client input natural_scrolling 1
 
 # Pointer speed (-1.0 to 1.0)
-somewm-client input pointer_speed 0.5
+somewm-client input accel_speed 0.5
 
 # Left-handed mode
 somewm-client input left_handed 1
 
-# Scroll method (0 = none, 1 = two-finger, 2 = edge, 3 = button)
-somewm-client input scroll_method 1
+# Scroll method ("two_finger", "edge", "button", or nil for default)
+somewm-client input scroll_method two_finger
 
 # Scroll button (for button scroll)
 somewm-client input scroll_button 274
@@ -166,7 +166,7 @@ somewm-client input xkb_options "ctrl:nocaps"
 ```bash
 # Get current value (no argument)
 somewm-client input tap_to_click
-somewm-client input pointer_speed
+somewm-client input accel_speed
 somewm-client input xkb_layout
 ```
 

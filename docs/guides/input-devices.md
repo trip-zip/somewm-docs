@@ -34,7 +34,7 @@ awful.input.tap_to_click = 1
 awful.input.natural_scrolling = 1
 
 -- Pointer speed (-1.0 to 1.0)
-awful.input.pointer_speed = 0.3
+awful.input.accel_speed = 0.3
 ```
 
 ## Keyboard Settings
