@@ -79,7 +79,8 @@ awesome.unlock()
 | Property | Type | Description |
 |----------|------|-------------|
 | `awesome.idle` | boolean (read-only) | True when the user has been idle long enough to fire at least one timeout |
-| `awesome.idle_inhibited` | boolean (read-only) | True if idle detection is currently inhibited (e.g., by a fullscreen client) |
+| `awesome.idle_inhibit` | boolean (read/write) | Set to true to suppress idle timeouts from Lua. OR-ed with protocol-level inhibitors |
+| `awesome.idle_inhibited` | boolean (read-only) | True if idle is inhibited by any source (protocol inhibitors OR `idle_inhibit`) |
 | `awesome.idle_timeouts` | table (read-only) | Table of `{name = seconds, ...}` for all active timeouts |
 
 ### Signals
@@ -104,6 +105,15 @@ end)
 
 -- Remove a specific timeout
 awesome.clear_idle_timeout("dim")
+
+-- Inhibit idle when any client is fullscreen
+client.connect_signal("property::fullscreen", function()
+    local dominated = false
+    for _, c in ipairs(client.get()) do
+        if c.fullscreen then dominated = true; break end
+    end
+    awesome.idle_inhibit = dominated
+end)
 ```
 
 ## DPMS API

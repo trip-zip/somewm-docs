@@ -96,6 +96,45 @@ awesome.clear_idle_timeout("dim")
 awesome.clear_all_idle_timeouts()
 ```
 
+## Inhibiting Idle
+
+Set `awesome.idle_inhibit = true` to suppress idle timeouts from Lua. This is OR-ed with Wayland protocol inhibitors (e.g., from media players), so both sources must be inactive for idle to resume.
+
+### Inhibit while fullscreen
+
+```lua
+client.connect_signal("property::fullscreen", function()
+    local dominated = false
+    for _, c in ipairs(client.get()) do
+        if c.fullscreen then dominated = true; break end
+    end
+    awesome.idle_inhibit = dominated
+end)
+```
+
+### Inhibit for specific apps
+
+```lua
+client.connect_signal("property::fullscreen", function()
+    local dominated = false
+    for _, c in ipairs(client.get()) do
+        if c.fullscreen and (c.class == "firefox" or c.class == "okular") then
+            dominated = true
+            break
+        end
+    end
+    awesome.idle_inhibit = dominated
+end)
+```
+
+### Keybinding toggle
+
+```lua
+awful.key({ modkey }, "F8", function()
+    awesome.idle_inhibit = not awesome.idle_inhibit
+end, {description = "toggle idle inhibition", group = "screen"})
+```
+
 ## DPMS Control
 
 ### Keybinding
@@ -241,8 +280,9 @@ Activity should auto-wake displays. If not:
 
 ### Idle timeouts not firing
 
-- Check if inhibited: `somewm-client eval "return awesome.idle_inhibited"`
-- Fullscreen clients inhibit idle detection by default
+- Check Lua inhibition: `somewm-client eval "return awesome.idle_inhibit"`
+- Check overall state: `somewm-client eval "return awesome.idle_inhibited"`
+- Fullscreen clients with protocol inhibitors also suppress idle
 - List active timeouts: `somewm-client eval "return awesome.idle_timeouts"`
 
 ## See Also
