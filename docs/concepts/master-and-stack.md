@@ -145,6 +145,8 @@ Not all layouts use the master/stack model:
 | `max` | No | Focused client fills the screen |
 | `magnifier` | Special | Focused client is always "master", others shrink behind it |
 | `floating` | No | No automatic tiling at all |
+| `carousel` | No | Scrollable columns with independent widths ([details](/concepts/scrollable-tiling)) |
+| `carousel.vertical` | No | Vertical variant of carousel ([details](/concepts/scrollable-tiling)) |
 
 ## Tasklist Order
 

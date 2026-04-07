@@ -158,6 +158,8 @@ All built-in layouts live under `awful.layout.suit`:
 | `suit.corner.ne` | `"cornerne"` | Master top-right corner |
 | `suit.corner.sw` | `"cornersw"` | Master bottom-left corner |
 | `suit.corner.se` | `"cornerse"` | Master bottom-right corner |
+| `suit.carousel` | `"carousel"` | Scrollable horizontal columns ([reference](/reference/awful/carousel)) |
+| `suit.carousel.vertical` | `"carousel.vertical"` | Scrollable vertical columns ([reference](/reference/awful/carousel)) |
 
 ## `skip_gap(nclients, tag)`
 

@@ -66,6 +66,10 @@ Commands for input device configuration.
 
 Available properties: `tap_to_click`, `tap_and_drag`, `drag_lock`, `tap_3fg_drag`, `natural_scrolling`, `disable_while_typing`, `dwtp`, `left_handed`, `middle_button_emulation`, `scroll_method`, `scroll_button`, `scroll_button_lock`, `click_method`, `send_events_mode`, `accel_profile`, `accel_speed`, `tap_button_map`, `clickfinger_button_map`, `keyboard_repeat_rate`, `keyboard_repeat_delay`, `xkb_layout`, `xkb_variant`, `xkb_options`, `numlock`
 
+:::note
+These commands set **global** input defaults. Per-device rules configured via `awful.input.rules` take priority over global settings. See [awful.input Reference](/reference/awful/input#input-rules) for details.
+:::
+
 ## Screenshot Commands
 
 | Command | Description |
