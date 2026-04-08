@@ -87,6 +87,7 @@ See [Lock, Idle, and DPMS reference](/reference/lock) for details.
 |--------|-----------|-------------|
 | `idle::start` | none | User became idle (first timeout fired) |
 | `idle::stop` | none | User activity detected after being idle |
+| `property::idle_inhibited` | none | Combined idle inhibition state changed |
 
 See [Lock, Idle, and DPMS reference](/reference/lock) for details.
 

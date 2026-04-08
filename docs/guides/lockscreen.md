@@ -135,6 +135,32 @@ awful.key({ modkey }, "F8", function()
 end, {description = "toggle idle inhibition", group = "screen"})
 ```
 
+### Wibar idle status widget
+
+Use `property::idle_inhibited` to build a reactive widget that shows whether idle is inhibited and by what:
+
+```lua
+local idle_widget = wibox.widget.textbox()
+
+local function update_idle_widget()
+    if not awesome.idle_inhibited then
+        idle_widget.text = " "
+        return
+    end
+
+    -- Show which app is inhibiting (if any)
+    local inhibitors = awesome.inhibitors
+    if #inhibitors > 0 and inhibitors[1].client then
+        idle_widget.text = "  " .. inhibitors[1].client.class
+    else
+        idle_widget.text = " "
+    end
+end
+
+update_idle_widget()
+awesome.connect_signal("property::idle_inhibited", update_idle_widget)
+```
+
 ## DPMS Control
 
 ### Keybinding

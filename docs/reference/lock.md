@@ -81,7 +81,9 @@ awesome.unlock()
 | `awesome.idle` | boolean (read-only) | True when the user has been idle long enough to fire at least one timeout |
 | `awesome.idle_inhibit` | boolean (read/write) | Set to true to suppress idle timeouts from Lua. OR-ed with protocol-level inhibitors |
 | `awesome.idle_inhibited` | boolean (read-only) | True if idle is inhibited by any source (protocol inhibitors OR `idle_inhibit`) |
-| `awesome.idle_timeouts` | table (read-only) | Table of `{name = seconds, ...}` for all active timeouts |
+| `awesome.inhibitors` | table (read-only) | Array of `{client = <client or nil>, visible = bool}` for each active Wayland protocol inhibitor |
+| `awesome.inhibitor_count` | integer (read-only) | Number of active Wayland protocol idle inhibitors |
+| `awesome.idle_timeouts` | table (read-only) | Table of `{name = {seconds = N, fired = bool}, ...}` for all active timeouts |
 
 ### Signals
 
@@ -89,6 +91,7 @@ awesome.unlock()
 |--------|-----------|-------------|
 | `idle::start` | none | User became idle (first timeout fired) |
 | `idle::stop` | none | User activity detected after being idle |
+| `property::idle_inhibited` | none | Combined idle inhibition state changed (read `awesome.idle_inhibited` for new value) |
 
 ### Example
 
@@ -114,6 +117,21 @@ client.connect_signal("property::fullscreen", function()
     end
     awesome.idle_inhibit = dominated
 end)
+
+-- Reactive wibar icon that shows idle inhibition state
+local idle_icon = wibox.widget.textbox()
+local function update_idle_icon()
+    idle_icon.text = awesome.idle_inhibited and " " or " "
+end
+update_idle_icon()
+awesome.connect_signal("property::idle_inhibited", update_idle_icon)
+
+-- Inspect which apps are inhibiting
+for _, inh in ipairs(awesome.inhibitors) do
+    if inh.client then
+        print(inh.client.class .. " is inhibiting idle (visible: " .. tostring(inh.visible) .. ")")
+    end
+end
 ```
 
 ## DPMS API
