@@ -1,0 +1,122 @@
+{
+  "docsSidebar": [
+    "intro",
+    {
+      "type": "category",
+      "label": "Getting Started",
+      "collapsed": false,
+      "items": [
+        "getting-started/installation",
+        "getting-started/first-launch",
+        "getting-started/migrating"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Tutorials",
+      "items": [
+        "tutorials/basics",
+        "tutorials/widgets",
+        "tutorials/keybindings",
+        "tutorials/theme",
+        "tutorials/wibar",
+        "tutorials/carousel"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "How-To Guides",
+      "items": [
+        "guides/autostart",
+        "guides/client-rules",
+        "guides/cli-control",
+        "guides/custom-layouts",
+        "guides/carousel-column-widths",
+        "guides/carousel-centering",
+        "guides/carousel-gestures",
+        "guides/carousel-stacking",
+        "guides/debugging",
+        "guides/fractional-scaling",
+        "guides/input-devices",
+        "guides/keyboard-layouts",
+        "guides/lockscreen",
+        "guides/multi-monitor",
+        "guides/tag-persistence",
+        "guides/notifications",
+        "guides/screenshots",
+        "guides/shadows",
+        "guides/wallpaper-caching",
+        "guides/widget-timers"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Reference",
+      "items": [
+        "reference/lua-libraries",
+        {
+          "type": "category",
+          "label": "awful",
+          "items": [
+            "reference/awful/index",
+            "reference/awful/layout",
+            "reference/awful/carousel",
+            "reference/awful/input",
+            "reference/awful/screenshot"
+          ]
+        },
+        {
+          "type": "category",
+          "label": "beautiful",
+          "items": [
+            "reference/beautiful/index",
+            "reference/beautiful/theme-variables"
+          ]
+        },
+        "reference/gears/index",
+        "reference/naughty/index",
+        {
+          "type": "category",
+          "label": "wibox",
+          "items": [
+            "reference/wibox/index",
+            "reference/wibox/wibar"
+          ]
+        },
+        "reference/output",
+        "reference/default-keybindings",
+        "reference/key-names",
+        "reference/lock",
+        "reference/lockscreen",
+        "reference/layer_surface/index",
+        "reference/screen",
+        "reference/tag-persistence",
+        "reference/shadows",
+        "reference/signals",
+        "reference/somewm-client"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Concepts",
+      "items": [
+        "concepts/object-model",
+        "concepts/architecture",
+        "concepts/wayland-vs-x11",
+        "concepts/display-scaling",
+        "concepts/wallpaper-caching",
+        "concepts/client-stack",
+        "concepts/master-and-stack",
+        "concepts/scrollable-tiling",
+        "concepts/focus-history",
+        "concepts/lockscreen",
+        "concepts/screenshots",
+        "concepts/tag-persistence",
+        "concepts/scene-graph",
+        "concepts/awesomewm-compat"
+      ]
+    },
+    "faq",
+    "troubleshooting"
+  ]
+}

@@ -1,0 +1,139 @@
+.hero {
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+}
+
+.heroInner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.heroTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 2rem;
+}
+
+.heroScreenshot {
+  margin: 2rem auto;
+  max-width: 640px;
+}
+
+.screenshotPlaceholder {
+  aspect-ratio: 16 / 9;
+  border: 1px dashed var(--ifm-color-emphasis-400);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ifm-color-emphasis-500);
+  font-size: 0.9rem;
+}
+
+.heroButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btnPrimary,
+.btnPrimary:hover {
+  color: #fff;
+}
+
+.btnPrimary {
+  background: var(--ifm-color-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btnPrimary:hover {
+  background: var(--ifm-color-primary-dark);
+  text-decoration: none;
+}
+
+.btnSecondary {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  color: var(--ifm-font-color-base);
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btnSecondary:hover {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.features {
+  padding: 2rem 2rem 3rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.featureCard {
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+}
+
+[data-theme='dark'] .featureCard {
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+.featureCard h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.featureCard p {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.release {
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.release p {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroTitle {
+    font-size: 2.25rem;
+  }
+
+  .heroButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+}

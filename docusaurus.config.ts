@@ -31,9 +31,22 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
-          routeBasePath: '/', // Docs at root, no /docs prefix
+          routeBasePath: '/docs',
+          lastVersion: '1.4',
+          versions: {
+            current: {
+              label: '2.0 (dev)',
+              banner: 'unreleased',
+            },
+            '1.4': {
+              label: '1.4',
+            },
+          },
         },
-        blog: false, // Disable blog
+        blog: {
+          showReadingTime: true,
+          editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -46,8 +59,8 @@ const config: Config = {
       '@easyops-cn/docusaurus-search-local',
       {
         hashed: true,
-        indexBlog: false,
-        docsRouteBasePath: '/',
+        indexBlog: true,
+        docsRouteBasePath: '/docs',
         highlightSearchTermsOnTargetPage: true,
       },
     ],
@@ -73,6 +86,15 @@ const config: Config = {
           label: 'Docs',
         },
         {
+          to: '/blog',
+          label: 'Blog',
+          position: 'left',
+        },
+        {
+          type: 'docsVersionDropdown',
+          position: 'left',
+        },
+        {
           href: 'https://github.com/trip-zip/somewm',
           label: 'GitHub',
           position: 'right',
@@ -82,9 +104,10 @@ const config: Config = {
     footer: {
       style: 'dark',
       links: [
-        {label: 'Getting Started', to: '/getting-started/installation'},
-        {label: 'Tutorials', to: '/tutorials/basics'},
-        {label: 'Reference', to: '/reference/lua-libraries'},
+        {label: 'Getting Started', to: '/docs/getting-started/installation'},
+        {label: 'Tutorials', to: '/docs/tutorials/basics'},
+        {label: 'Reference', to: '/docs/reference/lua-libraries'},
+        {label: 'Blog', to: '/blog'},
         {label: 'Discussions', href: 'https://github.com/trip-zip/somewm/discussions'},
         {label: 'AwesomeWM', href: 'https://awesomewm.org/community/'},
         {label: 'Source Code', href: 'https://github.com/trip-zip/somewm'},

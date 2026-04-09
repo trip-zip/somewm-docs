@@ -22,7 +22,7 @@ yay -S somewm-git
 paru -S somewm-git
 ```
 
-This installs somewm and all dependencies. After installation, skip directly to [Launch](/getting-started/first-launch).
+This installs somewm and all dependencies. After installation, skip directly to [Launch](/docs/getting-started/first-launch).
 
 #### Manual Build
 
@@ -168,4 +168,4 @@ make clean
 
 ## Next Steps
 
-Once installed, proceed to [Launch](/getting-started/first-launch) to run SomeWM for the first time.
+Once installed, proceed to [Launch](/docs/getting-started/first-launch) to run SomeWM for the first time.
