@@ -95,6 +95,7 @@ const sidebars: SidebarsConfig = {
         'reference/layer_surface/index',
         'reference/screen',
         'reference/tag-persistence',
+        'reference/wayland-protocols',
         'reference/shadows',
         'reference/signals',
         'reference/somewm-client',
