@@ -57,7 +57,8 @@ sudo apt install \
     libgdk-pixbuf-2.0-dev \
     wayland-protocols \
     libinput-dev \
-    libxkbcommon-dev
+    libxkbcommon-dev \
+    libxcb-util-dev
 
 # Optional: XWayland support
 sudo apt install xwayland libxcb1-dev libxcb-icccm4-dev
