@@ -77,6 +77,7 @@ Technical specifications and API details. Organized by Lua library, with links t
 Background knowledge and architectural understanding.
 
 <ModuleTable modules={[
+  { name: 'Why SomeWM', description: 'What this project commits to and what is open', link: '/docs/next/concepts/why-somewm' },
   { name: 'Architecture', description: 'How SomeWM is structured', link: '/docs/concepts/architecture' },
   { name: 'Object Model', description: 'Understanding the Lua object system', link: '/docs/concepts/object-model' },
   { name: 'Wayland vs X11', description: 'Key differences from X11', link: '/docs/concepts/wayland-vs-x11' },

@@ -89,6 +89,7 @@ const sidebars: SidebarsConfig = {
         // SomeWM-specific (alphabetical)
         'reference/output',
         'reference/default-keybindings',
+        'reference/deviations',
         'reference/key-names',
         'reference/lock',
         'reference/lockscreen',
@@ -105,6 +106,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Concepts',
       items: [
+        'concepts/why-somewm',
         'concepts/object-model',
         'concepts/architecture',
         'concepts/wayland-vs-x11',
