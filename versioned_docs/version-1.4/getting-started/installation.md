@@ -45,23 +45,33 @@ sudo pacman -S \
 sudo pacman -S xorg-xwayland libxcb
 ```
 
-### Debian/Ubuntu (25.04+ or unstable)
+### Debian/Ubuntu
 
 ```bash
 # Required dependencies
 sudo apt install \
+    meson \
     luajit \
     lua-lgi \
     libcairo2-dev \
     libpango1.0-dev \
     libgdk-pixbuf-2.0-dev \
+    libwayland-dev \
     wayland-protocols \
+    libdrm-dev \
+    libdbus-1-dev \
     libinput-dev \
     libxkbcommon-dev \
     libxcb-util-dev
 
 # Optional: XWayland support
-sudo apt install xwayland libxcb1-dev libxcb-icccm4-dev
+sudo apt install \
+    xwayland \
+    libxcb1-dev \
+    libxcb-icccm4-dev \
+    libxcb-composite0-dev \
+    libxcb-ewmh-dev \
+    libxcb-res0-dev
 ```
 
 ### Fedora
