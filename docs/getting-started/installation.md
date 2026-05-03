@@ -79,17 +79,28 @@ sudo apt install \
 ```bash
 # Required dependencies
 sudo dnf install \
+    meson \
     luajit \
+    luajit-devel \
     lua-lgi \
     cairo-devel \
     pango-devel \
     gdk-pixbuf2-devel \
+    wayland-devel \
     wayland-protocols-devel \
+    libdrm-devel \
+    dbus-devel \
+    glib2-devel \
     libinput-devel \
     libxkbcommon-devel
 
 # Optional: XWayland support
-sudo dnf install xorg-x11-server-Xwayland libxcb-devel xcb-util-wm-devel
+sudo dnf install \
+    xorg-x11-server-Xwayland \
+    xorg-x11-server-Xwayland-devel \
+    libxcb-devel \
+    xcb-util-wm-devel \
+    xcb-util-renderutil-devel
 ```
 
 ### NixOS
