@@ -31,6 +31,9 @@ const sidebars: SidebarsConfig = {
       items: [
         'guides/autostart',
         'guides/client-rules',
+        'guides/replace-default-handler',
+        'guides/react-to-client-lifecycle',
+        'guides/defer-startup-with-request-rules',
         'guides/cli-control',
         'guides/custom-layouts',
         'guides/carousel-column-widths',
@@ -109,6 +112,7 @@ const sidebars: SidebarsConfig = {
         'concepts/why-somewm',
         'concepts/object-model',
         'concepts/architecture',
+        'concepts/signals',
         'concepts/wayland-vs-x11',
         'concepts/display-scaling',
         'concepts/wallpaper-caching',
