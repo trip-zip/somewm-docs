@@ -81,27 +81,19 @@ The layers talk to each other through three mechanisms:
 
 ### Signals
 
-**Signals** are events that flow from C to Lua (or between Lua objects). When something happens, a signal fires and your callbacks run.
+**Signals** carry events from the compositor to Lua handlers (and between Lua objects). When something happens (a window opens, focus changes, a property updates), the relevant object emits a signal, and any handlers connected to it run.
 
 ```lua
--- C emits "manage" when a new window appears
-client.connect_signal("manage", function(c)
-    -- Your Lua code reacts
-    c.border_width = 2
-end)
-
--- Objects emit property change signals
-client.connect_signal("property::floating", function(c)
-    if c.floating then
-        c.ontop = true
-    end
+client.connect_signal("focus", function(c)
+    c.border_color = "#88c0d0"
 end)
 ```
 
-Common signal patterns:
-- `object.connect_signal("name", callback)` - subscribe to events
-- `object.emit_signal("name", ...)` - send custom signals
-- `property::X` signals fire when property X changes
+SomeWM 2.0 changes how those handlers reach Lua. AwesomeWM and SomeWM 1.x interleaved C and Lua in the same call stack: a Wayland event entered C, emitted a signal, ran Lua handlers inside the event handler, returned to C, emitted another signal, ran more Lua. One Wayland event could transition between C and Lua five or six times before settling.
+
+2.0 follows the engine model used by LOVE and Bitsquid: Lua orchestrates, C executes, with deliberate hand-off points between them. C handles each Wayland event without entering Lua. Outgoing signals go on a queue. At `some_refresh()`, called before each event-loop iteration, the queue drains: every queued handler runs in order, with no Wayland callbacks interleaved. Then C applies whatever Lua changed (geometry, stacking, drawin updates) and the loop blocks for the next event. The two layers no longer share a call stack.
+
+For per-signal mechanics (what's queued, what's still synchronous, how coalescing works), see [Signals (concepts)](./signals.md).
 
 ### Properties
 
