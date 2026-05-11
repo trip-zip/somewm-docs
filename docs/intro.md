@@ -10,6 +10,16 @@ import ModuleTable from '@site/src/components/ModuleTable';
 
 A Wayland compositor that brings AwesomeWM's Lua API to Wayland, built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots). These docs cover everything from getting started to the full API reference.
 
+## What These Docs Aim to Be
+
+SomeWM's documentation aims to be **self-sufficient**: a complete reference for SomeWM users, organized so you can find what you need without leaving.
+
+- **Comprehensive.** Every API surface AwesomeWM documents is, or will be, documented here.
+- **Organized by task.** We use the [Diátaxis framework](https://diataxis.fr/): tutorials (learning), how-to guides (doing), reference (looking up), and concepts (understanding), each kept separate. AwesomeWM's docs are LDoc-generated and do not draw these distinctions.
+- **Honest about Wayland.** Architectural differences from AwesomeWM, stubs, and SomeWM-only extensions are inline on the affected pages and indexed in [Deviations](/docs/next/reference/deviations).
+
+We are not self-sufficient on every topic yet. If you hit a gap, file a [discussion](https://github.com/trip-zip/somewm/discussions) and we will prioritize it. See [#532](https://github.com/trip-zip/somewm/discussions/532) for the conversation that started this work.
+
 ## How to Use These Docs
 
 This documentation attempts to follow the [Diátaxis framework](https://diataxis.fr/), organizing content into four distinct types:
@@ -84,8 +94,8 @@ Background knowledge and architectural understanding.
   { name: 'AwesomeWM Compatibility', description: 'What works and what differs', link: '/docs/concepts/awesomewm-compat' },
 ]} />
 
-## About These Docs
+## Versioning
 
-SomeWM targets AwesomeWM git (not the v4.3 stable release). The official [AwesomeWM API documentation](https://awesomewm.org/apidoc/) applies directly to SomeWM and remains the primary reference for the Lua API.
+The default docs match SomeWM 1.4, the current stable release, which tracks the AwesomeWM master branch. Use the version switcher in the navigation bar to view the 2.0 (dev) docs — SomeWM 2.0 is a Wayland-native rework that is not yet released.
 
-These docs focus on getting started with SomeWM, SomeWM-only features, and Wayland-specific differences.
+The [AwesomeWM apidoc](https://awesomewm.org/apidoc/) remains a useful upstream reference for topics that are not yet self-sufficient here.

@@ -112,7 +112,7 @@ const config: Config = {
         {label: 'AwesomeWM', href: 'https://awesomewm.org/community/'},
         {label: 'Source Code', href: 'https://github.com/trip-zip/somewm'},
       ],
-      copyright: `© ${new Date().getFullYear()} SomeWM Contributors`,
+      copyright: `© ${new Date().getFullYear()} SomeWM Contributors. Portions copyright the AwesomeWM contributors. Licensed under GPL v3 or later — see <a href="https://github.com/trip-zip/somewm-docs/blob/main/LICENSE">LICENSE</a> and <a href="https://github.com/trip-zip/somewm-docs/blob/main/ATTRIBUTION.md">ATTRIBUTION</a>.`,
     },
     prism: {
       theme: prismThemes.github,

@@ -6,7 +6,27 @@ description: SomeWM's compatibility philosophy and status
 
 # AwesomeWM Compatibility
 
-SomeWM's goal is **drop-in Lua API compatibility** with AwesomeWM. Your existing rc.lua should work with minimal or no changes.
+SomeWM's goal is **drop-in Lua API compatibility** with AwesomeWM. Your existing rc.lua should work with minimal or no changes. SomeWM's *documentation* goal is to be self-sufficient — a complete reference for SomeWM users — so you don't need to consult AwesomeWM's docs to understand the Lua API on SomeWM. This page covers both.
+
+## Documentation promise
+
+SomeWM's docs aim to be **self-sufficient** — a complete reference for SomeWM users:
+
+- **Comprehensive coverage.** Every API surface a SomeWM user reaches for is, or will be, documented here.
+- **Organized by task using Diátaxis.** Tutorials (learning), how-to guides (doing), reference (looking up), and concepts (understanding) are kept distinct, so you can find what you need based on what you're trying to do. AwesomeWM's LDoc-generated docs do not separate these.
+- **Wayland-aware examples.** Examples use SomeWM idioms (`output`, `somewm-client`, monitor hotplug semantics) rather than X11-isms.
+- **Deviations inline.** Where SomeWM differs from AwesomeWM, the difference is documented on the relevant page (look for a "Deviations from AwesomeWM" section) and indexed at [Deviations](/docs/reference/deviations).
+- **SomeWM-only features are first-class.** Anything unique to SomeWM gets its own page and is marked with a `<SomewmOnly />` badge inline.
+
+We are not self-sufficient on every topic yet. Gaps are tracked internally; if you hit one, file a [discussion](https://github.com/trip-zip/somewm/discussions) and it will get prioritized. The conversation that started this work is [discussion #532](https://github.com/trip-zip/somewm/discussions/532).
+
+### Version targets
+
+| SomeWM version | Tracks AwesomeWM | Status |
+|----------------|-------------------|--------|
+| 1.4 (current stable) | master (working toward 4.4) | Default docs |
+| 2.0 (dev) | (Wayland-native rework) | Behind the version switcher; not released |
+| 1.5 (future) | 4.5 (after upstream ships) | Planned |
 
 ## Philosophy
 
