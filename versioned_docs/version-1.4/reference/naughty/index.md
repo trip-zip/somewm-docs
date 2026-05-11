@@ -4,13 +4,17 @@ title: naughty
 description: Notification system
 ---
 
+import FromAwesomeWM from '@site/src/components/FromAwesomeWM';
+
 # naughty
+
+<FromAwesomeWM upstream="libraries/naughty" lastSynced="2026-05-11" />
 
 The `naughty` library handles desktop notifications. It receives notifications from applications via the D-Bus `org.freedesktop.Notifications` interface and displays them on screen.
 
-**Upstream documentation:** [awesomewm.org/apidoc/libraries/naughty.html](https://awesomewm.org/apidoc/libraries/naughty.html)
+## Deviations from AwesomeWM
 
-SomeWM's `naughty` implementation is fully compatible with AwesomeWM.
+None. SomeWM's `naughty` implementation is fully compatible with AwesomeWM. Notifications travel over the standard D-Bus `org.freedesktop.Notifications` interface; the Lua API and signal contract are identical.
 
 ## Modules
 

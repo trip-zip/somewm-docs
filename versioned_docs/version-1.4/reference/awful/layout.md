@@ -4,11 +4,23 @@ title: awful.layout
 description: Layout protocol, arrange contract, and layout registration
 ---
 
+import SomewmOnly from '@site/src/components/SomewmOnly';
+import FromAwesomeWM from '@site/src/components/FromAwesomeWM';
+
 # awful.layout
+
+<FromAwesomeWM upstream="libraries/awful.layout" lastSynced="2026-05-11" />
 
 The `awful.layout` module manages tiling layouts. A layout is a Lua table that tells the compositor how to position tiled clients on screen.
 
-**Upstream documentation:** [AwesomeWM awful.layout docs](https://awesomewm.org/apidoc/libraries/awful.layout.html)
+## Deviations from AwesomeWM
+
+The core `awful.layout` module is compatible with AwesomeWM. SomeWM adds two scrollable-tiling layouts under `awful.layout.suit`:
+
+| Addition | Notes |
+|----------|-------|
+| `awful.layout.suit.carousel` <SomewmOnly /> | Scrollable horizontal-column layout. [Reference](/docs/reference/awful/carousel). |
+| `awful.layout.suit.carousel.vertical` <SomewmOnly /> | Vertical variant. |
 
 ## Layout Table Structure
 

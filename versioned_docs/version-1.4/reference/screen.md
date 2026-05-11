@@ -5,12 +5,23 @@ description: Screen (monitor/display) object reference
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly';
+import FromAwesomeWM from '@site/src/components/FromAwesomeWM';
 
 # screen
 
+<FromAwesomeWM upstream="core_components/screen" lastSynced="2026-05-11" />
+
 The `screen` object represents a physical or virtual display. Each monitor connected to your system is a screen.
 
-**Upstream documentation:** [AwesomeWM screen docs](https://awesomewm.org/apidoc/core_components/screen.html)
+## Deviations from AwesomeWM
+
+SomeWM extends `screen` with fractional output scaling and DPI introspection. The Lua interface stays compatible; only the additional properties and one new signal are SomeWM-only.
+
+| API | SomeWM behavior | Why |
+|-----|-----------------|-----|
+| `screen.scale` <SomewmOnly /> | Read/write fractional scale (0.1–10.0). | Wayland fractional-scale protocol; no X11 equivalent. |
+| `screen.dpi` / `minimum_dpi` / `maximum_dpi` / `preferred_dpi` <SomewmOnly /> | DPI computed from output physical dimensions. | Wayland exposes per-output mm dimensions. |
+| `property::scale` signal <SomewmOnly /> | Fires when an output scale changes. | Driven by user or `somewm-client screen scale`. |
 
 ## Accessing Screens
 
