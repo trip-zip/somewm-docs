@@ -112,6 +112,7 @@ const sidebars: SidebarsConfig = {
         'concepts/why-somewm',
         'concepts/object-model',
         'concepts/architecture',
+        'concepts/rc-lua-anatomy',
         'concepts/signals',
         'concepts/wayland-vs-x11',
         'concepts/display-scaling',
