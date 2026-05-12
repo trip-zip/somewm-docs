@@ -4,9 +4,18 @@ title: Basics
 description: A beginner-friendly walkthrough of SomeWM basics
 ---
 
+import YouWillLearn from '@site/src/components/YouWillLearn';
+
 # Basics
 
-This tutorial will guide you through your first session with SomeWM, from logging in to making your first customization. No programming experience required - just a willingness to try something new.
+<YouWillLearn>
+
+- How tiling differs from floating window managers
+- How to start SomeWM and read the default desktop
+- Essential keybindings for windows, tags, and layouts
+- How to edit and reload your `rc.lua`
+
+</YouWillLearn>
 
 ## Prerequisites
 

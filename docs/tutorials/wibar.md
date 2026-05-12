@@ -4,9 +4,18 @@ title: Wibar
 description: Build a custom status bar from scratch
 ---
 
+import YouWillLearn from '@site/src/components/YouWillLearn';
+
 # Wibar
 
-The wibar is the status bar at the top (or bottom) of your screen. In this tutorial, you'll build a custom wibar from scratch.
+<YouWillLearn>
+
+- How to attach a wibar via `request::desktop_decoration`
+- The three-section align layout pattern
+- How to add standard widgets, custom widgets, and separators
+- How to style and toggle visibility
+
+</YouWillLearn>
 
 ## How Wibars Work
 

@@ -4,9 +4,18 @@ title: Widgets
 description: Build a simple clock widget from scratch
 ---
 
+import YouWillLearn from '@site/src/components/YouWillLearn';
+
 # Widgets
 
-Widgets are the building blocks of your SomeWM interface. In this tutorial, you'll build a custom clock widget from scratch to understand how the widget system works.
+<YouWillLearn>
+
+- How primitives, containers, and layouts compose
+- How to build a clock widget that updates on a timer
+- How to add icons, tooltips, and click handlers
+- Patterns for reading shell output and reacting to signals
+
+</YouWillLearn>
 
 ## Widget Basics
 

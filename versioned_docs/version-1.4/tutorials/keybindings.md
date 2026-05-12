@@ -4,9 +4,18 @@ title: Keybindings
 description: Add custom keyboard shortcuts to SomeWM
 ---
 
+import YouWillLearn from '@site/src/components/YouWillLearn';
+
 # Keybindings
 
-Keybindings are the heart of a tiling window manager. In this tutorial, you'll learn how to add your own custom shortcuts.
+<YouWillLearn>
+
+- The four parts of an `awful.key` binding
+- How to add global and per-client keybindings
+- How to bind media keys and mouse buttons
+- How to organize bindings into reusable tables
+
+</YouWillLearn>
 
 ## Keybinding Anatomy
 

@@ -4,9 +4,18 @@ title: Theme
 description: Customize SomeWM colors, fonts, and appearance
 ---
 
+import YouWillLearn from '@site/src/components/YouWillLearn';
+
 # Theme
 
-SomeWM's appearance is fully customizable through the **beautiful** module. In this tutorial, we'll create a custom theme from scratch.
+<YouWillLearn>
+
+- How `beautiful` variables flow to every widget
+- How to write and load a theme file
+- How to build a swappable color scheme system
+- How to set wallpapers and recolor icons
+
+</YouWillLearn>
 
 ## How Theming Works
 
