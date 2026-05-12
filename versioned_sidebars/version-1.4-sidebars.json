@@ -104,6 +104,7 @@
       "items": [
         "concepts/object-model",
         "concepts/architecture",
+        "concepts/signals",
         "concepts/wayland-vs-x11",
         "concepts/display-scaling",
         "concepts/wallpaper-caching",
