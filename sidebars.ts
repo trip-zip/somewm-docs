@@ -94,6 +94,7 @@ const sidebars: SidebarsConfig = {
         'reference/default-keybindings',
         'reference/deviations',
         'reference/key-names',
+        'reference/key-names-all',
         'reference/lock',
         'reference/lockscreen',
         'reference/layer_surface/index',
