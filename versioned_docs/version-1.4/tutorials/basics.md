@@ -24,8 +24,6 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 ## What is a Tiling Window Manager?
 
-If you're coming from Windows, macOS, or a traditional Linux desktop, you're used to **floating** windows - windows that overlap, can be dragged anywhere, and need manual resizing.
-
 SomeWM is a **tiling** window manager. This means:
 
 - **Windows don't overlap** - they automatically arrange to fill your screen
@@ -73,7 +71,7 @@ The bar at the top of your screen is called a **wibar** (widget bar). From left 
 
 ### Tags vs Workspaces
 
-You might be familiar with "virtual desktops" or "workspaces" from other systems. SomeWM uses **tags**, which are more flexible:
+SomeWM uses **tags** instead of fixed workspaces:
 
 - A window can be on **multiple tags at once** (not just one)
 - You can **view multiple tags simultaneously**
@@ -154,7 +152,7 @@ Tags are how you organize your windows. By default, you have 9 tags (numbered 1-
 
 Try it: Open a terminal, then press **Mod4 + 2** to switch to tag 2. Open another terminal here.
 
-Now press **Mod4 + 1** to go back to tag 1 - your first terminal is still there!
+Now press **Mod4 + 1** to go back to tag 1. The first terminal is still there.
 
 ### Moving Windows Between Tags
 
@@ -170,7 +168,7 @@ To move the focused window to another tag:
 |------------|--------|
 | **Mod4 + Ctrl + 1-9** | Toggle viewing tag 1-9 |
 
-Press **Mod4 + Ctrl + 2** while on tag 1 to view both tags simultaneously!
+Press **Mod4 + Ctrl + 2** while on tag 1 to view both tags simultaneously.
 
 ## Understanding Layouts
 
@@ -205,7 +203,7 @@ This works with tile, spiral, and dwindle layouts.
 
 ## Using the Mouse
 
-While SomeWM is keyboard-focused, mouse support is excellent:
+Mouse bindings:
 
 | Action | Effect |
 |--------|--------|
@@ -310,11 +308,6 @@ Be careful when changing modkey - you'll need to use the new key for all shortcu
 - **[Keybindings](/docs/tutorials/keybindings)** - Add your own keyboard shortcuts
 - **[Widgets](/docs/tutorials/widgets)** - Build a custom widget for your wibar
 - **[Default Keybindings](/docs/reference/default-keybindings)** - Complete list of all shortcuts
-
-:::tip Pro Tips
-1. **Use the help popup** (`Mod4 + s`) - it's always there when you forget a shortcut
-2. **Keep your old config** - when experimenting, comment out code instead of deleting it
-:::
 
 ## Troubleshooting
 

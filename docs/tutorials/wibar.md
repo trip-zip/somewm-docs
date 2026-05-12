@@ -181,8 +181,6 @@ end
 
 ## Adding Custom Widgets
 
-Add your own widgets from modules:
-
 ```lua
 -- At the top of wibar.lua
 local my_clock = require("widgets.clock")

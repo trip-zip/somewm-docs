@@ -190,8 +190,6 @@ return clock
 
 ## Styling with Containers
 
-Style with containers:
-
 ```lua
 local clock = wibox.widget {
     {
