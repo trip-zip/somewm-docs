@@ -123,8 +123,6 @@ awful.keyboard.append_global_keybindings({
 
 ## Organizing with Tables
 
-Organize keybindings with tables:
-
 ```lua
 -- Define keybindings as data
 local my_global_keys = {

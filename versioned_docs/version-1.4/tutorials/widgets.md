@@ -47,8 +47,6 @@ wibox.widget {
 
 ## Your First Textbox
 
-A text widget:
-
 ```lua
 local wibox = require("wibox")
 
@@ -254,8 +252,6 @@ end))
 Button numbers: `1` = left, `2` = middle, `3` = right.
 
 ## Complete Example
-
-Complete clock widget:
 
 ```lua
 -- widgets/clock.lua

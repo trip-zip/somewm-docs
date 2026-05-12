@@ -33,8 +33,6 @@ print(beautiful.font)       -- "sans 10"
 
 ## Creating Your Theme Directory
 
-Create a theme directory:
-
 ```bash
 mkdir -p ~/.config/somewm/theme
 ```
