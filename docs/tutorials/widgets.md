@@ -47,7 +47,7 @@ wibox.widget {
 
 ## Your First Textbox
 
-Let's start simple - a text widget:
+A text widget:
 
 ```lua
 local wibox = require("wibox")
@@ -58,11 +58,11 @@ local my_text = wibox.widget {
 }
 ```
 
-That's it! `my_text` is now a widget you can add to your wibar.
+`my_text` is now a widget you can add to your wibar.
 
 ## Building a Clock Widget
 
-Now let's build something useful - a clock that updates every second.
+A clock widget that updates every second:
 
 ### Step 1: Create the Widget
 
@@ -140,11 +140,11 @@ s.mywibox = awful.wibar {
 }
 ```
 
-Reload with **Mod4 + Ctrl + r** and you should see your clock!
+Reload with **Mod4 + Ctrl + r** to see the clock.
 
 ## Adding an Icon
 
-Let's enhance the clock with an icon using `imagebox`:
+Add an icon with `imagebox`:
 
 ```lua
 -- widgets/clock.lua
@@ -190,7 +190,7 @@ return clock
 
 ## Styling with Containers
 
-Add some visual polish with containers:
+Style with containers:
 
 ```lua
 local clock = wibox.widget {
@@ -231,7 +231,7 @@ local clock_tooltip = awful.tooltip {
 }
 ```
 
-Now hovering shows the full date!
+Hovering now shows the full date.
 
 ## Adding Click Handlers
 
@@ -257,7 +257,7 @@ Button numbers: `1` = left, `2` = middle, `3` = right.
 
 ## Complete Example
 
-Here's a polished clock widget with all features:
+Complete clock widget:
 
 ```lua
 -- widgets/clock.lua

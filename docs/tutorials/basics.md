@@ -32,8 +32,6 @@ SomeWM is a **tiling** window manager. This means:
 - **Keyboard-driven** - most actions use keyboard shortcuts instead of mouse
 - **Highly customizable** - everything is configured in Lua
 
-This might feel strange at first, but many developers find tiling window managers dramatically improve their productivity once they learn the basics.
-
 ## Starting SomeWM
 
 ### From a Display Manager
@@ -52,15 +50,11 @@ somewm
 
 ## Understanding the Desktop
 
-When SomeWM starts, you'll see a minimal desktop with a bar at the top.
-
 {/* TODO: Screenshot needed
    - Full desktop screenshot showing default SomeWM session
    - Should show: empty desktop with top wibar, default wallpaper
    - Annotate with arrows pointing to: taglist (left), tasklist (center), clock/systray (right)
 */}
-
-Let's break down what you're seeing:
 
 ### The Wibar (Top Bar)
 
@@ -89,7 +83,7 @@ Think of tags as labels you attach to windows, rather than containers that hold 
 
 ## Your First Commands
 
-Let's learn the essential keyboard shortcuts. All shortcuts use **Mod4** (the Super/Windows key) as the primary modifier.
+All shortcuts use **Mod4** (Super/Windows key) as the primary modifier.
 
 ### Opening a Terminal
 
@@ -100,11 +94,9 @@ Press **Mod4 + Enter** to open a terminal.
    - Show how it fills the entire screen (tiling behavior)
 */}
 
-Notice how the terminal automatically fills the available space. This is tiling in action!
-
 ### Opening More Windows
 
-Open a few more terminals with **Mod4 + Enter**. Watch how they automatically arrange:
+Open a few more terminals with **Mod4 + Enter**.
 
 {/* TODO: Screenshot needed
    - Desktop with 2-3 terminal windows tiled
@@ -123,7 +115,7 @@ With multiple windows open:
 | **Mod4 + k** | Focus previous window |
 | **Mod4 + Tab** | Switch to last focused window |
 
-Try pressing **Mod4 + j** and **Mod4 + k** to move focus between windows. Notice how the focused window gets a highlight.
+Try pressing **Mod4 + j** and **Mod4 + k** to move focus between windows.
 
 ### Closing Windows
 
@@ -140,7 +132,7 @@ Press **Mod4 + r** to open a run prompt in the wibar. Type any command (like `fi
 
 ### Showing Help
 
-Press **Mod4 + s** to show the keybinding help popup. This is your cheat sheet - use it often!
+Press **Mod4 + s** to show the keybinding help popup.
 
 {/* TODO: Screenshot needed
    - Hotkeys popup showing keybinding groups
@@ -173,8 +165,6 @@ To move the focused window to another tag:
 | **Mod4 + Shift + 1-9** | Move window to tag 1-9 |
 
 ### Viewing Multiple Tags
-
-This is where tags become more powerful than traditional workspaces:
 
 | Keybinding | Action |
 |------------|--------|
@@ -227,8 +217,6 @@ While SomeWM is keyboard-focused, mouse support is excellent:
 
 ## Your First Customization
 
-Now let's make a simple change to your configuration.
-
 ### Finding Your Config File
 
 SomeWM looks for configuration in this order:
@@ -279,7 +267,7 @@ Save the file.
 
 Press **Mod4 + Ctrl + r** to reload your configuration.
 
-Now **Mod4 + Enter** will open your new terminal!
+Now **Mod4 + Enter** opens your new terminal.
 
 :::caution
 If there's an error in your config, SomeWM will show a notification and continue with the old config. Check the notification for details about what went wrong.
@@ -303,8 +291,6 @@ Be careful when changing modkey - you'll need to use the new key for all shortcu
 
 ## Quick Reference Card
 
-Here are the essential keybindings to memorize:
-
 | Action | Keybinding |
 |--------|------------|
 | Open terminal | `Mod4 + Enter` |
@@ -320,8 +306,6 @@ Here are the essential keybindings to memorize:
 
 ## What's Next?
 
-Congratulations! You now know the basics of SomeWM. Here's where to go from here:
-
 - **[Theme](/docs/tutorials/theme)** - Change colors, fonts, and appearance
 - **[Keybindings](/docs/tutorials/keybindings)** - Add your own keyboard shortcuts
 - **[Widgets](/docs/tutorials/widgets)** - Build a custom widget for your wibar
@@ -329,8 +313,7 @@ Congratulations! You now know the basics of SomeWM. Here's where to go from here
 
 :::tip Pro Tips
 1. **Use the help popup** (`Mod4 + s`) - it's always there when you forget a shortcut
-2. **Start simple** - use the default config for a week before customizing heavily
-3. **Keep your old config** - when experimenting, comment out code instead of deleting it
+2. **Keep your old config** - when experimenting, comment out code instead of deleting it
 :::
 
 ## Troubleshooting

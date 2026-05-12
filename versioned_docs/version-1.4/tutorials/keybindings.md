@@ -56,7 +56,7 @@ awful.keyboard.append_global_keybindings({
 })
 ```
 
-Press **Mod4 + Ctrl + r** to reload, then try **Mod4 + b** to open Firefox!
+Press **Mod4 + Ctrl + r** to reload, then **Mod4 + b** to open Firefox.
 
 ## Adding a Client Keybinding
 
@@ -123,7 +123,7 @@ awful.keyboard.append_global_keybindings({
 
 ## Organizing with Tables
 
-As your config grows, keybindings can get messy. Here's a cleaner approach using tables:
+Organize keybindings with tables:
 
 ```lua
 -- Define keybindings as data
@@ -151,8 +151,6 @@ end
 -- Apply them
 awful.keyboard.append_global_keybindings(make_keybindings(my_global_keys))
 ```
-
-This makes it easy to scan and edit your keybindings at a glance.
 
 ## Helper Functions
 

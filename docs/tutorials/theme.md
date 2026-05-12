@@ -33,7 +33,7 @@ print(beautiful.font)       -- "sans 10"
 
 ## Creating Your Theme Directory
 
-First, create a directory for your theme:
+Create a theme directory:
 
 ```bash
 mkdir -p ~/.config/somewm/theme
@@ -89,7 +89,7 @@ local config_dir = os.getenv("HOME") .. "/.config/somewm"
 beautiful.init(config_dir .. "/theme/theme.lua")
 ```
 
-Press **Mod4 + Ctrl + r** to reload and see your changes!
+Press **Mod4 + Ctrl + r** to reload.
 
 ## Understanding DPI Scaling
 
@@ -139,8 +139,6 @@ theme.bg_urgent = colors.red
 theme.border_color_active = colors.green
 ```
 
-This makes it easy to tweak your entire color scheme by changing values in one place.
-
 ## Supporting Multiple Color Schemes
 
 Take it further by defining multiple palettes:
@@ -169,7 +167,7 @@ local colors = {
     },
 }
 
--- Switch schemes by changing this one line!
+-- Switch schemes by changing this one line
 local color_scheme = "gruvbox"
 local c = colors[color_scheme]
 
@@ -196,8 +194,6 @@ The most commonly customized categories include:
 ## Setting a Wallpaper
 
 ### Simple Wallpaper
-
-The simplest way to set a wallpaper:
 
 ```lua
 theme.wallpaper = "/home/user/wallpapers/mountain.jpg"

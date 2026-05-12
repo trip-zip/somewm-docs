@@ -61,7 +61,7 @@ widget = {
 
 ## Creating a Wibar Factory
 
-For cleaner code, create a factory function that builds your wibar:
+Wibar factory function:
 
 Create `~/.config/somewm/wibar.lua`:
 
@@ -111,7 +111,7 @@ end)
 
 ## Adding Standard Widgets
 
-Let's populate the wibar with useful widgets:
+Add standard widgets:
 
 ```lua
 -- wibar.lua
@@ -269,7 +269,7 @@ awful.wibar {
 
 ## Complete Example
 
-Here's a complete wibar module with all features:
+Complete wibar module:
 
 ```lua
 -- wibar.lua
