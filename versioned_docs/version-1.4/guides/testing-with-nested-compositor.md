@@ -58,6 +58,10 @@ somewm-client test reload --name work
 somewm-client test logs --name work -f
 ```
 
+:::note `test run` and shell quoting
+The arguments after `--` are forwarded through the same line-based IPC that `somewm-client exec` uses, so complex shell quoting (e.g. `-e sh -c 'echo hi; sleep 60'`) does not survive the marshal: the command string gets re-split on spaces on the receiving side. For commands with embedded spaces or `;`, write a small shell script and call that instead: `somewm-client test run --name work -- /path/to/your-script.sh`.
+:::
+
 ## Workflows
 
 Each of these is a recipe for a real reason someone reaches for `test`. Pick the one that matches the situation, copy the commands, adapt the paths.
