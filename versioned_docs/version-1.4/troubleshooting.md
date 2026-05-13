@@ -74,6 +74,57 @@ SomeWM uses the SNI D-Bus protocol. Legacy apps that only support X11 `_NET_SYST
 
 Most modern apps (NetworkManager, Discord, Bluetooth applets) support SNI.
 
+## Test Mode
+
+### `Mod4` keybindings don't work in a nested test instance
+
+When `somewm-client test start` is running, the nested somewm sits inside another compositor and the host decides whether to forward `Mod4`. If your host (e.g. GNOME) doesn't implement the shortcut inhibitor protocol, the orchestrator auto-remaps your `Mod4` bindings to `Mod1` (Alt) for that instance only. Check the start block:
+
+```
+test 'work': pid 12345 on wayland-3 (host: wayland), config ...
+  keybinds: ! outer compositor did not advertise shortcut inhibitor
+            ! Mod4 combos will be intercepted by the host
+```
+
+When you see this, hit `Alt + <key>` instead of `Mod4 + <key>` for the duration of the test instance. See [Testing with a nested compositor](./guides/testing-with-nested-compositor.md#keybind-behavior-on-each-host) for the per-host compatibility table.
+
+### My test instance crashes immediately on start
+
+The orchestrator reports `nested compositor exited before IPC was ready`. The crash log is in the state directory:
+
+```bash
+somewm-client test logs --name <n>
+```
+
+Look near the end for a Lua traceback or a wlroots error. Common causes:
+
+- `rc.lua` requires a module that isn't on the test instance's `LUA_PATH`. The orchestrator's `--config FILE` only sets the rc.lua path, not the Lua search path. If your config does `require("my-widgets.foo")`, that module needs to be where Lua already looks (the rc.lua's directory, or `~/.config/somewm/`).
+- The test instance's nested-Wayland backend can't initialize. Some hosts need `WLR_RENDERER=pixman` instead of GLES2. Try `WLR_RENDERER=pixman somewm-client test start ...`.
+- A widget calls a SomeWM API that doesn't exist in your installed version. The log shows the unknown function name.
+
+### `test stop` hangs or the state dir won't go away
+
+The orchestrator sends `SIGTERM` and waits up to five seconds for the IPC socket to disappear, then escalates to `SIGKILL`. If you see the pid file in `$XDG_RUNTIME_DIR/somewm-test/<n>/` but `kill -0 $(cat .../pid)` says the process is gone, the compositor died ungracefully and left its state behind. Manual cleanup is safe at that point:
+
+```bash
+rm -rf "$XDG_RUNTIME_DIR/somewm-test/<n>"
+```
+
+### `test list` shows a stale entry
+
+The orchestrator's `test list` connects to each instance's IPC socket with a short timeout. If it can't connect, the entry is reported as stale. That usually means the compositor crashed and the cleanup didn't run.
+
+```bash
+somewm-client test list
+# NAME      HOST    PID    STATE
+# work      wayland 12345  stale
+
+# Drop it
+somewm-client test stop --name work
+```
+
+If `test stop` itself errors out (the pid file is unreadable, the dir is partially gone), fall back to `rm -rf "$XDG_RUNTIME_DIR/somewm-test/<n>"`.
+
 ## Input Issues
 
 ### Keyboard layout not switching
