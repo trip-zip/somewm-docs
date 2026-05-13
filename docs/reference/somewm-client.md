@@ -83,6 +83,35 @@ These commands set **global** input defaults. Per-device rules configured via `a
 |---------|-------------|
 | `lock` | Lock the session |
 
+## Test Mode {#test-mode}
+
+Spawn a nested somewm under your current Wayland or X11 session so you can iterate on `rc.lua` without touching your real desktop. Each instance has its own name (defaults to `test`); the rest of the verbs target the named instance.
+
+| Command | Description |
+|---------|-------------|
+| `test start [opts]` | Spawn a sandboxed nested somewm. See options below. |
+| `test stop [--name N]` | Stop the named instance and remove its state dir. |
+| `test list [--json]` | List running instances. Connects to each socket; stale entries are flagged. |
+| `test run [--name N] -- CMD` | Spawn a command inside the nested instance (it inherits the right `WAYLAND_DISPLAY`). |
+| `test eval [--name N] LUA` | Evaluate Lua inside the nested instance, like `eval` but pointed at the named socket. |
+| `test reload [--name N]` | Reload the nested instance's config. |
+| `test logs [--name N] [-f]` | Print or follow the nested instance's log. |
+
+### `test start` options
+
+| Option | Description |
+|--------|-------------|
+| `--config FILE` | Path to the `rc.lua` to load. If omitted, the nested somewm follows its normal lookup. |
+| `--name NAME` | Instance name. Default `test`. Each instance gets its own state dir at `$XDG_RUNTIME_DIR/somewm-test/<name>/`. |
+| `--host wayland\|x11` | Outer compositor type. Defaults to `wayland` if `WAYLAND_DISPLAY` is set, otherwise required. |
+| `--keybinds auto\|inhibit\|remap\|none` | How keys reach the nested somewm. `auto` tries the shortcut inhibitor protocol and falls back to `Mod4 -> Mod1` remap if the host doesn't support it. |
+| `--no-marker` | Skip the wibar marker textbox (cosmetic only). |
+| `--force` | Replace an already-running instance with the same name. |
+
+The status block printed on success reports whether the outer compositor accepted the shortcut inhibitor request. See [Testing with a nested compositor](/docs/guides/testing-with-nested-compositor) for the workflow.
+
+Test mode is inspired by [AWMTT](https://github.com/serialoverflow/awmtt), a similar nested-compositor testing tool for AwesomeWM.
+
 ## Examples
 
 ```bash

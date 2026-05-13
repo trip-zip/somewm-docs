@@ -45,6 +45,17 @@ To only fail on critical issues:
 somewm --check ~/.config/somewm/rc.lua --check-level=critical
 ```
 
+## Reproduce a Crash in Isolation
+
+If your config loads but crashes at runtime, a nested test instance is a fast way to reproduce without taking down your real session. See [Testing with a nested compositor](/docs/guides/testing-with-nested-compositor):
+
+```bash
+somewm-client test start --config ~/.config/somewm/rc.lua
+somewm-client test logs -f
+```
+
+The nested compositor's log is in its state directory; tailing it shows the same error trace you'd see in your real session, but the crash doesn't affect your desktop.
+
 ## Read Error Notifications
 
 When SomeWM loads a config with runtime errors, it falls back to the default config and shows an error notification. The notification contains:

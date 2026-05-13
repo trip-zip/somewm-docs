@@ -19,6 +19,14 @@ What is reused: page structure, heading ordering, table columns, property orderi
 
 The four-quadrant framework (tutorials, how-to guides, reference, explanation) is described and credited on the [intro page](docs/intro.md) and the [AwesomeWM compatibility page](docs/concepts/awesomewm-compat.md). Diátaxis is a methodology, not text incorporated wholesale, so attribution is by link.
 
+## AWMTT
+
+- Project: <https://github.com/serialoverflow/awmtt>
+- Author: serialoverflow
+- License: see the AWMTT repository for the upstream terms
+
+What is reused: the conceptual UX of a nested-compositor mode for testing Lua configs without touching the user's real session (`start`, `stop`, `run`, `-C config`). The somewm `test` subcommand is an independent implementation. No source is copied; AWMTT wrapped Xephyr for AwesomeWM on X11, whereas `somewm-client test` uses wlroots' native nesting and adds named multi-instance management plus shortcut inhibitor negotiation. Credited inline in the [reference page](docs/reference/somewm-client.md#test-mode) and the [testing how-to](docs/guides/testing-with-nested-compositor.md).
+
 ## Code examples
 
 Many examples are rewritten for Wayland-native idioms (the `output` object, `somewm-client`, fractional scaling, monitor hotplug semantics). Where an example is closely derived from an AwesomeWM sample, the GPL applies as above.

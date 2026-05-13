@@ -14,6 +14,10 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 AwesomeWM has its own CLI tool (`awesome-client`), but it uses a different protocol. This guide covers `somewm-client`, which is specific to SomeWM.
 :::
 
+:::tip
+To try commands without affecting your real session, run them against a nested instance via [Testing with a nested compositor](/docs/guides/testing-with-nested-compositor).
+:::
+
 ## Basic Usage
 
 ### Check If Running

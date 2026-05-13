@@ -74,6 +74,20 @@ SomeWM uses the SNI D-Bus protocol. Legacy apps that only support X11 `_NET_SYST
 
 Most modern apps (NetworkManager, Discord, Bluetooth applets) support SNI.
 
+## Test Mode
+
+### `Mod4` keybindings don't work in a nested test instance
+
+When `somewm-client test start` is running, the nested somewm sits inside another compositor and the host decides whether to forward `Mod4`. If your host (e.g. GNOME) doesn't implement the shortcut inhibitor protocol, the orchestrator auto-remaps your `Mod4` bindings to `Mod1` (Alt) for that instance only. Check the start block:
+
+```
+test 'work': pid 12345 on wayland-3 (host: wayland), config ...
+  keybinds: ! outer compositor did not advertise shortcut inhibitor
+            ! Mod4 combos will be intercepted by the host
+```
+
+When you see this, hit `Alt + <key>` instead of `Mod4 + <key>` for the duration of the test instance. See [Testing with a nested compositor](/docs/guides/testing-with-nested-compositor#keybind-behavior-on-each-host) for the per-host compatibility table.
+
 ## Input Issues
 
 ### Keyboard layout not switching
