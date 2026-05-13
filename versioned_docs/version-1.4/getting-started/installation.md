@@ -6,6 +6,10 @@ description: Build and install SomeWM on your system
 
 # Installation
 
+:::tip Want to try first?
+You can run a sandboxed nested SomeWM inside your current Wayland or X11 session without logging out. Install the binary, then follow the [Try SomeWM Without Logging Out](../tutorials/try-somewm-without-installing.md) tutorial. Your daily-driver desktop is untouched.
+:::
+
 ## Dependencies
 
 :::note wlroots
