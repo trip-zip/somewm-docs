@@ -17,6 +17,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Tutorials',
       items: [
+        'tutorials/try-somewm-without-installing',
         'tutorials/basics',
         'tutorials/widgets',
         'tutorials/keybindings',
@@ -41,6 +42,7 @@ const sidebars: SidebarsConfig = {
         'guides/carousel-gestures',
         'guides/carousel-stacking',
         'guides/debugging',
+        'guides/testing-with-nested-compositor',
         'guides/fractional-scaling',
         'guides/input-devices',
         'guides/keyboard-layouts',
@@ -127,6 +129,7 @@ const sidebars: SidebarsConfig = {
         'concepts/tag-persistence',
         'concepts/scene-graph',
         'concepts/awesomewm-compat',
+        'concepts/test-mode',
       ],
     },
     'faq',

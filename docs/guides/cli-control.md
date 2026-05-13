@@ -15,7 +15,7 @@ AwesomeWM has its own CLI tool (`awesome-client`), but it uses a different proto
 :::
 
 :::tip
-To try commands without affecting your real session, run them against a nested instance via [Testing with a nested compositor](/docs/guides/testing-with-nested-compositor).
+To try commands without affecting your real session, run them against a nested instance via [Testing with a nested compositor](./testing-with-nested-compositor.md).
 :::
 
 ## Basic Usage

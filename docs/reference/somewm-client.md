@@ -108,7 +108,9 @@ Spawn a nested somewm under your current Wayland or X11 session so you can itera
 | `--no-marker` | Skip the wibar marker textbox (cosmetic only). |
 | `--force` | Replace an already-running instance with the same name. |
 
-The status block printed on success reports whether the outer compositor accepted the shortcut inhibitor request. See [Testing with a nested compositor](/docs/guides/testing-with-nested-compositor) for the workflow.
+The status block printed on success reports whether the outer compositor accepted the shortcut inhibitor request. See [Testing with a nested compositor](../guides/testing-with-nested-compositor.md) for the workflow.
+
+**See also:** [Test Mode (concepts)](../concepts/test-mode.md) for the why and when, and [Workflows](../guides/testing-with-nested-compositor.md#workflows) for the iterative-dev, PR-review, bisect, and sandbox recipes.
 
 Test mode is inspired by [AWMTT](https://github.com/serialoverflow/awmtt), a similar nested-compositor testing tool for AwesomeWM.
 
