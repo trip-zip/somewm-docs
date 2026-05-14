@@ -102,15 +102,67 @@ Spawn a nested somewm under your current Wayland or X11 session so you can itera
 | Option | Description |
 |--------|-------------|
 | `--config FILE` | Path to the `rc.lua` to load. If omitted, the nested somewm follows its normal lookup. |
-| `--name NAME` | Instance name. Default `test`. Each instance gets its own state dir at `$XDG_RUNTIME_DIR/somewm-test/<name>/`. |
-| `--host wayland\|x11` | Outer compositor type. Defaults to `wayland` if `WAYLAND_DISPLAY` is set, otherwise required. |
+| `--name NAME` | Instance name. Default `test`. 1 to 64 characters from `[A-Za-z0-9._-]`, no leading `.`. Each instance gets its own state dir at `$XDG_RUNTIME_DIR/somewm-test/<name>/`. |
+| `--host wayland\|x11\|headless` | Outer compositor type. Defaults to `wayland` if `WAYLAND_DISPLAY` is set; otherwise required. `headless` skips display nesting (no window opens) and is used by CI harnesses; typically paired with `WLR_RENDERER=pixman`. |
 | `--keybinds auto\|inhibit\|remap\|none` | How keys reach the nested somewm. `auto` tries the shortcut inhibitor protocol and falls back to `Mod4 -> Mod1` remap if the host doesn't support it. |
 | `--no-marker` | Skip the wibar marker textbox (cosmetic only). |
 | `--force` | Replace an already-running instance with the same name. |
 
-The status block printed on success reports whether the outer compositor accepted the shortcut inhibitor request. See [Testing with a nested compositor](../guides/testing-with-nested-compositor.md) for the workflow.
+The status block printed on success reports whether the outer compositor accepted the shortcut inhibitor request. `test start` waits up to 30 seconds for the nested compositor's IPC socket to respond to a ping before giving up; if `rc.lua` fails to load, the orchestrator detects the `FATAL:` line in the log and surfaces it instead of leaving the call hanging. See [Testing with a nested compositor](../guides/testing-with-nested-compositor.md) for the workflow.
 
-**See also:** [Test Mode (concepts)](../concepts/test-mode.md) for the why and when, and [Workflows](../guides/testing-with-nested-compositor.md#workflows) for the iterative-dev, PR-review, bisect, and sandbox recipes.
+### Environment variables {#test-env}
+
+Set by `somewm-client test` on the nested compositor:
+
+| Variable | Purpose |
+|----------|---------|
+| `SOMEWM_TEST_NAME` | Instance name. Compositor reads this to know it is a test instance and to load the keybind-remap shim. |
+| `SOMEWM_TEST_STATE_DIR` | Absolute path to the per-instance state directory. The compositor writes `keybinds_status` here. |
+| `SOMEWM_TEST_KEYBINDS_MODE` | One of `auto`, `inhibit`, `remap`, `none`. Mirrors `--keybinds`. |
+| `SOMEWM_TEST_KEYBINDS_REMAP` | Set to `1` when the orchestrator decides to fall back to `Mod4 -> Mod1` remap. The Lua shim reads this. |
+| `SOMEWM_SOCKET` | Absolute path to the per-instance IPC socket so subsequent `somewm-client test ...` calls reach the right compositor. |
+| `XDG_RUNTIME_DIR` | Overridden to `<state-dir>/runtime` so the nested compositor's Wayland socket does not collide with the host's. |
+| `WLR_BACKENDS`, `WLR_RENDERER`, `WLR_X11_OUTPUTS`, `WLR_WL_OUTPUTS` | Selected based on `--host`. |
+
+Read by `somewm-client test`:
+
+| Variable | Purpose |
+|----------|---------|
+| `SOMEWM_BINARY` | Path to the somewm binary to launch. Defaults to `somewm` on `$PATH`. Use this to nest a local build (`SOMEWM_BINARY=./build/somewm somewm-client test start ...`) without `make install`. |
+| `SOMEWM_TEST_KEEP_FAILED` | If set to any value, the orchestrator preserves the state directory after a failed start instead of cleaning it up. The log at `<state-dir>/log` survives so you can read it. |
+
+### State directory layout {#test-state-dir}
+
+Each instance owns `$XDG_RUNTIME_DIR/somewm-test/<name>/`:
+
+| File | Contents |
+|------|----------|
+| `pid` | Single line: the nested compositor's PID. |
+| `log` | Combined stdout + stderr of the nested compositor. |
+| `ipc.sock` | Unix domain socket the orchestrator and `somewm-client test ...` connect to. |
+| `runtime/` | Per-instance `XDG_RUNTIME_DIR`. Contains the nested compositor's `wayland-N` socket. |
+| `info` | Key-value snapshot for scripts. Keys: `name`, `pid`, `host`, `display`, `config`, `started_at`, `keybinds_mode`, `keybinds_status`, `wl_socket_name`, `no_marker`. |
+| `keybinds_status` | Single line written by the nested compositor: `active`, `unavailable`, or `not-applicable`. |
+
+`test stop` and the failed-start path both remove the directory unless `SOMEWM_TEST_KEEP_FAILED` is set.
+
+### Exit codes {#test-exit-codes}
+
+The `test` subcommands use a richer exit-code set than the generic codes at the bottom of this page:
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success. |
+| 1 | Usage error (bad flag, missing argument, invalid `--name`). |
+| 2 | An instance with the same `--name` is already running. Pass `--force` to replace it. |
+| 3 | Named instance not found (`stop`, `run`, `eval`, `reload`, `logs`). |
+| 4 | IPC failure (could not connect to the instance's socket, or the read/write failed). |
+| 5 | Process/system error (fork failed, the nested compositor exited before the socket came up, `FATAL:` in the startup log). |
+| 6 | Filesystem error (could not create the state directory, write the pidfile, or remove the state directory). |
+
+These let scripts and CI tell "already running" from "not found" from "the compositor crashed on startup" without parsing stderr.
+
+**See also:** [Test Mode (concepts)](../concepts/test-mode.md) for the why and when, and [Workflows](../guides/testing-with-nested-compositor.md#workflows) for the full set of recipes.
 
 Test mode is inspired by [AWMTT](https://github.com/serialoverflow/awmtt), a similar nested-compositor testing tool for AwesomeWM.
 
