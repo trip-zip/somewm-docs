@@ -38,7 +38,7 @@ test 'work': pid 12345 on wayland-3 (host: wayland), config /home/you/dev/somewm
             somewm-client test stop --name work
 ```
 
-Each instance gets its own directory at `$XDG_RUNTIME_DIR/somewm-test/<name>/` with an isolated `XDG_RUNTIME_DIR`, IPC socket, pid file, log, and an `info` key-value file you can inspect.
+Each instance gets its own directory at `$XDG_RUNTIME_DIR/somewm-test/<name>/` with an isolated `XDG_RUNTIME_DIR`, IPC socket, pid file, log, and an `info` key-value snapshot for scripts. See [State directory layout](../reference/somewm-client.md#test-state-dir) for the file-by-file breakdown.
 
 ## Drive commands into the nested instance
 
@@ -152,6 +152,71 @@ If the widget locks up the test instance, `somewm-client test stop --name sandbo
 
 Gotcha: test mode is not a security boundary. The nested instance shares your home directory; a widget that writes to `~/.config/somewm/state.json` writes to the real file. For untrusted code, use a separate user account or a VM. Test mode is for trusted but unproven Lua, not for hostile code. See [Test Mode](../concepts/test-mode.md#what-test-mode-is-not).
 
+### Headless integration testing for CI {#headless-ci}
+
+You want your `rc.lua` to have a test suite that runs in GitHub Actions, with no graphical session to nest under. The `--host headless` backend runs the full compositor and Lua VM with no display output, so `test eval` becomes a way to make assertions about your config.
+
+```bash
+# In CI, no WAYLAND_DISPLAY and no X11. Use headless + the pixman renderer.
+WLR_RENDERER=pixman somewm-client test start \
+    --name ci --host headless --config ./rc.lua
+
+# Assert something about the loaded config. test eval prints the Lua return value
+# and exits 0 on success, non-zero if the call errors.
+somewm-client test eval --name ci 'return tostring(#screen) == "1"' \
+    | grep -q '^true$' || exit 1
+
+somewm-client test eval --name ci 'return type(awful.layout.layouts) == "table"' \
+    | grep -q '^true$' || exit 1
+
+somewm-client test stop --name ci
+```
+
+Gotcha: the headless backend will not surface input or render artifacts, so this is for asserting state the Lua VM owns (loaded modules, registered handlers, tag counts, table contents). For things you can only verify by looking at pixels, use a Wayland host with a normal session.
+
+### Testing a custom build without installing {#custom-binary}
+
+You are reviewing a PR against somewm itself, or testing a local build of `somewm` before running `sudo make install`. `SOMEWM_BINARY` tells the orchestrator which binary to nest, so you can iterate against the build tree.
+
+```bash
+# Build the branch under test
+cd ~/tools/some && make build-test
+
+# Run your real rc.lua against the branch binary, nested under your normal session
+SOMEWM_BINARY=~/tools/some/build-test/somewm somewm-client test start \
+    --name dev --force --config ~/.config/somewm/rc.lua
+
+# Drive it however you'd drive your real session
+somewm-client test run  --name dev -- alacritty
+somewm-client test eval --name dev 'return client.focus and client.focus.name'
+```
+
+Gotcha: the installed `somewm-client` binary talks to the nested compositor over IPC. If the branch you are testing changes the IPC protocol, you may need to use the matching `somewm-client` from the same build tree: `~/tools/some/build-test/somewm-client test eval --name dev ...`.
+
+### Side-by-side comparison of two configs {#side-by-side}
+
+You want to compare two configs against the same input: an old version against a refactor, two competing widget libraries, your config against an upstream example. Run both nested at once with different `--name`s, drive identical commands into each.
+
+```bash
+# Bring up both configs
+somewm-client test start --name a --config ~/dev/rc-before.lua --force
+somewm-client test start --name b --config ~/dev/rc-after.lua  --force
+
+# Spawn the same client in each so behavior under "manage" is observable in both
+somewm-client test run --name a -- alacritty
+somewm-client test run --name b -- alacritty
+
+# Diff a piece of state across them
+somewm-client test eval --name a 'return #client.get()'
+somewm-client test eval --name b 'return #client.get()'
+
+# Tear down
+somewm-client test stop --name a
+somewm-client test stop --name b
+```
+
+Gotcha: the two instances share your D-Bus session, dconf, and `/home`. State written by one (notification daemon registrations, lock files, `~/.config/somewm/state.json`) can be observed by the other. For most comparisons that is fine, but be aware when the comparison hinges on first-write-wins state.
+
 ## Keybind behavior on each host
 
 The nested somewm sits between your hand and the host compositor. Keys flow into the host first, and the host decides what to forward.
@@ -190,6 +255,14 @@ somewm-client test stop --name work
 ```
 
 `test stop` sends `SIGTERM`, waits up to five seconds for the IPC socket to disappear, then escalates to `SIGKILL` if needed. The state directory is removed on the way out.
+
+If `test start` fails before the IPC socket comes up (broken `rc.lua`, missing Lua module, backend init error), the orchestrator removes the state directory by default. Pass `SOMEWM_TEST_KEEP_FAILED=1` in the environment to keep it around for forensics; the log at `<state-dir>/log` will still be there.
+
+```bash
+SOMEWM_TEST_KEEP_FAILED=1 somewm-client test start --name broken --config /tmp/intentionally-broken-rc.lua
+# After it fails, read the log:
+cat "$XDG_RUNTIME_DIR/somewm-test/broken/log"
+```
 
 `somewm-client test list` connects to each instance's IPC socket with a short timeout and reports `(stale)` for entries whose socket is gone. Stop any stale entries by name.
 
