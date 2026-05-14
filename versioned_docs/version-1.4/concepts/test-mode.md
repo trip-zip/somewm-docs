@@ -42,7 +42,7 @@ wlroots ships two relevant backends:
 
 The orchestrator (`somewm-client test`) picks the right backend, spins up a sandboxed `XDG_RUNTIME_DIR`, fork/execs the somewm binary, waits for its IPC socket to come up, and prints a status block. From there, the standard `somewm-client` IPC verbs work against the named instance via `--name`.
 
-A third backend, `--host headless`, runs the compositor with no display output at all. That sounds useless if you want to watch your widgets, but it is exactly what you want for CI: the full Lua VM loads, signal handlers register, and `test eval` lets you assert state, without any graphical session under it. See the [headless CI recipe](../guides/testing-with-nested-compositor.md#headless-ci) in the how-to for what that looks like in practice.
+A third backend, `--host headless`, runs the compositor with no display output. The Lua VM still loads, signal handlers still register, and `test eval` still works, so `rc.lua` assertions can run in CI without a graphical session. See the [headless CI recipe](../guides/testing-with-nested-compositor.md#headless-ci) for an example.
 
 ## Lifecycle
 
