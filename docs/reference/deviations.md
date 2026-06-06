@@ -86,7 +86,7 @@ These extend the AwesomeWM API with capabilities AwesomeWM has no equivalent for
 
 ### `awful.input` - Input device configuration
 
-18 properties for pointer (libinput) and keyboard settings. AwesomeWM delegated this to `xinput`, `xset`, and `setxkbmap` on X11.
+A number of properties for pointer (libinput) and keyboard settings. AwesomeWM delegated this to `xinput`, `xset`, and `setxkbmap` on X11.
 
 ```lua
 local awful = require("awful")

@@ -90,6 +90,8 @@ The `scroll_button` setting specifies which button activates scroll-on-button mo
 | `xkb_layout` | string | "us" | Keyboard layout (e.g., "us", "de", "us,ru") |
 | `xkb_variant` | string | "" | Layout variant (e.g., "dvorak", "colemak") |
 | `xkb_options` | string | "" | XKB options (e.g., "ctrl:nocaps") |
+| `xkb_model` | string | "" | XKB model (e.g., "pc105") |
+| `xkb_rules` | string | "" |  XKB rules (e.g., "base") |
 | `numlock` | boolean | - | Toggle NumLock on/off |
 | `keyboard_repeat_rate` | number | 25 | Key repeat rate (keys per second) |
 | `keyboard_repeat_delay` | number | 600 | Delay before repeat starts (milliseconds) |
