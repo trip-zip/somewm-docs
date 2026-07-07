@@ -180,9 +180,9 @@ naughty.notify {
 }
 ```
 
-### Print to stderr
+### Print to stdout
 
-`print()` writes to standard error, which appears in your terminal or log file:
+`print()` writes to standard output, which appears in your terminal or log file:
 
 ```lua
 print("Tag count: " .. tostring(#root.tags()))
