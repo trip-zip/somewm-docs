@@ -45,10 +45,10 @@ This shows `class`, `instance`, `name`, and other properties for each window.
 To see properties as windows open, add this temporarily to your `rc.lua`:
 
 ```lua
-client.connect_signal("manage", function(c)
-    naughty.notify {
+client.connect_signal("request::manage", function(c)
+    naughty.notification {
         title = "New window",
-        text = string.format(
+        message = string.format(
             "class: %s\ninstance: %s\nname: %s\ntype: %s",
             c.class or "nil",
             c.instance or "nil",
@@ -392,10 +392,10 @@ Check the class name. It's case-sensitive and might not be what you expect:
 somewm-client client list
 ```
 
-Some apps (notably Spotify) set their class late. If `class` is `nil` at rule evaluation time, the rule won't match. Use a `manage` signal as a workaround:
+Some apps (notably Spotify) set their class late. If `class` is `nil` at rule evaluation time, the rule won't match. Use a `request::manage` handler as a workaround:
 
 ```lua
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c)
     -- Wait for class to be set
     if c.class == nil then
         c:connect_signal("property::class", function()

@@ -291,7 +291,7 @@ Objects emit **signals** when things change. Connect to signals to react:
 
 ```lua
 -- React when a client is created
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c)
     -- c is the new client
     print("New client: " .. c.name)
 end)

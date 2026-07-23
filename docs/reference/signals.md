@@ -35,10 +35,8 @@ Emitted on the `client` class. Connect with `client.connect_signal("name", handl
 
 | Signal | Args | Notes |
 |--------|------|-------|
-| `request::manage` | `c, context, hints` | A new client wants to be managed. Default handlers (in `awful.permissions`, `ruled.client`) tag it, place it, and apply rules. Connect after default handlers run if you want to read post-rule properties. |
-| `manage` | `c` | The client is now managed and tagged. Safe to read all properties. |
-| `request::unmanage` | `c, context, hints` | The client is closing. Default handlers do final cleanup. |
-| `unmanage` | `c` | The client is gone. Don't access geometry or screen; they may already be invalid. |
+| `request::manage` | `c, context, hints` | A new client wants to be managed. Default handlers (in `awful.permissions`, `ruled.client`) tag it, place it, and apply rules. Connect after default handlers run if you want to read post-rule properties. `context` is `"new"` or `"startup"`. |
+| `request::unmanage` | `c, context, hints` | The client is going away. Default handlers do final cleanup. `context` is `"user"`, `"reparented"`, or `"destroyed"`. Don't access geometry or screen; they may already be invalid. |
 | `scanning` | none | Compositor is enumerating already-running clients before any are managed. `ruled.client` emits `request::rules` from here. |
 | `scanned` | none | Initial scan is complete. Fires before `awesome.startup` callbacks. |
 
@@ -187,7 +185,7 @@ Global signals on `awesome.*`. Connect with `awesome.connect_signal(...)`.
 
 ```lua
 -- React to new clients
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c, context, hints)
     if c.floating then
         awful.placement.centered(c)
     end

@@ -65,7 +65,7 @@ For delayed one-time actions:
 ```lua
 -- Run once after 3 seconds
 gears.timer.start_new(3, function()
-    naughty.notify { title = "Delayed notification" }
+    naughty.notification { title = "Delayed notification" }
     return false  -- Don't repeat
 end)
 ```
@@ -243,16 +243,16 @@ local function update_battery()
         -- Warning notifications
         if status ~= "Charging" then
             if capacity <= 10 and last_warning ~= 10 then
-                naughty.notify {
+                naughty.notification {
                     title = "Battery Critical",
-                    text = "Battery at " .. capacity .. "%",
+                    message = "Battery at " .. capacity .. "%",
                     urgency = "critical",
                 }
                 last_warning = 10
             elseif capacity <= 20 and last_warning ~= 20 then
-                naughty.notify {
+                naughty.notification {
                     title = "Battery Low",
-                    text = "Battery at " .. capacity .. "%",
+                    message = "Battery at " .. capacity .. "%",
                     urgency = "normal",
                 }
                 last_warning = 20

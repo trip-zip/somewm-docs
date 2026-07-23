@@ -63,11 +63,11 @@ awful.spawn.with_shell("xdg-user-dirs-update && nitrogen --restore")
 awful.spawn.with_shell("my-app > ~/.cache/my-app.log 2>&1")
 ```
 
-Combine with once for one-time shell commands:
+`spawn.once` and `spawn.single_instance` don't work with shell commands: they match clients by startup notification, which the shell doesn't propagate. To make a shell command run only once, put the guard in the command itself:
 
 ```lua
--- Only run once, with shell
-awful.util.spawn_with_shell("sleep 3 && nitrogen --restore")
+-- Skip if it's already running
+awful.spawn.with_shell("pgrep -x nitrogen > /dev/null || (sleep 3 && nitrogen --restore)")
 ```
 
 ## Delayed Startup

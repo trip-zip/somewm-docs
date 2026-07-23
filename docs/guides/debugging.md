@@ -174,9 +174,9 @@ The quickest way to inspect values at runtime:
 ```lua
 local naughty = require("naughty")
 
-naughty.notify {
+naughty.notification {
     title = "Debug",
-    text = tostring(client.focus and client.focus.class or "no focus"),
+    message = tostring(client.focus and client.focus.class or "no focus"),
 }
 ```
 
@@ -198,10 +198,10 @@ Listen for error signals to catch issues as they happen:
 
 ```lua
 awesome.connect_signal("debug::error", function(err)
-    naughty.notify {
+    naughty.notification {
         preset = naughty.config.presets.critical,
         title = "Error",
-        text = tostring(err),
+        message = tostring(err),
     }
 end)
 ```

@@ -19,7 +19,6 @@ The `awful` library is the core of AwesomeWM's window management functionality. 
 |--------|---------|
 | `awful.key` | Define keyboard shortcuts |
 | `awful.button` | Define mouse bindings |
-| `awful.rules` | Automatic client rules |
 | [awful.layout](./layout) | Tiling layouts |
 | `awful.tag` | Tag (workspace) management |
 | `awful.client` | Client (window) operations |
@@ -28,6 +27,8 @@ The `awful` library is the core of AwesomeWM's window management functionality. 
 | `awful.prompt` | Input prompts |
 | `awful.menu` | Context menus |
 | [awful.screenshot](./screenshot) | Screenshot capture and interactive snipping |
+
+Client rules live in `ruled.client`, not `awful`. SomeWM 2.0 deleted the `awful.rules` compatibility shim. See [Client Rules](../../guides/client-rules.md).
 
 ## SomeWM Extensions
 

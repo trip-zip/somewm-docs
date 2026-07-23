@@ -237,9 +237,9 @@ Make widgets interactive with `add_button`:
 clock:add_button(awful.button({}, 1, function()
     -- Left click: show notification
     local naughty = require("naughty")
-    naughty.notify {
+    naughty.notification {
         title = "Current Time",
-        text = os.date("%A, %B %d, %Y\n%H:%M:%S"),
+        message = os.date("%A, %B %d, %Y\n%H:%M:%S"),
     }
 end))
 
@@ -315,9 +315,9 @@ awful.tooltip {
 
 -- Click to show notification
 clock:add_button(awful.button({}, 1, function()
-    naughty.notify {
+    naughty.notification {
         title = "Current Time",
-        text = os.date("%A, %B %d, %Y\n%H:%M:%S"),
+        message = os.date("%A, %B %d, %Y\n%H:%M:%S"),
         timeout = 5,
     }
 end))
