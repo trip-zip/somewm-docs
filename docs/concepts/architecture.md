@@ -153,7 +153,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 end)
 
 -- This runs later, when windows appear
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c)
     -- Configure new windows
 end)
 ```

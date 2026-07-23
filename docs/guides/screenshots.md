@@ -80,9 +80,9 @@ awful.key({ modkey }, "Print", function()
         end
     end)
     s:connect_signal("file::saved", function(self, path)
-        naughty.notify {
+        naughty.notification {
             title = "Screenshot saved",
-            text = path,
+            message = path,
             timeout = 3,
         }
     end)
@@ -100,7 +100,7 @@ local s = awful.screenshot({
     auto_save_delay = 3,
 })
 s:connect_signal("timer::tick", function(self, remaining)
-    naughty.notify { title = "Screenshot in " .. remaining .. "s", timeout = 1 }
+    naughty.notification { title = "Screenshot in " .. remaining .. "s", timeout = 1 }
 end)
 ```
 
@@ -181,7 +181,7 @@ awful.keyboard.append_global_keybindings({
     awful.key({}, "Print", function()
         local filename = os.date("~/Pictures/screenshot_%Y%m%d_%H%M%S.png")
         awful.spawn.with_shell("grim " .. filename)
-        naughty.notify { title = "Screenshot", text = "Saved to " .. filename }
+        naughty.notification { title = "Screenshot", message = "Saved to " .. filename }
     end, { description = "screenshot full screen", group = "screenshot" }),
 
     -- Shift+Print: Select region
@@ -193,7 +193,7 @@ awful.keyboard.append_global_keybindings({
     -- Ctrl+Print: Full screen to clipboard
     awful.key({ "Control" }, "Print", function()
         awful.spawn.with_shell("grim - | wl-copy")
-        naughty.notify { title = "Screenshot", text = "Copied to clipboard" }
+        naughty.notification { title = "Screenshot", message = "Copied to clipboard" }
     end, { description = "screenshot to clipboard", group = "screenshot" }),
 
     -- Ctrl+Shift+Print: Region to clipboard
@@ -226,9 +226,9 @@ end
 function screenshot.full()
     local f = filename()
     awful.spawn.easy_async_with_shell("grim " .. f, function()
-        naughty.notify {
+        naughty.notification {
             title = "Screenshot",
-            text = "Saved: " .. f,
+            message = "Saved: " .. f,
             timeout = 3,
         }
     end)
@@ -243,9 +243,9 @@ end
 -- Full screen to clipboard
 function screenshot.full_clipboard()
     awful.spawn.easy_async_with_shell("grim - | wl-copy", function()
-        naughty.notify {
+        naughty.notification {
             title = "Screenshot",
-            text = "Copied to clipboard",
+            message = "Copied to clipboard",
             timeout = 3,
         }
     end)

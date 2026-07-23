@@ -119,7 +119,7 @@ This is the default behavior. When a client closes, `awful.client.focus.history.
 Focus the previous client on the same screen:
 
 ```lua
-client.connect_signal("unmanage", function(c)
+client.connect_signal("request::unmanage", function(c)
     if c == client.focus then
         local fallback = awful.client.focus.history.get(c.screen, 0, function(cl)
             return cl ~= c and cl.screen == c.screen

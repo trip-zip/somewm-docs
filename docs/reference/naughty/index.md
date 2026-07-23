@@ -10,14 +10,13 @@ The `naughty` library handles desktop notifications. It receives notifications f
 
 **Upstream documentation:** [awesomewm.org/apidoc/libraries/naughty.html](https://awesomewm.org/apidoc/libraries/naughty.html)
 
-SomeWM's `naughty` implementation is fully compatible with AwesomeWM.
+SomeWM's `naughty` implementation matches AwesomeWM, with one exception: SomeWM 2.0 removed the deprecated functional API that AwesomeWM still ships. See [Removed in SomeWM 2.0](#removed-functions).
 
 ## Modules
 
 | Module | Purpose |
 |--------|---------|
-| `naughty.notify` | Create and display notifications |
-| `naughty.notification` | Notification object |
+| `naughty.notification` | Create notifications; the notification object |
 | `naughty.layout.box` | Default notification display widget |
 | `naughty.widget.icon` | Notification icon widget |
 | `naughty.widget.title` | Notification title widget |
@@ -38,14 +37,14 @@ naughty.connect_signal("request::display", function(n)
 end)
 ```
 
-## naughty.notify
+## naughty.notification
 
 Create a notification:
 
 ```lua
-naughty.notify {
+naughty.notification {
     title   = "Title",
-    text    = "Body text",
+    message = "Body text",
     timeout = 5,
 }
 ```
@@ -55,7 +54,7 @@ naughty.notify {
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `title` | string | `""` | Notification title |
-| `text` | string | `""` | Notification body |
+| `message` | string | `""` | Notification body |
 | `timeout` | number | `5` | Auto-dismiss time in seconds (0 = never) |
 | `urgency` | string | `"normal"` | `"low"`, `"normal"`, or `"critical"` |
 | `position` | string | `"top_right"` | Screen position (see [Positions](#positions)) |
@@ -68,12 +67,14 @@ naughty.notify {
 | `category` | string | `nil` | Notification category (e.g., `"email.arrived"`) |
 | `app_name` | string | `nil` | Application name |
 
+`text` is still accepted as a constructor alias for `message`, but it is deprecated. There is no `text` property on the notification object.
+
 ### Actions
 
 ```lua
-naughty.notify {
+naughty.notification {
     title = "Download complete",
-    text = "document.pdf",
+    message = "document.pdf",
     actions = {
         naughty.action { name = "Open" },
         naughty.action { name = "Show in folder" },
@@ -84,9 +85,9 @@ naughty.notify {
 Handle action clicks with the `invoked` signal:
 
 ```lua
-local n = naughty.notify {
+local n = naughty.notification {
     title = "Download complete",
-    text = "document.pdf",
+    message = "document.pdf",
     actions = {
         naughty.action { name = "Open" },
         naughty.action { name = "Show in folder" },
@@ -225,13 +226,24 @@ for _, n in ipairs(naughty.notifications.suspended) do
 end
 ```
 
-### Legacy API
+## Removed in SomeWM 2.0 {#removed-functions}
 
-```lua
-naughty.suspend()   -- Deprecated, use naughty.suspended = true
-naughty.resume()    -- Deprecated, use naughty.suspended = false
-naughty.toggle()    -- Deprecated, use naughty.suspended = not naughty.suspended
-```
+The pre-AwesomeWM 4.4 functional API is gone. Calling any of these raises
+`attempt to call field '...' (a nil value)`.
+
+| Removed | Use instead |
+|---------|-------------|
+| `naughty.notify(args)` | `naughty.notification(args)` |
+| `naughty.suspend()` | `naughty.suspended = true` |
+| `naughty.resume()` | `naughty.suspended = false` |
+| `naughty.toggle()` | `naughty.suspended = not naughty.suspended` |
+| `naughty.is_suspended()` | `naughty.suspended` |
+| `naughty.destroy(n, reason)` | `n:destroy(reason)` |
+| `naughty.getById(id)` | `naughty.get_by_id(id)` |
+| `naughty.reset_timeout(n, t)` | `n:reset_timeout(t)` |
+| `naughty.replace_text(n, title, text)` | `n.title = title; n.message = text` |
+
+These still exist in SomeWM 1.4. See the [1.4 naughty reference](/docs/reference/naughty) if you have not upgraded.
 
 ## Signals
 

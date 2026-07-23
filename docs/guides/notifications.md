@@ -79,9 +79,9 @@ awful.keyboard.append_global_keybindings({
     awful.key({ modkey }, "n", function()
         naughty.suspended = not naughty.suspended
 
-        naughty.notify {
+        naughty.notification {
             title = naughty.suspended and "Presentation Mode" or "Notifications",
-            text = naughty.suspended and "Only critical alerts will show" or "All notifications enabled",
+            message = naughty.suspended and "Only critical alerts will show" or "All notifications enabled",
             timeout = 2,
             ignore_suspend = true,
         }
@@ -220,9 +220,9 @@ Trigger notifications from keybindings, widgets, or scripts:
 ```lua
 local naughty = require("naughty")
 
-naughty.notify {
+naughty.notification {
     title = "Volume Changed",
-    text = "Volume: 50%",
+    message = "Volume: 50%",
     icon = "/usr/share/icons/Adwaita/48x48/status/audio-volume-medium.png",
     timeout = 2,
     urgency = "low",

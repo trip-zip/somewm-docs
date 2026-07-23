@@ -87,7 +87,7 @@ When the queue drains, it processes a snapshot of the events queued at that mome
 ## Most signals receive their object as the first argument
 
 ```lua
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c)
     -- c is the client that was just managed
 end)
 
@@ -163,12 +163,12 @@ Three patterns, in increasing invasiveness:
 
 ```lua
 -- 1. Add a reaction (default handler still runs)
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c)
     if c.class == "Firefox" then c.maximized = true end
 end)
 
 -- 2. Stop reacting (your handler stops running; default unaffected)
-client.disconnect_signal("manage", my_handler)
+client.disconnect_signal("request::manage", my_handler)
 
 -- 3. Replace the default (default stops; yours takes over)
 client.disconnect_signal("request::tag", awful.permissions.tag)

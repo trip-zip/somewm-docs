@@ -153,13 +153,67 @@ end)
 
 Most of your config will work without changes:
 
-- **All awful.* modules** - layouts, keybindings, rules, spawn, etc.
 - **All gears.* modules** - timers, shapes, filesystem, etc.
 - **All wibox.* widgets** - text, image, progressbar, etc.
-- **Naughty notifications**
 - **Theming** - beautiful.* properties
-- **Client rules** - `awful.rules.rules`
+- **Client rules** - `ruled.client`
+- **Notifications** - `naughty`, including D-Bus notifications from applications
 - **Signals** - `client.connect_signal()`, `screen.connect_signal()`, etc.
+
+The modern API surface is intact. What SomeWM 2.0 dropped is the *deprecated* API that
+AwesomeWM still carries for backward compatibility. If your config predates AwesomeWM 4.0,
+read the next section.
+
+## Deprecated APIs Removed in SomeWM 2.0
+
+AwesomeWM still ships these for backward compatibility. SomeWM 2.0 deleted them, so a config
+that uses them fails with `attempt to call field '...' (a nil value)` or a `require` error.
+SomeWM 1.4 still has all of them.
+
+### Notifications
+
+| AwesomeWM | SomeWM 2.0 |
+|-----------|------------|
+| `naughty.notify(args)` | `naughty.notification(args)` |
+| `naughty.suspend()` / `naughty.resume()` / `naughty.toggle()` | `naughty.suspended = true` / `false` / `not naughty.suspended` |
+| `naughty.is_suspended()` | `naughty.suspended` |
+| `naughty.destroy(n, reason)` | `n:destroy(reason)` |
+| `naughty.getById(id)` | `naughty.get_by_id(id)` |
+| `naughty.reset_timeout(n, t)` | `n:reset_timeout(t)` |
+| `naughty.replace_text(n, title, text)` | `n.title = title; n.message = text` |
+
+### Client lifecycle signals
+
+The bare `manage` and `unmanage` signals are gone. Handlers connected to them never fire.
+SomeWM logs a warning at startup when it sees one.
+
+| AwesomeWM | SomeWM 2.0 |
+|-----------|------------|
+| `client.connect_signal("manage", function(c) ...` | `client.connect_signal("request::manage", function(c, context, hints) ...` |
+| `client.connect_signal("unmanage", function(c) ...` | `client.connect_signal("request::unmanage", function(c, context, hints) ...` |
+
+See [React to client lifecycle](../guides/react-to-client-lifecycle.md).
+
+### Renamed modules
+
+The 3.x-to-4.x redirect shims were deleted. `require` the real module instead.
+
+| Removed | Use instead |
+|---------|-------------|
+| `awful.rules` | `ruled.client` |
+| `awful.util` | `gears.filesystem`, `gears.table`, `gears.string`, `gears.math`, `gears.color`, `gears.debug`, `gears.geometry` |
+| `awful.wibox` | `awful.wibar` |
+| `awful.ewmh` | `awful.permissions` |
+| `awful.widget.graph` / `progressbar` / `textclock` | `wibox.widget.*` |
+| `wibox.widget.background` | `wibox.container.background` |
+| `wibox.layout.margin` / `constraint` / `scroll` / `mirror` / `rotate` | `wibox.container.*` |
+
+### Functional wrappers on `awful.tag` and `awful.client`
+
+26 `awful.tag.*` wrappers (`tag.setmwfact`, `tag.getgap`, `tag.viewonly`, and friends) and 5
+`awful.client.*` wrappers (`getmaster`, `setmaster`, `setslave`, `getmarked`,
+`floating.toggle`) were removed. All were replaced by object properties and methods in
+AwesomeWM 4.0, so use `t.master_width_factor`, `t.gap`, `t:view_only()`, and so on.
 
 ## Automatic Detection
 

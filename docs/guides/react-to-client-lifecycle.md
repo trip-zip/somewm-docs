@@ -12,10 +12,10 @@ For the full list, see [`client` signals](../reference/signals.md#client-signals
 
 ## Run code when a client appears
 
-`client.manage` fires when a client is fully managed: tagged, placed, with rules applied. It's the standard hook for "do X to new windows".
+`request::manage` fires when a new client appears. It's the standard hook for "do X to new windows".
 
 ```lua
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c, context, hints)
     -- Center floating windows on the focused screen
     if c.floating then
         awful.placement.centered(c)
@@ -23,14 +23,20 @@ client.connect_signal("manage", function(c)
 end)
 ```
 
-If you need to do something *before* rules apply (e.g. set a property the rules will then act on), use `request::manage` instead. The default rule handlers run in `request::manage`, so connect-order matters: handlers connected before `awful.permissions` and `ruled.client` are loaded see the pre-rule state.
+`context` is `"new"` for a window that just opened, or `"startup"` for one that already existed when SomeWM started. `hints` is reserved and currently empty.
+
+Connect-order decides what state you see. `ruled.client` connects its rule handler when the module is first required, so a handler you connect *after* that (the normal case in `rc.lua`) sees the client with rules already applied. Connect before `ruled.client` is required if you need the pre-rule state.
+
+:::note SomeWM 2.0 removed the bare `manage` signal
+AwesomeWM also emits a plain `manage` signal after rules are applied. SomeWM 2.0 removed it along with `unmanage`. Handlers connected to those names never fire, and SomeWM logs a warning at startup telling you to switch. Use `request::manage` and `request::unmanage`.
+:::
 
 ## Pin a scratchpad
 
-A scratchpad is a window you toggle in and out, always on the same tag, always floating, ignored by tasklists. Set it up on `manage`:
+A scratchpad is a window you toggle in and out, always on the same tag, always floating, ignored by tasklists. Set it up on `request::manage`:
 
 ```lua
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c)
     if c.instance == "scratchpad" then
         c.floating = true
         c.skip_taskbar = true
@@ -41,7 +47,7 @@ client.connect_signal("manage", function(c)
 end)
 ```
 
-Better: do this with a `ruled.client` rule. `manage` works, but rules are the structured way to express "every Foo client gets these properties". Use `manage` when the logic doesn't fit a rule (depends on runtime state, needs to read other clients).
+Better: do this with a `ruled.client` rule. The signal works, but rules are the structured way to express "every Foo client gets these properties". Use `request::manage` when the logic doesn't fit a rule (depends on runtime state, needs to read other clients).
 
 ## React to focus changes
 
@@ -80,7 +86,7 @@ end)
 -- Show a notification when a client becomes urgent
 client.connect_signal("property::urgent", function(c)
     if c.urgent then
-        naughty.notify {
+        naughty.notification {
             title = "Urgent: " .. (c.class or "?"),
             message = c.name,
         }
@@ -92,24 +98,24 @@ end)
 
 ## Run code when a client closes
 
-`unmanage` fires when a client is gone. Don't access geometry, screen, or tags inside the handler. They may already be invalid.
+`request::unmanage` fires when a client is gone. Don't access geometry, screen, or tags inside the handler. They may already be invalid.
 
 ```lua
-client.connect_signal("unmanage", function(c)
+client.connect_signal("request::unmanage", function(c)
     print("Closed: " .. (c.class or "?"))
 end)
 ```
 
-If you need state from the client at close time, save it on `manage`:
+If you need state from the client at close time, save it on `request::manage`:
 
 ```lua
 local client_data = {}
 
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c)
     client_data[c] = { class = c.class, opened_at = os.time() }
 end)
 
-client.connect_signal("unmanage", function(c)
+client.connect_signal("request::unmanage", function(c)
     local data = client_data[c]
     if data then
         print(string.format("%s ran for %d seconds", data.class, os.time() - data.opened_at))
@@ -124,11 +130,11 @@ Tables keyed by client object are safe. Once the client is unmanaged, drop your 
 
 | Want | Signal | Notes |
 |------|--------|-------|
-| Do X to new windows | `manage` | Use `ruled.client` rules where they fit |
-| Do X *before* rules apply | `request::manage` | Connect order matters |
+| Do X to new windows | `request::manage` | Use `ruled.client` rules where they fit |
+| Do X *before* rules apply | `request::manage` | Connect before `ruled.client` is required |
 | Highlight focused window | `focus` / `unfocus` | Or replace `request::border` |
 | React to title changes | `property::name` | Useful for tasklists |
-| Save / restore window state | `manage` + `unmanage` | Stash data keyed by client |
+| Save / restore window state | `request::manage` + `request::unmanage` | Stash data keyed by client |
 | Notify on urgent | `property::urgent` | Check `c.urgent` inside |
 | Flash on first paint | `property::geometry` | Filter on first emit per client |
 

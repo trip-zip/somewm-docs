@@ -58,7 +58,7 @@ These work exactly as in AwesomeWM:
 |----------|---------|
 | **Window Management** | `awful.client`, `awful.tag`, `awful.screen`, `awful.layout` |
 | **Input** | `awful.key`, `awful.button`, `awful.keyboard`, `awful.mouse` |
-| **Spawning** | `awful.spawn`, `awful.rules`, `ruled.client` |
+| **Spawning** | `awful.spawn`, `ruled.client` |
 | **Widgets** | All `wibox.*` modules |
 | **Utilities** | All `gears.*` modules |
 | **Theming** | `beautiful` |

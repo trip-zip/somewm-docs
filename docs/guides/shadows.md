@@ -238,7 +238,7 @@ awful.key({ modkey, "Shift" }, "s", function()
     if c then
         current_preset = current_preset % #preset_names + 1
         c.shadow = shadow_presets[preset_names[current_preset]]
-        naughty.notify { text = "Shadow: " .. preset_names[current_preset] }
+        naughty.notification { message = "Shadow: " .. preset_names[current_preset] }
     end
 end, {description = "cycle shadow presets", group = "client"})
 ```

@@ -86,16 +86,16 @@ Sometimes you don't want to replace the default; you want to run additionally. J
 
 ```lua
 -- The default handler still runs. Your handler runs after it.
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c)
     if c.class == "Firefox" then
         c.maximized = true
     end
 end)
 ```
 
-Handler order is the order they were connected. The default handler is connected at `require "awful.permissions"` time, so any handler you connect after that will run after the default.
+Handler order is the order they were connected. The `request::manage` default is connected at `require "ruled.client"` time (other defaults come from `require "awful.permissions"`), so any handler you connect after that will run after the default.
 
-For `request::*` signals where the default is doing something specific (placing, tagging, drawing borders), additive isn't always what you want; your handler might fight the default. For pure observation (`manage`, `focus`, `property::*`), additive is almost always right.
+For `request::*` signals where the default is doing something specific (placing, tagging, drawing borders), additive isn't always what you want; your handler might fight the default. For pure observation (`focus`, `property::*`), additive is almost always right.
 
 ## Finding the default handler
 
