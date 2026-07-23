@@ -24,6 +24,19 @@ const config: Config = {
     locales: ['en'],
   },
 
+  plugins: [
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'kiln',
+        path: 'kiln',
+        routeBasePath: '/kiln',
+        sidebarPath: './sidebarsKiln.ts',
+        editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
+      },
+    ],
+  ],
+
   presets: [
     [
       'classic',
@@ -46,6 +59,11 @@ const config: Config = {
         blog: {
           showReadingTime: true,
           editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
+        },
+        sitemap: {
+          // /kiln is live but unlisted: reachable by URL, absent from the
+          // sitemap, search index, navbar, and footer.
+          ignorePatterns: ['/kiln/**'],
         },
         theme: {
           customCss: './src/css/custom.css',
