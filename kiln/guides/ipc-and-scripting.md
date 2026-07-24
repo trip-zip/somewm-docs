@@ -56,7 +56,7 @@ The reply is capped at 4096 bytes. For big dumps, return compact strings, or wri
 
 ## 3. One-liners
 
-The six config globals (`client`, `screen`, `tag`, `layer`, `notification`, `core`) are available directly; the `some` module is one `require` away.
+The seven config globals (`client`, `screen`, `tag`, `layer`, `notification`, `drag`, `core`) are available directly; the `some` module is one `require` away.
 
 List every client:
 

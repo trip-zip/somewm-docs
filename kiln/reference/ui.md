@@ -23,7 +23,7 @@ end)
 
 ## The declare-time contract
 
-Constructors only work inside a declare function: a bar function, a widget function, or a policy the runtime calls during a frame. Outside a frame they error (`declare primitives are only callable inside` a declare pass). This is deliberate: an element is not an object you build and keep, it is a statement about the current frame. To change what is on screen, change the state your declare function reads; the next frame redeclares from the new facts.
+Constructors only work inside a declare function: a bar function, a widget function, or a policy the runtime calls during a frame. Outside a frame they error (`declare primitives are only callable inside the frame handler`). This is deliberate: an element is not an object you build and keep, it is a statement about the current frame. To change what is on screen, change the state your declare function reads; the next frame redeclares from the new facts.
 
 Container constructors take their children as a closure, so nesting is plain Lua:
 
@@ -73,7 +73,7 @@ Helpers that are not constructors:
 
 ## The cfg contract
 
-Every `box`, `row`, `column`, `surface`, and `image` cfg accepts exactly these fields:
+Every `box`, `row`, `column`, and `surface` cfg accepts exactly these fields (`image` and `text` take the narrower cfgs listed in the constructor table above):
 
 | Field | Values | Meaning |
 |---|---|---|

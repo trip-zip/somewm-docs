@@ -28,7 +28,8 @@ some.spawn("foot")
 | `some.animation` | Frame-clock easing: `get` and `start`. See [some.animation](#someanimation) below. |
 | `some.lockscreen` | The built-in lockscreen. `configure{}` overrides its colors and formats. See [Lockscreen and idle](/kiln/guides/lockscreen-and-idle). |
 | `some.prompt` | The inline text prompt: `run{}` and `completion`. See [some.prompt](#someprompt) below. |
-| `some.menu` | Popup menus: `show`, `close`, `client_list`. See [Menus](/kiln/guides/menus). |
+| `some.menu` | Popup menus: `show`, `close`, `client_list`. `some.menu.open` is the open-menu state, non-nil while a menu is up. See [Menus](/kiln/guides/menus). |
+| `some.notify` | Post or update a notification: `some.notify{ title = ..., message = ... }`. See [notification](/kiln/reference/notification). |
 | `some.tooltip` | `attach(text)` returns an `on_hover` handler. See [some.tooltip](#sometooltip) below. |
 | `some.placement` | 14 float-placement helpers. See [some.placement](/kiln/reference/placement). |
 | `some.icon` | Application icon lookup: `path(name)` and `client(c)`. See [some.icon](#someicon) below. |
@@ -56,6 +57,7 @@ See [Spawn lifecycle](/kiln/guides/spawn-lifecycle) for how pipes and watches be
 | `some.dirty(screen_name?)` | Force a re-declare of the named screen, or of every screen when called with no argument. |
 | `some.image_reload(path)` | Drop the cached decode of an image file, so the next frame re-reads it from disk. |
 | `some.reload()` | Re-run the config file in the live process. |
+| `some.inspector(s?)` | Toggle the Clay debug inspector on a screen; default the focused screen. See [Reload and debugging](/kiln/guides/reload-and-debugging). |
 
 :::note
 `some.reload()` re-runs your `rc.lua`, not the library: it does NOT re-require stdlib modules, so edits to kiln's own Lua need a restart. A reload drops everything the config built (bindings, rules, listeners, grabs, watches) and keeps everything the compositor owns (screens, layer surfaces, notifications, running children, input settings). Clients survive as clients but are re-tagged by the new config's rules, and a client minimized from the config side comes back unminimized. A broken config leaves a live compositor; the error surfaces through `some.on("error")`.

@@ -1,12 +1,12 @@
 ---
 title: core
-description: The raw C boundary, 54 functions across core.*, core.client.*, core.input.*, and core.output.*.
+description: The raw C boundary, 56 functions across core.*, core.client.*, core.input.*, and core.output.*.
 sidebar_position: 15
 ---
 
 # core
 
-`core` is the raw C surface of the compositor: 54 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, chrome, focus, rules) is built by calling these.
+`core` is the raw C surface of the compositor: 56 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, chrome, focus, rules) is built by calling these.
 
 :::note
 `core.*` is the raw C boundary the stdlib is built on. Configs should prefer the object model (`client`, `tag`, `screen`, `layer`, `notification`) and `some.*`, but everything here is reachable from config code and over IPC.

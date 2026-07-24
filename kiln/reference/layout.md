@@ -11,11 +11,10 @@ A layout in kiln is a plain function: `(clients, area, tag)`, called during a fr
 ```lua
 local some = require("somewm")
 
-tag.on("added", function(t)
-  t.layout = some.layout.tile
-end)
+-- at creation
+tag.new { name = "www", screen = screen.focused, layout = some.layout.fair }
 
--- switch a tag later, variants included
+-- or switch a tag later, variants included
 screen.focused.selected_tag.layout = some.layout.corner.se
 ```
 

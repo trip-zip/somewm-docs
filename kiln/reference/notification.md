@@ -32,7 +32,7 @@ Creates a notification, or updates one in place when `id` names a live one (a vo
 | `title` | string | nil | Heading. |
 | `message` | string | nil | Body text. |
 | `urgency` | string | `"normal"` | `"low"`, `"normal"`, or `"critical"`. Critical is sticky: it ignores the timeout and stays until dismissed. |
-| `timeout` | number | `theme.notification_timeout[urgency]` | Seconds until auto-dismiss; 0 is sticky. Writing it on a live notification re-arms the timer. |
+| `timeout` | number | `theme.notification_timeout[urgency]` | Seconds until auto-dismiss; 0 is sticky. Writing it on a live notification re-arms the timer. Ignored while urgency is critical. |
 | `actions` | list | `{}` | Action buttons, each `{key = ..., label = ...}`. |
 | `screen` | screen | the focused screen | Where the popup is drawn. |
 | `icon` | string | nil | Icon name or path. |
@@ -40,7 +40,7 @@ Creates a notification, or updates one in place when `id` names a live one (a vo
 
 Any other field is kept verbatim on the object: DBus passthrough hints land this way, and your own fields are visible to whatever display reads them. Managed fields set by the constructor: `seq`, `born`, `alive`; the computed getter `n.age` returns seconds since `born`.
 
-All listed properties are live on the object: writing `title`, `message`, `urgency`, `icon`, or `actions` redraws, and writing `timeout` or `urgency` re-arms the expiry timer.
+All listed properties are live on the object: writing `title`, `message`, `urgency`, `icon`, or `actions` redraws, and writing `timeout` or `urgency` re-arms the expiry timer (a critical notification never expires, whatever its timeout; it leaves only by dismissal).
 
 ## Methods
 

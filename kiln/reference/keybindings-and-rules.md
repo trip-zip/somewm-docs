@@ -39,7 +39,7 @@ A spec's modifiers must match the held set exactly, so `mod+j` and `mod+shift+j`
 some.key { mods = { "mod" }, key = "1-9", desc = "view tag", group = "tags",
            press = function(i)
                local t = screen.focused.tags[i]
-               if t then t:view_only() end
+               if t then t:view() end
            end }
 ```
 

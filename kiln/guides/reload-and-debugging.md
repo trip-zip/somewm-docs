@@ -124,12 +124,12 @@ Close it with the same key or the `x` in its header. Colours and panel width are
 
 ## 6. Name the containers you expect to debug
 
-Some rows in the tree have no name. Those are elements declared without an `id`: `ui.box`, `ui.row` and `ui.col` do not require one, kiln does not invent one, and so there is no name to print. A blank row is still fully inspectable, its config reads normally in the detail pane, it just cannot be identified at a glance.
+Some rows in the tree have no name. Those are elements declared without an `id`: `ui.box`, `ui.row` and `ui.column` do not require one, kiln does not invent one, and so there is no name to print. A blank row is still fully inspectable, its config reads normally in the detail pane, it just cannot be identified at a glance.
 
 Giving an element an id is a pure annotation. It changes nothing about layout or behaviour:
 
 ```lua
-ui.col({ id = "statusbar", h = 28, color = theme.bg }, function()
+ui.column({ id = "statusbar", h = 28, color = theme.bg }, function()
 	ui.row({ id = "statusbar.left", gap = 8 }, function()
 		-- ...
 	end)
