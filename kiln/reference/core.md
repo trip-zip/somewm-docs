@@ -26,7 +26,7 @@ These four build the Clay element tree and error outside a frame or lock handler
 
 | Function | Description |
 |---|---|
-| `core.open(decl)` | Open a Clay element. `decl` is a raw Clay declaration table: `id`, `layout` (`sizing`, `padding`, `childGap`, `childAlignment`, `layoutDirection`), `backgroundColor`, `cornerRadius`, `aspectRatio`, `image`, `floating`, `clip`, `border`. Must be balanced by `core.close()`. |
+| `core.open(decl)` | Open a Clay element. `decl` is a raw Clay declaration table: `id`, `layout` (`sizing`, `padding`, `childGap`, `childAlignment`, `layoutDirection`), `backgroundColor`, `cornerRadius`, `aspectRatio`, `image`, `floating` (incl. `clipTo = "none"` or `"attached_parent"`), `clip`, `border`. Must be balanced by `core.close()`. |
 | `core.close()` | Close the innermost open element. Errors without a matching `core.open`. |
 | `core.text(str, cfg)` | Declare a text leaf. `cfg` fields: `textColor`, `fontId` (accepted but currently ignored, one font), `fontSize` (default 16), `letterSpacing`, `lineHeight`, `wrapMode`, `textAlignment`. |
 | `core.surface(handle, decl?)` | Place a client surface as a self-closing leaf. Without `decl` it grows in both axes. The element id derives from the handle, so the key is stable across frames. Declaring the same handle twice in one frame is an error. |

@@ -109,6 +109,7 @@ Handler dispatch is innermost-first with no bubbling: the deepest element with a
 | `band` | band name | Stacking band, see below. |
 | `z` | number | Fine z within the band. |
 | `passthrough` | boolean | Pointer events pass through the float. |
+| `clip` | boolean | The float inherits the clip rectangle of what it attaches to: the part outside is neither drawn nor hittable. For a menu or tooltip anchored inside a `ui.scroll`. Default off: a float extends past its parent freely. |
 
 ## Bands (z order)
 

@@ -37,7 +37,7 @@ External panels, launchers, and lockers speak the layer-shell protocol, which de
 
 ## Clip is for scrolling, not containment
 
-Clay can clip a subtree to a box, and kiln exposes that through `ui.scroll`: a viewport whose content moves under it. That is the only intended use. Containment (keeping things on screen, keeping a menu under the bar) is never done by clipping a parent; it is done by the output edge and by band order. A float is not clipped by the element it attaches to, and that is a feature: a popup anchored to a bar widget extends past the bar freely.
+Clay can clip a subtree to a box, and kiln exposes that through `ui.scroll`: a viewport whose content moves under it. That is the only intended use. Containment (keeping things on screen, keeping a menu under the bar) is never done by clipping a parent; it is done by the output edge and by band order. A float is not clipped by the element it attaches to, and that is a feature: a popup anchored to a bar widget extends past the bar freely. The one exception is opt-in: `float = { clip = true }` makes the float inherit its attach target's clip rectangle, drawn and hittable only inside it, which is what a tooltip anchored inside a `ui.scroll` wants.
 
 ## Hidden means not in the tree
 
