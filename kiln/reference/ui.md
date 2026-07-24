@@ -41,7 +41,7 @@ end)
 | `ui.box(cfg, children?)` | Plain container or leaf. No layout direction of its own. |
 | `ui.row(cfg, children?)` | Left-to-right container. |
 | `ui.column(cfg, children?)` | Top-to-bottom container. |
-| `ui.text(str, cfg?)` | Text leaf. cfg: `color` (default `theme.fg`), `size` (default `theme.font_size`). |
+| `ui.text(str, cfg?)` | Text leaf. cfg: `color` (default `theme.fg`), `size` (default `theme.font_size`), `wrap` (`"words"` default, `"newlines"`, `"none"`), `align` (`"left"` default, `"center"`, `"right"`; places wrapped lines within the text box, use the parent's `align` for a single line), `line_height` (px per line; 0, the default, uses the font height). |
 | `ui.spacer(n?)` | Flexible gap: `ui.box{ w = n or "grow", h = n }`. With no argument it grows to fill the row. |
 | `ui.image(path, cfg?)` | Image leaf. cfg: `id, w, h, aspect, radius, on_press`. Images have no intrinsic size: give both axes, or one axis plus `aspect`. Decoded once and cached by path. |
 | `ui.surface(c, cfg?)` | The client leaf: places the client's own buffer tree at the solved box. |
