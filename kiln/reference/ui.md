@@ -77,7 +77,7 @@ Every `box`, `row`, `column`, `surface`, and `image` cfg accepts exactly these f
 
 | Field | Values | Meaning |
 |---|---|---|
-| `id` | string, or `{ name, index }` | Element id. Needed for handlers, `core.box` readback, and float anchoring. Auto-assigned when absent and a handler is present. |
+| `id` | string, or `{ name, index }` | Element id. Needed for handlers, `core.box` readback, and float anchoring, and it is what labels the element in the [inspector](/kiln/guides/reload-and-debugging). Auto-assigned when absent and a handler is present; an element with neither is anonymous, which is supported but shows as a blank row. Two elements sharing an id in one frame is fatal, so repeated elements need `{ name, index }` with a numeric index. |
 | `w`, `h` | number (px), `"fit"`, `"grow"`, `"N%"`, `{ "grow", min =, max = }` | Sizing per axis. |
 | `pad` | number, `{ x =, y = }`, or `{ left =, right =, top =, bottom = }` | Padding. |
 | `gap` | number | Space between children. |
