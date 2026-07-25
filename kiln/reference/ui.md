@@ -84,7 +84,7 @@ Every `box`, `row`, `column`, and `surface` cfg accepts exactly these fields (`i
 | `align` | `"center"`, or `{ x =, y = }` with x in `"left"/"center"/"right"` and y in `"top"/"center"/"bottom"` | Child alignment. |
 | `color` | color spec | Background. |
 | `radius` | number | Corner radius, all four corners. |
-| `border` | `{ width = n or { left =, right =, top =, bottom = }, color = }` | Border; `width` defaults to 1. |
+| `border` | `{ width = n or { left =, right =, top =, bottom =, betweenChildren = }, color = }` | Border; `width` defaults to 1. The table form also takes `betweenChildren`, a divider drawn between adjacent children along the layout axis. |
 | `float` | table, see below | Take the element out of flow. |
 | `aspect` | number | Aspect ratio (width / height). |
 | `clip` | `{ vertical =, horizontal =, childOffset = { x, y } }` | Scissor plus content offset (what `ui.scroll` wraps for you). |
