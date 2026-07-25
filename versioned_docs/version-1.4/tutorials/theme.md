@@ -26,10 +26,12 @@ All visual styling in SomeWM flows through the `beautiful` module. When you call
 local beautiful = require("beautiful")
 beautiful.init("/path/to/your/theme.lua")
 
--- Later, anywhere in your config:
+-- Anywhere AFTER init(), including inside required modules:
 print(beautiful.bg_normal)  -- "#282828"
 print(beautiful.font)       -- "sans 10"
 ```
+
+Order matters: before `beautiful.init()` runs, every theme variable is `nil` and reading one produces no error. This includes code that runs inside modules your `rc.lua` requires, so require widget modules after the `beautiful.init()` call.
 
 ## Creating Your Theme Directory
 
@@ -430,6 +432,8 @@ local theme = {}
 -- ... your theme settings ...
 return theme  -- Don't forget this!
 ```
+
+Also check *when* your code reads the theme. A module required before `beautiful.init()` sees `nil` for every theme variable, silently. Values copied at require time (like `bg = beautiful.bg_normal` at the top of a widget module) stay `nil` even after `init()` runs later. Move widget requires below `beautiful.init()` in your `rc.lua`.
 
 ### Icons not showing
 

@@ -24,6 +24,7 @@ Reference for `awful.wibar` configuration options.
 |----------|------|---------|-------------|
 | `bg` | color | `beautiful.wibar_bg` | Background color |
 | `fg` | color | `beautiful.wibar_fg` | Foreground/text color |
+| `bgimage` | surface/string/function | `beautiful.wibar_bgimage` | Background image, drawn over `bg`. See [Background Image](#background-image) |
 | `opacity` | number | `1` | Opacity (0.0 to 1.0) |
 | `shape` | function | - | Shape function (e.g., `gears.shape.rounded_rect`) |
 
@@ -145,6 +146,44 @@ awful.key({ modkey }, "b", function()
 end)
 ```
 
+## Background Image
+
+`bgimage` paints an image on top of the background color. It accepts three kinds of value:
+
+| Value | Behavior |
+|-------|----------|
+| File path (string) | Loaded with `gears.surface` and cached. A bad path is not an error: it logs a message and draws nothing |
+| Cairo surface | Used as-is |
+| Function | Called on every repaint as `f(context, cr, width, height)`; draw whatever you want with the cairo context |
+
+A surface or path is painted **once, at its native pixel size, anchored at the top-left corner**. It is not tiled and not stretched; the rest of the bar shows the plain `bg` color. A small texture PNG therefore appears only in the corner. To tile it, use the function form and a repeating cairo pattern:
+
+```lua
+local cairo = require("lgi").cairo
+local gsurface = require("gears.surface")
+
+local texture = gsurface.load(os.getenv("HOME") .. "/.config/somewm/theme/bar-texture.png")
+
+s.mywibox = awful.wibar {
+    position = "top",
+    screen = s,
+    bgimage = function(_, cr, width, height)
+        local pattern = cairo.Pattern.create_for_surface(texture)
+        pattern.extend = cairo.Extend.REPEAT
+        cr:set_source(pattern)
+        cr:rectangle(0, 0, width, height)
+        cr:fill()
+    end,
+}
+```
+
+Notes:
+
+- `beautiful.wibar_bgimage` is read once, when the wibar is constructed, and only if you did not pass `bgimage` yourself. Setting the theme variable after the bar exists does nothing; assign `s.mywibox.bgimage = ...` instead.
+- `bgimage` is write-only: reading `s.mywibox.bgimage` does not return the value you set.
+
+For a step-by-step walkthrough (native, tiled, and stretched variants), see [Put a PNG texture on your wibar](/docs/guides/wibar-background-image).
+
 ## Theme Variables
 
 These `beautiful` variables provide defaults for wibars:
@@ -153,6 +192,7 @@ These `beautiful` variables provide defaults for wibars:
 |----------|-------------|
 | `wibar_bg` | Default background |
 | `wibar_fg` | Default foreground |
+| `wibar_bgimage` | Default background image (surface, path, or function) |
 | `wibar_height` | Default height |
 | `wibar_border_color` | Default border color |
 | `wibar_border_width` | Default border width |

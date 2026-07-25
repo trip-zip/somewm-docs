@@ -82,3 +82,7 @@ Run `somewm --check ~/.config/somewm/rc.lua` to check for errors.
 ### Widgets aren't rendering
 
 Usually means LGI isn't found. See [Installation - LGI Troubleshooting](/docs/getting-started/installation#lgi-troubleshooting).
+
+### My widget ignores my theme
+
+The widget module was required before `beautiful.init()`. See [Troubleshooting](/docs/troubleshooting#widget-shows-no-theming-unstyled-wrong-font).
