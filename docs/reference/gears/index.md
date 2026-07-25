@@ -59,6 +59,24 @@ widget.shape = function(cr, w, h)
 end
 ```
 
+### Surfaces
+
+`gears.surface` turns image files into cairo surfaces, used by `bgimage`, wallpapers, and icons:
+
+```lua
+local gsurface = require("gears.surface")
+
+local img = gsurface.load("/path/to/image.png")            -- cached by path
+local img2 = gsurface.load_uncached("/path/to/image.png")  -- fresh copy, no cache
+local w, h = gsurface.get_size(img)                        -- pixel dimensions
+```
+
+Behavior worth knowing:
+
+- `load` caches surfaces by file path, so loading the same file twice is free. Use `load_uncached` if you modify the surface in place.
+- A path that fails to load is **not an error**: an error is printed to the log and an empty 0x0 surface is returned, which draws nothing. If an image silently does not appear, check the log.
+- Passing an existing cairo surface returns it unchanged, so APIs built on `gears.surface` accept either a path or a surface.
+
 ## Behavioral Notes
 
 SomeWM's `gears` implementation is fully compatible with AwesomeWM.

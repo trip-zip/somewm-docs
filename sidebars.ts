@@ -19,9 +19,9 @@ const sidebars: SidebarsConfig = {
       items: [
         'tutorials/try-somewm-without-installing',
         'tutorials/basics',
+        'tutorials/theme',
         'tutorials/widgets',
         'tutorials/keybindings',
-        'tutorials/theme',
         'tutorials/wibar',
         'tutorials/carousel',
       ],
@@ -53,6 +53,7 @@ const sidebars: SidebarsConfig = {
         'guides/screenshots',
         'guides/shadows',
         'guides/wallpaper-caching',
+        'guides/wibar-background-image',
         'guides/widget-timers',
       ],
     },

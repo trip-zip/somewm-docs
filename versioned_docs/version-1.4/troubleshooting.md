@@ -68,6 +68,10 @@ For custom LGI locations:
 somewm -L /usr/lib/lua/5.1
 ```
 
+### Widget shows no theming (unstyled, wrong font)
+
+The widget module was required before `beautiful.init()` ran. Theme variables read at require time were `nil`, silently: no error is raised, the widget just renders with no colors and the default `sans 8` font. Move the widget `require` below `beautiful.init()` in your `rc.lua`. See [the widgets tutorial](/docs/tutorials/widgets#step-3-use-it-in-your-config).
+
 ### Systray icons not showing
 
 SomeWM uses the SNI D-Bus protocol. Legacy apps that only support X11 `_NET_SYSTEMTRAY` won't show icons.

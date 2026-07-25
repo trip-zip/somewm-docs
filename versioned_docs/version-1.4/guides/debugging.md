@@ -121,6 +121,18 @@ local clock = require("widgets/clock")   -- Wrong: use dots, not slashes
 local clock = require("clock")           -- Wrong: missing directory
 ```
 
+### Theme Variables Silently Nil
+
+Unlike the errors above, this one produces no message at all. A module required before `beautiful.init()` reads `nil` for every theme variable, and values copied at require time stay `nil` after `init()` runs:
+
+```lua
+-- widgets/clock.lua, required BEFORE beautiful.init() in rc.lua
+local beautiful = require("beautiful")
+local bg = beautiful.bg_normal   -- nil, no error; stays nil forever
+```
+
+Quick probe: add `print(beautiful.bg_normal)` at the top of the module and check the log. If it prints `nil`, move the module's `require` below `beautiful.init()` in your `rc.lua`.
+
 ### Calling a Nil Function
 
 Happens when a function name is misspelled or the module doesn't export it:
