@@ -56,9 +56,9 @@ This page explains why some AwesomeWM features work differently (or don't work) 
 
 **X11**: Borders drawn OUTSIDE the window frame by X server.
 
-**Wayland**: Borders are scene graph elements at geometry edges.
+**Wayland**: Borders are scene graph rectangles drawn around the client geometry. `c:geometry()` excludes the border, matching AwesomeWM; the window's on-screen footprint is the geometry plus `border_width` on each side.
 
-**Impact**: Titlebars start INSIDE the border area (inset by `border_width`).
+**Impact**: Titlebars are inside the geometry and start INSIDE the border area (inset by `border_width`).
 
 ## Partially Working Features
 
