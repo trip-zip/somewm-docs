@@ -4,8 +4,6 @@ description: The complete kiln API surface, page by page, objects, modules, and 
 sidebar_position: 1
 ---
 
-import ModuleTable from '@site/src/components/ModuleTable';
-
 # Reference
 
 This section documents every symbol a kiln config can touch: the objects the compositor hands you, the `some` stdlib modules, and the system layer under both. Each page opens with a short example, then tables: properties as name, type, default, description; methods with their signatures inline; signals with payload and when they fire.
@@ -22,38 +20,38 @@ and the classes `client`, `screen`, `tag`, `layer`, `drag`, `notification`, and 
 
 The live things the compositor manages. Properties are read at declare time, so setting one takes effect on the next frame.
 
-<ModuleTable modules={[
-  { name: 'client', description: 'A window: geometry, tags, focus, floating, fullscreen, its methods and signals.', link: '/kiln/reference/client' },
-  { name: 'tag', description: 'A workspace: selection, its client list, layout, and layout parameters.', link: '/kiln/reference/tag' },
-  { name: 'screen', description: 'An output: geometry, workarea, tags, bars, and the DPI facts.', link: '/kiln/reference/screen' },
-  { name: 'layer', description: 'A layer-shell surface: panels, launchers, and lockers from other programs.', link: '/kiln/reference/layer' },
-  { name: 'notification', description: 'A desktop notification: urgency, actions, timeout, and its lifecycle.', link: '/kiln/reference/notification' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [client](client.md) | A window: geometry, tags, focus, floating, fullscreen, its methods and signals. |
+| [tag](tag.md) | A workspace: selection, its client list, layout, and layout parameters. |
+| [screen](screen.md) | An output: geometry, workarea, tags, bars, and the DPI facts. |
+| [layer](layer.md) | A layer-shell surface: panels, launchers, and lockers from other programs. |
+| [notification](notification.md) | A desktop notification: urgency, actions, timeout, and its lifecycle. |
 
 ## Modules
 
 The `some` stdlib: everything a config composes with.
 
-<ModuleTable modules={[
-  { name: 'some', description: 'The top-level module: spawn, rules, key, button, and what it re-exports.', link: '/kiln/reference/some' },
-  { name: 'some.ui', description: 'The declarative UI layer: every constructor, the cfg contract, floats, bands, and menus.', link: '/kiln/reference/ui' },
-  { name: 'some.layout', description: 'The layout contract, the nine built-in families, and the tag properties they read.', link: '/kiln/reference/layout' },
-  { name: 'Keys, Buttons, and Rules', description: 'Binding keys and pointer buttons, and matching clients with rules.', link: '/kiln/reference/keybindings-and-rules' },
-  { name: 'some.defaults', description: 'The replaceable default policies the runtime installs.', link: '/kiln/reference/defaults' },
-  { name: 'some.placement', description: 'Placement helpers for floating clients.', link: '/kiln/reference/placement' },
-  { name: 'Theme Variables', description: 'Every some.theme key with its default, plus some.modkey.', link: '/kiln/reference/theme-variables' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [some](some.md) | The top-level module: spawn, rules, key, button, and what it re-exports. |
+| [some.ui](ui.md) | The declarative UI layer: every constructor, the cfg contract, floats, bands, and menus. |
+| [some.layout](layout.md) | The layout contract, the nine built-in families, and the tag properties they read. |
+| [Keys, Buttons, and Rules](keybindings-and-rules.md) | Binding keys and pointer buttons, and matching clients with rules. |
+| [some.defaults](defaults.md) | The replaceable default policies the runtime installs. |
+| [some.placement](placement.md) | Placement helpers for floating clients. |
+| [Theme Variables](theme-variables.md) | Every some.theme key with its default, plus some.modkey. |
 
 ## System
 
 The layer under the stdlib. Everyday configs rarely need these pages; scripting, debugging, and extension work does.
 
-<ModuleTable modules={[
-  { name: 'Signal Index', description: 'Every signal on every class, in one table.', link: '/kiln/reference/signals' },
-  { name: 'core', description: 'The raw C boundary the stdlib is built on: declare primitives, timers, input.', link: '/kiln/reference/core' },
-  { name: 'Origin Events', description: 'The compositor events that drive the runtime, and what each carries.', link: '/kiln/reference/events' },
-  { name: 'Environment and IPC', description: 'Environment variables, the IPC socket, and evaluating Lua from outside.', link: '/kiln/reference/environment-and-ipc' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Signal Index](signals.md) | Every signal on every class, in one table. |
+| [core](core.md) | The raw C boundary the stdlib is built on: declare primitives, timers, input. |
+| [Origin Events](events.md) | The compositor events that drive the runtime, and what each carries. |
+| [Environment and IPC](environment-and-ipc.md) | Environment variables, the IPC socket, and evaluating Lua from outside. |
 
 ## See also
 

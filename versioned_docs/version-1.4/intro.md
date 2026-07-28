@@ -4,8 +4,6 @@ title: Documentation
 description: SomeWM documentation index - tutorials, guides, reference, and concepts
 ---
 
-import ModuleTable from '@site/src/components/ModuleTable';
-
 # SomeWM Documentation
 
 A Wayland compositor that brings AwesomeWM's Lua API to Wayland, built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots). These docs cover everything from getting started to the full API reference.
@@ -16,7 +14,7 @@ SomeWM's documentation aims to be **self-sufficient**: a complete reference for 
 
 - **Comprehensive.** Every API surface AwesomeWM documents is, or will be, documented here.
 - **Organized by task.** We use the [Diátaxis framework](https://diataxis.fr/): tutorials (learning), how-to guides (doing), reference (looking up), and concepts (understanding), each kept separate. AwesomeWM's docs are LDoc-generated and do not draw these distinctions.
-- **Honest about Wayland.** Architectural differences from AwesomeWM, stubs, and SomeWM-only extensions are inline on the affected pages and indexed in [Deviations](/docs/reference/deviations).
+- **Honest about Wayland.** Architectural differences from AwesomeWM, stubs, and SomeWM-only extensions are inline on the affected pages and indexed in [Deviations](reference/deviations.md).
 
 We are not self-sufficient on every topic yet. If you hit a gap, file a [discussion](https://github.com/trip-zip/somewm/discussions) and we will prioritize it. See [#532](https://github.com/trip-zip/somewm/discussions/532) for the conversation that started this work.
 
@@ -35,63 +33,63 @@ Each section serves a different need. Pick the one that matches what you're tryi
 
 ## Getting Started
 
-<ModuleTable modules={[
-  { name: 'Installation', description: 'Build and install SomeWM', link: '/docs/getting-started/installation' },
-  { name: 'First Launch', description: 'Run SomeWM for the first time', link: '/docs/getting-started/first-launch' },
-  { name: 'Migrating', description: 'Coming from AwesomeWM? Start here', link: '/docs/getting-started/migrating' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Installation](getting-started/installation.md) | Build and install SomeWM |
+| [First Launch](getting-started/first-launch.md) | Run SomeWM for the first time |
+| [Migrating](getting-started/migrating.md) | Coming from AwesomeWM? Start here |
 
 ## Tutorials
 
 Step-by-step lessons to learn SomeWM from scratch.
 
-<ModuleTable modules={[
-  { name: 'Basics', description: 'Core concepts and configuration', link: '/docs/tutorials/basics' },
-  { name: 'Keybindings', description: 'Set up keyboard shortcuts', link: '/docs/tutorials/keybindings' },
-  { name: 'Widgets', description: 'Build custom widgets', link: '/docs/tutorials/widgets' },
-  { name: 'Wibar', description: 'Configure the status bar', link: '/docs/tutorials/wibar' },
-  { name: 'Theme', description: 'Customize colors and appearance', link: '/docs/tutorials/theme' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Basics](tutorials/basics.md) | Core concepts and configuration |
+| [Keybindings](tutorials/keybindings.md) | Set up keyboard shortcuts |
+| [Widgets](tutorials/widgets.md) | Build custom widgets |
+| [Wibar](tutorials/wibar.md) | Configure the status bar |
+| [Theme](tutorials/theme.md) | Customize colors and appearance |
 
 ## How-To Guides
 
 Practical recipes for specific tasks.
 
-<ModuleTable modules={[
-  { name: 'Input Devices', description: 'Configure touchpad, mouse, and keyboard settings', link: '/docs/guides/input-devices' },
-  { name: 'CLI Control', description: 'Control SomeWM from external scripts', link: '/docs/guides/cli-control' },
-  { name: 'Multi-Monitor', description: 'Set up multiple displays', link: '/docs/guides/multi-monitor' },
-  { name: 'Autostart', description: 'Launch applications on startup', link: '/docs/guides/autostart' },
-  { name: 'Notifications', description: 'Configure the notification system', link: '/docs/guides/notifications' },
-  { name: 'Screenshots', description: 'Capture screen content', link: '/docs/guides/screenshots' },
-  { name: 'Fractional Scaling', description: 'HiDPI and fractional display scaling', link: '/docs/guides/fractional-scaling' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Input Devices](guides/input-devices.md) | Configure touchpad, mouse, and keyboard settings |
+| [CLI Control](guides/cli-control.md) | Control SomeWM from external scripts |
+| [Multi-Monitor](guides/multi-monitor.md) | Set up multiple displays |
+| [Autostart](guides/autostart.md) | Launch applications on startup |
+| [Notifications](guides/notifications.md) | Configure the notification system |
+| [Screenshots](guides/screenshots.md) | Capture screen content |
+| [Fractional Scaling](guides/fractional-scaling.md) | HiDPI and fractional display scaling |
 
 ## Reference
 
 Technical specifications and API details. Organized by Lua library, with links to upstream AwesomeWM docs.
 
-<ModuleTable modules={[
-  { name: 'Lua Libraries', description: 'Overview of all libraries with upstream links', link: '/docs/reference/lua-libraries' },
-  { name: 'awful', description: 'Window management, keybindings, layouts', link: '/docs/reference/awful/' },
-  { name: 'beautiful', description: 'Theming and theme variables', link: '/docs/reference/beautiful/' },
-  { name: 'wibox', description: 'Widgets and the wibar', link: '/docs/reference/wibox/' },
-  { name: 'naughty', description: 'Notifications', link: '/docs/reference/naughty/' },
-  { name: 'gears', description: 'Utilities (timers, shapes, colors)', link: '/docs/reference/gears/' },
-  { name: 'Key Names', description: 'Modifier keys and key name reference', link: '/docs/reference/key-names' },
-  { name: 'somewm-client', description: 'IPC CLI tool (SomeWM-only)', link: '/docs/reference/somewm-client' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Lua Libraries](reference/lua-libraries.md) | Overview of all libraries with upstream links |
+| [awful](reference/awful/index.md) | Window management, keybindings, layouts |
+| [beautiful](reference/beautiful/index.md) | Theming and theme variables |
+| [wibox](reference/wibox/index.md) | Widgets and the wibar |
+| [naughty](reference/naughty/index.md) | Notifications |
+| [gears](reference/gears/index.md) | Utilities (timers, shapes, colors) |
+| [Key Names](reference/key-names.md) | Modifier keys and key name reference |
+| [somewm-client](reference/somewm-client.md) | IPC CLI tool (SomeWM-only) |
 
 ## Concepts
 
 Background knowledge and architectural understanding.
 
-<ModuleTable modules={[
-  { name: 'Architecture', description: 'How SomeWM is structured', link: '/docs/concepts/architecture' },
-  { name: 'Object Model', description: 'Understanding the Lua object system', link: '/docs/concepts/object-model' },
-  { name: 'Wayland vs X11', description: 'Key differences from X11', link: '/docs/concepts/wayland-vs-x11' },
-  { name: 'AwesomeWM Compatibility', description: 'What works and what differs', link: '/docs/concepts/awesomewm-compat' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Architecture](concepts/architecture.md) | How SomeWM is structured |
+| [Object Model](concepts/object-model.md) | Understanding the Lua object system |
+| [Wayland vs X11](concepts/wayland-vs-x11.md) | Key differences from X11 |
+| [AwesomeWM Compatibility](concepts/awesomewm-compat.md) | What works and what differs |
 
 ## Versioning
 

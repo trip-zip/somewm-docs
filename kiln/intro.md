@@ -4,8 +4,6 @@ description: A Wayland compositor where your entire desktop is one declarative L
 sidebar_position: 1
 ---
 
-import ModuleTable from '@site/src/components/ModuleTable';
-
 # Kiln
 
 kiln is a Wayland compositor where everything on screen is a node in one [Clay](https://github.com/nicbarker/clay) layout tree per screen. Windows, bars, widgets, tags, menus, and notifications are all the same kind of thing: Lua declares the tree, the Clay solver lays it out, and a thin C core renders the result. There is no separate widget toolkit, no imperative drawing loop, no special-cased bar. Your entire desktop is a Lua config over a small, general core.
@@ -31,65 +29,65 @@ Pick the section that matches what you are trying to do right now.
 
 ## Getting Started
 
-<ModuleTable modules={[
-  { name: 'Installation', description: 'Build kiln from source and install it', link: '/kiln/getting-started/installation' },
-  { name: 'First Launch', description: 'Run kiln nested or on a TTY for the first time', link: '/kiln/getting-started/first-launch' },
-  { name: 'Anatomy of rc.lua', description: 'What the default config does, section by section', link: '/kiln/getting-started/rc-anatomy' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Installation](getting-started/installation.md) | Build kiln from source and install it |
+| [First Launch](getting-started/first-launch.md) | Run kiln nested or on a TTY for the first time |
+| [Anatomy of rc.lua](getting-started/rc-anatomy.md) | What the default config does, section by section |
 
 ## Tutorials
 
 Step-by-step lessons that build your config from scratch.
 
-<ModuleTable modules={[
-  { name: 'Basics', description: 'Clients, tags, screens, and the declare loop', link: '/kiln/tutorials/basics' },
-  { name: 'Keybindings', description: 'Bind keys and mouse buttons with some.key and some.button', link: '/kiln/tutorials/keybindings' },
-  { name: 'A Bar From Scratch', description: 'Build a status bar out of ui nodes', link: '/kiln/tutorials/a-bar-from-scratch' },
-  { name: 'Widgets', description: 'Self-updating regions with ui.widget', link: '/kiln/tutorials/widgets' },
-  { name: 'Theming', description: 'Colors, fonts, and sizes through the theme table', link: '/kiln/tutorials/theming' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Basics](tutorials/basics.md) | Clients, tags, screens, and the declare loop |
+| [Keybindings](tutorials/keybindings.md) | Bind keys and mouse buttons with some.key and some.button |
+| [A Bar From Scratch](tutorials/a-bar-from-scratch.md) | Build a status bar out of ui nodes |
+| [Widgets](tutorials/widgets.md) | Self-updating regions with ui.widget |
+| [Theming](tutorials/theming.md) | Colors, fonts, and sizes through the theme table |
 
 ## How-To Guides
 
 Practical recipes for specific tasks. A selection of the most useful ones; the sidebar lists all of them.
 
-<ModuleTable modules={[
-  { name: 'Client Rules', description: 'Match clients and apply properties on map', link: '/kiln/guides/client-rules' },
-  { name: 'Multi-Monitor', description: 'Configure outputs: mode, scale, position', link: '/kiln/guides/multi-monitor' },
-  { name: 'Input Devices', description: 'Keymap, repeat rate, touchpad, and pointer settings', link: '/kiln/guides/input-devices' },
-  { name: 'Notifications', description: 'Receive, style, and replace the notification display', link: '/kiln/guides/notifications' },
-  { name: 'Wallpaper', description: 'Put an image behind everything', link: '/kiln/guides/wallpaper' },
-  { name: 'App Launcher', description: 'A .desktop application menu in config space', link: '/kiln/guides/app-launcher' },
-  { name: 'IPC and Scripting', description: 'Drive the live config VM from the shell', link: '/kiln/guides/ipc-and-scripting' },
-  { name: 'Reload and Debugging', description: 'Reload the config in place and inspect state', link: '/kiln/guides/reload-and-debugging' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Client Rules](guides/client-rules.md) | Match clients and apply properties on map |
+| [Multi-Monitor](guides/multi-monitor.md) | Configure outputs: mode, scale, position |
+| [Input Devices](guides/input-devices.md) | Keymap, repeat rate, touchpad, and pointer settings |
+| [Notifications](guides/notifications.md) | Receive, style, and replace the notification display |
+| [Wallpaper](guides/wallpaper.md) | Put an image behind everything |
+| [App Launcher](guides/app-launcher.md) | A .desktop application menu in config space |
+| [IPC and Scripting](guides/ipc-and-scripting.md) | Drive the live config VM from the shell |
+| [Reload and Debugging](guides/reload-and-debugging.md) | Reload the config in place and inspect state |
 
 ## Concepts
 
 Background knowledge and architectural understanding.
 
-<ModuleTable modules={[
-  { name: 'The Clay Thesis', description: 'Why one layout tree owns the whole screen', link: '/kiln/concepts/the-clay-thesis' },
-  { name: 'Frames and Dirty', description: 'When kiln redraws, and when it deliberately does not', link: '/kiln/concepts/frames-and-dirty' },
-  { name: 'Object Model', description: 'One class mixin behind clients, tags, screens, and the rest', link: '/kiln/concepts/object-model' },
-  { name: 'Nodes, Floats, and Bands', description: 'How the tree, out-of-flow elements, and z-order fit together', link: '/kiln/concepts/nodes-floats-and-bands' },
-  { name: 'The C/Lua Boundary', description: 'What the C core does and what it refuses to do', link: '/kiln/concepts/c-lua-boundary' },
-  { name: 'kiln vs SomeWM', description: 'Shared concepts, different API, no compat layer', link: '/kiln/concepts/kiln-vs-somewm' },
-  { name: 'Limitations', description: 'What kiln deliberately does not do', link: '/kiln/concepts/limitations' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [The Clay Thesis](concepts/the-clay-thesis.md) | Why one layout tree owns the whole screen |
+| [Frames and Dirty](concepts/frames-and-dirty.md) | When kiln redraws, and when it deliberately does not |
+| [Object Model](concepts/object-model.md) | One class mixin behind clients, tags, screens, and the rest |
+| [Nodes, Floats, and Bands](concepts/nodes-floats-and-bands.md) | How the tree, out-of-flow elements, and z-order fit together |
+| [The C/Lua Boundary](concepts/c-lua-boundary.md) | What the C core does and what it refuses to do |
+| [kiln vs SomeWM](concepts/kiln-vs-somewm.md) | Shared concepts, different API, no compat layer |
+| [Limitations](concepts/limitations.md) | What kiln deliberately does not do |
 
 ## Reference
 
 Exact API details: every property, method, signal, and default.
 
-<ModuleTable modules={[
-  { name: 'Reference Index', description: 'The full API surface in one place', link: '/kiln/reference/' },
-  { name: 'client', description: 'The client object: properties, methods, signals', link: '/kiln/reference/client' },
-  { name: 'some', description: 'The some module: keys, rules, spawn, defaults', link: '/kiln/reference/some' },
-  { name: 'some.ui', description: 'The node constructors and the cfg contract', link: '/kiln/reference/ui' },
-  { name: 'some.layout', description: 'Layout functions and their tag parameters', link: '/kiln/reference/layout' },
-  { name: 'Theme Variables', description: 'Every theme key with its default', link: '/kiln/reference/theme-variables' },
-]} />
+| Module | Description |
+|--------|-------------|
+| [Reference Index](reference/index.md) | The full API surface in one place |
+| [client](reference/client.md) | The client object: properties, methods, signals |
+| [some](reference/some.md) | The some module: keys, rules, spawn, defaults |
+| [some.ui](reference/ui.md) | The node constructors and the cfg contract |
+| [some.layout](reference/layout.md) | Layout functions and their tag parameters |
+| [Theme Variables](reference/theme-variables.md) | Every theme key with its default |
 
 ## Where to start
 
