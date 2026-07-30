@@ -2,6 +2,7 @@
 title: Kiln
 description: A Wayland compositor where your entire desktop is one declarative Lua config over a Clay layout tree.
 sidebar_position: 1
+slug: /
 ---
 
 # Kiln
