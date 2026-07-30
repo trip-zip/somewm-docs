@@ -60,11 +60,7 @@ const config: Config = {
           showReadingTime: true,
           editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
         },
-        sitemap: {
-          // /kiln is live but unlisted: reachable by URL, absent from the
-          // sitemap, search index, navbar, and footer.
-          ignorePatterns: ['/kiln/**'],
-        },
+        sitemap: {},
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -78,7 +74,7 @@ const config: Config = {
       {
         hashed: true,
         indexBlog: true,
-        docsRouteBasePath: '/docs',
+        docsRouteBasePath: ['/docs', '/kiln'],
         highlightSearchTermsOnTargetPage: true,
       },
     ],
@@ -102,6 +98,13 @@ const config: Config = {
           sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Docs',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'kilnSidebar',
+          docsPluginId: 'kiln',
+          position: 'left',
+          label: 'Kiln',
         },
         {
           to: '/blog',

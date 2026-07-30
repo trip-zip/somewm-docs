@@ -8,6 +8,8 @@ sidebar_position: 1
 
 kiln is a Wayland compositor where everything on screen is a node in one [Clay](https://github.com/nicbarker/clay) layout tree per screen. Windows, bars, widgets, tags, menus, and notifications are all the same kind of thing: Lua declares the tree, the Clay solver lays it out, and a thin C core renders the result. There is no separate widget toolkit, no imperative drawing loop, no special-cased bar. Your entire desktop is a Lua config over a small, general core.
 
+The source lives at [github.com/trip-zip/kiln](https://github.com/trip-zip/kiln).
+
 kiln shares its desktop concepts with SomeWM and AwesomeWM: clients, tags, layouts, rules, a status bar, a theme table. But its API is deliberately its own, declarative rather than imperative, and there is no compatibility layer. Existing AwesomeWM or SomeWM configs and widget libraries do not run on kiln. See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) for the full comparison.
 
 :::info

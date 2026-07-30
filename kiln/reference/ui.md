@@ -41,9 +41,9 @@ end)
 | `ui.box(cfg, children?)` | Plain container or leaf. No layout direction of its own. |
 | `ui.row(cfg, children?)` | Left-to-right container. |
 | `ui.column(cfg, children?)` | Top-to-bottom container. |
-| `ui.text(str, cfg?)` | Text leaf. cfg: `color` (default `theme.fg`), `size` (default `theme.font_size`), `wrap` (`"words"` default, `"newlines"`, `"none"`), `align` (`"left"` default, `"center"`, `"right"`; places wrapped lines within the text box, use the parent's `align` for a single line), `line_height` (px per line; 0, the default, uses the font height). |
+| `ui.text(str, cfg?)` | Text leaf. cfg: `color` (default `theme.fg`), `size` (default `theme.font_size`), `font` (a Pango font description such as `"Sans Bold"`, see [Fonts](#fonts)), `wrap` (`"words"` default, `"newlines"`, `"none"`), `align` (`"left"` default, `"center"`, `"right"`; places wrapped lines within the text box, use the parent's `align` for a single line), `line_height` (px per line; 0, the default, uses the font height), `ellipsize` (see [Truncation](#truncation)). |
 | `ui.spacer(n?)` | Flexible gap: `ui.box{ w = n or "grow", h = n }`. With no argument it grows to fill the row. |
-| `ui.image(path, cfg?)` | Image leaf. cfg: `id, w, h, aspect, radius, on_press`. Images have no intrinsic size: give both axes, or one axis plus `aspect`. Decoded once and cached by path. |
+| `ui.image(path, cfg?)` | Image leaf. cfg: `id, w, h, aspect, radius, on_press, recolor`. Images have no intrinsic size: give both axes, or one axis plus `aspect`. Decoded once and cached by path. `recolor` takes a color spec and uses the file as a stencil: the color replaces the decoded pixels and only their alpha survives, so one glyph file draws in any ink. |
 | `ui.surface(c, cfg?)` | The client leaf: places the client's own buffer tree at the solved box. |
 | `ui.titlebar(c, focused?)` | Stock titlebar row: icon, title, maximize and close buttons. Replaceable: assign `some.ui.titlebar = fn`. |
 | `ui.resize_handles(c, z?)` | Eight invisible edge and corner handles over a floating client. |
@@ -110,6 +110,61 @@ Handler dispatch is innermost-first with no bubbling: the deepest element with a
 | `z` | number | Fine z within the band. |
 | `passthrough` | boolean | Pointer events pass through the float. |
 | `clip` | boolean | The float inherits the clip rectangle of what it attaches to: the part outside is neither drawn nor hittable. For a menu or tooltip anchored inside a `ui.scroll`. Default off: a float extends past its parent freely. |
+| `expand` | number, or `{ w =, h = }` | Grow the float's own box outward without moving or resizing its children. One number means both axes. This is how a popup gets a margin that paints and hits, where a `pad` would have inset every child instead. |
+| `fit` | boolean | Keep the float inside the screen's workarea. An `to = "element"` float flips to the opposite side of its target when it would overflow, which is how a submenu near the right edge opens leftward; a `to = "root"` float clamps instead, since mirroring a root attach would throw it across the screen rather than beside anything. Requires an `id`, because the fit is computed from the element's solved box. |
+
+## Fonts
+
+`font` takes a Pango font description and interns it to an id the declaration
+carries, so a leaf can name any installed face:
+
+```lua
+ui.text("Handgloves", { font = "Sans Bold", size = 14 })
+ui.text("Handgloves", { font = "Serif Italic" })
+```
+
+Two rules follow from how the id is used.
+
+**Size lives in `size`, not in the description.** `"Sans Bold 14"` is refused
+rather than silently ignored, because the size is set absolutely at the
+output's device scale on its own channel and a size in the description would be
+overridden without warning.
+
+**A family nothing on the system provides is not an error.** Pango substitutes,
+so a typo is a visual bug rather than a dead session.
+
+Omitting `font` uses `theme.font`, which is interned like any other
+description. The face reaches both the raster and the measure callback, so a
+bold run wraps at the width it actually draws at.
+
+## Truncation
+
+`ellipsize = true` truncates an overflowing run and marks the cut, instead of
+letting it run past its container.
+
+```lua
+ui.box({ id = "row", w = 180, clip = { horizontal = true } }, function()
+    ui.text(title, { ellipsize = true })
+end)
+```
+
+**It needs a clipping ancestor, and this is the part that surprises people.** A
+text element is sized to its own glyphs, and its render command reports that
+same width, so there is no "available width" anywhere in the declaration for a
+run to be measured against. What bounds a run is the clip its parent declared.
+Truncation is therefore a property of the pair, not of the text leaf.
+
+Without a horizontally clipping ancestor whose width is fixed independently of
+the text, `ellipsize` does nothing at all, with no error. That is the same
+precondition CSS imposes with `overflow: hidden` plus a bounded box.
+
+The wrap mode does not matter. A clipping parent leaves its children at full
+width rather than compressing them, so a `wrap = "words"` run inside a
+horizontal clip stays on one line and overflows exactly like `wrap = "none"`.
+
+**Known cosmetic cost.** The scissor is the clip element's outer box, so an
+ellipsis inside a padded box sits against the box edge rather than inside the
+padding. Put the clip on an inner box if the padding must be respected.
 
 ## Bands (z order)
 

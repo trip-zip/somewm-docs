@@ -33,6 +33,7 @@ some.spawn("foot")
 | `some.tooltip` | `attach(text)` returns an `on_hover` handler. See [some.tooltip](#sometooltip) below. |
 | `some.placement` | 14 float-placement helpers. See [some.placement](/kiln/reference/placement). |
 | `some.icon` | Application icon lookup: `path(name)` and `client(c)`. See [some.icon](#someicon) below. |
+| `some.asset` | Generated images, content-addressed: turn an SVG document into a PNG path the image leaf can name. See [some.asset](#someasset) below. |
 | `some.object` | The class factory and handle registry (`attach`, `detach`, `lookup`). See [the object model](/kiln/concepts/object-model). |
 
 Key bindings, mouse buttons, and client rules (`some.key`, `some.button`, `some.rule`, `some.focused`) have their own page: [Keys, Buttons, and Rules](/kiln/reference/keybindings-and-rules).
@@ -187,6 +188,66 @@ The tooltip opens above or below the element depending on which half of the scre
 |---|---|
 | `some.icon.path(name)` | Resolve an application name to an icon file path, or `nil`. Consults the app's `.desktop` `Icon=` line, then the icon theme and pixmaps directories. Memoized, misses included. |
 | `some.icon.client(c)` | The best icon for a client: `c.icon` if C already holds one (X11 pixel data), else the lookup on `c.app_id`, else on `c.class` and its lowercase form. |
+
+## some.asset
+
+The declaration layer can name an image but cannot make one, so anything the
+renderer has no vocabulary for (a gradient, a line-art glyph) has to arrive as
+a file. `some.asset` renders an SVG document to a PNG and hands back the path.
+
+```lua
+local some = require("somewm")
+local ramp = some.asset.gradient(
+    "linear:0,0:1920,1080:0,#1e1e2e:1,#313244", 1920, 1080)
+if ramp ~= nil then
+    ui.box({ w = "grow", h = "grow", image = { path = ramp } })
+end
+```
+
+| Function | Description |
+|---|---|
+| `some.asset.request(name, w, h, svg)` | Queue a render if it is not already cached, and return the key it will be found under. Does not fork. |
+| `some.asset.flush()` | Render everything queued, in one process. |
+| `some.asset.path(key)` | The readable PNG path for a key, or `nil`. Memoized both ways, so a failed render is not retried per frame. |
+| `some.asset.svg(name, w, h, svg)` | The one-shot: request, flush, and resolve a single document. |
+| `some.asset.gradient(spec, w, h)` | A linear gradient as a PNG path, or `nil`. |
+
+**It forks a subprocess and writes a file.** This is for static and low-rate
+content: chrome that changes on a theme switch or a mode change, never anything
+that varies per frame.
+
+**Three calls rather than one, because the fork is the expensive part.** Twenty
+glyphs are one process only if the requests pile up before the flush, so
+request them all, flush once, then resolve each. Reach for `svg` only when
+there is a single document.
+
+**`nil` is an answer, not an error.** A render can fail because `rsvg-convert`
+is missing, and a path that decodes to nothing renders blank rather than
+raising, so every call site should draw its non-image fallback when the answer
+is `nil`. A malformed gradient spec is different: that raises, because it is a
+config mistake rather than a missing tool.
+
+The cache is content-addressed. The digest of the document is in the filename,
+so a theme switch names different files and there is nothing to invalidate.
+
+### Gradient specs
+
+Both forms are accepted:
+
+```lua
+"linear:x0,y0:x1,y1:0,#ff0000:1,#0000ff"
+{ type = "linear", from = {x0,y0}, to = {x1,y1},
+  stops = { {0,"#ff0000"}, {1,"#0000ff"} } }
+```
+
+Coordinates are pixels in the target's own space, so `0,0` to `w,h` is corner
+to corner. Colors take the same specs as every other color field, alpha
+included. Linear only; a `radial` spec is refused by name rather than silently
+ignored.
+
+The size is the caller's, and it should come from a box the solver already
+answered (a screen's `canvas` reading times its scale), not from arithmetic
+that re-derives where the image will land.
 
 ## See also
 

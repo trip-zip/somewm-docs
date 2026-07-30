@@ -30,9 +30,8 @@ reproducibly with no extra setup.
 
 ## Build
 
-The kiln repository is not public yet; these steps assume you have a checkout.
-
 ```bash
+git clone https://github.com/trip-zip/kiln.git
 cd kiln
 make
 ```
