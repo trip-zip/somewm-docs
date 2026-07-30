@@ -25,6 +25,7 @@ end)
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `workarea` | table | derived | `{x, y, width, height}` left after bars and exclusive layer surfaces, read back from the last solve. Read only. |
+| `canvas` | table | derived | `{x, y, width, height}` of the whole root element from the last solve, bars included. Read only; nil before the first solve. |
 | `scale` | number | 1 | Fractional output scale. Read comes from the output list; writing drives the output's scale. Logical geometry is unchanged by scale. |
 | `selected_tag` | tag or nil | derived | Sugar for `selected_tags[1]`. Writing a tag means `{t}`; writing nil writes `{}`, which the tag layer refuses to leave empty. |
 | `selected_tags` | list of tags | `{}` | The selection fact. Writing it redraws, runs the tag-switch reveal animation, and pushes tag history. |

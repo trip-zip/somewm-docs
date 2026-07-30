@@ -52,10 +52,10 @@ end)
 | `ui.each(items, key, declare)` | Keyed list: `key(item)` returns each element id, `declare(item, id, st)` gets a per-key state table that survives reorder. |
 | `ui.widget(spec)` | Self-updating region: `{ fn or [1], watch = { "Class::signal", ... }, every = seconds }`. Returns the declare function; `watch` and `every` mark the screen dirty. |
 | `ui.bar(s, cfg, fn)` | Register a bar on screen `s`. cfg: `color` (`theme.bg`), `height` (`theme.bar_height`), `gap` (6), `edge` (`"top"` or `"bottom"`, default top), `band` (default `"above"`). |
-| `ui.taglist(s)` | Stock taglist: one pressable cell per tag, accent when selected. |
-| `ui.tasklist(s, cfg?)` | Stock tasklist. cfg: `filter` (default `ui.filter.currenttags`), `width` (default `{ "grow", max = 180 }`). |
+| `ui.taglist(s, cfg?)` | Stock taglist: one pressable cell per tag, accent when selected. cfg: `on` (see the handler table below). |
+| `ui.tasklist(s, cfg?)` | Stock tasklist. cfg: `filter` (default `ui.filter.currenttags`), `width` (default `{ "grow", max = 180 }`), `on`. |
 | `ui.systray(cfg?)` | Status-notifier tray items as pressable icon cells. cfg: `size` (default 18). |
-| `ui.layoutbox(s)` | Current layout indicator; pressing cycles to the next layout. |
+| `ui.layoutbox(s, cfg?)` | Current layout indicator; pressing cycles to the next layout. Draws `theme.layout_icons[family]` when set, else the layout name as text. cfg: `on`. |
 | `ui.layoutlist(s, cfg?)` | Layout picker, as a menu over `some.layout.list`. |
 | `ui.clock()` | Minute-aligned clock text. |
 | `ui.menu(cfg)` | Alias for `some.menu.show` (see [Menus](#menus)). |
@@ -71,6 +71,16 @@ Helpers that are not constructors:
 | `ui.filter.minimized` | Tasklist filter: minimized clients on the screen's selected tags. |
 | `ui.bands` | The band name to z base table (see [Bands](#bands-z-order)). |
 
+### The widget handler table
+
+`ui.taglist`, `ui.tasklist`, and `ui.layoutbox` take an `on` sub-table of
+named gestures: `press(item, ev)` (the tag, client, or tag under the
+pointer, plus the ordinary press event with `button` and `mods`) and
+`scroll(ev)`. A handler preempts: returning a truthy value means handled and
+the stdlib default (view the tag, focus the client, cycle the layout) does
+not run; returning nil declines to it. `on` is a sub-table because
+`on_press` on an element cfg already means the box's own edge.
+
 ## The cfg contract
 
 Every `box`, `row`, `column`, and `surface` cfg accepts exactly these fields (`image` and `text` take the narrower cfgs listed in the constructor table above):
@@ -84,7 +94,7 @@ Every `box`, `row`, `column`, and `surface` cfg accepts exactly these fields (`i
 | `align` | `"center"`, or `{ x =, y = }` with x in `"left"/"center"/"right"` and y in `"top"/"center"/"bottom"` | Child alignment. |
 | `color` | color spec | Background. |
 | `radius` | number | Corner radius, all four corners. |
-| `border` | `{ width = n or { left =, right =, top =, bottom =, betweenChildren = }, color = }` | Border; `width` defaults to 1. The table form also takes `betweenChildren`, a divider drawn between adjacent children along the layout axis. |
+| `border` | `{ width = n or { left =, right =, top =, bottom =, between = }, color = }` | Border; `width` defaults to 1. The table form also takes `between` (Clay's `betweenChildren`), a divider drawn between adjacent children along the layout axis. |
 | `float` | table, see below | Take the element out of flow. |
 | `aspect` | number | Aspect ratio (width / height). |
 | `clip` | `{ vertical =, horizontal =, childOffset = { x, y } }` | Scissor plus content offset (what `ui.scroll` wraps for you). |
@@ -205,14 +215,17 @@ some.menu.show({
 | `some.menu.show(cfg)` | Open a menu. cfg: `screen` (default the focused screen), `items` (required), `x`, `y` (root offset, default 0), `under` (element id to drop below, the usual case for a bar button). |
 | `some.menu.close()` | Close the open menu and its submenu chain. |
 | `some.menu.client_list(cfg)` | A ready menu over all mapped clients, labelled and iconed like tasklist rows; pressing a row unminimizes, views, focuses, and raises the client. Same cfg as `show` but for `items`, which it fills in. |
+| `some.menu.nav(verb)` | Drive the open menu from the keyboard: `"down"`, `"up"`, `"enter"` (descend into a submenu or run the row), `"back"` (close one level, or the chain at the root), `"close"`. Returns whether the verb was handled. |
+| `some.menu.keys` | The keysym-to-verb map behind the built-in keyboard handling: Down/Up move, Right/Return/KP_Enter enter, Left/Escape go back. Replaceable per key (`some.menu.keys.j = "down"`) or wholesale. |
 
 Each item is `{ "label", action }` with an optional `icon = path`. When the second element is a function, pressing the row closes the menu and calls it. When it is a table, the row is a submenu that opens beside it on hover. That one rule is the entire item schema.
 
 An open menu declares its own near-invisible screen-sized scrim underneath itself: a press anywhere outside the menu closes it, while presses on rows never reach the scrim.
 
-:::note
-Menus are pointer-driven: rows navigate on hover and dispatch on press, and there is no keyboard navigation. See [Limitations](/kiln/concepts/limitations).
-:::
+An open menu also holds the keyboard: arrow keys move the selection, Right or
+Return enters a submenu or runs the row, Left or Escape backs out. The map is
+`some.menu.keys`; a keyboard descent into a submenu lights its first row,
+while a pointer descent does not (the pointer already says where it is).
 
 ## See also
 

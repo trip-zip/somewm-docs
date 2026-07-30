@@ -89,6 +89,7 @@ const sidebars: SidebarsConfig = {
         'reference/core',
         'reference/events',
         'reference/environment-and-ipc',
+        'reference/kiln-client',
       ],
     },
     'faq',

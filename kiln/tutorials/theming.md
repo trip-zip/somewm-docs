@@ -50,15 +50,17 @@ The full list with defaults lives in the
 
 ## 3. Edit theme values in your rc
 
-The default config does exactly this, near the top:
+The default config does exactly this, near the top, applying a whole palette
+at once (it ships three: gruvbox, catppuccin, nord, with the chosen name
+persisted to `~/.config/kiln/theme`):
 
 ```lua
 local some = require("somewm")
 local th = some.theme
 
-some.modkey = "alt"
-th.bg = "#1c1c28"
-th.accent = "#7aa2f7"
+some.modkey = "super"
+th.bg = "#1e1e2e"
+th.accent = "#cba6f7"
 ```
 
 Any key you do not set keeps its default. Colors are `"#rrggbb"` or

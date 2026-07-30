@@ -147,9 +147,21 @@ some.button { mods = {}, button = 3, on = "root",
 	end }
 ```
 
-:::note
-Menus are pointer-driven: rows respond to hover and press, and there is no keyboard navigation. See [limitations](/kiln/concepts/limitations).
-:::
+## Keyboard navigation
+
+An open menu holds the keyboard. The defaults: Down and Up move the
+selection, Right, Return, or KP_Enter enter a submenu or run the row, Left
+and Escape close one level (and the whole chain at the root). The map is
+`some.menu.keys`, keysym to verb, replaceable one key at a time or wholesale:
+
+```lua
+some.menu.keys.j = "down"
+some.menu.keys.k = "up"
+```
+
+`some.menu.nav(verb)` drives the same machinery from code, with verbs
+`"down"`, `"up"`, `"enter"`, `"back"`, and `"close"`; it returns whether the
+verb was handled.
 
 Menu colors and sizing come from the theme: `menu_width` (default 200) and `menu_height` (row height, default 24), with `bg`, `bg2`, and `accent` for the chrome.
 

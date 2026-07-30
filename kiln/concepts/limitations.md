@@ -12,14 +12,13 @@ kiln is a proof of concept, and this page is the honest inventory: what the mode
 
 kiln draws rectangles, rounded corners, borders, images, text, and color. That is the complete list, and it is deliberate: the vocabulary is what Clay declares and the C renderer reconciles, with no escape hatch into arbitrary painting.
 
-Not available: gradients, arcs, rings, and circles (so no radial progress bars or pie charts), rotation and mirroring, drop shadows, shapes beyond the rounded rectangle, and per-window opacity. There is no Lua canvas and no cairo access; a config cannot paint pixels, only declare nodes. A surprising amount of chrome fits the vocabulary (the default desktop, including its launcher glyph, is composed entirely from it), but if your aesthetic depends on arcs and gradients, kiln cannot draw it today.
+Not available as drawing primitives: gradients, arcs, rings, and circles (so no radial progress bars or pie charts), rotation and mirroring, drop shadows, shapes beyond the rounded rectangle, and per-window opacity. There is no Lua canvas and no cairo access; a config cannot paint pixels, only declare nodes. The escape hatch is an image: `some.asset` renders SVG (including [`some.asset.gradient`](/kiln/reference/some)) to cached PNGs, which is how the default desktop gets its gradient wallpaper and its glyphs. A surprising amount of chrome fits the vocabulary directly, but if your aesthetic depends on painting at declare time, kiln cannot draw it today.
 
 ## Current gaps
 
 These are unbuilt, not refused:
 
 - **No pointer warp.** A config cannot move the cursor, so focus-follows policies that warp the pointer to the focused client are not expressible.
-- **Menus are pointer-only.** No arrow-key navigation, enter to select, or escape to close in [menus](/kiln/guides/menus), and the same applies to the [hotkeys popup](/kiln/guides/hotkeys-popup) and the layout picker, which are built on the same machinery.
 - **Floating clients do not honor size hints.** Min, max, and increment size hints are not read: a floating terminal resizes freely instead of in cell steps, a dialog can be squeezed below its minimum, and the only floor is the uniform `theme.min_size`.
 - **Bars are full-width top or bottom struts.** No vertical bars, no floating pill bars, no margins or partial width. A pill can be declared as a float, but a float reserves no workarea. See [A bar from scratch](/kiln/tutorials/a-bar-from-scratch) for what bars can do.
 

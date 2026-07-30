@@ -52,6 +52,7 @@ The layer under the stdlib. Everyday configs rarely need these pages; scripting,
 | [core](core.md) | The raw C boundary the stdlib is built on: declare primitives, timers, input. |
 | [Origin Events](events.md) | The compositor events that drive the runtime, and what each carries. |
 | [Environment and IPC](environment-and-ipc.md) | Environment variables, the IPC socket, and evaluating Lua from outside. |
+| [kiln-client](kiln-client.md) | The command-line client: every verb, selectors, reflection, JSON output. |
 
 ## See also
 

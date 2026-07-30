@@ -1,6 +1,6 @@
 ---
 title: Hotkeys Popup
-description: Build a keybinding cheat sheet overlay from the key registry, toggled by a bind and dismissed by a press or any key.
+description: Use the built-in keybinding cheat sheet, and build your own replacement from the key registry when the stock one is not enough.
 sidebar_position: 12
 ---
 
@@ -10,10 +10,10 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 <YouWillLearn>
 
+- Showing, closing, and toggling the built-in cheat sheet with `some.hotkeys`
+- What the stock sheet renders, and where its content comes from
 - Reading every binding back from `some.key.all()`
-- Grouping bindings by their `group` field
-- Declaring the sheet as an overlay float with a dismissing scrim
-- Toggling it from a bind, and closing it on any key with a keygrabber
+- Declaring a custom sheet as an overlay float with a dismissing scrim
 
 </YouWillLearn>
 
@@ -25,37 +25,65 @@ local ui, key = some.ui, some.key
 local th = some.theme
 ```
 
-Every `key { ... }` call records itself in a registry, including the `desc` and `group` you gave it. A hotkeys popup is nothing more than a read of that registry, grouped and laid out as an overlay float. There is no popup widget to configure; you build the sheet in about forty lines, and it lists whatever your config binds, always current.
+## The built-in sheet
 
-## Step 1: read the registry
+Every `key { ... }` call records itself in a registry, including the `desc`
+and `group` you gave it. The stdlib ships a cheat sheet that reads that
+registry at declare, so it lists whatever your config binds, always current:
 
-`some.key.all()` returns a copy of every binding as written:
+```lua
+key { mods = { "mod" }, key = "s", desc = "show help", group = "kiln",
+  press = some.hotkeys.toggle }
+```
+
+That is the whole wiring, and it is exactly what the default config does. The
+API is three functions and one field:
+
+| Symbol | Meaning |
+|---|---|
+| `some.hotkeys.show(s?)` | open the sheet on screen `s` (default: focused) |
+| `some.hotkeys.close()` | close it |
+| `some.hotkeys.toggle(s?)` | one or the other |
+| `some.hotkeys.open` | the screen the sheet is open on, or nil |
+
+The stock sheet:
+
+- groups bindings by their `group` field, in first-seen declaration order,
+  and deals the groups into three columns of roughly equal height
+- shows each binding's resolved chord (`super+s`, not `mod+s`) next to its
+  `desc`
+- floats centered in the `overlay` band over a screen-sized scrim
+- holds the keyboard while open: any key press dismisses it, and nothing
+  leaks to the binding underneath. A press outside the sheet dismisses too.
+
+A range binding (`key = "1-9"`) is one row reading `"1-9"`, not nine expanded
+rows. There is no update path to manage: the registry is the model and the
+declare is the render, so a binding added at any time is on the sheet the
+next time it opens.
+
+## Rolling your own
+
+The rest of this page replaces the stock sheet with your own layout. The
+same registry powers it: `some.key.all()` returns a copy of every binding as
+written.
+
+### Step 1: read the registry
 
 ```lua
 for _, k in ipairs(some.key.all()) do
-  -- k.mods, k.key, k.desc, k.group
+  -- k.mods, k.key, k.desc, k.group, k.label
 end
 ```
 
-A range binding (`key = "1-9"`) is one entry reading `"1-9"`, not nine expanded entries. That is exactly what a cheat sheet wants: the chords the compositor listens for are expanded, but the registry keeps the compact form you wrote.
+`k.label` is the chord as the user reads it, resolved through `some.modkey`
+at bind time (`"super+s"`). `k.mods` keeps the compact form you wrote, with
+`"mod"` unresolved, if you want to format chords yourself. Rebinding a chord
+replaces its registry row in place, so labels stay unique.
 
-## Step 2: format the chord
+### Step 2: group
 
-The registry keeps `mods` as written, with `"mod"` unresolved. Resolve it through `some.modkey` the same way a binding does, and join:
-
-```lua
-local function chord_label(k)
-  local out = ""
-  for _, m in ipairs(k.mods) do
-    out = out .. (m == "mod" and some.modkey or m) .. "+"
-  end
-  return out .. k.key
-end
-```
-
-## Step 3: group
-
-Bucket the registry by `group`, keeping first-seen order so the sheet reads in declaration order rather than hash order:
+Bucket the registry by `group`, keeping first-seen order so the sheet reads
+in declaration order rather than hash order:
 
 ```lua
 local function grouped_keys()
@@ -72,9 +100,12 @@ local function grouped_keys()
 end
 ```
 
-## Step 4: declare the overlay
+### Step 3: declare the overlay
 
-The popup is chrome in the screen's tree, declared while a boolean is set and not declared at all when it is not. Two floats in the `overlay` band: a screen-sized scrim that dismisses on any press outside, and the centered sheet one z above it:
+The popup is chrome in the screen's tree, declared while a boolean is set and
+not declared at all when it is not. Two floats in the `overlay` band: a
+screen-sized scrim that dismisses on any press outside, and the sheet one z
+above it:
 
 ```lua
 local hotkeys_open = false
@@ -82,7 +113,7 @@ local hotkeys_open = false
 local function declare_hotkeys(s)
   if not hotkeys_open then return end
   ui.box({
-    id = "hotkeys-scrim",
+    id = "my-hotkeys-scrim",
     float = { to = "root", band = "overlay" },
     w = s.width, h = s.height,
     color = "#00000080",
@@ -93,7 +124,7 @@ local function declare_hotkeys(s)
   })
   local groups, order = grouped_keys()
   ui.column({
-    id = "hotkeys",
+    id = "my-hotkeys",
     float = { to = "root", anchor = "center", band = "overlay", z = 1 },
     color = th.bg, radius = 8, pad = 16, gap = 12,
     border = { width = 1, color = th.accent },
@@ -105,7 +136,7 @@ local function declare_hotkeys(s)
           for _, k in ipairs(groups[g]) do
             ui.row({ gap = 8, align = { y = "center" } }, function()
               ui.box({ color = th.bg2, radius = 3, pad = { x = 6 } },
-                function() ui.text(chord_label(k), { size = 12 }) end)
+                function() ui.text(k.label, { size = 12 }) end)
               ui.text(k.desc or "", { size = 12, color = th.muted })
             end)
           end
@@ -116,18 +147,23 @@ local function declare_hotkeys(s)
 end
 ```
 
-Press dispatch is innermost-first, so a press on the sheet hits the sheet and never reaches the scrim; a press anywhere else closes.
+Press dispatch is innermost-first, so a press on the sheet hits the sheet and
+never reaches the scrim; a press anywhere else closes.
 
 :::warning
-If you add ids to the chord rows for scripting, use plain strings (`"hkkey:" .. chord_label(k)`). A table id's second element must be numeric (a client handle, a tag index); a string there is not valid.
+If you add ids to the chord rows for scripting, use plain strings
+(`"hkkey:" .. k.label`). A table id's second element must be numeric (a
+client handle, a tag index); a string there is not valid.
 :::
 
-## Step 5: wire it in and toggle it
+### Step 4: wire it in and toggle it
 
-Call `declare_hotkeys(s)` at the end of your bar function so the sheet rides every frame while open. Then bind a toggle, and put the binding in the same registry so the sheet lists its own summon key:
+Call `declare_hotkeys(s)` at the end of your bar function so the sheet rides
+every frame while open. Then bind a toggle, and put the binding in the same
+registry so the sheet lists its own summon key:
 
 ```lua
-ui.bar(s, { edge = "top", height = 28, color = th.bg }, function()
+ui.bar(s, { edge = "top", color = th.bg }, function()
   -- taglist, tasklist, clock ...
   declare_hotkeys(s)
 end)
@@ -139,11 +175,15 @@ key { mods = { "mod" }, key = "s", desc = "show keys", group = "system",
   end }
 ```
 
-`some.dirty` forces the redraw: the boolean is plain Lua state, and changing it does not redraw anything on its own.
+`some.dirty` forces the redraw: the boolean is plain Lua state, and changing
+it does not redraw anything on its own.
 
-## Step 6 (optional): dismiss on any key
+### Step 5 (optional): dismiss on any key
 
-The scrim closes on a press. To also close on any keystroke, take the keyboard with `some.keygrabber` while the sheet is open, and route both dismissal paths through one function so the grab is always released:
+The scrim closes on a press. To match the stock sheet and also close on any
+keystroke, take the keyboard with `some.keygrabber` while the sheet is open,
+and route both dismissal paths through one function so the grab is always
+released:
 
 ```lua
 local hotkeys_grab = nil
@@ -174,11 +214,9 @@ key { mods = { "mod" }, key = "s", desc = "show keys", group = "system",
   end }
 ```
 
-Use `close_hotkeys` in the scrim's `on_press` too. While the grab holds, no binding fires, which is fine: the first key press closes the sheet and releases the keyboard.
-
-## Why there is no update path
-
-A `key { ... }` call added at any time appends to the registry, and the next time the popup declares, it reads the new entry. The registry is the model and the declare is the render; nothing is cached, so nothing goes stale.
+Use `close_hotkeys` in the scrim's `on_press` too. While the grab holds, no
+binding fires, which is fine: the first key press closes the sheet and
+releases the keyboard.
 
 ## See also
 

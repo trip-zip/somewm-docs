@@ -70,6 +70,7 @@ Written by the standard library, rules, or your config. All read/write, all emit
 | `titlebar` | boolean | false | Whether the titlebar row is declared. |
 | `sticky` | boolean | false | Visible on every tag of its screen. |
 | `no_focus` | boolean | false | Set by a rule's `focus = false`; activation policy reads it. |
+| `band` | string | unset | Explicit z-band override for the client's float (`"below"`, `"above"`, ...). Unset, the band derives from state: fullscreen while focused, `above` when `ontop`, else `normal`. See [Nodes, floats, and bands](/kiln/concepts/nodes-floats-and-bands). |
 
 :::note
 There is no property allowlist. Any key you write on a client stores and emits `property::<key>` exactly like the built-in ones, so you can hang your own state off a client and listen for changes to it.

@@ -46,7 +46,7 @@ The IPC protocol is: connect to the unix socket, send Lua source, half-close, re
 export KILN_SOCK=/tmp/kiln-test.sock
 scripts/kiln-eval 'return #screen.all()'          # -> 1
 scripts/kiln-eval 'return screen.all()[1].name'   # -> HEADLESS-1
-scripts/kiln-eval 'return #screen.all()[1].tags'  # -> 4
+scripts/kiln-eval 'return #screen.all()[1].tags'  # -> 5
 ```
 
 This is a live REPL into the config's Lua state: everything your config can do, an eval can do. Flip a tag, spawn a program, replace a policy, read a client's geometry. See [IPC and scripting](/kiln/guides/ipc-and-scripting) for the full protocol.

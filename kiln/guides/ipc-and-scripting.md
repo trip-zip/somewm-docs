@@ -92,6 +92,14 @@ Reload the config:
 scripts/kiln-eval 'require("somewm").reload()'
 ```
 
+Most one-liners like these have a `kiln-client` verb that spares you the
+Lua: `kiln-client client list`, `kiln-client tag view 2`, `kiln-client theme
+set accent "#ff8800"`, `kiln-client notify --title build done`,
+`kiln-client reload`. It speaks the same socket, adds `--json` for scripts,
+and ships shell completions; see the
+[kiln-client reference](/kiln/reference/kiln-client). Raw eval remains the
+door to anything without a verb.
+
 ## 4. Target a nested dev instance
 
 Each kiln instance owns one socket. Your daily session uses the default path; a nested test instance started with `make dev` picks a private socket (like `/tmp/kiln-dev-1.sock`) and prints it at startup, so scripts target it explicitly:
@@ -145,6 +153,7 @@ Both are plain request-reply, so they compose with watch loops, status bar exec 
 ## See also
 
 - [Environment and IPC reference](/kiln/reference/environment-and-ipc)
+- [kiln-client reference](/kiln/reference/kiln-client)
 - [Reload and Debugging](/kiln/guides/reload-and-debugging)
 - [Testing Headless](/kiln/guides/testing-headless)
 - [Spawn Lifecycle](/kiln/guides/spawn-lifecycle)

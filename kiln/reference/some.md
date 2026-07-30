@@ -28,7 +28,8 @@ some.spawn("foot")
 | `some.animation` | Frame-clock easing: `get` and `start`. See [some.animation](#someanimation) below. |
 | `some.lockscreen` | The built-in lockscreen. `configure{}` overrides its colors and formats. See [Lockscreen and idle](/kiln/guides/lockscreen-and-idle). |
 | `some.prompt` | The inline text prompt: `run{}` and `completion`. See [some.prompt](#someprompt) below. |
-| `some.menu` | Popup menus: `show`, `close`, `client_list`. `some.menu.open` is the open-menu state, non-nil while a menu is up. See [Menus](/kiln/guides/menus). |
+| `some.menu` | Popup menus: `show`, `close`, `client_list`, keyboard navigation via `nav(verb)` and the replaceable `keys` map. `some.menu.open` is the open-menu state, non-nil while a menu is up. See [Menus](/kiln/guides/menus). |
+| `some.hotkeys` | The built-in keybinding cheat sheet: `show(s?)`, `close()`, `toggle(s?)`, with `open` as the screen it is up on (or nil). Renders the key registry grouped by `group`; any key dismisses. See [Hotkeys popup](/kiln/guides/hotkeys-popup). |
 | `some.notify` | Post or update a notification: `some.notify{ title = ..., message = ... }`. See [notification](/kiln/reference/notification). |
 | `some.tooltip` | `attach(text)` returns an `on_hover` handler. See [some.tooltip](#sometooltip) below. |
 | `some.placement` | 14 float-placement helpers. See [some.placement](/kiln/reference/placement). |

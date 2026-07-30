@@ -59,7 +59,7 @@ kiln -s 'foot'
 
 ## IPC: the eval socket
 
-kiln listens on a unix socket (mode 0600, owner only) and evaluates whatever Lua you send, inside the same VM that runs your config. This is not a command protocol with a fixed verb list: it is a live REPL into the config VM, and everything in this reference is drivable over it.
+kiln listens on a unix socket (mode 0600, owner only) and evaluates whatever Lua you send, inside the same VM that runs your config: a live REPL into the config VM, and everything in this reference is drivable over it. The same socket also carries a fixed command surface for the [`kiln-client` CLI](/kiln/reference/kiln-client); commands travel wrapped in `kiln_ipc(...)`, so bare text is always read as Lua.
 
 The protocol:
 
@@ -83,6 +83,7 @@ Anything that can connect to the socket evaluates arbitrary Lua in your composit
 
 ## See also
 
+- [kiln-client](/kiln/reference/kiln-client): the CLI over this socket, verbs and selectors
 - [IPC and scripting](/kiln/guides/ipc-and-scripting): workflows built on the socket
 - [Testing headless](/kiln/guides/testing-headless): a private instance with `KILN_SOCK` and `KILN_RC`
 - [Reload and debugging](/kiln/guides/reload-and-debugging): poking a live session

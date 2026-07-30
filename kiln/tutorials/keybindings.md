@@ -83,8 +83,9 @@ key { mods = { "mod" }, key = "d", desc = "app launcher", group = "launch",
 binding registry, which `some.key.all()` returns, and the default config's
 `mod+s` cheat sheet is built entirely from that registry: one column per
 group, one row per binding. Annotate your bindings and they appear in the
-popup automatically. The popup itself is plain config code you can restyle;
-see the [hotkeys popup guide](/kiln/guides/hotkeys-popup).
+popup automatically. The popup ships in the stdlib (`some.hotkeys`), and the
+same registry powers a custom one; see the
+[hotkeys popup guide](/kiln/guides/hotkeys-popup).
 
 ## 5. Ranges
 
@@ -139,7 +140,7 @@ button { mods = { "mod" }, button = 3,
 	press = function(c) c:grab_resize_nearest() end }
 
 button { mods = {}, button = 2, on = "root",
-	press = function() some.spawn(os.getenv("TERMINAL") or "ghostty") end }
+	press = function() some.spawn(os.getenv("TERMINAL") or "foot") end }
 ```
 
 The first two are the default config's move and resize drags. Buttons: 1
@@ -153,17 +154,16 @@ by `button{}`; see the [bar tutorial](/kiln/tutorials/a-bar-from-scratch).
 binding. `some.reload()` calls both before re-running your config, which is
 why editing the file and reloading never duplicates anything.
 
-When you experiment over IPC instead, clear first: re-running a `key{}` call
-replaces the chord's dispatch but appends a second registry entry, so the
-cheat sheet would show duplicates.
+Re-running a `key{}` call over IPC is safe: rebinding a chord replaces its
+registry row in place, so the cheat sheet never shows duplicates. Still,
 
 ```bash
 scripts/kiln-eval 'require("somewm").reload()'
 ```
 
-is the cleanest way to apply binding edits. (`require("somewm")` returns the
-same module your rc holds as `some`; the local itself is not visible to the
-socket.)
+is the cleanest way to apply binding edits from a file. (`require("somewm")`
+returns the same module your rc holds as `some`; the local itself is not
+visible to the socket.)
 
 ## Complete example
 
@@ -174,7 +174,7 @@ local key, button = some.key, some.button
 some.modkey = "super"
 
 key { mods = { "mod" }, key = "Return", desc = "terminal", group = "launch",
-	press = function() some.spawn(os.getenv("TERMINAL") or "ghostty") end }
+	press = function() some.spawn(os.getenv("TERMINAL") or "foot") end }
 key { mods = { "mod" }, key = "d", desc = "app launcher", group = "launch",
 	press = function() some.spawn("fuzzel") end }
 

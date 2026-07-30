@@ -37,6 +37,8 @@ Creates a notification, or updates one in place when `id` names a live one (a vo
 | `screen` | screen | the focused screen | Where the popup is drawn. |
 | `icon` | string | nil | Icon name or path. |
 | `value` | number | nil | Progress 0..100; the stock display draws a progress bar. |
+| `app_name` | string | nil | The sending application's name; DBus intake fills it, and rules match on it. |
+| `hints` | table | nil | DBus passthrough hints, kept verbatim for whatever display reads them. |
 
 Any other field is kept verbatim on the object: DBus passthrough hints land this way, and your own fields are visible to whatever display reads them. Managed fields set by the constructor: `seq`, `born`, `alive`; the computed getter `n.age` returns seconds since `born`.
 

@@ -41,50 +41,61 @@ First hit wins:
 
 The stock desktop is the default `rc.lua`:
 
-- A top bar (28 px) carrying, left to right: a taglist, a layout indicator,
-  a menu button, a tasklist, and a clock on the right. Hovering the clock
-  shows the full date as a tooltip.
-- Four tags per screen: `term`, `web`, `chat`, `media`, on the tile, spiral,
-  fair, and carousel layouts respectively. The first tag is selected.
-- A wallpaper, if the `KILN_WALLPAPER` environment variable points at an
-  image file. Unset, the background is the theme's base color.
+- A top bar (32 px) carrying, left to right: a launcher button, a taglist,
+  a tasklist, a system tray, a layout indicator, and a clock floated in the
+  center. Hovering the clock shows the full date as a tooltip.
+- Five tags per screen: `dev`, `web`, `chat`, `files`, `media`, all on the
+  tile layout. The first tag is selected.
+- A generated wallpaper: a gradient in the theme's colors with the kiln mark
+  centered, rendered per output (this needs `rsvg-convert` on your PATH). Set
+  `KILN_WALLPAPER` to an image path to use that instead.
+- The catppuccin palette. The main menu (`mod+w`, or right-click the desktop)
+  has a theme submenu with gruvbox and nord as well; the choice persists to
+  `~/.config/kiln/theme` across restarts.
 
 Clients tile into the selected tag's layout as you open them. Clicking a
 client focuses it, and focus also follows the mouse.
 
 ## Default keybindings
 
-The modkey is `alt`. Press `alt+s` at any time to pop up the built-in cheat
-sheet, which is generated from these same bindings.
+The modkey is `super` (the stdlib default is `alt`; the shipped config
+overrides it). Press `mod+s` at any time to pop up the built-in cheat sheet,
+which is generated from the live bindings and always complete. The essentials:
 
 | Chord | Action |
 |---|---|
-| `alt+Return` | open a terminal (`$TERMINAL`, falling back to ghostty) |
-| `alt+b` | open a browser (firefox) |
-| `alt+c` | open chat (slack) |
-| `alt+r` | run prompt (type a command, Enter to spawn) |
-| `alt+t` | spawn a terminal with an activation token |
-| `alt+q` | close the focused client |
-| `alt+space` | toggle floating |
-| `alt+f` | toggle fullscreen |
-| `alt+m` | toggle maximized |
-| `alt+n` | minimize (restore by clicking its tasklist entry) |
-| `alt+Tab` | focus the previously focused client |
-| `alt+o` | send the focused client to the next screen |
-| `alt+1` .. `alt+9` | view tag by index |
-| `alt+shift+1` .. `alt+shift+9` | move the focused client to a tag |
-| `alt+period` | next layout |
-| `alt+comma` | pick a layout from a menu |
-| `alt+l` | lock the session |
-| `alt+s` | show the hotkeys popup |
-| `alt+Escape` | quit kiln |
+| `mod+Return` | open a terminal (`$TERMINAL`, falling back to foot) |
+| `mod+r` | run prompt (type a command with Tab completion, Enter to spawn) |
+| `mod+p` | app launcher: every installed `.desktop` app, type to filter |
+| `mod+w` | main menu (theme switcher, lock, quit, ...) |
+| `mod+s` | hotkeys sheet |
+| `mod+shift+c` | close the focused client |
+| `mod+j` / `mod+k` | focus next / previous client |
+| `mod+Tab` | focus the previously focused client |
+| `mod+1` .. `mod+9` | view tag by index |
+| `mod+shift+1` .. `mod+shift+9` | move the focused client to a tag |
+| `mod+Left` / `mod+Right` | view previous / next tag |
+| `mod+space` | next layout |
+| `mod+h` / `mod+l` | shrink / grow the master area |
+| `mod+ctrl+space` | toggle floating |
+| `mod+f` / `mod+m` / `mod+n` | fullscreen / maximize / minimize |
+| `mod+o` | send the focused client to the next screen |
+| `mod+shift+Escape` | lock the session |
+| `mod+ctrl+r` | reload the config |
+| `mod+shift+i` | toggle the Clay inspector |
+| `mod+shift+q` | quit kiln |
+
+The config also binds the media keys (volume and microphone via `wpctl`,
+brightness via `brightnessctl`) and screenshots (`Print` for the full output,
+`shift+Print` for a region via `slurp` and `grim`).
 
 Mouse bindings:
 
 | Gesture | Action |
 |---|---|
-| `alt` + left drag | move a window |
-| `alt` + right drag | resize from the nearest corner |
+| `mod` + left drag | move a window |
+| `mod` + right drag | resize from the nearest corner |
+| right-click the desktop | main menu |
 | click | focus |
 
 ## Make it yours
@@ -93,7 +104,7 @@ Copy the default config into place and edit it:
 
 ```bash
 mkdir -p ~/.config/kiln
-cp rc.lua ~/.config/kiln/rc.lua     # from the source tree
+cp kilnrc.lua ~/.config/kiln/rc.lua     # from the source tree
 # or, after make install:
 cp /usr/local/share/kiln/rc.lua ~/.config/kiln/rc.lua
 ```

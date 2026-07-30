@@ -18,7 +18,7 @@ kiln is SomeWM, an AwesomeWM-style framework for Wayland, re-based on the Clay l
 
 ## Can I draw gradients, arcs, or custom shapes?
 
-No. The paint vocabulary is rectangles, corner radius, borders, images, text, and color (with alpha). There are no gradients, arcs, shadows, rotation, or arbitrary shapes, and no cairo escape hatch: everything on screen is composed from that vocabulary. This is a deliberate limit, not a missing feature. See [Limitations](/kiln/concepts/limitations).
+Not as drawing primitives. The paint vocabulary is rectangles, corner radius, borders, images, text, and color (with alpha). There are no gradient, arc, shadow, rotation, or arbitrary-shape primitives, and no cairo escape hatch: everything on screen is composed from that vocabulary. The escape hatch is an image: `some.asset` renders any SVG (including generated gradients via `some.asset.gradient`) to a cached PNG, which is how the default desktop draws its wallpaper and glyphs. See [Limitations](/kiln/concepts/limitations).
 
 ## How do I script or query kiln from the shell?
 

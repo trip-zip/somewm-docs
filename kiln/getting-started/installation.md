@@ -14,10 +14,12 @@ whole cycle: configure, build, run, install.
 You need `meson` and `ninja`, plus these libraries with development headers:
 
 - wlroots 0.20
-- wayland-server
+- wayland-server, wayland-client
 - wayland-protocols
 - wayland-scanner
 - xkbcommon
+- libinput
+- pixman-1
 - luajit
 - cairo
 - pangocairo
@@ -43,7 +45,17 @@ over meson; this is exactly equivalent:
 meson setup build && ninja -C build
 ```
 
-The binary lands at `./build/kiln`.
+The binary lands at `./build/kiln`, alongside the `kiln-client` CLI.
+
+Three features are on by default and can be disabled at configure time
+(`meson setup build -D<flag>=disabled`, or via `MESON_OPTS` with the make
+wrapper):
+
+| Flag | On by default | Off means |
+|---|---|---|
+| `xwayland` | X11 clients run; needs xcb and xcb-ewmh headers | No X11 clients |
+| `dbus` | Notifications and the system tray; needs libsystemd or basu | Both are absent entirely, not stubbed |
+| `pam` | Real lock-screen authentication | The lock screen accepts a fixed test password |
 
 ## Run from the source tree
 

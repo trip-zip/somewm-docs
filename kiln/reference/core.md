@@ -1,12 +1,12 @@
 ---
 title: core
-description: The raw C boundary, 56 functions across core.*, core.client.*, core.input.*, and core.output.*.
+description: The raw C boundary, 57 functions across core.*, core.client.*, core.input.*, and core.output.*.
 sidebar_position: 15
 ---
 
 # core
 
-`core` is the raw C surface of the compositor: 56 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, chrome, focus, rules) is built by calling these.
+`core` is the raw C surface of the compositor: 57 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, chrome, focus, rules) is built by calling these.
 
 :::note
 `core.*` is the raw C boundary the stdlib is built on. Configs should prefer the object model (`client`, `tag`, `screen`, `layer`, `notification`) and `some.*`, but everything here is reachable from config code and over IPC.
@@ -22,13 +22,14 @@ print(b.x, b.y, b.width, b.height)
 
 ### Declare
 
-These four build the Clay element tree and error outside a frame or lock handler ("declare primitives are only callable inside the frame handler"). Normally only the stdlib's frame handler calls them; `some.ui` nodes compile down to these.
+These build the Clay element tree and error outside a frame or lock handler ("declare primitives are only callable inside the frame handler"). Normally only the stdlib's frame handler calls them; `some.ui` nodes compile down to these.
 
 | Function | Description |
 |---|---|
 | `core.open(decl)` | Open a Clay element. `decl` is a raw Clay declaration table: `id`, `layout` (`sizing`, `padding`, `childGap`, `childAlignment`, `layoutDirection`), `backgroundColor`, `cornerRadius`, `aspectRatio`, `image`, `floating` (incl. `clipTo = "none"` or `"attached_parent"`), `clip`, `border`. Must be balanced by `core.close()`. |
 | `core.close()` | Close the innermost open element. Errors without a matching `core.open`. |
-| `core.text(str, cfg)` | Declare a text leaf. `cfg` fields: `textColor`, `fontId` (accepted but currently ignored, one font), `fontSize` (default 16), `letterSpacing`, `lineHeight`, `wrapMode`, `textAlignment`. |
+| `core.text(str, cfg)` | Declare a text leaf. `cfg` fields: `textColor`, `fontId` (an id from `core.font`; 0 is the default font), `fontSize` (default 16), `letterSpacing`, `lineHeight`, `wrapMode`, `textAlignment`. |
+| `core.font(desc)` | Intern a Pango font description ("Sans Bold", "Monospace") to the id a text declaration carries as `fontId`. The same description always returns the same id. Callable outside a frame, unlike the declare primitives; `ui.text` calls it through a cache for its `font` cfg. |
 | `core.surface(handle, decl?)` | Place a client surface as a self-closing leaf. Without `decl` it grows in both axes. The element id derives from the handle, so the key is stable across frames. Declaring the same handle twice in one frame is an error. |
 
 ### Readback

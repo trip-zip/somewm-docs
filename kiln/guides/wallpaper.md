@@ -50,29 +50,42 @@ The image is decoded once and cached by its path. Declaring it every frame costs
 
 ## The default config's version
 
-kiln's bundled config reads the path from the `KILN_WALLPAPER` environment variable and declares the box at the top of its bar function, before the bar's own widgets:
+kiln's bundled config declares a `backdrop` box at the top of its bar
+function, before the bar's own widgets. The path comes from the
+`KILN_WALLPAPER` environment variable when set; otherwise the config
+*generates* a wallpaper (a gradient in the theme's colors with the kiln mark,
+an SVG rendered to a cached PNG by `rsvg-convert`, memoized per resolution
+and scale). The essential shape:
 
 ```lua
-screen.on("added", function(s)
-  -- tags ...
-  ui.bar(s, { edge = "top", color = th.bg }, function()
-    local wp = os.getenv("KILN_WALLPAPER")
-    if wp ~= nil and wp ~= "" then
-      ui.box({
-        id = "wallpaper",
-        image = { path = wp },
-        float = { to = "root", band = "background", passthrough = true },
-        w = s.width, h = s.height,
-      })
-    end
-    -- taglist, tasklist, clock ...
-  end)
-end)
+local function backdrop(s)
+  local wp = os.getenv("KILN_WALLPAPER")
+  if wp == nil or wp == "" then
+    wp = wallpaper(s)   -- the generated gradient; nil if rsvg-convert is missing
+  end
+  ui.box({
+    id = "backdrop",
+    float = { to = "root", band = "background", passthrough = true },
+    w = "grow", h = "grow",
+    color = (wp == nil or wp == "") and th.bg or nil,
+    image = (wp ~= nil and wp ~= "") and { path = wp } or nil,
+    on_scroll = function(ev)
+      view_relative(s, (ev.dy or 0) > 0 and 1 or -1)
+    end,
+  })
+end
 ```
+
+Three details worth stealing: `w = "grow"` fills the root box rather than
+naming the output size, so it stays correct when chrome takes a strip off
+the screen; the theme color is the fallback fill only when no image resolved
+(a fill and an image on one box are one channel, not two layers); and the
+passthrough float still carries a scroll handler, which is how wheeling over
+empty desktop cycles tags.
 
 Declaring it inside the bar function does not put it inside the bar: `to = "root"` attaches the float to the root of the screen's tree. The bar function is simply the per-frame declare hook a config owns.
 
-Launch with:
+Launch with your own image:
 
 ```bash
 KILN_WALLPAPER=~/Pictures/wall.png kiln
