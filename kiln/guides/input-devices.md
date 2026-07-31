@@ -4,18 +4,7 @@ description: Configure keyboard layouts, key repeat, and pointer behavior throug
 sidebar_position: 8
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Input Devices
-
-<YouWillLearn>
-
-- The `kiln.input` property surface and its defaults
-- Switching keyboard layouts from a bind, with a bar indicator
-- Key repeat, numlock, and pointer settings
-- The all-devices caveat
-
-</YouWillLearn>
 
 Input configuration is a set of plain read/write properties on `kiln.input`. Writing one applies it; reading one returns the last value you wrote (there is no readback from the hardware, so an unwritten property reads `nil` unless a default is listed below).
 

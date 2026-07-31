@@ -4,19 +4,7 @@ description: Build a status bar step by step with ui.bar and the stock cells, th
 sidebar_position: 3
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # A Bar from Scratch
-
-<YouWillLearn>
-
-- Registering a bar with `ui.bar(s, cfg, fn)` inside `screen.on("added")`
-- Why the bar function re-runs on every dirty frame, and what that buys you
-- The stock cells: taglist, tasklist, systray, layoutbox, clock, spacer
-- Styling with `cfg` (color, height, gap, edge, band) and theme keys
-- The `row`, `box`, and `text` primitives underneath every cell
-
-</YouWillLearn>
 
 A kiln bar is not a window or a surface. It is a row of nodes in the screen's
 one layout tree, and it reserves workarea by construction: the frame stacks

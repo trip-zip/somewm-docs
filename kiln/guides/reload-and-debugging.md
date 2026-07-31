@@ -4,20 +4,9 @@ description: The edit-reload loop, what survives kiln.reload, catching config er
 sidebar_position: 18
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Reload and Debugging
 
-<YouWillLearn>
-
-- What `kiln.reload()` does, keeps, and drops
-- Catching config errors with the `error` signal
-- Where the logs are and what lands in them
-- Reading the live element tree in the built-in inspector
-- Which containers to name, and why it pays off
-- Testing config changes safely in a nested instance
-
-</YouWillLearn>
+kiln reloads your config into the running compositor, so the edit loop never costs you a session. When something does go wrong, the config error surfaces on a signal, the logs are plain text, and the live element tree is readable from a built-in inspector.
 
 ## 1. The edit-reload loop
 

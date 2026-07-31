@@ -4,28 +4,17 @@ description: "The kiln.theme table: what the keys control, editing them in your 
 sidebar_position: 5
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Theming
 
-<YouWillLearn>
-
-- What `kiln.theme` is and when its values are read
-- The key groups: palette, metrics, chrome, popups
-- Overriding theme values in your rc
-- Per-tag gap overrides with `t.gap`
-- Live-tweaking the theme over IPC and watching the next frame
-- A small cohesive example theme
-
-</YouWillLearn>
+kiln has no theme file, no theme format, and no style engine. It has a table.
 
 ## 1. What kiln.theme is
 
 `kiln.theme` is one plain Lua table of colors and metrics. Everything the
 stdlib draws (the focus ring, the bar, taglist cells, titlebars, menus,
 tooltips, notifications, the prompt) reads it at declare time, on every dirty
-frame. There is no theme file format and no style engine: assign to the
-table, mark the screen dirty, and the next frame wears the new values.
+frame. Assign to the table, mark the screen dirty, and the next frame wears
+the new values.
 
 Because it is a plain table (not a signal-emitting object), writing to it
 does not redraw by itself. In your rc that never matters (the first frame

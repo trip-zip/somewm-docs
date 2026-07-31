@@ -4,18 +4,9 @@ description: Capture full outputs with core.screenshot and regions with grim and
 sidebar_position: 11
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Screenshots
 
-<YouWillLearn>
-
-- Saving a full output to PNG with `core.screenshot`
-- Binding Print and Shift+Print for full and region captures
-- Region capture with grim and slurp through `kiln.spawn`
-- Using a capture as a live image source, no file involved
-
-</YouWillLearn>
+kiln has no screenshot object, format menu, or naming scheme. A screenshot is one function call: `core.screenshot(name[, path])` reads back the composed scene of one output, everything the frame holds (clients, chrome, wallpaper). Everything else (which screen, which file, which key) is your config.
 
 Snippets assume the standard config preamble:
 
@@ -23,8 +14,6 @@ Snippets assume the standard config preamble:
 local kiln = require("kiln")
 local ui, key = kiln.ui, kiln.key
 ```
-
-kiln has no screenshot object, format menu, or naming scheme. A screenshot is one function call: `core.screenshot(name[, path])` reads back the composed scene of one output, everything the frame holds (clients, chrome, wallpaper). Everything else (which screen, which file, which key) is your config.
 
 ## The primitive
 

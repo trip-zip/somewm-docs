@@ -4,19 +4,9 @@ description: Receive desktop notifications, raise your own, tune timeouts and ur
 sidebar_position: 5
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Notifications
 
-<YouWillLearn>
-
-- How kiln receives desktop notifications without a separate daemon
-- Raising notifications from your config with `kiln.notify`
-- Urgency, timeouts, and the theme keys behind them
-- Reacting to notification signals and action buttons
-- Replacing the entire display with your own
-
-</YouWillLearn>
+Desktop notifications arrive over DBus and are drawn by the compositor itself. Nothing needs installing, the popups take their colors from the theme table, and the entire display is one policy function you can replace.
 
 ## 1. kiln is the notification daemon
 

@@ -4,20 +4,7 @@ description: "Self-updating bar regions with ui.widget: timers, watched signals,
 sidebar_position: 4
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Widgets
-
-<YouWillLearn>
-
-- What a widget is in kiln: a declare function plus a reason to redraw
-- Periodic redraws with `ui.widget{ every = seconds }`
-- Feeding a widget from a shell command with `kiln.spawn.watch`
-- Reacting to object signals with `watch = { "Class::signal" }`
-- Keyed dynamic lists with `ui.each`
-- A percent meter built from two nested boxes
-
-</YouWillLearn>
 
 A kiln widget is just a function that declares nodes, called from your bar
 function every dirty frame. There is no widget object and no update method:

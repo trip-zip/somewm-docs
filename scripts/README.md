@@ -1,6 +1,18 @@
-# Reference generators
+# Generators
 
-Scripts that produce the long enumerated reference pages from upstream sources of truth.
+Scripts that produce documentation assets from upstream sources of truth.
+
+- **Reference pages** (below) - the long enumerated reference pages.
+- **[Clay thesis figures](figures/README.md)** - `npm run generate:figures` renders
+  every image under `static/img/kiln/clay/` from a real headless kiln. Safe to run
+  while kiln is your live session; see that README for how.
+- **`kiln-verify.sh`** - boot a headless kiln on a config and report whether it
+  actually runs. Use it to check kiln doc samples before they ship:
+  `scripts/kiln-verify.sh sample.lua --box launcher --shot out.png`.
+- **`lib/kiln-headless.sh`** - sourceable boot/IPC helpers shared by both of the
+  above. The single copy of the "do not clobber the live session" guards.
+
+## Reference generators
 
 ## When to run
 

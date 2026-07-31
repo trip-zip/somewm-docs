@@ -4,19 +4,9 @@ description: Run apps once per session, focus running instances instead of respa
 sidebar_position: 15
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Spawn Lifecycle
 
-<YouWillLearn>
-
-- Autostart that survives config reloads without doubling processes
-- Checking for a running app by scanning `client.all()`
-- Single-instance app keys: focus the window if it exists, spawn if not
-- Routing a spawned client to a tag with a rule
-- Why app_id matching is the mechanism, and what activation tokens add
-
-</YouWillLearn>
+`kiln.spawn(cmd)` is fire and forget: kiln launches the process and forgets it. Everything smarter (run once, focus-or-spawn, tag routing) is a few lines of config, built on one identity fact: a client's `app_id`.
 
 Snippets assume the standard config preamble:
 
@@ -24,8 +14,6 @@ Snippets assume the standard config preamble:
 local kiln = require("kiln")
 local key, rule = kiln.key, kiln.rule
 ```
-
-`kiln.spawn(cmd)` is fire and forget: kiln launches the process and forgets it. Everything smarter (run once, focus-or-spawn, tag routing) is a few lines of config, built on one identity fact: a client's `app_id`.
 
 ## Run once at startup
 

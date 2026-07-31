@@ -7,91 +7,74 @@ slug: /
 
 # Kiln
 
-kiln is a Wayland compositor where everything on screen is a node in one [Clay](https://github.com/nicbarker/clay) layout tree per screen. Windows, bars, widgets, tags, menus, and notifications are all the same kind of thing: Lua declares the tree, the Clay solver lays it out, and a thin C core renders the result. There is no separate widget toolkit, no imperative drawing loop, no special-cased bar. Your entire desktop is a Lua config over a small, general core.
+A stripped down Wayland compositor where the entire screen is one [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, tags, menus, and notifications are all nodes in it.
 
-The source lives at [github.com/trip-zip/kiln](https://github.com/trip-zip/kiln).
+![The default kiln desktop: two terminals tiled under the bar](/img/kiln/desktop.png)
 
-kiln shares its desktop concepts with SomeWM and AwesomeWM: clients, tags, layouts, rules, a status bar, a theme table. But its API is deliberately its own, declarative rather than imperative, and there is no compatibility layer. Existing AwesomeWM or SomeWM configs and widget libraries do not run on kiln. See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) for the full comparison.
+## Your desktop is a config
+
+This is the bar from the default `rc.lua`, unedited:
+
+```lua
+ui.bar(s, { edge = "top", color = th.bg }, function()
+    taglist(s)
+    tasklist(s)
+    ui.spacer()
+    ui.systray()
+    layoutbox(s)
+
+    -- floated to the parent's center, with a tooltip that is just a handler
+    ui.box({
+        id = "clock",
+        float = { to = "parent", anchor = "center" },
+        color = th.bg2, radius = 4, pad = { x = 8 }, align = "center",
+        on_hover = ui.tooltip(function() return os.date("%A %d %B %Y") end),
+    }, ui.clock)
+end)
+```
+
+What to notice:
+
+- **`ui.spacer()` takes the leftover room** because Clay's solver gives it the leftover room, not because a bar widget has a spacer feature.
+- **A bar is a box with children.** So is a menu, a notification, and a tiled window's frame. There is one set of constructors, used everywhere.
+- **Nothing here is imperative.** No draw callback, no widget object to construct and wire up. You declare what the screen should look like and the solver does the rest.
+
+## It really is a Clay tree
+
+Clay's own debug inspector works on the live desktop. Not a reimplementation and not a screenshot tool: the actual inspector, walking the actual tree that laid out the screen you are looking at. Toggle it with `mod+shift+i`.
+
+![Clay's debug inspector open over the kiln desktop](/img/kiln/inspector.png)
+
+Why one tree owns the whole screen, and what that deletes: [The Clay Thesis](/kiln/concepts/the-clay-thesis).
+
+## Start here
+
+1. [Install kiln](/kiln/getting-started/installation) from source.
+2. [Launch it nested](/kiln/getting-started/first-launch) inside your current session, so nothing is at stake.
+3. Work through [the basics](/kiln/tutorials/basics), which walks the default config and ends with you changing it live.
+
+`mod+Return` opens a terminal, `mod+s` shows every binding on one sheet, `mod+shift+q` quits.
+
+## Coming from AwesomeWM or SomeWM
+
+- **The concepts carry over.** Clients, tags, layouts, rules, a status bar, a theme table.
+- **The API does not.** It is declarative rather than imperative, with no compatibility layer. Existing configs and widget libraries do not run on kiln.
+
+See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) for the full comparison.
 
 :::info
 kiln is a young project. The API is functional and fully documented here, but it is not yet frozen: names and shapes may still change between releases.
 :::
 
-## How these docs are organized
+## Where things live
 
-These docs follow the [Diátaxis framework](https://diataxis.fr/), separating four kinds of pages:
+These docs follow the [Diátaxis framework](https://diataxis.fr/). The sidebar lists every page; this is which section to open.
 
-| Type | Purpose | When to use |
-|------|---------|-------------|
-| **Tutorials** | Learning through doing | You're new and want to learn step-by-step |
-| **How-To Guides** | Solving specific problems | You need to accomplish a particular task |
-| **Reference** | Technical specifications | You need exact details about an API or feature |
-| **Concepts** | Understanding the "why" | You want deeper knowledge of how things work |
+| Section | Open it when |
+|---------|--------------|
+| [Tutorials](/kiln/tutorials/basics) | You are new and want to build up a config step by step |
+| [How-To Guides](/kiln/guides/client-rules) | You have a specific task in hand |
+| [Reference](/kiln/reference/) | You need the exact property, method, signal, or default |
+| [Concepts](/kiln/concepts/the-clay-thesis) | You want to understand how kiln works and why |
 
-Pick the section that matches what you are trying to do right now.
-
-## Getting Started
-
-| Module | Description |
-|--------|-------------|
-| [Installation](getting-started/installation.md) | Build kiln from source and install it |
-| [First Launch](getting-started/first-launch.md) | Run kiln nested or on a TTY for the first time |
-| [Anatomy of rc.lua](getting-started/rc-anatomy.md) | What the default config does, section by section |
-
-## Tutorials
-
-Step-by-step lessons that build your config from scratch.
-
-| Module | Description |
-|--------|-------------|
-| [Basics](tutorials/basics.md) | Clients, tags, screens, and the declare loop |
-| [Keybindings](tutorials/keybindings.md) | Bind keys and mouse buttons with kiln.key and kiln.button |
-| [A Bar From Scratch](tutorials/a-bar-from-scratch.md) | Build a status bar out of ui nodes |
-| [Widgets](tutorials/widgets.md) | Self-updating regions with ui.widget |
-| [Theming](tutorials/theming.md) | Colors, fonts, and sizes through the theme table |
-
-## How-To Guides
-
-Practical recipes for specific tasks. A selection of the most useful ones; the sidebar lists all of them.
-
-| Module | Description |
-|--------|-------------|
-| [Client Rules](guides/client-rules.md) | Match clients and apply properties on map |
-| [Multi-Monitor](guides/multi-monitor.md) | Configure outputs: mode, scale, position |
-| [Input Devices](guides/input-devices.md) | Keymap, repeat rate, touchpad, and pointer settings |
-| [Notifications](guides/notifications.md) | Receive, style, and replace the notification display |
-| [Wallpaper](guides/wallpaper.md) | Put an image behind everything |
-| [App Launcher](guides/app-launcher.md) | A .desktop application menu in config space |
-| [IPC and Scripting](guides/ipc-and-scripting.md) | Drive the live config VM from the shell |
-| [Reload and Debugging](guides/reload-and-debugging.md) | Reload the config in place and inspect state |
-
-## Concepts
-
-Background knowledge and architectural understanding.
-
-| Module | Description |
-|--------|-------------|
-| [The Clay Thesis](concepts/the-clay-thesis.md) | Why one layout tree owns the whole screen |
-| [Frames and Dirty](concepts/frames-and-dirty.md) | When kiln redraws, and when it deliberately does not |
-| [Object Model](concepts/object-model.md) | One class mixin behind clients, tags, screens, and the rest |
-| [Nodes, Floats, and Bands](concepts/nodes-floats-and-bands.md) | How the tree, out-of-flow elements, and z-order fit together |
-| [The C/Lua Boundary](concepts/c-lua-boundary.md) | What the C core does and what it refuses to do |
-| [kiln vs SomeWM](concepts/kiln-vs-somewm.md) | Shared concepts, different API, no compat layer |
-| [Limitations](concepts/limitations.md) | What kiln deliberately does not do |
-
-## Reference
-
-Exact API details: every property, method, signal, and default.
-
-| Module | Description |
-|--------|-------------|
-| [Reference Index](reference/index.md) | The full API surface in one place |
-| [client](reference/client.md) | The client object: properties, methods, signals |
-| [kiln](reference/kiln.md) | The kiln module: keys, rules, spawn, defaults |
-| [kiln.ui](reference/ui.md) | The node constructors and the cfg contract |
-| [kiln.layout](reference/layout.md) | Layout functions and their tag parameters |
-| [Theme Variables](reference/theme-variables.md) | Every theme key with its default |
-
-## Where to start
-
-[Install kiln](/kiln/getting-started/installation), then [launch it](/kiln/getting-started/first-launch) nested inside your current session so nothing is at stake. Once it opens, work through the [basics tutorial](/kiln/tutorials/basics): it walks the default config and ends with you changing it live.
+Short answers to common questions are in the [FAQ](/kiln/faq). The source lives at [github.com/trip-zip/kiln](https://github.com/trip-zip/kiln).

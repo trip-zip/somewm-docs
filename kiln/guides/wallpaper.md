@@ -4,18 +4,9 @@ description: Set a wallpaper with a single image node in the background band, pe
 sidebar_position: 10
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Wallpaper
 
-<YouWillLearn>
-
-- How a wallpaper is one declared box, not a compositor feature
-- The default config's `KILN_WALLPAPER` recipe
-- Per-screen and per-tag wallpaper variants
-- A solid color fallback when no image is set
-
-</YouWillLearn>
+kiln has no wallpaper object and no wallpaper API. A wallpaper is an image-filled box floated to the root in the `background` band, the lowest z range, so it sits behind every client and every piece of chrome. You declare it in your bar function like everything else on screen.
 
 Snippets assume the standard config preamble:
 
@@ -24,8 +15,6 @@ local kiln = require("kiln")
 local ui = kiln.ui
 local th = kiln.theme
 ```
-
-kiln has no wallpaper object and no wallpaper API. A wallpaper is an image-filled box floated to the root in the `background` band, the lowest z range, so it sits behind every client and every piece of chrome. You declare it in your bar function like everything else on screen.
 
 ## The recipe
 

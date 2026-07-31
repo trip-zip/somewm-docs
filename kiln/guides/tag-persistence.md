@@ -4,18 +4,11 @@ description: Remember each monitor's tag arrangement across unplug and replug, a
 sidebar_position: 16
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Tag Persistence
 
-<YouWillLearn>
+Unplug a monitor and kiln keeps every window alive: the departing screen's clients are moved onto a surviving screen's selected tag, all of them, in one pile. Plug the monitor back in and it comes up as a fresh screen: your `screen.on("added")` handler builds its default tags, and the clients stay in the pile on the survivor. Nothing is lost, but nothing is remembered either.
 
-- What kiln does with a monitor's tags and clients when it unplugs
-- Recording per-output arrangements in a table keyed by output name
-- Why client membership must be tracked live, not read at removal
-- Recreating tags and moving clients home when the output returns
-
-</YouWillLearn>
+This guide builds the memory: a config table keyed by output name that records which tags a screen had and which client lived on which tag, then restores the arrangement when the output returns. It works because output names ("eDP-1", "DP-3") are stable across replug within a session.
 
 Snippets assume the standard config preamble:
 
@@ -24,10 +17,6 @@ local kiln = require("kiln")
 local ui = kiln.ui
 local th = kiln.theme
 ```
-
-Unplug a monitor and kiln keeps every window alive: the departing screen's clients are moved onto a surviving screen's selected tag, all of them, in one pile. Plug the monitor back in and it comes up as a fresh screen: your `screen.on("added")` handler builds its default tags, and the clients stay in the pile on the survivor. Nothing is lost, but nothing is remembered either.
-
-This guide builds the memory: a config table keyed by output name that records which tags a screen had and which client lived on which tag, then restores the arrangement when the output returns. It works because output names ("eDP-1", "DP-3") are stable across replug within a session.
 
 ## The removal contract
 

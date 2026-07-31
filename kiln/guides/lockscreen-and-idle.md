@@ -4,19 +4,9 @@ description: Lock the session with kiln's native PAM-backed lockscreen, auto-loc
 sidebar_position: 9
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Lockscreen and Idle
 
-<YouWillLearn>
-
-- Locking and unlocking with `kiln.lock` and PAM authentication
-- Styling the native lockscreen with `kiln.lockscreen.configure`
-- Auto-lock after idle with `kiln.set_idle_timeout`
-- Respecting idle inhibitors (a playing video)
-- Using an external locker instead
-
-</YouWillLearn>
+kiln locks the session itself, in the compositor core rather than in a client drawing over the screen. Nothing in your config can see input or lift the lock while it holds, so a broken keybinding cannot lock you out or let someone else in.
 
 ## 1. The lock model
 

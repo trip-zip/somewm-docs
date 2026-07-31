@@ -4,19 +4,9 @@ description: React to outputs coming and going, keep per-screen tags and bars, m
 sidebar_position: 7
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Multi-Monitor
 
-<YouWillLearn>
-
-- The three screen signals: `added`, `changed`, `removed`
-- Per-screen tags and bars, including per-monitor differences
-- Moving clients between screens with `c:move_to`
-- What happens to windows when an output disappears
-- Static output configuration: mode, position, scale, enable
-
-</YouWillLearn>
+kiln has no multi-monitor mode. Outputs arrive and leave as ordinary screen objects, and a config that builds its world in the `added` handler handles six of them the same way it handles one.
 
 ## 1. The screen lifecycle
 

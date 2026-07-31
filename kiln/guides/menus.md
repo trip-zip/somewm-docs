@@ -4,19 +4,7 @@ description: Build popup menus with kiln.menu, nest submenus, attach them to bar
 sidebar_position: 4
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Menus
-
-<YouWillLearn>
-
-- Opening a menu with `kiln.menu.show`
-- The item shape: actions, submenus, icons
-- Dropping a menu under a bar element with `under`
-- The ready-made window list, `kiln.menu.client_list`
-- A root menu on desktop right-click
-
-</YouWillLearn>
 
 A kiln menu is a floating column of pressable rows drawn by the compositor itself: no popup window, no external process. It comes with its own dismissal behavior: a press anywhere outside the menu closes it.
 

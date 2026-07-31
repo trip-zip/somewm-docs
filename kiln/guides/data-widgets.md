@@ -4,19 +4,9 @@ description: Progress bars, history graphs, sliders, and toggles built from plai
 sidebar_position: 14
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Data Widgets
 
-<YouWillLearn>
-
-- A progress bar from two boxes and percent sizing
-- A history graph from a ring buffer and `ui.each`
-- A slider driven by `on_press`, `on_scroll`, and `kiln.mousegrabber`
-- A checkbox from a bordered box and `on_press`
-- Feeding all of them from `kiln.spawn.watch`
-
-</YouWillLearn>
+kiln has no canvas or drawing API, and bar meters do not need one. A meter is boxes: fixed and grow sizing, percent widths, colors, and handlers. The data lives in plain Lua variables; a shell command polled by `kiln.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers.
 
 Snippets assume the standard config preamble:
 
@@ -25,8 +15,6 @@ local kiln = require("kiln")
 local ui = kiln.ui
 local th = kiln.theme
 ```
-
-kiln has no canvas or drawing API, and bar meters do not need one. A meter is boxes: fixed and grow sizing, percent widths, colors, and handlers. The data lives in plain Lua variables; a shell command polled by `kiln.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers.
 
 :::note
 Widget state is ordinary Lua. Changing a local variable draws nothing by itself; call `kiln.dirty()` after every update so the next frame renders it. See [frames and dirty](/kiln/concepts/frames-and-dirty).

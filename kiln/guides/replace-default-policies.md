@@ -4,17 +4,7 @@ description: Swap any of kiln's ten stock behaviors, from focus succession to fu
 sidebar_position: 6
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Replacing Default Policies
-
-<YouWillLearn>
-
-- The `kiln.defaults` model: ten policies, each one plain function
-- The two replacement patterns: reassign the field, or swap the listener
-- Three worked replacements: focus succession, focus stealing, and fake fullscreen
-
-</YouWillLearn>
 
 Everything kiln decides on your behalf is a function in `kiln.defaults`, and every one of them is replaceable wholesale. There is no hook registry and no permission system: you write a function with the same signature and put it where the old one was.
 

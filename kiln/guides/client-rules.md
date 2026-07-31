@@ -4,19 +4,7 @@ description: Match new windows with kiln.rule and give them tags, screens, float
 sidebar_position: 1
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Client Rules
-
-<YouWillLearn>
-
-- How `kiln.rule{}` selectors match a new window
-- What the `props` table can set, and which keys are special
-- When the `on(c)` callback runs and what it is for
-- How multiple matching rules combine
-- Three working rules: a browser pinned to a tag, floating centered dialogs, and a scratchpad terminal
-
-</YouWillLearn>
 
 A rule runs when a client maps, before it takes focus. It is the place to say "this app lives on that tag", "dialogs float", or "this window never steals focus", without touching a keybinding.
 

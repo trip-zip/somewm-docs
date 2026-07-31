@@ -4,19 +4,7 @@ description: "Drive a running kiln from the shell: the socket protocol, kiln-eva
 sidebar_position: 17
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # IPC and Scripting
-
-<YouWillLearn>
-
-- The kiln socket as a live Lua REPL into the running compositor
-- One-liners with `kiln-eval`: inspecting clients, switching tags, tweaking the theme
-- Expressions versus statements, and the reply size cap
-- Targeting a nested dev instance with `KILN_SOCK`
-- Getting events out despite the request-reply-only protocol
-
-</YouWillLearn>
 
 Every running kiln listens on a unix socket and evaluates whatever Lua you send it, in the same VM your config runs in. Anything your config can do, a shell script can do: the entire API surface is drivable from outside.
 

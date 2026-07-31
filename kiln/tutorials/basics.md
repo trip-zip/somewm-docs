@@ -4,19 +4,11 @@ description: "A first hands-on session: run kiln nested, tile some terminals, sw
 sidebar_position: 1
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Basics
 
-<YouWillLearn>
-
-- Running kiln as a nested window inside your current session
-- Opening clients and watching the tiled layout react
-- Switching layouts and moving between tags
-- Floating, moving, and resizing a window with the mouse
-- Editing your config and reloading it without restarting
-
-</YouWillLearn>
+kiln runs nested inside your existing session as an ordinary window. Nothing
+below needs a spare machine or a logout: you tile, retag, float, and reload
+against a live compositor running on the desktop you are already using.
 
 ## Prerequisites
 

@@ -4,18 +4,9 @@ description: Build a .desktop application launcher on the stdlib menu, with icon
 sidebar_position: 13
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # App Launcher
 
-<YouWillLearn>
-
-- Finding `.desktop` files under the XDG application directories
-- Parsing Name, Exec, and Icon with plain Lua
-- Resolving icons with `kiln.icon.path`
-- Presenting the list with `kiln.menu.show` and launching with `kiln.spawn_with_token`
-
-</YouWillLearn>
+An application launcher is a menu of every installed `.desktop` entry, where picking a row spawns its command. kiln does not ship one as a module; you build it from the stdlib menu plus a directory scan and a file parse, both plain Lua. The one launcher-specific ingredient is `kiln.spawn_with_token(cmd)`: it launches the command with an XDG activation token, so the app you asked for arrives able to focus itself.
 
 Snippets assume the standard config preamble:
 
@@ -24,8 +15,6 @@ local kiln = require("kiln")
 local ui, key = kiln.ui, kiln.key
 local th = kiln.theme
 ```
-
-An application launcher is a menu of every installed `.desktop` entry, where picking a row spawns its command. kiln does not ship one as a module; you build it from the stdlib menu plus a directory scan and a file parse, both plain Lua. The one launcher-specific ingredient is `kiln.spawn_with_token(cmd)`: it launches the command with an XDG activation token, so the app you asked for arrives able to focus itself.
 
 ## Step 1: find the application directories
 

@@ -4,19 +4,7 @@ description: Write your own tiling layout as a plain Lua function over ui contai
 sidebar_position: 2
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Custom Layouts
-
-<YouWillLearn>
-
-- The layout contract: one function that declares cells
-- Building a two-column layout from `ui.row` and `ui.client`
-- Reading tag parameters like `master_width_factor`
-- Registering a layout on a tag and in the cycle
-- When you need pixel math from `area`, and when you do not
-
-</YouWillLearn>
 
 A layout in kiln is not an object or a class. It is one function:
 

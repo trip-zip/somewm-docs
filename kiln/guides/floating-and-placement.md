@@ -4,19 +4,9 @@ description: Float windows, move and resize them with the mouse, and position th
 sidebar_position: 3
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Floating and Placement
 
-<YouWillLearn>
-
-- How `c.floating` and the `c.float` box relate
-- Toggling floating from a key
-- Positioning floats with `kiln.placement` helpers
-- Interactive move and resize with mouse buttons and edge handles
-- Keeping floats on screen with `no_offscreen`, `no_overlap`, and `under_mouse`
-
-</YouWillLearn>
+A floating client leaves the tiled order and carries its own box. The placement helpers, interactive move and resize, and the rules that keep a window on screen are all built on those two facts.
 
 ## 1. Two properties: the flag and the box
 

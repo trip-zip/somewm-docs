@@ -4,18 +4,11 @@ description: Use the built-in keybinding cheat sheet, and build your own replace
 sidebar_position: 12
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Hotkeys Popup
 
-<YouWillLearn>
-
-- Showing, closing, and toggling the built-in cheat sheet with `kiln.hotkeys`
-- What the stock sheet renders, and where its content comes from
-- Reading every binding back from `kiln.key.all()`
-- Declaring a custom sheet as an overlay float with a dismissing scrim
-
-</YouWillLearn>
+kiln keeps a registry of every binding your config declares, with the
+description and group you gave it. The built-in cheat sheet is a reader of
+that registry, and so is any replacement you write.
 
 Snippets assume the standard config preamble:
 
@@ -27,9 +20,8 @@ local th = kiln.theme
 
 ## The built-in sheet
 
-Every `key { ... }` call records itself in a registry, including the `desc`
-and `group` you gave it. The stdlib ships a cheat sheet that reads that
-registry at declare, so it lists whatever your config binds, always current:
+The stdlib ships a cheat sheet that reads that registry at declare, so it
+lists whatever your config binds, always current:
 
 ```lua
 key { mods = { "mod" }, key = "s", desc = "show help", group = "kiln",

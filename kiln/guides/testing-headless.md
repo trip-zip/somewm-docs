@@ -4,19 +4,7 @@ description: Run kiln invisibly for config testing and CI, drive it over IPC, an
 sidebar_position: 19
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Testing Headless
-
-<YouWillLearn>
-
-- Booting kiln with no display using the headless backend
-- Keeping test instances off your live session's IPC socket
-- Driving a headless instance with `kiln-eval`
-- Screenshotting what a headless config actually drew
-- A minimal smoke-test script for CI
-
-</YouWillLearn>
 
 kiln runs fine with no monitor, no GPU display, and no input devices: the headless backend creates a virtual output and renders into it in software. That makes a full compositor cheap to boot in a test: start it, evaluate Lua in it over IPC, screenshot the result, kill it. You can verify a config change without logging out, and run the same checks in CI.
 

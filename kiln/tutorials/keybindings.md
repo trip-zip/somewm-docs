@@ -4,22 +4,10 @@ description: "Teach kiln.key from scratch: chords and the modkey, press and rele
 sidebar_position: 2
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Keybindings
 
-<YouWillLearn>
-
-- Registering a key binding with `kiln.key{}`
-- How `"mod"` resolves through `kiln.modkey`, and exact modifier matching
-- Press and release handlers
-- `desc` and `group`, and how they feed the hotkeys popup
-- Range keys like `"1-9"` and `"a-z"` that pass their value to the handler
-- Client verbs with `kiln.focused`
-- Mouse bindings with `kiln.button{}` on clients and the root
-- Clearing and re-registering bindings
-
-</YouWillLearn>
+`kiln.key{}` is how input reaches your config. One call registers one chord,
+and the same call carries the description that the hotkeys popup reads back.
 
 ## Prerequisites
 
