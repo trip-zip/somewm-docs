@@ -10,7 +10,7 @@ Every signal name in one place. Instance listeners attach with `obj:on(name, fn)
 
 ```lua
 client.on("focus", function(c) print("focused", c.title) end)
-some.on("error", function(signal, err) some.notify { title = signal, message = err } end)
+kiln.on("error", function(signal, err) kiln.notify { title = signal, message = err } end)
 ```
 
 ## client
@@ -79,9 +79,9 @@ The `drag` global is a plain signal bus (`drag.on`, `drag.off`), not an object c
 | `start` | none | A drag-and-drop operation began. |
 | `end` | none | It ended. |
 
-## some.on (global bus)
+## kiln.on (global bus)
 
-Subscribe with `some.on(name, fn)`.
+Subscribe with `kiln.on(name, fn)`.
 
 | Signal | Payload | Emitted when |
 |---|---|---|

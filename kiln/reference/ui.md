@@ -1,16 +1,16 @@
 ---
-title: some.ui
+title: kiln.ui
 description: The declarative UI module, every constructor, the cfg contract, floats and bands, and menus.
 sidebar_position: 8
 ---
 
-# some.ui
+# kiln.ui
 
-`some.ui` is how anything gets on screen in kiln: bars, titlebars, widgets, menus, even the clients themselves are declared as a tree of elements that the Clay solver lays out each frame. There are no widget objects and no update paths. You write a function that declares what the screen looks like right now, and kiln reruns it whenever something changes.
+`kiln.ui` is how anything gets on screen in kiln: bars, titlebars, widgets, menus, even the clients themselves are declared as a tree of elements that the Clay solver lays out each frame. There are no widget objects and no update paths. You write a function that declares what the screen looks like right now, and kiln reruns it whenever something changes.
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
+local kiln = require("kiln")
+local ui = kiln.ui
 
 screen.on("added", function(s)
   ui.bar(s, {}, function()
@@ -45,7 +45,7 @@ end)
 | `ui.spacer(n?)` | Flexible gap: `ui.box{ w = n or "grow", h = n }`. With no argument it grows to fill the row. |
 | `ui.image(path, cfg?)` | Image leaf. cfg: `id, w, h, aspect, radius, on_press, recolor`. Images have no intrinsic size: give both axes, or one axis plus `aspect`. Decoded once and cached by path. `recolor` takes a color spec and uses the file as a stencil: the color replaces the decoded pixels and only their alpha survives, so one glyph file draws in any ink. |
 | `ui.surface(c, cfg?)` | The client leaf: places the client's own buffer tree at the solved box. |
-| `ui.titlebar(c, focused?)` | Stock titlebar row: icon, title, maximize and close buttons. Replaceable: assign `some.ui.titlebar = fn`. |
+| `ui.titlebar(c, focused?)` | Stock titlebar row: icon, title, maximize and close buttons. Replaceable: assign `kiln.ui.titlebar = fn`. |
 | `ui.resize_handles(c, z?)` | Eight invisible edge and corner handles over a floating client. |
 | `ui.client(c, cfg?)` | The composite: border plus titlebar plus surface, rounded, colored by focus; adds resize handles when the client floats. |
 | `ui.scroll(cfg, children)` | Clipped scroll viewport. cfg: `id` (required, keys the offset), `w, h, color, pad, step` (default 40). |
@@ -56,10 +56,10 @@ end)
 | `ui.tasklist(s, cfg?)` | Stock tasklist. cfg: `filter` (default `ui.filter.currenttags`), `width` (default `{ "grow", max = 180 }`), `on`. |
 | `ui.systray(cfg?)` | Status-notifier tray items as pressable icon cells. cfg: `size` (default 18). |
 | `ui.layoutbox(s, cfg?)` | Current layout indicator; pressing cycles to the next layout. Draws `theme.layout_icons[family]` when set, else the layout name as text. cfg: `on`. |
-| `ui.layoutlist(s, cfg?)` | Layout picker, as a menu over `some.layout.list`. |
+| `ui.layoutlist(s, cfg?)` | Layout picker, as a menu over `kiln.layout.list`. |
 | `ui.clock()` | Minute-aligned clock text. |
-| `ui.menu(cfg)` | Alias for `some.menu.show` (see [Menus](#menus)). |
-| `ui.tooltip(text)` | Alias for `some.tooltip.attach`: returns an `on_hover` handler that shows a tooltip. `text` is a string or a function read at declare. |
+| `ui.menu(cfg)` | Alias for `kiln.menu.show` (see [Menus](#menus)). |
+| `ui.tooltip(text)` | Alias for `kiln.tooltip.attach`: returns an `on_hover` handler that shows a tooltip. `text` is a string or a function read at declare. |
 
 Helpers that are not constructors:
 
@@ -198,13 +198,13 @@ Layer-shell surfaces declare into the band their protocol layer names: `backgrou
 A menu is chrome in the screen's Clay tree, declared while open, gone when closed. There is no menu widget object.
 
 ```lua
-some.menu.show({
+kiln.menu.show({
   under = "launcher",
   items = {
-    { "terminal", function() some.spawn("foot") end },
+    { "terminal", function() kiln.spawn("foot") end },
     { "layouts", {
-      { "tile", function() screen.focused.selected_tag.layout = some.layout.tile end },
-      { "max",  function() screen.focused.selected_tag.layout = some.layout.max end },
+      { "tile", function() screen.focused.selected_tag.layout = kiln.layout.tile end },
+      { "max",  function() screen.focused.selected_tag.layout = kiln.layout.max end },
     } },
   },
 })
@@ -212,11 +212,11 @@ some.menu.show({
 
 | Function | Description |
 |---|---|
-| `some.menu.show(cfg)` | Open a menu. cfg: `screen` (default the focused screen), `items` (required), `x`, `y` (root offset, default 0), `under` (element id to drop below, the usual case for a bar button). |
-| `some.menu.close()` | Close the open menu and its submenu chain. |
-| `some.menu.client_list(cfg)` | A ready menu over all mapped clients, labelled and iconed like tasklist rows; pressing a row unminimizes, views, focuses, and raises the client. Same cfg as `show` but for `items`, which it fills in. |
-| `some.menu.nav(verb)` | Drive the open menu from the keyboard: `"down"`, `"up"`, `"enter"` (descend into a submenu or run the row), `"back"` (close one level, or the chain at the root), `"close"`. Returns whether the verb was handled. |
-| `some.menu.keys` | The keysym-to-verb map behind the built-in keyboard handling: Down/Up move, Right/Return/KP_Enter enter, Left/Escape go back. Replaceable per key (`some.menu.keys.j = "down"`) or wholesale. |
+| `kiln.menu.show(cfg)` | Open a menu. cfg: `screen` (default the focused screen), `items` (required), `x`, `y` (root offset, default 0), `under` (element id to drop below, the usual case for a bar button). |
+| `kiln.menu.close()` | Close the open menu and its submenu chain. |
+| `kiln.menu.client_list(cfg)` | A ready menu over all mapped clients, labelled and iconed like tasklist rows; pressing a row unminimizes, views, focuses, and raises the client. Same cfg as `show` but for `items`, which it fills in. |
+| `kiln.menu.nav(verb)` | Drive the open menu from the keyboard: `"down"`, `"up"`, `"enter"` (descend into a submenu or run the row), `"back"` (close one level, or the chain at the root), `"close"`. Returns whether the verb was handled. |
+| `kiln.menu.keys` | The keysym-to-verb map behind the built-in keyboard handling: Down/Up move, Right/Return/KP_Enter enter, Left/Escape go back. Replaceable per key (`kiln.menu.keys.j = "down"`) or wholesale. |
 
 Each item is `{ "label", action }` with an optional `icon = path`. When the second element is a function, pressing the row closes the menu and calls it. When it is a table, the row is a submenu that opens beside it on hover. That one rule is the entire item schema.
 
@@ -224,7 +224,7 @@ An open menu declares its own near-invisible screen-sized scrim underneath itsel
 
 An open menu also holds the keyboard: arrow keys move the selection, Right or
 Return enters a submenu or runs the row, Left or Escape backs out. The map is
-`some.menu.keys`; a keyboard descent into a submenu lights its first row,
+`kiln.menu.keys`; a keyboard descent into a submenu lights its first row,
 while a pointer descent does not (the pointer already says where it is).
 
 ## See also

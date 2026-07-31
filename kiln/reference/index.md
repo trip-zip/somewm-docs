@@ -6,12 +6,12 @@ sidebar_position: 1
 
 # Reference
 
-This section documents every symbol a kiln config can touch: the objects the compositor hands you, the `some` stdlib modules, and the system layer under both. Each page opens with a short example, then tables: properties as name, type, default, description; methods with their signatures inline; signals with payload and when they fire.
+This section documents every symbol a kiln config can touch: the objects the compositor hands you, the `kiln` stdlib modules, and the system layer under both. Each page opens with a short example, then tables: properties as name, type, default, description; methods with their signatures inline; signals with payload and when they fire.
 
 Two conventions run through everything. A config loads the stdlib once:
 
 ```lua
-local some = require("somewm")
+local kiln = require("kiln")
 ```
 
 and the classes `client`, `screen`, `tag`, `layer`, `drag`, `notification`, and `core` are globals, available without requiring anything.
@@ -30,17 +30,17 @@ The live things the compositor manages. Properties are read at declare time, so 
 
 ## Modules
 
-The `some` stdlib: everything a config composes with.
+The `kiln` stdlib: everything a config composes with.
 
 | Module | Description |
 |--------|-------------|
-| [some](some.md) | The top-level module: spawn, rules, key, button, and what it re-exports. |
-| [some.ui](ui.md) | The declarative UI layer: every constructor, the cfg contract, floats, bands, and menus. |
-| [some.layout](layout.md) | The layout contract, the nine built-in families, and the tag properties they read. |
+| [kiln](kiln.md) | The top-level module: spawn, rules, key, button, and what it re-exports. |
+| [kiln.ui](ui.md) | The declarative UI layer: every constructor, the cfg contract, floats, bands, and menus. |
+| [kiln.layout](layout.md) | The layout contract, the nine built-in families, and the tag properties they read. |
 | [Keys, Buttons, and Rules](keybindings-and-rules.md) | Binding keys and pointer buttons, and matching clients with rules. |
-| [some.defaults](defaults.md) | The replaceable default policies the runtime installs. |
-| [some.placement](placement.md) | Placement helpers for floating clients. |
-| [Theme Variables](theme-variables.md) | Every some.theme key with its default, plus some.modkey. |
+| [kiln.defaults](defaults.md) | The replaceable default policies the runtime installs. |
+| [kiln.placement](placement.md) | Placement helpers for floating clients. |
+| [Theme Variables](theme-variables.md) | Every kiln.theme key with its default, plus kiln.modkey. |
 
 ## System
 

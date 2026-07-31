@@ -1,21 +1,21 @@
 ---
-title: some.layout
+title: kiln.layout
 description: The layout contract, the nine built-in layout families and their variants, and the tag properties they read.
 sidebar_position: 9
 ---
 
-# some.layout
+# kiln.layout
 
 A layout in kiln is a plain function: `(clients, area, tag)`, called during a frame to declare the tiled clients of the visible tag as UI elements. `t.layout` holds one; assigning it changes the tag's tiling on the next frame.
 
 ```lua
-local some = require("somewm")
+local kiln = require("kiln")
 
 -- at creation
-tag.new { name = "www", screen = screen.focused, layout = some.layout.fair }
+tag.new { name = "www", screen = screen.focused, layout = kiln.layout.fair }
 
 -- or switch a tag later, variants included
-screen.focused.selected_tag.layout = some.layout.corner.se
+screen.focused.selected_tag.layout = kiln.layout.corner.se
 ```
 
 ## The layout contract
@@ -66,7 +66,7 @@ Layout parameters are plain tag properties. Set them per tag; each has a default
 |---|---|
 | `layout.name(fn)` | The display name of a layout function, variants included: a tag on `tile.left` names as `"tile.left"`. Only the stock families have names: for a custom layout it returns nil (the stock `ui.layoutbox` then shows `?`). |
 | `layout.next(fn)` | The layout after `fn` in the cycle order; from a variant (or anything not in the list) it restarts the list. |
-| `layout.list` | The cycle order, one entry per family. A config can replace it: `some.layout.list = { some.layout.tile, some.layout.max }`. |
+| `layout.list` | The cycle order, one entry per family. A config can replace it: `kiln.layout.list = { kiln.layout.tile, kiln.layout.max }`. |
 
 `ui.layoutbox` and `ui.layoutlist` are built on these three.
 
@@ -75,4 +75,4 @@ Layout parameters are plain tag properties. Set them per tag; each has a default
 - [Custom layouts](/kiln/guides/custom-layouts)
 - [The Clay thesis](/kiln/concepts/the-clay-thesis)
 - [tag](/kiln/reference/tag)
-- [some.ui](/kiln/reference/ui)
+- [kiln.ui](/kiln/reference/ui)

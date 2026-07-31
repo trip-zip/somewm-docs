@@ -28,13 +28,13 @@ The reason is a feedback loop. kiln configures a client to the box Clay solved; 
 
 ## The manual lever
 
-`some.dirty()` marks every screen; `some.dirty(name)` marks one. You need it exactly when you changed something outside the dirty lists that a declaration reads: a plain Lua table your widget renders from, a custom property your bar displays. Widgets built with `ui.widget` can declare their own triggers (`watch` a signal, or `every` some seconds) and dirty themselves; see the [widgets tutorial](/kiln/tutorials/widgets).
+`kiln.dirty()` marks every screen; `kiln.dirty(name)` marks one. You need it exactly when you changed something outside the dirty lists that a declaration reads: a plain Lua table your widget renders from, a custom property your bar displays. Widgets built with `ui.widget` can declare their own triggers (`watch` a signal, or `every` some seconds) and dirty themselves; see the [widgets tutorial](/kiln/tutorials/widgets).
 
 ## The frame clock and animation
 
 Sometimes a screen should redraw every frame for a while: an easing tag switch, a sliding master split. For that there is a per-output frame clock. `core.tick(screen, true)` arms it; while armed, C delivers a `frame::tick` event with the screen and the true time delta on every output frame, and the screen re-solves at panel rate. `core.tick(screen, false)` disarms it and the screen goes idle again.
 
-Animation is plain Lua state on top of that clock. `some.animation.start(screen, key, target, dur, from)` begins easing a named value toward a target (ease-out cubic, 0.15 seconds by default), arming the screen's tick if it was idle. `some.animation.get(key, default)` returns the eased value mid-flight and the caller's own value once settled. Declarations read `get` where they would read the raw value, so an animated frame is just an ordinary frame that happened to read an in-between number. When the last animation on a screen finishes, its tick disarms automatically.
+Animation is plain Lua state on top of that clock. `kiln.animation.start(screen, key, target, dur, from)` begins easing a named value toward a target (ease-out cubic, 0.15 seconds by default), arming the screen's tick if it was idle. `kiln.animation.get(key, default)` returns the eased value mid-flight and the caller's own value once settled. Declarations read `get` where they would read the raw value, so an animated frame is just an ordinary frame that happened to read an in-between number. When the last animation on a screen finishes, its tick disarms automatically.
 
 C holds none of this: no easing curves, no animation state, no durations. The clock is the only C mechanism; the motion is your Lua. The stdlib uses the same machinery for its own effects, like the tag-switch reveal and the master-split slide.
 

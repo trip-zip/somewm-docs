@@ -20,9 +20,9 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 Snippets assume the standard config preamble:
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
-local th = some.theme
+local kiln = require("kiln")
+local ui = kiln.ui
+local th = kiln.theme
 ```
 
 kiln has no wallpaper object and no wallpaper API. A wallpaper is an image-filled box floated to the root in the `background` band, the lowest z range, so it sits behind every client and every piece of chrome. You declare it in your bar function like everything else on screen.
@@ -46,7 +46,7 @@ Three things make this work:
 - **The size.** `s.width` and `s.height` are the screen's logical size, so one declaration fills the output at any scale. On a HiDPI panel the image is rasterized to physical pixels per output; give it a source at least as large as your largest panel's physical resolution and it stays sharp.
 - **`passthrough = true`.** A full-screen float normally captures pointer hits, which would block clicks on the bar and the desktop. With passthrough it stays visible but never blocks; it can still carry its own handlers (a scroll handler, for example).
 
-The image is decoded once and cached by its path. Declaring it every frame costs one lookup. To change the wallpaper, change the path; the next frame reads the new file. If you overwrite the same file in place, drop the stale cache entry with `some.image_reload(path)`.
+The image is decoded once and cached by its path. Declaring it every frame costs one lookup. To change the wallpaper, change the path; the next frame reads the new file. If you overwrite the same file in place, drop the stale cache entry with `kiln.image_reload(path)`.
 
 ## The default config's version
 

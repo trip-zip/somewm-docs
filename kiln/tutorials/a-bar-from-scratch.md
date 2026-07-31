@@ -28,9 +28,9 @@ A config you can edit and reload (see [Basics](/kiln/tutorials/basics)).
 Snippets assume:
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
-local th = some.theme
+local kiln = require("kiln")
+local ui = kiln.ui
+local th = kiln.theme
 ```
 
 ## 1. The smallest possible bar
@@ -40,7 +40,7 @@ default config does it:
 
 ```lua
 screen.on("added", function(s)
-	tag.new { name = "1", screen = s, layout = some.layout.tile }
+	tag.new { name = "1", screen = s, layout = kiln.layout.tile }
 
 	ui.bar(s, {}, function()
 		ui.clock()
@@ -55,7 +55,7 @@ content is the `fn`.
 :::warning
 `ui.bar` appends. Registering it anywhere that runs repeatedly (or pasting it
 twice over IPC) stacks a second bar. Keep it inside `screen.on("added")` and
-apply changes with `some.reload()`, which rebuilds the bar list cleanly.
+apply changes with `kiln.reload()`, which rebuilds the bar list cleanly.
 :::
 
 ## 2. The declare function
@@ -133,7 +133,7 @@ The bar `cfg` takes:
 		end)
 ```
 
-Colors and sizes the stock cells use come from `some.theme` (`bg`, `bg2`,
+Colors and sizes the stock cells use come from `kiln.theme` (`bg`, `bg2`,
 `fg`, `accent`, `muted`, `font_size`, `bar_height`), so restyling globally is
 usually a theme edit rather than a bar edit. See
 [Theming](/kiln/tutorials/theming).
@@ -148,7 +148,7 @@ children?)`, and the `ui.text(str, cfg?)` leaf. A launcher button:
 		ui.box({
 			id = "launch-btn", color = th.accent, radius = 4, pad = { x = 8 },
 			align = "center",
-			on_press = function() some.spawn("fuzzel") end,
+			on_press = function() kiln.spawn("fuzzel") end,
 		}, function()
 			ui.text("run", { color = th.bg, size = 12 })
 		end)
@@ -173,13 +173,13 @@ tags all do). For your own data sources and timers, see
 ## Complete example
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
-local th = some.theme
+local kiln = require("kiln")
+local ui = kiln.ui
+local th = kiln.theme
 
 screen.on("added", function(s)
-	tag.new { name = "one", screen = s, layout = some.layout.tile }
-	tag.new { name = "two", screen = s, layout = some.layout.fair }
+	tag.new { name = "one", screen = s, layout = kiln.layout.tile }
+	tag.new { name = "two", screen = s, layout = kiln.layout.fair }
 	s.tags[1]:view()
 
 	ui.bar(s, { edge = "top", height = 28, color = th.bg }, function()
@@ -188,7 +188,7 @@ screen.on("added", function(s)
 		ui.box({
 			id = "launch-btn", color = th.accent, radius = 4, pad = { x = 8 },
 			align = "center",
-			on_press = function() some.spawn("fuzzel") end,
+			on_press = function() kiln.spawn("fuzzel") end,
 		}, function()
 			ui.text("run", { color = th.bg, size = 12 })
 		end)

@@ -18,14 +18,14 @@ kiln is SomeWM, an AwesomeWM-style framework for Wayland, re-based on the Clay l
 
 ## Can I draw gradients, arcs, or custom shapes?
 
-Not as drawing primitives. The paint vocabulary is rectangles, corner radius, borders, images, text, and color (with alpha). There are no gradient, arc, shadow, rotation, or arbitrary-shape primitives, and no cairo escape hatch: everything on screen is composed from that vocabulary. The escape hatch is an image: `some.asset` renders any SVG (including generated gradients via `some.asset.gradient`) to a cached PNG, which is how the default desktop draws its wallpaper and glyphs. See [Limitations](/kiln/concepts/limitations).
+Not as drawing primitives. The paint vocabulary is rectangles, corner radius, borders, images, text, and color (with alpha). There are no gradient, arc, shadow, rotation, or arbitrary-shape primitives, and no cairo escape hatch: everything on screen is composed from that vocabulary. The escape hatch is an image: `kiln.asset` renders any SVG (including generated gradients via `kiln.asset.gradient`) to a cached PNG, which is how the default desktop draws its wallpaper and glyphs. See [Limitations](/kiln/concepts/limitations).
 
 ## How do I script or query kiln from the shell?
 
 kiln listens on a unix socket (`$XDG_RUNTIME_DIR/kiln.sock`, overridable with `KILN_SOCK`). Send Lua text, get the result back: it is a live REPL into the config VM, so everything in these docs is drivable from a script. The `scripts/kiln-eval` wrapper does the socket dance for you:
 
 ```bash
-scripts/kiln-eval 'require("somewm").notify{title = "hello", message = "from the shell"}'
+scripts/kiln-eval 'require("kiln").notify{title = "hello", message = "from the shell"}'
 ```
 
 See [IPC and Scripting](/kiln/guides/ipc-and-scripting).
@@ -43,7 +43,7 @@ No. kiln does not implement the wlr-output-management protocol, so external tool
 With a rule. Rules match clients on map and apply properties:
 
 ```lua
-some.rule{
+kiln.rule{
   match = { app = "mpv" },
   props = { tag = "3", floating = true },
 }
@@ -53,7 +53,7 @@ some.rule{
 
 ## Why does my bar or widget not update?
 
-kiln only redraws a screen when something marks it dirty. Most stdlib property writes do that for you, but a plain value changing inside your widget function does not: the frame that would show it never happens. Declare what your widget depends on with `ui.widget{watch = {"client::focus"}, every = 30, fn}` so signals or a timer re-answer it, or call `some.dirty()` to force a frame. See [Frames and Dirty](/kiln/concepts/frames-and-dirty).
+kiln only redraws a screen when something marks it dirty. Most stdlib property writes do that for you, but a plain value changing inside your widget function does not: the frame that would show it never happens. Declare what your widget depends on with `ui.widget{watch = {"client::focus"}, every = 30, fn}` so signals or a timer re-answer it, or call `kiln.dirty()` to force a frame. See [Frames and Dirty](/kiln/concepts/frames-and-dirty).
 
 ## Can I log into kiln from a display manager?
 
@@ -78,13 +78,13 @@ Copy the installed default to `~/.config/kiln/rc.lua` to start customizing. See 
 
 ## How do I reload the config without restarting?
 
-Call `some.reload()`. It re-runs your config in the live compositor: clients, tags, and screens survive. Bind it to a key, or trigger it over IPC:
+Call `kiln.reload()`. It re-runs your config in the live compositor: clients, tags, and screens survive. Bind it to a key, or trigger it over IPC:
 
 ```bash
-scripts/kiln-eval 'require("somewm").reload()'
+scripts/kiln-eval 'require("kiln").reload()'
 ```
 
-(Over the socket, use `require("somewm")`: the `some` variable is local to your
+(Over the socket, use `require("kiln")`: the `kiln` variable is local to your
 config file, not a global.) Note that reload re-runs the config file only;
 stdlib modules are not re-required. See [Reload and Debugging](/kiln/guides/reload-and-debugging).
 
@@ -100,4 +100,4 @@ See the [client reference](/kiln/reference/client).
 
 ## Is there a hotkeys cheat sheet?
 
-Yes. Every `some.key` binding can carry `desc` and `group` fields, and the hotkeys popup renders them as an on-screen cheat sheet. `some.key.all()` returns the binding registry if you want to build your own. See [Hotkeys Popup](/kiln/guides/hotkeys-popup).
+Yes. Every `kiln.key` binding can carry `desc` and `group` fields, and the hotkeys popup renders them as an on-screen cheat sheet. `kiln.key.all()` returns the binding registry if you want to build your own. See [Hotkeys Popup](/kiln/guides/hotkeys-popup).

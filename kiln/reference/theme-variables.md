@@ -1,19 +1,19 @@
 ---
 title: Theme Variables
-description: Every some.theme key, its default, and what it styles, plus some.modkey.
+description: Every kiln.theme key, its default, and what it styles, plus kiln.modkey.
 sidebar_position: 13
 ---
 
 # Theme Variables
 
-`some.theme` is a plain Lua table. There is no theme engine and no reload step: assign a key at load or at any time, and everything that reads it picks up the new value on the next frame, because chrome reads the theme at declare.
+`kiln.theme` is a plain Lua table. There is no theme engine and no reload step: assign a key at load or at any time, and everything that reads it picks up the new value on the next frame, because chrome reads the theme at declare.
 
 ```lua
-local some = require("somewm")
+local kiln = require("kiln")
 
-some.theme.accent = "#c05068"
-some.theme.gap = 12
-some.theme.bar_height = 28
+kiln.theme.accent = "#c05068"
+kiln.theme.gap = 12
+kiln.theme.bar_height = 28
 ```
 
 Colors take any form `ui.color` accepts: `"#rrggbb"`, `"#rrggbbaa"`, or `{ r, g, b, a }`.
@@ -54,17 +54,17 @@ Colors take any form `ui.color` accepts: `"#rrggbb"`, `"#rrggbbaa"`, or `{ r, g,
 | `menu_submenu_icon` | unset | Image path for the submenu marker; unset, menus draw a text `>`. The default config sets it to a generated chevron glyph. |
 | `layout_icons` | unset | Table of layout family name to image path for `ui.layoutbox`; unset, the box draws the layout name as text. |
 
-## some.modkey
+## kiln.modkey
 
-Not a theme key, but the same kind of knob: `some.modkey` (default `"alt"`) is what `"mod"` resolves to in key and button bindings. Set it before your `key {}` calls.
+Not a theme key, but the same kind of knob: `kiln.modkey` (default `"alt"`) is what `"mod"` resolves to in key and button bindings. Set it before your `key {}` calls.
 
 ```lua
-some.modkey = "super"
+kiln.modkey = "super"
 ```
 
 ## See also
 
 - [Theming](/kiln/tutorials/theming)
-- [some.ui](/kiln/reference/ui)
+- [kiln.ui](/kiln/reference/ui)
 - [Notifications](/kiln/guides/notifications)
 - [Keys, Buttons, and Rules](/kiln/reference/keybindings-and-rules)

@@ -1,15 +1,15 @@
 ---
-title: some.placement
+title: kiln.placement
 description: The 14 float placement helpers, arithmetic over the screen workarea that writes c.float.
 sidebar_position: 12
 ---
 
-# some.placement
+# kiln.placement
 
-`some.placement` places floating clients: each helper is a function `f(c, s?)` that computes a position against the screen's workarea and writes `c.float` in one assignment (one `property::float`, one re-declare). `s` defaults to the client's screen.
+`kiln.placement` places floating clients: each helper is a function `f(c, s?)` that computes a position against the screen's workarea and writes `c.float` in one assignment (one `property::float`, one re-declare). `s` defaults to the client's screen.
 
 ```lua
-some.placement.centered(c)
+kiln.placement.centered(c)
 ```
 
 There are no placement objects and no apply pass: helpers compose by being called in order, so "centered, then nudged on screen" is two calls, not an operator.
@@ -45,9 +45,9 @@ The three constraint helpers:
 All three return the client, like the combinators, and compose the same way:
 
 ```lua
-some.placement.under_mouse(c)      -- already includes no_offscreen
-some.placement.top_right(c)
-some.placement.no_overlap(c)       -- find a clear slot instead
+kiln.placement.under_mouse(c)      -- already includes no_offscreen
+kiln.placement.top_right(c)
+kiln.placement.no_overlap(c)       -- find a clear slot instead
 ```
 
 ## In a rule
@@ -55,15 +55,15 @@ some.placement.no_overlap(c)       -- find a clear slot instead
 A rule's `on(c)` callback takes a placement helper directly, since a helper is already a `function(c)`:
 
 ```lua
-some.rule { match_any = { app = { "pinentry" } },
+kiln.rule { match_any = { app = { "pinentry" } },
             props = { floating = true },
-            on = some.placement.centered }
+            on = kiln.placement.centered }
 
-some.rule { match = { app = "mpv" },
+kiln.rule { match = { app = "mpv" },
             props = { floating = true },
             on = function(c)
-                some.placement.bottom_right(c)
-                some.placement.no_offscreen(c)
+                kiln.placement.bottom_right(c)
+                kiln.placement.no_offscreen(c)
             end }
 ```
 

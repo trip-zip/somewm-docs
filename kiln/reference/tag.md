@@ -15,7 +15,7 @@ screen.on("added", function(s)
   end
 end)
 
-some.key { mods = { "mod" }, key = "1-9", press = function(i)
+kiln.key { mods = { "mod" }, key = "1-9", press = function(i)
   local t = screen.focused.tags[i]
   if t then t:view() end
 end }
@@ -27,7 +27,7 @@ end }
 |---|---|---|---|
 | `selected` | boolean | derived | Whether the tag is in its screen's `selected_tags`. Computed on read, never stored. Writing routes to the screen's selection, keeps the screen's tag order, and refuses a write that would empty the last selection. |
 | `name` | string | nil | Display name. A rename redraws the screen even when the tag is not selected, since the taglist draws every tag. |
-| `layout` | function | `some.layout.tile` | The layout function; see [layout](/kiln/reference/layout). |
+| `layout` | function | `kiln.layout.tile` | The layout function; see [layout](/kiln/reference/layout). |
 | `clients` | list of clients | `{}` | The tag's client stack, in stacking order. Read only: mutate through `c.tags` writes, never directly. |
 | `screen` | screen | set at `tag.new` | The tag's screen. Read only. |
 | `master_width_factor` | number | 0.5 | Master area fraction, clamped to 0.05..0.95 by the layout. Writing it animates the split. |

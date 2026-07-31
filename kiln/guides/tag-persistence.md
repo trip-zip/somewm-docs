@@ -20,9 +20,9 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 Snippets assume the standard config preamble:
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
-local th = some.theme
+local kiln = require("kiln")
+local ui = kiln.ui
+local th = kiln.theme
 ```
 
 Unplug a monitor and kiln keeps every window alive: the departing screen's clients are moved onto a surviving screen's selected tag, all of them, in one pile. Plug the monitor back in and it comes up as a fresh screen: your `screen.on("added")` handler builds its default tags, and the clients stay in the pile on the survivor. Nothing is lost, but nothing is remembered either.

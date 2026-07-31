@@ -45,7 +45,7 @@ Step-by-step lessons that build your config from scratch.
 | Module | Description |
 |--------|-------------|
 | [Basics](tutorials/basics.md) | Clients, tags, screens, and the declare loop |
-| [Keybindings](tutorials/keybindings.md) | Bind keys and mouse buttons with some.key and some.button |
+| [Keybindings](tutorials/keybindings.md) | Bind keys and mouse buttons with kiln.key and kiln.button |
 | [A Bar From Scratch](tutorials/a-bar-from-scratch.md) | Build a status bar out of ui nodes |
 | [Widgets](tutorials/widgets.md) | Self-updating regions with ui.widget |
 | [Theming](tutorials/theming.md) | Colors, fonts, and sizes through the theme table |
@@ -87,9 +87,9 @@ Exact API details: every property, method, signal, and default.
 |--------|-------------|
 | [Reference Index](reference/index.md) | The full API surface in one place |
 | [client](reference/client.md) | The client object: properties, methods, signals |
-| [some](reference/some.md) | The some module: keys, rules, spawn, defaults |
-| [some.ui](reference/ui.md) | The node constructors and the cfg contract |
-| [some.layout](reference/layout.md) | Layout functions and their tag parameters |
+| [kiln](reference/kiln.md) | The kiln module: keys, rules, spawn, defaults |
+| [kiln.ui](reference/ui.md) | The node constructors and the cfg contract |
+| [kiln.layout](reference/layout.md) | Layout functions and their tag parameters |
 | [Theme Variables](reference/theme-variables.md) | Every theme key with its default |
 
 ## Where to start

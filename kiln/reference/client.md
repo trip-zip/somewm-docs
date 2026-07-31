@@ -16,7 +16,7 @@ client.on("map", function(c)
   end
 end)
 
-some.key { mods = { "mod" }, key = "q", press = some.focused(function(c)
+kiln.key { mods = { "mod" }, key = "q", press = kiln.focused(function(c)
   c:close()
 end) }
 ```
@@ -78,7 +78,7 @@ There is no property allowlist. Any key you write on a client stores and emits `
 
 ### Which property writes redraw
 
-Writes to `floating`, `float`, `ontop`, `urgent`, `titlebar`, `sticky`, `title`, `app_id`, and `icon` mark the client's screen dirty and redraw (so do `fullscreen`, `maximized`, and `minimized`, through their own listeners). Geometry writes do not: `width` and `height` are written on every size commit, and a redraw there would pin the screen at panel rate. A write outside the list still changes state and emits its signal, but draws nothing until the next frame; call `some.dirty()` if you need one now.
+Writes to `floating`, `float`, `ontop`, `urgent`, `titlebar`, `sticky`, `title`, `app_id`, and `icon` mark the client's screen dirty and redraw (so do `fullscreen`, `maximized`, and `minimized`, through their own listeners). Geometry writes do not: `width` and `height` are written on every size commit, and a redraw there would pin the screen at panel rate. A write outside the list still changes state and emits its signal, but draws nothing until the next frame; call `kiln.dirty()` if you need one now.
 
 ## Methods
 
@@ -134,7 +134,7 @@ Writes to `floating`, `float`, `ontop`, `urgent`, `titlebar`, `sticky`, `title`,
 | `request::decoration_mode` | mode | The client states its preferred decoration mode. |
 | `request::close` | none | A foreign toplevel (a taskbar) asks to close this client. |
 
-Two stock listeners ride the `focus` signal: one promotes the client in the focus history, one raises floating, fullscreen, and maximized clients (tiled clients are deliberately not raised, since their list position is their cell). Every `request::*` signal routes to the matching `some.defaults.*` policy, and each is replaceable wholesale; see [defaults](/kiln/reference/defaults).
+Two stock listeners ride the `focus` signal: one promotes the client in the focus history, one raises floating, fullscreen, and maximized clients (tiled clients are deliberately not raised, since their list position is their cell). Every `request::*` signal routes to the matching `kiln.defaults.*` policy, and each is replaceable wholesale; see [defaults](/kiln/reference/defaults).
 
 ## See also
 

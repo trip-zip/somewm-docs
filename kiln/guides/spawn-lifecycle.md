@@ -21,28 +21,28 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 Snippets assume the standard config preamble:
 
 ```lua
-local some = require("somewm")
-local key, rule = some.key, some.rule
+local kiln = require("kiln")
+local key, rule = kiln.key, kiln.rule
 ```
 
-`some.spawn(cmd)` is fire and forget: kiln launches the process and forgets it. Everything smarter (run once, focus-or-spawn, tag routing) is a few lines of config, built on one identity fact: a client's `app_id`.
+`kiln.spawn(cmd)` is fire and forget: kiln launches the process and forgets it. Everything smarter (run once, focus-or-spawn, tag routing) is a few lines of config, built on one identity fact: a client's `app_id`.
 
 ## Run once at startup
 
-Your config file runs at boot, and runs again on every `some.reload()`. A bare `some.spawn` at the top level therefore spawns again on each reload. The fix is a session flag. A reload re-runs the file in the same Lua state, so a global (deliberately not `local`) survives it:
+Your config file runs at boot, and runs again on every `kiln.reload()`. A bare `kiln.spawn` at the top level therefore spawns again on each reload. The fix is a session flag. A reload re-runs the file in the same Lua state, so a global (deliberately not `local`) survives it:
 
 ```lua
--- Global on purpose: survives some.reload(), so autostart runs once per session.
+-- Global on purpose: survives kiln.reload(), so autostart runs once per session.
 autostarted = autostarted or false
 
 if not autostarted then
   autostarted = true
-  some.spawn("mako")
-  some.spawn({ "foot", "--server" })
+  kiln.spawn("mako")
+  kiln.spawn({ "foot", "--server" })
 end
 ```
 
-`some.spawn` takes a shell string (run through `sh -c`) or an argv table (run directly, no shell).
+`kiln.spawn` takes a shell string (run through `sh -c`) or an argv table (run directly, no shell).
 
 ## Check what is already running
 
@@ -58,13 +58,13 @@ end
 
 local function ensure_running(app_id, cmd)
   if running(app_id) == nil then
-    some.spawn(cmd)
+    kiln.spawn(cmd)
   end
 end
 ```
 
 :::warning
-At the moment your config file executes, `client.all()` is empty: on a fresh boot no client has mapped yet, and during a reload the existing clients are re-announced only after the config finishes. A top-level `ensure_running` call therefore always spawns. Use the session flag for load-time autostart, and call `ensure_running` from places that run later: a keybinding, a `some.timer`, or a signal handler. Note also that the scan only sees clients with windows; a windowless daemon is invisible to it.
+At the moment your config file executes, `client.all()` is empty: on a fresh boot no client has mapped yet, and during a reload the existing clients are re-announced only after the config finishes. A top-level `ensure_running` call therefore always spawns. Use the session flag for load-time autostart, and call `ensure_running` from places that run later: a keybinding, a `kiln.timer`, or a signal handler. Note also that the scan only sees clients with windows; a windowless daemon is invisible to it.
 :::
 
 ## Single-instance app keys
@@ -82,7 +82,7 @@ local function focus_or_spawn(app_id, cmd)
       c:focus()
       return
     end
-    some.spawn_with_token(cmd)
+    kiln.spawn_with_token(cmd)
   end
 end
 
@@ -92,7 +92,7 @@ key { mods = { "mod" }, key = "c", desc = "chat", group = "launch",
   press = focus_or_spawn("Slack", "slack") }
 ```
 
-The spawn leg uses `some.spawn_with_token`, covered below: since the key press is an explicit user request, the new window should arrive focused.
+The spawn leg uses `kiln.spawn_with_token`, covered below: since the key press is an explicit user request, the new window should arrive focused.
 
 Find an app's `app_id` by launching it and asking:
 
@@ -125,9 +125,9 @@ X11 apps running through Xwayland expose `class` and `instance` instead; rules m
 
 ## Focus handoff: spawn_with_token
 
-What kiln can do is vouch for the user's intent. `some.spawn_with_token(cmd)` launches the command with an XDG activation token in its environment. When the app maps and presents that token, its activation request arbitrates as user-initiated, and the stock policy focuses it. Without a token, an app that asks for focus out of the blue is marked urgent instead of being focused.
+What kiln can do is vouch for the user's intent. `kiln.spawn_with_token(cmd)` launches the command with an XDG activation token in its environment. When the app maps and presents that token, its activation request arbitrates as user-initiated, and the stock policy focuses it. Without a token, an app that asks for focus out of the blue is marked urgent instead of being focused.
 
-Use `spawn_with_token` at the sites where a human just asked for the window: launcher rows, app keys, focus-or-spawn. Use plain `some.spawn` for autostart daemons and background jobs, which have no business taking your keyboard when they finally map.
+Use `spawn_with_token` at the sites where a human just asked for the window: launcher rows, app keys, focus-or-spawn. Use plain `kiln.spawn` for autostart daemons and background jobs, which have no business taking your keyboard when they finally map.
 
 ## See also
 

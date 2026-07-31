@@ -78,7 +78,7 @@ const sidebars: SidebarsConfig = {
             'reference/notification',
           ],
         },
-        'reference/some',
+        'reference/kiln',
         'reference/ui',
         'reference/layout',
         'reference/keybindings-and-rules',

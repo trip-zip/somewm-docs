@@ -33,14 +33,14 @@ The runtime calls it every frame with the tiled clients of the visible tag, in s
 A vertical stack: one column, every client a growing cell.
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
+local kiln = require("kiln")
+local ui = kiln.ui
 
 local function stack(cs, area, t)
 	if #cs == 0 then
 		return
 	end
-	local gap = (t and t.gap) or some.theme.gap
+	local gap = (t and t.gap) or kiln.theme.gap
 	ui.column({ w = "grow", h = "grow", gap = gap }, function()
 		for _, c in ipairs(cs) do
 			ui.client(c)
@@ -65,7 +65,7 @@ local function twocol(cs, area, t)
 	if #cs == 0 then
 		return
 	end
-	local gap = (t and t.gap) or some.theme.gap
+	local gap = (t and t.gap) or kiln.theme.gap
 	local half = math.ceil(#cs / 2)
 	ui.row({ w = "grow", h = "grow", gap = gap }, function()
 		ui.column({ w = "grow", h = "grow", gap = gap }, function()
@@ -98,7 +98,7 @@ local function twocol(cs, area, t)
 		return
 	end
 	local f = (t and t.master_width_factor) or 0.5
-	local gap = (t and t.gap) or some.theme.gap
+	local gap = (t and t.gap) or kiln.theme.gap
 	local half = math.ceil(#cs / 2)
 	-- The percent form only makes sense when both columns exist.
 	local left_w = #cs > half and (f * 100) .. "%" or "grow"
@@ -132,7 +132,7 @@ local function tile(cs, area, t)
 	end
 	local f = (t and t.master_width_factor) or 0.5
 	local n = math.min((t and t.master_count) or 1, #cs)
-	local gap = (t and t.gap) or some.theme.gap
+	local gap = (t and t.gap) or kiln.theme.gap
 	local stacked = #cs > n
 	ui.row({ w = "grow", h = "grow", gap = gap }, function()
 		-- The master run: a percent-width column while a stack exists,
@@ -171,19 +171,19 @@ or at runtime:
 screen.focused.selected_tag.layout = twocol
 ```
 
-To include it in the layout cycle (`some.layout.next`, the layoutbox press, `mod+space` style bindings), set the cycle list; it is yours to override:
+To include it in the layout cycle (`kiln.layout.next`, the layoutbox press, `mod+space` style bindings), set the cycle list; it is yours to override:
 
 ```lua
-some.layout.list = {
-	some.layout.tile,
+kiln.layout.list = {
+	kiln.layout.tile,
 	twocol,
-	some.layout.max,
-	some.layout.floating,
+	kiln.layout.max,
+	kiln.layout.floating,
 }
 ```
 
 :::note
-`some.layout.name(fn)` only knows the built-in families, so the stock `ui.layoutbox` shows `?` for a custom layout, and `ui.layoutlist` has no label for it. If you want a name in your bar, render your own indicator, for example `t.layout == twocol and "twocol" or some.layout.name(t.layout)`.
+`kiln.layout.name(fn)` only knows the built-in families, so the stock `ui.layoutbox` shows `?` for a custom layout, and `ui.layoutlist` has no label for it. If you want a name in your bar, render your own indicator, for example `t.layout == twocol and "twocol" or kiln.layout.name(t.layout)`.
 :::
 
 ## 6. When you need area, and when you do not
@@ -198,15 +198,15 @@ Most layouts never touch the `area` argument: sizing with `"grow"` and percent s
 ## Complete example
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
+local kiln = require("kiln")
+local ui = kiln.ui
 
 local function twocol(cs, area, t)
 	if #cs == 0 then
 		return
 	end
 	local f = (t and t.master_width_factor) or 0.5
-	local gap = (t and t.gap) or some.theme.gap
+	local gap = (t and t.gap) or kiln.theme.gap
 	local half = math.ceil(#cs / 2)
 	local left_w = #cs > half and (f * 100) .. "%" or "grow"
 	ui.row({ w = "grow", h = "grow", gap = gap }, function()

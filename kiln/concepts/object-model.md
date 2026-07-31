@@ -43,8 +43,8 @@ client.on("property::urgent", fn)   -- every client, current and future
 Every listener runs inside `pcall`. A listener that throws does not break the emit, does not skip the listeners after it, and does not take down your session. Instead the failure is reported as an `error` signal on the global bus:
 
 ```lua
-some.on("error", function(signal, err)
-  some.notify { title = "config error", message = signal .. ": " .. err }
+kiln.on("error", function(signal, err)
+  kiln.notify { title = "config error", message = signal .. ": " .. err }
 end)
 ```
 

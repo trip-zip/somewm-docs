@@ -1,6 +1,6 @@
 ---
 title: Theming
-description: "The some.theme table: what the keys control, editing them in your rc, per-tag gaps, and live-tweaking colors over IPC."
+description: "The kiln.theme table: what the keys control, editing them in your rc, per-tag gaps, and live-tweaking colors over IPC."
 sidebar_position: 5
 ---
 
@@ -10,7 +10,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 <YouWillLearn>
 
-- What `some.theme` is and when its values are read
+- What `kiln.theme` is and when its values are read
 - The key groups: palette, metrics, chrome, popups
 - Overriding theme values in your rc
 - Per-tag gap overrides with `t.gap`
@@ -19,9 +19,9 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 </YouWillLearn>
 
-## 1. What some.theme is
+## 1. What kiln.theme is
 
-`some.theme` is one plain Lua table of colors and metrics. Everything the
+`kiln.theme` is one plain Lua table of colors and metrics. Everything the
 stdlib draws (the focus ring, the bar, taglist cells, titlebars, menus,
 tooltips, notifications, the prompt) reads it at declare time, on every dirty
 frame. There is no theme file format and no style engine: assign to the
@@ -30,7 +30,7 @@ table, mark the screen dirty, and the next frame wears the new values.
 Because it is a plain table (not a signal-emitting object), writing to it
 does not redraw by itself. In your rc that never matters (the first frame
 comes after the config runs); at runtime you follow a write with
-`some.dirty()`.
+`kiln.dirty()`.
 
 ## 2. The keys
 
@@ -55,10 +55,10 @@ at once (it ships three: gruvbox, catppuccin, nord, with the chosen name
 persisted to `~/.config/kiln/theme`):
 
 ```lua
-local some = require("somewm")
-local th = some.theme
+local kiln = require("kiln")
+local th = kiln.theme
 
-some.modkey = "super"
+kiln.modkey = "super"
 th.bg = "#1e1e2e"
 th.accent = "#cba6f7"
 ```
@@ -80,7 +80,7 @@ redraws immediately (tag layout parameters are on the dirty list).
 
 ```lua
 screen.on("added", function(s)
-	local t = tag.new { name = "media", screen = s, layout = some.layout.max }
+	local t = tag.new { name = "media", screen = s, layout = kiln.layout.max }
 	t.gap = 0
 end)
 ```
@@ -98,16 +98,16 @@ Every kiln exposes a Lua socket, so theme iteration needs no reload loop.
 Change the accent and watch the very next frame:
 
 ```bash
-scripts/kiln-eval 'local some = require("somewm") some.theme.accent = "#ff9e64" some.dirty()'
-scripts/kiln-eval 'local some = require("somewm") some.theme.gap = 16 some.dirty()'
-scripts/kiln-eval 'local some = require("somewm") some.theme.client_radius = 10 some.dirty()'
+scripts/kiln-eval 'local kiln = require("kiln") kiln.theme.accent = "#ff9e64" kiln.dirty()'
+scripts/kiln-eval 'local kiln = require("kiln") kiln.theme.gap = 16 kiln.dirty()'
+scripts/kiln-eval 'local kiln = require("kiln") kiln.theme.client_radius = 10 kiln.dirty()'
 ```
 
-(The `require("somewm")` is needed because `some` is a local in your rc, not a
+(The `require("kiln")` is needed because `kiln` is a local in your rc, not a
 global the socket can see; requiring returns the same live module.)
 
 Focus ring, selected tag, tasklist highlight all flip together. When a
-combination sticks, copy the assignments into your rc. Remember `some.dirty()`:
+combination sticks, copy the assignments into your rc. Remember `kiln.dirty()`:
 without it the values change but nothing redraws until something else
 dirties the screen. More on the socket in
 [IPC and scripting](/kiln/guides/ipc-and-scripting).
@@ -117,8 +117,8 @@ dirties the screen. More on the socket in
 A cohesive cool-gray theme with a teal accent, as the top of an rc:
 
 ```lua
-local some = require("somewm")
-local th = some.theme
+local kiln = require("kiln")
+local th = kiln.theme
 
 -- palette
 th.bg = "#2e3440"

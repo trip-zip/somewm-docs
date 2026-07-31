@@ -1,6 +1,6 @@
 ---
 title: Menus
-description: Build popup menus with some.menu, nest submenus, attach them to bar elements, and open a root menu on right-click.
+description: Build popup menus with kiln.menu, nest submenus, attach them to bar elements, and open a root menu on right-click.
 sidebar_position: 4
 ---
 
@@ -10,10 +10,10 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 <YouWillLearn>
 
-- Opening a menu with `some.menu.show`
+- Opening a menu with `kiln.menu.show`
 - The item shape: actions, submenus, icons
 - Dropping a menu under a bar element with `under`
-- The ready-made window list, `some.menu.client_list`
+- The ready-made window list, `kiln.menu.client_list`
 - A root menu on desktop right-click
 
 </YouWillLearn>
@@ -23,18 +23,18 @@ A kiln menu is a floating column of pressable rows drawn by the compositor itsel
 ## 1. Show a menu
 
 ```lua
-local some = require("somewm")
+local kiln = require("kiln")
 
-some.menu.show {
+kiln.menu.show {
 	items = {
-		{ "terminal", function() some.spawn("foot") end },
-		{ "browser", function() some.spawn("firefox") end },
-		{ "quit", some.quit },
+		{ "terminal", function() kiln.spawn("foot") end },
+		{ "browser", function() kiln.spawn("firefox") end },
+		{ "quit", kiln.quit },
 	},
 }
 ```
 
-`some.menu.show(cfg)` takes:
+`kiln.menu.show(cfg)` takes:
 
 | Key | Meaning |
 |---|---|
@@ -43,7 +43,7 @@ some.menu.show {
 | `x`, `y` | open at a point, in screen coordinates (default 0, 0) |
 | `under` | an element id; the menu drops below that element instead of using `x`/`y` |
 
-It returns the open-menu state; `some.menu.open` is non-nil while a menu is up, and `some.menu.close()` closes it (submenus included). `some.ui.menu` is the same function under another name.
+It returns the open-menu state; `kiln.menu.open` is non-nil while a menu is up, and `kiln.menu.close()` closes it (submenus included). `kiln.ui.menu` is the same function under another name.
 
 ## 2. Items
 
@@ -59,21 +59,21 @@ local items = {
 
 The payload's type is the whole schema: a function is an action, a table is a submenu. Actions run after the menu closes, so an action can itself open another menu.
 
-`icon` is an image path (the same values `ui.image` accepts); `some.icon.client(c)` resolves a client's icon into one, which is how the window-list menu gets its icons.
+`icon` is an image path (the same values `ui.image` accepts); `kiln.icon.client(c)` resolves a client's icon into one, which is how the window-list menu gets its icons.
 
 ## 3. Submenus
 
 A nested table opens as a second column attached to the right edge of its row. It opens on hover and on press, and it nests as deep as you like:
 
 ```lua
-some.menu.show {
+kiln.menu.show {
 	items = {
 		{ "session", {
-			{ "lock", some.lock },
-			{ "reload config", some.reload },
-			{ "quit", some.quit },
+			{ "lock", kiln.lock },
+			{ "reload config", kiln.reload },
+			{ "quit", kiln.quit },
 		} },
-		{ "terminal", function() some.spawn("foot") end },
+		{ "terminal", function() kiln.spawn("foot") end },
 	},
 }
 ```
@@ -86,26 +86,26 @@ Passing `under = "<element id>"` anchors the menu to a declared element instead 
 
 ```lua
 screen.on("added", function(s)
-	some.ui.bar(s, { edge = "top" }, function()
-		some.ui.box({
+	kiln.ui.bar(s, { edge = "top" }, function()
+		kiln.ui.box({
 			id = "menu-btn",
-			color = some.theme.accent, radius = 4, pad = { x = 8 },
+			color = kiln.theme.accent, radius = 4, pad = { x = 8 },
 			align = "center",
 			on_press = function()
-				if some.menu.open ~= nil then
-					some.menu.close()
+				if kiln.menu.open ~= nil then
+					kiln.menu.close()
 				else
-					some.menu.show {
+					kiln.menu.show {
 						under = "menu-btn", screen = s,
 						items = {
-							{ "terminal", function() some.spawn("foot") end },
-							{ "quit", some.quit },
+							{ "terminal", function() kiln.spawn("foot") end },
+							{ "quit", kiln.quit },
 						},
 					}
 				end
 			end,
 		}, function()
-			some.ui.text("menu", { size = 12, color = some.theme.bg })
+			kiln.ui.text("menu", { size = 12, color = kiln.theme.bg })
 		end)
 	end)
 end)
@@ -115,13 +115,13 @@ The open-or-close check makes the button a toggle: pressing it while its menu is
 
 ## 5. The window list
 
-`some.menu.client_list(cfg)` is a prebuilt menu over every mapped client: one row per window with its icon and title, and pressing a row unminimizes, views its tag, focuses, and raises it. `cfg` passes through to `menu.show`, so `screen`, `under`, `x`, and `y` all work:
+`kiln.menu.client_list(cfg)` is a prebuilt menu over every mapped client: one row per window with its icon and title, and pressing a row unminimizes, views its tag, focuses, and raises it. `cfg` passes through to `menu.show`, so `screen`, `under`, `x`, and `y` all work:
 
 ```lua
-some.key {
+kiln.key {
 	mods = { "mod" }, key = "e",
 	desc = "window list", group = "client",
-	press = function() some.menu.client_list {} end,
+	press = function() kiln.menu.client_list {} end,
 }
 ```
 
@@ -130,17 +130,17 @@ some.key {
 A button bind with `on = "root"` fires when the press lands on empty desktop, which is the classic place for a main menu:
 
 ```lua
-some.button { mods = {}, button = 3, on = "root",
+kiln.button { mods = {}, button = 3, on = "root",
 	press = function()
-		if some.menu.open ~= nil then
-			some.menu.close()
+		if kiln.menu.open ~= nil then
+			kiln.menu.close()
 		else
-			some.menu.show {
+			kiln.menu.show {
 				screen = screen.focused,
 				items = {
-					{ "terminal", function() some.spawn("foot") end },
-					{ "lock", some.lock },
-					{ "quit", some.quit },
+					{ "terminal", function() kiln.spawn("foot") end },
+					{ "lock", kiln.lock },
+					{ "quit", kiln.quit },
 				},
 			}
 		end
@@ -152,14 +152,14 @@ some.button { mods = {}, button = 3, on = "root",
 An open menu holds the keyboard. The defaults: Down and Up move the
 selection, Right, Return, or KP_Enter enter a submenu or run the row, Left
 and Escape close one level (and the whole chain at the root). The map is
-`some.menu.keys`, keysym to verb, replaceable one key at a time or wholesale:
+`kiln.menu.keys`, keysym to verb, replaceable one key at a time or wholesale:
 
 ```lua
-some.menu.keys.j = "down"
-some.menu.keys.k = "up"
+kiln.menu.keys.j = "down"
+kiln.menu.keys.k = "up"
 ```
 
-`some.menu.nav(verb)` drives the same machinery from code, with verbs
+`kiln.menu.nav(verb)` drives the same machinery from code, with verbs
 `"down"`, `"up"`, `"enter"`, `"back"`, and `"close"`; it returns whether the
 verb was handled.
 

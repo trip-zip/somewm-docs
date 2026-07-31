@@ -12,7 +12,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 - Saving a full output to PNG with `core.screenshot`
 - Binding Print and Shift+Print for full and region captures
-- Region capture with grim and slurp through `some.spawn`
+- Region capture with grim and slurp through `kiln.spawn`
 - Using a capture as a live image source, no file involved
 
 </YouWillLearn>
@@ -20,8 +20,8 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 Snippets assume the standard config preamble:
 
 ```lua
-local some = require("somewm")
-local ui, key = some.ui, some.key
+local kiln = require("kiln")
+local ui, key = kiln.ui, kiln.key
 ```
 
 kiln has no screenshot object, format menu, or naming scheme. A screenshot is one function call: `core.screenshot(name[, path])` reads back the composed scene of one output, everything the frame holds (clients, chrome, wallpaper). Everything else (which screen, which file, which key) is your config.
@@ -56,10 +56,10 @@ key { mods = {}, key = "Print", desc = "screenshot", group = "screenshot",
   end }
 ```
 
-The directory, the timestamp format, and the trigger key are all yours to change. Add a `some.spawn("notify-send ...")` after the call if you want confirmation, or pipe the path to a clipboard tool.
+The directory, the timestamp format, and the trigger key are all yours to change. Add a `kiln.spawn("notify-send ...")` after the call if you want confirmation, or pipe the path to a clipboard tool.
 
 :::note
-`core.screenshot` is the one place these recipes reach below the `some` API into the [core boundary](/kiln/reference/core). That is by design: reading back composed pixels is a compositor fact, and this is its single entry point.
+`core.screenshot` is the one place these recipes reach below the `kiln` API into the [core boundary](/kiln/reference/core). That is by design: reading back composed pixels is a compositor fact, and this is its single entry point.
 :::
 
 ## Region capture with grim and slurp
@@ -70,12 +70,12 @@ For a region, use the standard Wayland pair: `slurp` draws an interactive select
 key { mods = { "shift" }, key = "Print", desc = "screenshot region",
   group = "screenshot",
   press = function()
-    some.spawn("mkdir -p ~/Pictures && slurp | grim -g - " ..
+    kiln.spawn("mkdir -p ~/Pictures && slurp | grim -g - " ..
       "~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png")
   end }
 ```
 
-`some.spawn` with a string runs the command through `sh -c`, so the pipe, the `&&`, and the `$(date ...)` stamp all work as written. This is the bundled config's binding.
+`kiln.spawn` with a string runs the command through `sh -c`, so the pipe, the `&&`, and the `$(date ...)` stamp all work as written. This is the bundled config's binding.
 
 ## An interactive-ish region bind
 
@@ -85,7 +85,7 @@ If you prefer a dedicated chord for deliberate, mouse-driven captures (separate 
 key { mods = { "mod", "ctrl" }, key = "p", desc = "interactive screenshot",
   group = "screenshot",
   press = function()
-    some.spawn("mkdir -p ~/Pictures && slurp | grim -g - " ..
+    kiln.spawn("mkdir -p ~/Pictures && slurp | grim -g - " ..
       "~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png")
   end }
 ```

@@ -1,6 +1,6 @@
 ---
 title: Client Rules
-description: Match new windows with some.rule and give them tags, screens, floating state, and placement automatically.
+description: Match new windows with kiln.rule and give them tags, screens, floating state, and placement automatically.
 sidebar_position: 1
 ---
 
@@ -10,7 +10,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 <YouWillLearn>
 
-- How `some.rule{}` selectors match a new window
+- How `kiln.rule{}` selectors match a new window
 - What the `props` table can set, and which keys are special
 - When the `on(c)` callback runs and what it is for
 - How multiple matching rules combine
@@ -21,12 +21,12 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 A rule runs when a client maps, before it takes focus. It is the place to say "this app lives on that tag", "dialogs float", or "this window never steals focus", without touching a keybinding.
 
 ```lua
-local some = require("somewm")
+local kiln = require("kiln")
 
-some.rule {
+kiln.rule {
 	match = { dialog = true },
 	props = { floating = true },
-	on = some.placement.centered,
+	on = kiln.placement.centered,
 }
 ```
 
@@ -64,7 +64,7 @@ A rule with no selector at all matches nothing, not everything. To match every c
 Wayland clients identify by `app_id`; X11 clients by `class`, `instance`, and `role`. An app that can run either way needs both named:
 
 ```lua
-some.rule {
+kiln.rule {
 	match_any = { app = { "Gpick" }, class = { "Gpick" } },
 	props = { floating = true },
 }
@@ -91,10 +91,10 @@ Sending a client to a tag never switches the view to that tag. If you want to fo
 `on` runs after `props`, with the client as its argument. It is where placement lives, because a placement helper is just a function of the client:
 
 ```lua
-some.rule {
+kiln.rule {
 	match_any = { app = { "pinentry" } },
 	props = { floating = true },
-	on = some.placement.centered,
+	on = kiln.placement.centered,
 }
 ```
 
@@ -106,25 +106,25 @@ Rules are not first-match. Every rule that matches a client applies, in the orde
 
 ```lua
 -- Every client: place new floats in free space, and never off screen.
-some.rule {
+kiln.rule {
 	match = { fn = function() return true end },
 	on = function(c)
-		some.placement.no_overlap(c)
-		some.placement.no_offscreen(c)
+		kiln.placement.no_overlap(c)
+		kiln.placement.no_offscreen(c)
 	end,
 }
 
 -- App-specific rules declared later win on conflicts.
 ```
 
-Rules only apply to normal windows; X11 override-redirect surfaces (menus, tooltips) bypass them entirely. `some.rule.clear()` drops every registered rule, which is what a config reload uses.
+Rules only apply to normal windows; X11 override-redirect surfaces (menus, tooltips) bypass them entirely. `kiln.rule.clear()` drops every registered rule, which is what a config reload uses.
 
 ## 5. Worked example: browser to its own tag
 
 Assuming a tag named `"web"` exists (created in your `screen.on("added")` handler):
 
 ```lua
-some.rule {
+kiln.rule {
 	match_any = { app = { "firefox" }, class = { "firefox" } },
 	props = { tag = "web" },
 }
@@ -133,7 +133,7 @@ some.rule {
 To jump to the browser when it opens, add the follow in `on`:
 
 ```lua
-some.rule {
+kiln.rule {
 	match_any = { app = { "firefox" }, class = { "firefox" } },
 	props = { tag = "web" },
 	on = function(c)
@@ -147,10 +147,10 @@ some.rule {
 `dialog = true` matches any client with a parent window (file pickers, confirmation prompts):
 
 ```lua
-some.rule {
+kiln.rule {
 	match = { dialog = true },
 	props = { floating = true },
-	on = some.placement.centered,
+	on = kiln.placement.centered,
 }
 ```
 
@@ -158,8 +158,8 @@ Placement helpers compose by being called in sequence, so "centered, but never o
 
 ```lua
 on = function(c)
-	some.placement.centered(c)
-	some.placement.no_offscreen(c)
+	kiln.placement.centered(c)
+	kiln.placement.no_offscreen(c)
 end
 ```
 
@@ -168,16 +168,16 @@ end
 Launch a terminal under a dedicated app id, and give that id a rule that always floats it, keeps it on top, and centers it:
 
 ```lua
-some.key {
+kiln.key {
 	mods = { "mod" }, key = "grave",
 	desc = "scratchpad terminal", group = "launch",
-	press = function() some.spawn("foot --app-id=scratchpad") end,
+	press = function() kiln.spawn("foot --app-id=scratchpad") end,
 }
 
-some.rule {
+kiln.rule {
 	match = { app = "^scratchpad$" },
 	props = { floating = true, ontop = true, sticky = true },
-	on = some.placement.centered,
+	on = kiln.placement.centered,
 }
 ```
 

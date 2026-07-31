@@ -12,7 +12,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 - What a widget is in kiln: a declare function plus a reason to redraw
 - Periodic redraws with `ui.widget{ every = seconds }`
-- Feeding a widget from a shell command with `some.spawn.watch`
+- Feeding a widget from a shell command with `kiln.spawn.watch`
 - Reacting to object signals with `watch = { "Class::signal" }`
 - Keyed dynamic lists with `ui.each`
 - A percent meter built from two nested boxes
@@ -31,9 +31,9 @@ A bar of your own (see [A bar from scratch](/kiln/tutorials/a-bar-from-scratch))
 Snippets assume:
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
-local th = some.theme
+local kiln = require("kiln")
+local ui = kiln.ui
+local th = kiln.theme
 ```
 
 :::warning
@@ -71,17 +71,17 @@ The widget is the function itself: you call it where you want its cells.
 ## 2. External data: a battery reader with spawn.watch
 
 For data that lives outside the compositor, poll a command and park the
-result in a table the widget reads. `some.spawn.watch(cmd, interval, cb)`
+result in a table the widget reads. `kiln.spawn.watch(cmd, interval, cb)`
 runs the command, feeds each output line to `cb`, and re-runs it `interval`
 seconds after it exits:
 
 ```lua
 local stats = { battery = nil }
 
-some.spawn.watch("cat /sys/class/power_supply/BAT0/capacity", 30,
+kiln.spawn.watch("cat /sys/class/power_supply/BAT0/capacity", 30,
 	function(line)
 		stats.battery = tonumber(line)
-		some.dirty()
+		kiln.dirty()
 	end)
 
 local battery = ui.widget {
@@ -91,12 +91,12 @@ local battery = ui.widget {
 }
 ```
 
-The callback stores the fact and calls `some.dirty()`, so the redraw happens
+The callback stores the fact and calls `kiln.dirty()`, so the redraw happens
 when the data changes, not on a render timer; the widget itself needs no
 `every`. The same pattern reads CPU load, volume, or anything else a command
 can print: one `spawn.watch` per source, one shared `stats` table.
 
-`spawn.watch` returns a handle with `:stop()`, and `some.reload()` stops all
+`spawn.watch` returns a handle with `:stop()`, and `kiln.reload()` stops all
 watches automatically, so an edited config never doubles its pollers. See
 [Spawn lifecycle](/kiln/guides/spawn-lifecycle).
 
@@ -181,16 +181,16 @@ against the parent, so `meter(42)` fills 42 percent of the track.
 A battery meter, wired end to end:
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
-local th = some.theme
+local kiln = require("kiln")
+local ui = kiln.ui
+local th = kiln.theme
 
 local stats = { battery = nil }
 
-some.spawn.watch("cat /sys/class/power_supply/BAT0/capacity", 30,
+kiln.spawn.watch("cat /sys/class/power_supply/BAT0/capacity", 30,
 	function(line)
 		stats.battery = tonumber(line)
-		some.dirty()
+		kiln.dirty()
 	end)
 
 local battery = ui.widget {
@@ -212,7 +212,7 @@ local battery = ui.widget {
 }
 
 screen.on("added", function(s)
-	tag.new { name = "1", screen = s, layout = some.layout.tile }
+	tag.new { name = "1", screen = s, layout = kiln.layout.tile }
 	ui.bar(s, {}, function()
 		ui.taglist(s)
 		ui.spacer()

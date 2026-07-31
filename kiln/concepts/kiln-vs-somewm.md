@@ -18,7 +18,7 @@ There is **no AwesomeWM compatibility layer**. No `awful`, `wibox`, `gears`, `na
 
 What maps, conceptually rather than literally:
 
-- **Keybindings** become entries in the `some.key` registry: one table per chord with `mods`, `key`, a handler, and a description that feeds the hotkeys popup. Ranges like `"1-9"` replace keygroups. See [keybindings](/kiln/tutorials/keybindings).
+- **Keybindings** become entries in the `kiln.key` registry: one table per chord with `mods`, `key`, a handler, and a description that feeds the hotkeys popup. Ranges like `"1-9"` replace keygroups. See [keybindings](/kiln/tutorials/keybindings).
 - **Layouts** are plain Lua functions over the clients and the area, declaring nodes instead of computing geometries. `master_width_factor`, `master_count`, and friends live on the tag, as before. See [Custom layouts](/kiln/guides/custom-layouts).
 - **Widgets** are declarations, not objects. Where AwesomeWM composes wibox widget instances with layouts and containers, kiln composes function calls that declare boxes, rows, text, and images each frame. There is no widget lifecycle to manage. See the [widgets tutorial](/kiln/tutorials/widgets).
 - **Rules, menus, notifications, prompts, placement helpers, the systray, the taglist and tasklist**: all present, all with kiln spellings. Most daily-driver capabilities have a direct kiln expression, and the guides cover them one by one.

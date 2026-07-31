@@ -1,15 +1,15 @@
 ---
 title: notification
-description: The notification object, some.notify, urgency and timeouts, actions, and the replaceable display.
+description: The notification object, kiln.notify, urgency and timeouts, actions, and the replaceable display.
 sidebar_position: 6
 ---
 
 # notification
 
-A notification is a plain object raised by `some.notify{...}` or by any application over DBus (both arrive through the same constructor, there is no privileged path). The `notification` global is the class. Everything about a notification's life is Lua policy: how long it lives, what critical means, where the popups sit, and what a press does.
+A notification is a plain object raised by `kiln.notify{...}` or by any application over DBus (both arrive through the same constructor, there is no privileged path). The `notification` global is the class. Everything about a notification's life is Lua policy: how long it lives, what critical means, where the popups sit, and what a press does.
 
 ```lua
-some.notify {
+kiln.notify {
   title = "Volume",
   message = "40%",
   id = 9001,       -- calling again with the same id updates in place
@@ -22,7 +22,7 @@ notification.on("added", function(n)
 end)
 ```
 
-## `some.notify{...}`
+## `kiln.notify{...}`
 
 Creates a notification, or updates one in place when `id` names a live one (a volume popup is exactly this: same id, new value, no flicker). Returns the notification object.
 
@@ -71,7 +71,7 @@ All listed properties are live on the object: writing `title`, `message`, `urgen
 
 ## The display
 
-The entire presentation is one replaceable function: `some.defaults.notify_display(s)`, called during each screen's declare. Assign your own function to replace the whole UI, or nil to render nothing. The stock display is written entirely in public [ui](/kiln/reference/ui) API: an overlay-band float stacked top-right below the bar, urgency-colored border, icon, title and message, a progress bar from `value`, action buttons, and press-to-dismiss.
+The entire presentation is one replaceable function: `kiln.defaults.notify_display(s)`, called during each screen's declare. Assign your own function to replace the whole UI, or nil to render nothing. The stock display is written entirely in public [ui](/kiln/reference/ui) API: an overlay-band float stacked top-right below the bar, urgency-colored border, icon, title and message, a progress bar from `value`, action buttons, and press-to-dismiss.
 
 ## See also
 

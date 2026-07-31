@@ -24,10 +24,10 @@ In the other direction, Lua calls C verbs: focus this handle, configure this sur
 
 ## Defaults are policy you can replace
 
-The stdlib's own default reactions to requests are not privileged. They live on `some.defaults` as plain functions: the focus successor when a client unmaps, what activation does, how layer surfaces are sized, the entire notification display, what fullscreen, maximize, minimize, and close requests do. Two of them (`successor` and `notify_display`) are read at call time, so assigning a new function is the whole replacement. The rest are connected to the signal buses by value at startup, so replacing one is a swap: take the stock function off the bus, put yours on.
+The stdlib's own default reactions to requests are not privileged. They live on `kiln.defaults` as plain functions: the focus successor when a client unmaps, what activation does, how layer surfaces are sized, the entire notification display, what fullscreen, maximize, minimize, and close requests do. Two of them (`successor` and `notify_display`) are read at call time, so assigning a new function is the whole replacement. The rest are connected to the signal buses by value at startup, so replacing one is a swap: take the stock function off the bus, put yours on.
 
 ```lua
-client.off("request::fullscreen", some.defaults.fullscreen)
+client.off("request::fullscreen", kiln.defaults.fullscreen)
 client.on("request::fullscreen", function(c, on)
   -- your rule; the stock one is simply `c.fullscreen = on`
 end)
@@ -37,7 +37,7 @@ Because C never acts on a request itself, swapping a handler off with nothing in
 
 ## core is real, but not the surface
 
-The raw C boundary is exposed to your config as the `core` global: declare-time primitives, client and output verbs, input configuration, timers, spawn. It exists, it is documented in the [core reference](/kiln/reference/core), and the stdlib is built from nothing else, which is itself the proof that the boundary is sufficient. But `core` bypasses the object model: no signals fire, no state is tracked, no policy runs. The intended surface is the one described everywhere else in these docs: objects, signals, `some.*`. Reach for `core` when you are extending the stdlib's own layer (a new output arrangement in [multi-monitor setups](/kiln/guides/multi-monitor), for instance), not for daily configuration.
+The raw C boundary is exposed to your config as the `core` global: declare-time primitives, client and output verbs, input configuration, timers, spawn. It exists, it is documented in the [core reference](/kiln/reference/core), and the stdlib is built from nothing else, which is itself the proof that the boundary is sufficient. But `core` bypasses the object model: no signals fire, no state is tracked, no policy runs. The intended surface is the one described everywhere else in these docs: objects, signals, `kiln.*`. Reach for `core` when you are extending the stdlib's own layer (a new output arrangement in [multi-monitor setups](/kiln/guides/multi-monitor), for instance), not for daily configuration.
 
 ## Why the line is drawn here
 

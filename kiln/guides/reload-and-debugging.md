@@ -1,6 +1,6 @@
 ---
 title: Reload and Debugging
-description: The edit-reload loop, what survives some.reload, catching config errors, reading logs, inspecting the live element tree, and testing in a nested instance.
+description: The edit-reload loop, what survives kiln.reload, catching config errors, reading logs, inspecting the live element tree, and testing in a nested instance.
 sidebar_position: 18
 ---
 
@@ -10,7 +10,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 <YouWillLearn>
 
-- What `some.reload()` does, keeps, and drops
+- What `kiln.reload()` does, keeps, and drops
 - Catching config errors with the `error` signal
 - Where the logs are and what lands in them
 - Reading the live element tree in the built-in inspector
@@ -21,20 +21,20 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 ## 1. The edit-reload loop
 
-`some.reload()` re-runs your config file inside the live compositor: no restart, no session loss. Bind it and keep it bound:
+`kiln.reload()` re-runs your config file inside the live compositor: no restart, no session loss. Bind it and keep it bound:
 
 ```lua
-some.key {
+kiln.key {
 	mods = { "mod", "ctrl" }, key = "r",
 	desc = "reload config", group = "system",
-	press = some.reload,
+	press = kiln.reload,
 }
 ```
 
 or trigger it from your editor via [IPC](/kiln/guides/ipc-and-scripting):
 
 ```bash
-scripts/kiln-eval 'require("somewm").reload()'
+scripts/kiln-eval 'require("kiln").reload()'
 ```
 
 A reload only re-executes the config file. The library itself is not re-required, so editing your config is instant, while changes to kiln's own code need a compositor restart.
@@ -59,8 +59,8 @@ A broken config does not kill the session. The reload catches the error, reports
 Every config callback (bindings, listeners, bar functions, rules) runs isolated: an error in one is caught, reported, and does not take down dispatch. Each caught error fires the global `error` signal with the name of the failing hook and the message:
 
 ```lua
-some.on("error", function(signal, err)
-	some.notify {
+kiln.on("error", function(signal, err)
+	kiln.notify {
 		urgency = "critical",
 		title = "Config error in " .. tostring(signal),
 		message = tostring(err),
@@ -96,17 +96,17 @@ Errors and logs tell you what broke. The inspector tells you what your config ac
 kiln's shipped config binds it to `mod+shift+i`. In your own config:
 
 ```lua
-some.key {
+kiln.key {
 	mods = { "mod", "shift" }, key = "i",
 	desc = "toggle clay inspector", group = "system",
-	press = function() some.inspector() end,
+	press = function() kiln.inspector() end,
 }
 ```
 
 or over [IPC](/kiln/guides/ipc-and-scripting), which is the one to reach for when a keybinding is the thing you are debugging:
 
 ```bash
-scripts/kiln-eval 'require("somewm").inspector()'
+scripts/kiln-eval 'require("kiln").inspector()'
 ```
 
 The panel takes 400px off the right of the focused screen, and the desktop is not covered: the root narrows and everything reflows into what is left, so bars and tiled clients move while it is open and return when you close it. That is worth knowing before you use it to debug a layout, because the layout you are looking at is being solved 400px narrower than usual.
@@ -164,7 +164,7 @@ make dev
 This starts a fresh compositor in a nested window with a private IPC socket and log file, both printed at startup. Your real session is untouched. From there:
 
 - Point it at an experimental config with `KILN_RC`: `KILN_RC=/path/to/test-rc.lua make dev`.
-- Drive it over its own socket: `KILN_SOCK=/tmp/kiln-dev-1.sock scripts/kiln-eval 'require("somewm").reload()'`.
+- Drive it over its own socket: `KILN_SOCK=/tmp/kiln-dev-1.sock scripts/kiln-eval 'require("kiln").reload()'`.
 - Launch test clients into it by setting `WAYLAND_DISPLAY` to the display name in its boot log, for example `WAYLAND_DISPLAY=wayland-1 foot`.
 
 Private sockets mean a dev instance can never hijack your live session's IPC, and vice versa. When the config works nested, reload it in the real session.

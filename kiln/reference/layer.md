@@ -6,7 +6,7 @@ sidebar_position: 5
 
 # layer
 
-A layer object is one layer-shell surface: an external bar, launcher, wallpaper, or lock helper that placed itself with the wlr-layer-shell protocol. The `layer` global is the class. The surface's facts live on the object; how it is sized, answered, and granted the keyboard is Lua policy in `some.defaults`, replaceable wholesale.
+A layer object is one layer-shell surface: an external bar, launcher, wallpaper, or lock helper that placed itself with the wlr-layer-shell protocol. The `layer` global is the class. The surface's facts live on the object; how it is sized, answered, and granted the keyboard is Lua policy in `kiln.defaults`, replaceable wholesale.
 
 ```lua
 layer.on("map", function(l)
@@ -48,13 +48,13 @@ As with every kiln object, unknown keys store and emit `property::<key>`.
 
 ## Policy
 
-Layer surfaces carry no built-in behavior; three replaceable policies on `some.defaults` decide everything (see [defaults](/kiln/reference/defaults)):
+Layer surfaces carry no built-in behavior; three replaceable policies on `kiln.defaults` decide everything (see [defaults](/kiln/reference/defaults)):
 
 | Policy | Runs on | Decides |
 |---|---|---|
-| `some.defaults.layer(l)` | `map`, `commit` | How the surface is sized and answered. The stock one implements standard protocol sizing: a zero desired axis anchored to both opposite edges stretches between them minus margins; everything else is honored as asked. |
-| `some.defaults.layer_keyboard(l)` | `map`, `commit` | Whether the surface gets the keyboard. Stock: `exclusive` takes the seat, `on_demand` stays inert. |
-| `some.defaults.layer_release(l)` | `unmap`, `destroy` | Cleanup; the stock one returns the seat to the focused client if the surface held it. |
+| `kiln.defaults.layer(l)` | `map`, `commit` | How the surface is sized and answered. The stock one implements standard protocol sizing: a zero desired axis anchored to both opposite edges stretches between them minus margins; everything else is honored as asked. |
+| `kiln.defaults.layer_keyboard(l)` | `map`, `commit` | Whether the surface gets the keyboard. Stock: `exclusive` takes the seat, `on_demand` stays inert. |
+| `kiln.defaults.layer_release(l)` | `unmap`, `destroy` | Cleanup; the stock one returns the seat to the focused client if the surface held it. |
 
 Replace any of them with a plain assignment before the surface maps. A broken `layer` policy means the surface is visibly absent, never a compositor-synthesized answer.
 

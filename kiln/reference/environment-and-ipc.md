@@ -74,7 +74,7 @@ Evaluation tries expression form first (so `1+1` answers `2`), then statement fo
 ```bash
 scripts/kiln-eval 'return core.output.list()[1].name'
 scripts/kiln-eval 'core.spawn({ "foot" })'
-echo 'require("somewm").notify{ title = "hi", message = "from IPC" }' | scripts/kiln-eval
+echo 'require("kiln").notify{ title = "hi", message = "from IPC" }' | scripts/kiln-eval
 ```
 
 :::warning

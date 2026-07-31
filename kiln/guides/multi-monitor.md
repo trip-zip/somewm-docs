@@ -45,19 +45,19 @@ end)
 Every screen gets its own tags and its own bars; nothing is shared. Branch on `s.name` for per-monitor differences:
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
+local kiln = require("kiln")
+local ui = kiln.ui
 
 screen.on("added", function(s)
 	if s.name == "eDP-1" then
 		-- the laptop panel: five workspaces
 		for _, name in ipairs({ "dev", "web", "chat", "files", "media" }) do
-			tag.new { name = name, screen = s, layout = some.layout.tile }
+			tag.new { name = name, screen = s, layout = kiln.layout.tile }
 		end
 	else
 		-- anything external: two, on max
-		tag.new { name = "ext", screen = s, layout = some.layout.max }
-		tag.new { name = "ext2", screen = s, layout = some.layout.max }
+		tag.new { name = "ext", screen = s, layout = kiln.layout.max }
+		tag.new { name = "ext2", screen = s, layout = kiln.layout.max }
 	end
 	s.tags[1]:view()
 
@@ -77,10 +77,10 @@ On `changed`, the screen's geometry (`s.width`, `s.height`) refreshes on the nex
 `c:move_to(target)` sends a client to another screen's selected tag; focus follows the window. The standard next-screen binding:
 
 ```lua
-some.key {
+kiln.key {
 	mods = { "mod" }, key = "o",
 	desc = "move to next screen", group = "client",
-	press = some.focused(function(c)
+	press = kiln.focused(function(c)
 		local all = screen.all()
 		if #all < 2 or c.tag == nil then
 			return

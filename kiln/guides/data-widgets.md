@@ -1,6 +1,6 @@
 ---
 title: Data Widgets
-description: Progress bars, history graphs, sliders, and toggles built from plain boxes and fed by some.spawn.watch.
+description: Progress bars, history graphs, sliders, and toggles built from plain boxes and fed by kiln.spawn.watch.
 sidebar_position: 14
 ---
 
@@ -12,38 +12,38 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 - A progress bar from two boxes and percent sizing
 - A history graph from a ring buffer and `ui.each`
-- A slider driven by `on_press`, `on_scroll`, and `some.mousegrabber`
+- A slider driven by `on_press`, `on_scroll`, and `kiln.mousegrabber`
 - A checkbox from a bordered box and `on_press`
-- Feeding all of them from `some.spawn.watch`
+- Feeding all of them from `kiln.spawn.watch`
 
 </YouWillLearn>
 
 Snippets assume the standard config preamble:
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
-local th = some.theme
+local kiln = require("kiln")
+local ui = kiln.ui
+local th = kiln.theme
 ```
 
-kiln has no canvas or drawing API, and bar meters do not need one. A meter is boxes: fixed and grow sizing, percent widths, colors, and handlers. The data lives in plain Lua variables; a shell command polled by `some.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers.
+kiln has no canvas or drawing API, and bar meters do not need one. A meter is boxes: fixed and grow sizing, percent widths, colors, and handlers. The data lives in plain Lua variables; a shell command polled by `kiln.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers.
 
 :::note
-Widget state is ordinary Lua. Changing a local variable draws nothing by itself; call `some.dirty()` after every update so the next frame renders it. See [frames and dirty](/kiln/concepts/frames-and-dirty).
+Widget state is ordinary Lua. Changing a local variable draws nothing by itself; call `kiln.dirty()` after every update so the next frame renders it. See [frames and dirty](/kiln/concepts/frames-and-dirty).
 :::
 
-## Feeding data: some.spawn.watch
+## Feeding data: kiln.spawn.watch
 
-`some.spawn.watch(cmd, interval, cb)` runs a command, feeds each output line to your callback, and re-runs it `interval` seconds after it exits. A memory fraction, polled every 5 seconds:
+`kiln.spawn.watch(cmd, interval, cb)` runs a command, feeds each output line to your callback, and re-runs it `interval` seconds after it exits. A memory fraction, polled every 5 seconds:
 
 ```lua
 local mem = 0
 
-some.spawn.watch("free -b", 5, function(line)
+kiln.spawn.watch("free -b", 5, function(line)
   local total, used = line:match("^Mem:%s+(%d+)%s+(%d+)")
   if total ~= nil then
     mem = tonumber(used) / tonumber(total)
-    some.dirty()
+    kiln.dirty()
   end
 end)
 ```
@@ -82,7 +82,7 @@ local cpu_hist, cpu_seq = {}, 0
 local prev_idle, prev_total
 local SAMPLES = 30
 
-some.spawn.watch("head -1 /proc/stat", 2, function(line)
+kiln.spawn.watch("head -1 /proc/stat", 2, function(line)
   local n = {}
   for v in line:gmatch("%d+") do n[#n + 1] = tonumber(v) end
   local idle, total = n[4] + (n[5] or 0), 0
@@ -94,7 +94,7 @@ some.spawn.watch("head -1 /proc/stat", 2, function(line)
       value = 1 - (idle - prev_idle) / (total - prev_total),
     }
     if #cpu_hist > SAMPLES then table.remove(cpu_hist, 1) end
-    some.dirty()
+    kiln.dirty()
   end
   prev_idle, prev_total = idle, total
 end)
@@ -121,7 +121,7 @@ end
 
 ## A slider
 
-A slider is a progress bar that writes back. On press, set the value from the pointer's x inside the track, then take the pointer with `some.mousegrabber` so dragging keeps updating until the button releases. `core.box(id)` reads the track's solved geometry, which is in the same coordinate space as the event's `x`:
+A slider is a progress bar that writes back. On press, set the value from the pointer's x inside the track, then take the pointer with `kiln.mousegrabber` so dragging keeps updating until the button releases. `core.box(id)` reads the track's solved geometry, which is in the same coordinate space as the event's `x`:
 
 ```lua
 local function slider(id, width, get, set)
@@ -129,7 +129,7 @@ local function slider(id, width, get, set)
     local b = core.box(id)
     if b == nil or b.width == 0 then return end
     set(math.max(0, math.min(1, (px - b.x) / b.width)))
-    some.dirty()
+    kiln.dirty()
   end
   ui.box({
     id = id, w = width, h = 8,
@@ -137,12 +137,12 @@ local function slider(id, width, get, set)
     align = { y = "center" },
     on_scroll = function(ev)
       set(math.max(0, math.min(1, get() - (ev.dy or 0) * 0.05)))
-      some.dirty()
+      kiln.dirty()
     end,
     on_press = function(ev)
       apply(ev.x)
       local grab
-      grab = some.mousegrabber {
+      grab = kiln.mousegrabber {
         motion = function(mev) apply(mev.x) end,
         button = function(bev)
           if not bev.pressed then grab:stop() end
@@ -168,13 +168,13 @@ slider("vol-slider", 100,
   function() return vol end,
   function(f)
     vol = f
-    some.spawn(string.format(
+    kiln.spawn(string.format(
       "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%",
       math.floor(f * 100 + 0.5)))
   end)
 ```
 
-To keep the slider honest against volume changed elsewhere, add a `some.spawn.watch` on `wpctl get-volume @DEFAULT_AUDIO_SINK@` that parses the number back into `vol`.
+To keep the slider honest against volume changed elsewhere, add a `kiln.spawn.watch` on `wpctl get-volume @DEFAULT_AUDIO_SINK@` that parses the number back into `vol`.
 
 ## A checkbox
 
@@ -188,7 +188,7 @@ ui.box({
   border = { width = 1, color = th.accent },
   on_press = function()
     notification.suspended = not notification.suspended
-    some.dirty()
+    kiln.dirty()
   end,
 })
 ```
@@ -215,7 +215,7 @@ screen.on("added", function(s)
       function() return vol end,
       function(f)
         vol = f
-        some.spawn(string.format(
+        kiln.spawn(string.format(
           "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%",
           math.floor(f * 100 + 0.5)))
       end)
@@ -226,7 +226,7 @@ screen.on("added", function(s)
       border = { width = 1, color = th.accent },
       on_press = function()
         notification.suspended = not notification.suspended
-        some.dirty()
+        kiln.dirty()
       end,
     })
     ui.clock()
@@ -239,4 +239,4 @@ end)
 - [Widgets tutorial](/kiln/tutorials/widgets)
 - [ui reference](/kiln/reference/ui)
 - [Frames and dirty](/kiln/concepts/frames-and-dirty)
-- [some reference](/kiln/reference/some), for `spawn.watch`, `spawn.pipe`, and the grabbers
+- [kiln reference](/kiln/reference/kiln), for `spawn.watch`, `spawn.pipe`, and the grabbers

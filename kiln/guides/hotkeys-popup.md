@@ -10,9 +10,9 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 <YouWillLearn>
 
-- Showing, closing, and toggling the built-in cheat sheet with `some.hotkeys`
+- Showing, closing, and toggling the built-in cheat sheet with `kiln.hotkeys`
 - What the stock sheet renders, and where its content comes from
-- Reading every binding back from `some.key.all()`
+- Reading every binding back from `kiln.key.all()`
 - Declaring a custom sheet as an overlay float with a dismissing scrim
 
 </YouWillLearn>
@@ -20,9 +20,9 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 Snippets assume the standard config preamble:
 
 ```lua
-local some = require("somewm")
-local ui, key = some.ui, some.key
-local th = some.theme
+local kiln = require("kiln")
+local ui, key = kiln.ui, kiln.key
+local th = kiln.theme
 ```
 
 ## The built-in sheet
@@ -33,7 +33,7 @@ registry at declare, so it lists whatever your config binds, always current:
 
 ```lua
 key { mods = { "mod" }, key = "s", desc = "show help", group = "kiln",
-  press = some.hotkeys.toggle }
+  press = kiln.hotkeys.toggle }
 ```
 
 That is the whole wiring, and it is exactly what the default config does. The
@@ -41,10 +41,10 @@ API is three functions and one field:
 
 | Symbol | Meaning |
 |---|---|
-| `some.hotkeys.show(s?)` | open the sheet on screen `s` (default: focused) |
-| `some.hotkeys.close()` | close it |
-| `some.hotkeys.toggle(s?)` | one or the other |
-| `some.hotkeys.open` | the screen the sheet is open on, or nil |
+| `kiln.hotkeys.show(s?)` | open the sheet on screen `s` (default: focused) |
+| `kiln.hotkeys.close()` | close it |
+| `kiln.hotkeys.toggle(s?)` | one or the other |
+| `kiln.hotkeys.open` | the screen the sheet is open on, or nil |
 
 The stock sheet:
 
@@ -64,18 +64,18 @@ next time it opens.
 ## Rolling your own
 
 The rest of this page replaces the stock sheet with your own layout. The
-same registry powers it: `some.key.all()` returns a copy of every binding as
+same registry powers it: `kiln.key.all()` returns a copy of every binding as
 written.
 
 ### Step 1: read the registry
 
 ```lua
-for _, k in ipairs(some.key.all()) do
+for _, k in ipairs(kiln.key.all()) do
   -- k.mods, k.key, k.desc, k.group, k.label
 end
 ```
 
-`k.label` is the chord as the user reads it, resolved through `some.modkey`
+`k.label` is the chord as the user reads it, resolved through `kiln.modkey`
 at bind time (`"super+s"`). `k.mods` keeps the compact form you wrote, with
 `"mod"` unresolved, if you want to format chords yourself. Rebinding a chord
 replaces its registry row in place, so labels stay unique.
@@ -88,7 +88,7 @@ in declaration order rather than hash order:
 ```lua
 local function grouped_keys()
   local groups, order = {}, {}
-  for _, k in ipairs(some.key.all()) do
+  for _, k in ipairs(kiln.key.all()) do
     local g = k.group or "other"
     if groups[g] == nil then
       groups[g] = {}
@@ -119,7 +119,7 @@ local function declare_hotkeys(s)
     color = "#00000080",
     on_press = function()
       hotkeys_open = false
-      some.dirty(s.name)
+      kiln.dirty(s.name)
     end,
   })
   local groups, order = grouped_keys()
@@ -171,17 +171,17 @@ end)
 key { mods = { "mod" }, key = "s", desc = "show keys", group = "system",
   press = function()
     hotkeys_open = not hotkeys_open
-    some.dirty(screen.focused.name)
+    kiln.dirty(screen.focused.name)
   end }
 ```
 
-`some.dirty` forces the redraw: the boolean is plain Lua state, and changing
+`kiln.dirty` forces the redraw: the boolean is plain Lua state, and changing
 it does not redraw anything on its own.
 
 ### Step 5 (optional): dismiss on any key
 
 The scrim closes on a press. To match the stock sheet and also close on any
-keystroke, take the keyboard with `some.keygrabber` while the sheet is open,
+keystroke, take the keyboard with `kiln.keygrabber` while the sheet is open,
 and route both dismissal paths through one function so the grab is always
 released:
 
@@ -194,17 +194,17 @@ local function close_hotkeys()
     hotkeys_grab:stop()
     hotkeys_grab = nil
   end
-  some.dirty()
+  kiln.dirty()
 end
 
 local function open_hotkeys(s)
   hotkeys_open = true
-  hotkeys_grab = some.keygrabber {
+  hotkeys_grab = kiln.keygrabber {
     key = function(ev)
       if ev.pressed then close_hotkeys() end
     end,
   }
-  some.dirty(s.name)
+  kiln.dirty(s.name)
 end
 
 key { mods = { "mod" }, key = "s", desc = "show keys", group = "system",

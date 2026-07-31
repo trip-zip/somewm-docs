@@ -12,7 +12,7 @@ kiln is a proof of concept, and this page is the honest inventory: what the mode
 
 kiln draws rectangles, rounded corners, borders, images, text, and color. That is the complete list, and it is deliberate: the vocabulary is what Clay declares and the C renderer reconciles, with no escape hatch into arbitrary painting.
 
-Not available as drawing primitives: gradients, arcs, rings, and circles (so no radial progress bars or pie charts), rotation and mirroring, drop shadows, shapes beyond the rounded rectangle, and per-window opacity. There is no Lua canvas and no cairo access; a config cannot paint pixels, only declare nodes. The escape hatch is an image: `some.asset` renders SVG (including [`some.asset.gradient`](/kiln/reference/some)) to cached PNGs, which is how the default desktop gets its gradient wallpaper and its glyphs. A surprising amount of chrome fits the vocabulary directly, but if your aesthetic depends on painting at declare time, kiln cannot draw it today.
+Not available as drawing primitives: gradients, arcs, rings, and circles (so no radial progress bars or pie charts), rotation and mirroring, drop shadows, shapes beyond the rounded rectangle, and per-window opacity. There is no Lua canvas and no cairo access; a config cannot paint pixels, only declare nodes. The escape hatch is an image: `kiln.asset` renders SVG (including [`kiln.asset.gradient`](/kiln/reference/kiln)) to cached PNGs, which is how the default desktop gets its gradient wallpaper and its glyphs. A surprising amount of chrome fits the vocabulary directly, but if your aesthetic depends on painting at declare time, kiln cannot draw it today.
 
 ## Current gaps
 
@@ -39,7 +39,7 @@ What does not:
 
 ## Input configuration is global
 
-`some.input` settings (acceleration, natural scrolling, tap-to-click, and the rest) apply to every device. There are no per-device settings, so a laptop with an external mouse cannot give the touchpad and the mouse different acceleration profiles. Single-pointer setups lose nothing. See [Input devices](/kiln/guides/input-devices).
+`kiln.input` settings (acceleration, natural scrolling, tap-to-click, and the rest) apply to every device. There are no per-device settings, so a laptop with an external mouse cannot give the touchpad and the mouse different acceleration profiles. Single-pointer setups lose nothing. See [Input devices](/kiln/guides/input-devices).
 
 ## The AwesomeWM ecosystem
 

@@ -1,6 +1,6 @@
 ---
 title: Keybindings
-description: "Teach some.key from scratch: chords and the modkey, press and release, descriptions for the hotkeys popup, ranges, and mouse bindings."
+description: "Teach kiln.key from scratch: chords and the modkey, press and release, descriptions for the hotkeys popup, ranges, and mouse bindings."
 sidebar_position: 2
 ---
 
@@ -10,13 +10,13 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 <YouWillLearn>
 
-- Registering a key binding with `some.key{}`
-- How `"mod"` resolves through `some.modkey`, and exact modifier matching
+- Registering a key binding with `kiln.key{}`
+- How `"mod"` resolves through `kiln.modkey`, and exact modifier matching
 - Press and release handlers
 - `desc` and `group`, and how they feed the hotkeys popup
 - Range keys like `"1-9"` and `"a-z"` that pass their value to the handler
-- Client verbs with `some.focused`
-- Mouse bindings with `some.button{}` on clients and the root
+- Client verbs with `kiln.focused`
+- Mouse bindings with `kiln.button{}` on clients and the root
 - Clearing and re-registering bindings
 
 </YouWillLearn>
@@ -27,15 +27,15 @@ A running kiln and a config you can edit (see
 [Basics](/kiln/tutorials/basics)). Snippets assume the usual header:
 
 ```lua
-local some = require("somewm")
-local key, button = some.key, some.button
+local kiln = require("kiln")
+local key, button = kiln.key, kiln.button
 ```
 
 ## 1. Your first binding
 
 ```lua
 key { mods = { "mod" }, key = "d",
-	press = function() some.spawn("fuzzel") end }
+	press = function() kiln.spawn("fuzzel") end }
 ```
 
 One call, one chord. `mods` is a list of modifier names, `key` is the key
@@ -45,14 +45,14 @@ name, `press` runs on the press edge. Reload (or paste this through
 Bound chords are consumed by the compositor: the press never reaches the
 focused client, so a binding cannot half-leak into a terminal.
 
-## 2. Mods and some.modkey
+## 2. Mods and kiln.modkey
 
 Modifier names are `ctrl`, `alt`, `shift`, `super`. The special name `"mod"`
-resolves through `some.modkey` at bind time, so the whole config retargets
+resolves through `kiln.modkey` at bind time, so the whole config retargets
 with one line:
 
 ```lua
-some.modkey = "super"
+kiln.modkey = "super"
 ```
 
 Set it before your `key{}` calls. Matching is exact: `{ "mod" }` does not fire
@@ -65,8 +65,8 @@ Both handlers are optional and independent:
 
 ```lua
 key { mods = { "mod" }, key = "v",
-	press = function() some.spawn("pactl set-source-mute @DEFAULT_SOURCE@ 0") end,
-	release = function() some.spawn("pactl set-source-mute @DEFAULT_SOURCE@ 1") end }
+	press = function() kiln.spawn("pactl set-source-mute @DEFAULT_SOURCE@ 0") end,
+	release = function() kiln.spawn("pactl set-source-mute @DEFAULT_SOURCE@ 1") end }
 ```
 
 A push-to-talk key: unmute while held. A release-only binding works too; the
@@ -76,14 +76,14 @@ chord is still consumed on the press edge so the release reliably arrives.
 
 ```lua
 key { mods = { "mod" }, key = "d", desc = "app launcher", group = "launch",
-	press = function() some.spawn("fuzzel") end }
+	press = function() kiln.spawn("fuzzel") end }
 ```
 
 `desc` and `group` change nothing about dispatch. They are recorded in the
-binding registry, which `some.key.all()` returns, and the default config's
+binding registry, which `kiln.key.all()` returns, and the default config's
 `mod+s` cheat sheet is built entirely from that registry: one column per
 group, one row per binding. Annotate your bindings and they appear in the
-popup automatically. The popup ships in the stdlib (`some.hotkeys`), and the
+popup automatically. The popup ships in the stdlib (`kiln.hotkeys`), and the
 same registry powers a custom one; see the
 [hotkeys popup guide](/kiln/guides/hotkeys-popup).
 
@@ -101,24 +101,24 @@ key { mods = { "mod" }, key = "1-9", desc = "view tag", group = "tag",
 
 key { mods = { "mod", "ctrl" }, key = "a-z", desc = "mark", group = "demo",
 	press = function(letter)
-		some.notify { title = "pressed", message = letter }
+		kiln.notify { title = "pressed", message = letter }
 	end }
 ```
 
 The registry keeps the range as one entry, so the cheat sheet shows a single
 `1-9  view tag` row instead of nine.
 
-## 6. Client verbs with some.focused
+## 6. Client verbs with kiln.focused
 
-Handlers that act on "the focused client" all need the same guard. `some.focused(fn)`
+Handlers that act on "the focused client" all need the same guard. `kiln.focused(fn)`
 wraps a function to run with `client.focus` as its first argument, and to do
 nothing when no client is focused:
 
 ```lua
 key { mods = { "mod" }, key = "q", desc = "close client", group = "client",
-	press = some.focused(function(c) c:close() end) }
+	press = kiln.focused(function(c) c:close() end) }
 key { mods = { "mod" }, key = "f", desc = "fullscreen", group = "client",
-	press = some.focused(function(c) c:toggle_fullscreen() end) }
+	press = kiln.focused(function(c) c:toggle_fullscreen() end) }
 ```
 
 :::warning
@@ -129,7 +129,7 @@ polite one.
 
 ## 7. Mouse bindings
 
-`some.button{}` is the same shape with a button number instead of a key, plus
+`kiln.button{}` is the same shape with a button number instead of a key, plus
 an `on` field naming where the press must land: `"client"` (the default) for
 presses on a client surface, `"root"` for presses on empty workarea. The
 handler receives the client (or nil on the root).
@@ -140,7 +140,7 @@ button { mods = { "mod" }, button = 3,
 	press = function(c) c:grab_resize_nearest() end }
 
 button { mods = {}, button = 2, on = "root",
-	press = function() some.spawn(os.getenv("TERMINAL") or "foot") end }
+	press = function() kiln.spawn(os.getenv("TERMINAL") or "foot") end }
 ```
 
 The first two are the default config's move and resize drags. Buttons: 1
@@ -150,38 +150,38 @@ by `button{}`; see the [bar tutorial](/kiln/tutorials/a-bar-from-scratch).
 
 ## 8. Clearing and re-registering
 
-`some.key.clear()` drops every key binding, `some.button.clear()` every mouse
-binding. `some.reload()` calls both before re-running your config, which is
+`kiln.key.clear()` drops every key binding, `kiln.button.clear()` every mouse
+binding. `kiln.reload()` calls both before re-running your config, which is
 why editing the file and reloading never duplicates anything.
 
 Re-running a `key{}` call over IPC is safe: rebinding a chord replaces its
 registry row in place, so the cheat sheet never shows duplicates. Still,
 
 ```bash
-scripts/kiln-eval 'require("somewm").reload()'
+scripts/kiln-eval 'require("kiln").reload()'
 ```
 
-is the cleanest way to apply binding edits from a file. (`require("somewm")`
-returns the same module your rc holds as `some`; the local itself is not
+is the cleanest way to apply binding edits from a file. (`require("kiln")`
+returns the same module your rc holds as `kiln`; the local itself is not
 visible to the socket.)
 
 ## Complete example
 
 ```lua
-local some = require("somewm")
-local key, button = some.key, some.button
+local kiln = require("kiln")
+local key, button = kiln.key, kiln.button
 
-some.modkey = "super"
+kiln.modkey = "super"
 
 key { mods = { "mod" }, key = "Return", desc = "terminal", group = "launch",
-	press = function() some.spawn(os.getenv("TERMINAL") or "foot") end }
+	press = function() kiln.spawn(os.getenv("TERMINAL") or "foot") end }
 key { mods = { "mod" }, key = "d", desc = "app launcher", group = "launch",
-	press = function() some.spawn("fuzzel") end }
+	press = function() kiln.spawn("fuzzel") end }
 
 key { mods = { "mod" }, key = "q", desc = "close", group = "client",
-	press = some.focused(function(c) c:close() end) }
+	press = kiln.focused(function(c) c:close() end) }
 key { mods = { "mod" }, key = "space", desc = "toggle floating", group = "client",
-	press = some.focused(function(c) c.floating = not c.floating end) }
+	press = kiln.focused(function(c) c.floating = not c.floating end) }
 
 key { mods = { "mod" }, key = "1-9", desc = "view tag", group = "tag",
 	press = function(i)
@@ -189,13 +189,13 @@ key { mods = { "mod" }, key = "1-9", desc = "view tag", group = "tag",
 		if t then t:view() end
 	end }
 key { mods = { "mod", "shift" }, key = "1-9", desc = "move to tag", group = "tag",
-	press = some.focused(function(c, i)
+	press = kiln.focused(function(c, i)
 		local t = screen.focused.tags[i]
 		if t then c.tags = { t } end
 	end) }
 
 key { mods = { "mod" }, key = "Escape", desc = "quit", group = "system",
-	press = some.quit }
+	press = kiln.quit }
 
 button { mods = { "mod" }, button = 1, press = function(c) c:grab_move() end }
 button { mods = { "mod" }, button = 3,

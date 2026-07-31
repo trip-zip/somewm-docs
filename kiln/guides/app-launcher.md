@@ -12,20 +12,20 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 - Finding `.desktop` files under the XDG application directories
 - Parsing Name, Exec, and Icon with plain Lua
-- Resolving icons with `some.icon.path`
-- Presenting the list with `some.menu.show` and launching with `some.spawn_with_token`
+- Resolving icons with `kiln.icon.path`
+- Presenting the list with `kiln.menu.show` and launching with `kiln.spawn_with_token`
 
 </YouWillLearn>
 
 Snippets assume the standard config preamble:
 
 ```lua
-local some = require("somewm")
-local ui, key = some.ui, some.key
-local th = some.theme
+local kiln = require("kiln")
+local ui, key = kiln.ui, kiln.key
+local th = kiln.theme
 ```
 
-An application launcher is a menu of every installed `.desktop` entry, where picking a row spawns its command. kiln does not ship one as a module; you build it from the stdlib menu plus a directory scan and a file parse, both plain Lua. The one launcher-specific ingredient is `some.spawn_with_token(cmd)`: it launches the command with an XDG activation token, so the app you asked for arrives able to focus itself.
+An application launcher is a menu of every installed `.desktop` entry, where picking a row spawns its command. kiln does not ship one as a module; you build it from the stdlib menu plus a directory scan and a file parse, both plain Lua. The one launcher-specific ingredient is `kiln.spawn_with_token(cmd)`: it launches the command with an XDG activation token, so the app you asked for arrives able to focus itself.
 
 ## Step 1: find the application directories
 
@@ -111,7 +111,7 @@ Matching keys as `^([%w-]+)` drops the localized `Name[de]` variants and keeps t
 
 ## Step 3: build the menu rows
 
-Walk the directories with first-name-wins on a basename clash (so your `~/.local/share` override shadows the system copy), sort by name, and turn each entry into a `{ label, action }` menu item. `some.icon.path(name)` resolves an icon name to a file path (or nil), and a menu item takes the result as `icon`:
+Walk the directories with first-name-wins on a basename clash (so your `~/.local/share` override shadows the system copy), sort by name, and turn each entry into a `{ label, action }` menu item. `kiln.icon.path(name)` resolves an icon name to a file path (or nil), and a menu item takes the result as `icon`:
 
 ```lua
 local function menubar_items()
@@ -132,17 +132,17 @@ local function menubar_items()
   local items = {}
   for _, a in ipairs(apps) do
     items[#items + 1] = { a.name, function()
-      some.spawn_with_token(a.exec)
-    end, icon = a.icon ~= nil and some.icon.path(a.icon) or nil }
+      kiln.spawn_with_token(a.exec)
+    end, icon = a.icon ~= nil and kiln.icon.path(a.icon) or nil }
   end
   return items
 end
 ```
 
-The action is the point of the recipe: `some.spawn_with_token` mints an activation token for the child, so the app opens focused. The user asked for the window; the window gets the seat.
+The action is the point of the recipe: `kiln.spawn_with_token` mints an activation token for the child, so the app opens focused. The user asked for the window; the window gets the seat.
 
 :::note
-`some.icon.path` is a bounded lookup: the app's own `Icon=` line, then hicolor at common sizes, then pixmaps. It does not walk icon-theme inheritance chains, so a name only your GTK theme ships may resolve to nil. Menu rows render fine without an icon.
+`kiln.icon.path` is a bounded lookup: the app's own `Icon=` line, then hicolor at common sizes, then pixmaps. It does not walk icon-theme inheritance chains, so a name only your GTK theme ships may resolve to nil. Menu rows render fine without an icon.
 :::
 
 ## Step 4: open it
@@ -154,7 +154,7 @@ ui.box({
   id = "apps-btn", color = th.accent, radius = 4,
   pad = { x = 8 }, align = "center",
   on_press = function()
-    some.menu.show { under = "apps-btn", screen = s,
+    kiln.menu.show { under = "apps-btn", screen = s,
       items = menubar_items() }
   end,
 }, function() ui.text("apps", { color = th.bg, size = 12 }) end)
@@ -164,19 +164,19 @@ ui.box({
 key { mods = { "mod" }, key = "p", desc = "show the menubar", group = "launcher",
   press = function()
     local s = screen.focused
-    some.menu.show { under = "apps-btn", screen = s, items = menubar_items() }
+    kiln.menu.show { under = "apps-btn", screen = s, items = menubar_items() }
   end }
 ```
 
 Dismissal, nesting, and press dispatch all come from the stdlib menu; this recipe only supplies the rows. Install an app and it appears on the next open; uninstall one and it is gone.
 
 :::tip
-Prefer typing to clicking? `some.prompt.run` with `some.prompt.completion` over the same list gives you a keyboard launcher instead: feed it the app names, look up the `exec` for the completed name in `done`. The scan and parse above are reusable as-is.
+Prefer typing to clicking? `kiln.prompt.run` with `kiln.prompt.completion` over the same list gives you a keyboard launcher instead: feed it the app names, look up the `exec` for the completed name in `done`. The scan and parse above are reusable as-is.
 :::
 
 ## See also
 
 - [Menus](/kiln/guides/menus)
 - [Spawn lifecycle](/kiln/guides/spawn-lifecycle), including what activation tokens do for focus
-- [some reference](/kiln/reference/some)
+- [kiln reference](/kiln/reference/kiln)
 - [Client rules](/kiln/guides/client-rules), for routing launched apps to tags

@@ -118,10 +118,10 @@ Every kiln also exposes a live Lua socket, so the same reload works from any
 terminal, key or no key:
 
 ```bash
-scripts/kiln-eval 'require("somewm").reload()'
+scripts/kiln-eval 'require("kiln").reload()'
 ```
 
-(The socket cannot see your rc's `some` local; `require("somewm")` returns the
+(The socket cannot see your rc's `kiln` local; `require("kiln")` returns the
 same module.) More on reload semantics and debugging a broken config in
 [Reload and debugging](/kiln/guides/reload-and-debugging).
 

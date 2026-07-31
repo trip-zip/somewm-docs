@@ -20,14 +20,14 @@ to a cached PNG by `rsvg-convert`.
 ## The require line and the globals
 
 ```lua
-local some = require("somewm")
-local ui, key, rule, button = some.ui, some.key, some.rule, some.button
-local th = some.theme
+local kiln = require("kiln")
+local ui, key, rule, button = kiln.ui, kiln.key, kiln.rule, kiln.button
+local th = kiln.theme
 ```
 
-`require("somewm")` is the whole import. It returns the `some` module:
-functions (`some.spawn`, `some.quit`, `some.dirty`), submodules (`some.ui`,
-`some.layout`, `some.placement`), the theme table, and the binding
+`require("kiln")` is the whole import. It returns the `kiln` module:
+functions (`kiln.spawn`, `kiln.quit`, `kiln.dirty`), submodules (`kiln.ui`,
+`kiln.layout`, `kiln.placement`), the theme table, and the binding
 constructors `key`, `button`, `rule`. The locals are just shorthand.
 
 Beyond the module, a config sees seven globals: `client`, `screen`, `tag`,
@@ -40,8 +40,8 @@ Beyond the module, a config sees seven globals: `client`, `screen`, `tag`,
 The very first wiring is the error bus, so everything after it fails loudly:
 
 ```lua
-some.on("error", function(_, err)
-	some.notify {
+kiln.on("error", function(_, err)
+	kiln.notify {
 		urgency = "critical",
 		title = "Oops, an error happened!",
 		message = tostring(err),
@@ -55,17 +55,17 @@ of vanishing into the log.
 ## Theme and modkey
 
 ```lua
-some.modkey = "super"
+kiln.modkey = "super"
 ```
 
-`some.modkey` is what the string `"mod"` resolves to in every key and button
+`kiln.modkey` is what the string `"mod"` resolves to in every key and button
 spec. The stdlib default is `alt`; the shipped config picks `super`.
 
 The theme section defines three inline palettes (gruvbox, catppuccin, nord),
 each mapping the same nine keys (`bg`, `bg2`, `fg`, `accent`, `muted`,
 `titlebar`, `titlebar_focus`, `close`, `urgent`). The chosen name persists in
 `$XDG_CONFIG_HOME/kiln/theme`; `switch_theme(name)` writes the file and calls
-`some.reload()`, and the reload re-runs this file, which re-reads the name.
+`kiln.reload()`, and the reload re-runs this file, which re-reads the name.
 Catppuccin is the fallback when the file is missing. See
 [Theming](/kiln/tutorials/theming) and the
 [theme variable reference](/kiln/reference/theme-variables).
@@ -74,7 +74,7 @@ Catppuccin is the fallback when the file is missing. See
 
 The config draws no icons from disk. Every glyph (close button, layout icons,
 menu icons) is a small inline SVG rendered to a cached PNG through
-`some.asset`, and the wallpaper is the same trick at screen size: a gradient
+`kiln.asset`, and the wallpaper is the same trick at screen size: a gradient
 in the theme colors plus the kiln mark, memoized per resolution and scale
 (SUBSTITUTION 1). `KILN_WALLPAPER` still wins when it is set. The rendered
 glyphs also feed two theme keys the stdlib reads when present:
@@ -93,19 +93,19 @@ isolation.
 local function menu_items(s)
 	return {
 		{ "hotkeys", icon = glyph("keys", th.fg), function()
-			some.hotkeys.show(s)
+			kiln.hotkeys.show(s)
 		end },
 		{ "terminal", icon = glyph("terminal", th.fg),
-			function() some.spawn(terminal) end },
+			function() kiln.spawn(terminal) end },
 		{ "theme", icon = glyph("palette", th.fg), {
 			{ "gruvbox", function() switch_theme("gruvbox") end },
 			{ "catppuccin", function() switch_theme("catppuccin") end },
 			{ "nord", function() switch_theme("nord") end },
 		} },
 		{ "edit config", ... },
-		{ "restart", icon = glyph("restart", th.fg), some.reload },
-		{ "lock", icon = glyph("lock", th.fg), some.lock },
-		{ "quit", icon = glyph("power", th.fg), some.quit },
+		{ "restart", icon = glyph("restart", th.fg), kiln.reload },
+		{ "lock", icon = glyph("lock", th.fg), kiln.lock },
+		{ "quit", icon = glyph("power", th.fg), kiln.quit },
 	}
 end
 ```
@@ -113,12 +113,12 @@ end
 Menu items are `{ label, action }` pairs; a table as the second element nests
 a submenu (the theme switcher), and `icon = <path>` adds a leading image
 cell. The launcher button in the bar and the root right-click both open the
-main menu through `some.menu.show`. See [Menus](/kiln/guides/menus).
+main menu through `kiln.menu.show`. See [Menus](/kiln/guides/menus).
 
 ## The app launcher
 
 `mod+p` opens the menubar: every installed `.desktop` application behind a
-type-to-filter prompt. It is built from `some.prompt.run` plus a config-owned
+type-to-filter prompt. It is built from `kiln.prompt.run` plus a config-owned
 float listing the matches; the `.desktop` scan is config space, zero stdlib
 lines. The [app launcher guide](/kiln/guides/app-launcher) rebuilds the idea.
 
@@ -128,11 +128,11 @@ Everything per-screen happens in one handler:
 
 ```lua
 screen.on("added", function(s)
-	tag.new { name = "dev", screen = s, layout = some.layout.tile }
-	tag.new { name = "web", screen = s, layout = some.layout.tile }
-	tag.new { name = "chat", screen = s, layout = some.layout.tile }
-	tag.new { name = "files", screen = s, layout = some.layout.tile }
-	tag.new { name = "media", screen = s, layout = some.layout.tile }
+	tag.new { name = "dev", screen = s, layout = kiln.layout.tile }
+	tag.new { name = "web", screen = s, layout = kiln.layout.tile }
+	tag.new { name = "chat", screen = s, layout = kiln.layout.tile }
+	tag.new { name = "files", screen = s, layout = kiln.layout.tile }
+	tag.new { name = "media", screen = s, layout = kiln.layout.tile }
 	s.tags[1]:view()
 
 	ui.bar(s, { edge = "top", color = th.bg }, function()
@@ -172,10 +172,10 @@ floated to the bar's center with a tooltip. The full build-up is the
 
 ```lua
 key { mods = { "mod" }, key = "s", desc = "show help", group = "kiln",
-	press = some.hotkeys.toggle }
+	press = kiln.hotkeys.toggle }
 
 key { mods = { "mod", "shift" }, key = "c", desc = "close", group = "client",
-	press = some.focused(function(c) c:close() end) }
+	press = kiln.focused(function(c) c:close() end) }
 
 key { mods = { "mod" }, key = "1-9", desc = "only view tag", group = "tag",
 	press = function(i)
@@ -186,8 +186,8 @@ key { mods = { "mod" }, key = "1-9", desc = "only view tag", group = "tag",
 
 Every binding is one `key{}` call: mods, key, a press handler, plus `desc` and
 `group` for the hotkeys sheet. The sheet itself is stdlib: `mod+s` calls
-`some.hotkeys.toggle`, which renders every registered binding grouped by
-`group`. `some.focused(fn)` wraps a client verb to run on the focused client
+`kiln.hotkeys.toggle`, which renders every registered binding grouped by
+`group`. `kiln.focused(fn)` wraps a client verb to run on the focused client
 when there is one. `"1-9"` is a range: it expands to nine bindings and passes
 the index to the handler. Note that `c:kill()` is deliberately unbound; the
 polite `c:close()` is the only close verb in the default config.
@@ -209,8 +209,8 @@ of this from scratch.
 ```lua
 rule { match = { fn = function() return true end },
 	on = function(c)
-		some.placement.no_overlap(c)
-		some.placement.no_offscreen(c)
+		kiln.placement.no_overlap(c)
+		kiln.placement.no_offscreen(c)
 	end }
 
 rule { match_any = {
@@ -236,7 +236,7 @@ fires whichever way the client arrives. See
 
 ## Where policies hook in
 
-The default behaviors live as ten replaceable `some.defaults.*` functions,
+The default behaviors live as ten replaceable `kiln.defaults.*` functions,
 and the shipped config leaves all of them stock. What it does add is one
 listener:
 
@@ -246,7 +246,7 @@ client.on("mouse::enter", function(c) c:focus() end)
 
 That single line is focus-follows-mouse. Swapping a default wholesale is the
 same shape in reverse: `client.off("request::activate",
-some.defaults.activate)` then `client.on` with your own. See
+kiln.defaults.activate)` then `client.on` with your own. See
 [Replace default policies](/kiln/guides/replace-default-policies) and the
 [defaults reference](/kiln/reference/defaults).
 

@@ -10,13 +10,13 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 <YouWillLearn>
 
-- The `some.defaults` model: ten policies, each one plain function
+- The `kiln.defaults` model: ten policies, each one plain function
 - The two replacement patterns: reassign the field, or swap the listener
 - Three worked replacements: focus succession, focus stealing, and fake fullscreen
 
 </YouWillLearn>
 
-Everything kiln decides on your behalf is a function in `some.defaults`, and every one of them is replaceable wholesale. There is no hook registry and no permission system: you write a function with the same signature and put it where the old one was.
+Everything kiln decides on your behalf is a function in `kiln.defaults`, and every one of them is replaceable wholesale. There is no hook registry and no permission system: you write a function with the same signature and put it where the old one was.
 
 ## 1. The ten policies
 
@@ -39,10 +39,10 @@ Stock behavior, briefly: `successor` picks the most recently focused living clie
 
 The general recipe is always: understand what the stock function does (the table above, plus the relevant reference page), write your own with the same signature, install it. How you install it depends on how the policy is invoked.
 
-**Called through the table.** `successor` and `notify_display` are looked up on `some.defaults` at call time, so replacing them is one assignment:
+**Called through the table.** `successor` and `notify_display` are looked up on `kiln.defaults` at call time, so replacing them is one assignment:
 
 ```lua
-some.defaults.successor = function(gone)
+kiln.defaults.successor = function(gone)
 	-- return a client, or nil to clear focus
 end
 ```
@@ -50,7 +50,7 @@ end
 **Connected to a signal.** `activate`, `fullscreen`, `maximize`, `minimize`, `close`, and the `layer` trio are registered as signal listeners at boot. Assigning the table field does not touch the listener that is already on the bus, so swap it there:
 
 ```lua
-client.off("request::fullscreen", some.defaults.fullscreen)
+client.off("request::fullscreen", kiln.defaults.fullscreen)
 client.on("request::fullscreen", my_fullscreen)
 ```
 
@@ -74,7 +74,7 @@ local function shares_tag(a, b)
 	return false
 end
 
-some.defaults.successor = function(gone)
+kiln.defaults.successor = function(gone)
 	local s = gone.screen
 	if s == nil then
 		return nil
@@ -97,10 +97,10 @@ end
 
 ## 4. Worked example: strict focus stealing
 
-The stock `activate` marks non-user-initiated requests urgent. To deny background apps any effect at all, honoring only requests backed by a real activation token (for example a window you launched with `some.spawn_with_token`):
+The stock `activate` marks non-user-initiated requests urgent. To deny background apps any effect at all, honoring only requests backed by a real activation token (for example a window you launched with `kiln.spawn_with_token`):
 
 ```lua
-client.off("request::activate", some.defaults.activate)
+client.off("request::activate", kiln.defaults.activate)
 client.on("request::activate", function(c, ctx)
 	if ctx.valid then
 		c:focus()
@@ -116,7 +116,7 @@ end)
 Some apps insist on fullscreening themselves (video players on double-click). This replacement tells the client it is fullscreen, so it hides its own chrome and plays full-surface, but keeps it exactly where the layout put it:
 
 ```lua
-client.off("request::fullscreen", some.defaults.fullscreen)
+client.off("request::fullscreen", kiln.defaults.fullscreen)
 client.on("request::fullscreen", function(c, on)
 	-- Mirror the state to the client so it draws itself fullscreen,
 	-- but never set c.fullscreen: the layout keeps tiling it.

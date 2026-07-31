@@ -56,7 +56,7 @@ The reply is capped at 4096 bytes. For big dumps, return compact strings, or wri
 
 ## 3. One-liners
 
-The seven config globals (`client`, `screen`, `tag`, `layer`, `notification`, `drag`, `core`) are available directly; the `some` module is one `require` away.
+The seven config globals (`client`, `screen`, `tag`, `layer`, `notification`, `drag`, `core`) are available directly; the `kiln` module is one `require` away.
 
 List every client:
 
@@ -77,19 +77,19 @@ scripts/kiln-eval 'screen.focused.tags[2]:view()'
 Tweak the theme live:
 
 ```bash
-scripts/kiln-eval 'require("somewm").theme.accent = "#ff8800" core.dirty()'
+scripts/kiln-eval 'require("kiln").theme.accent = "#ff8800" core.dirty()'
 ```
 
 Raise a notification:
 
 ```bash
-scripts/kiln-eval 'require("somewm").notify { title = "build", message = "done" }'
+scripts/kiln-eval 'require("kiln").notify { title = "build", message = "done" }'
 ```
 
 Reload the config:
 
 ```bash
-scripts/kiln-eval 'require("somewm").reload()'
+scripts/kiln-eval 'require("kiln").reload()'
 ```
 
 Most one-liners like these have a `kiln-client` verb that spares you the
@@ -112,12 +112,12 @@ See [Reload and Debugging](/kiln/guides/reload-and-debugging) for the nested-ins
 
 ## 5. Request-reply only: getting events out
 
-The socket has no subscription mechanism: you cannot ask it to stream events. When something outside kiln needs to hear about changes, invert the flow: a signal listener inside the config pushes out with `some.spawn`:
+The socket has no subscription mechanism: you cannot ask it to stream events. When something outside kiln needs to hear about changes, invert the flow: a signal listener inside the config pushes out with `kiln.spawn`:
 
 ```lua
 -- In your config: tell an external script whenever focus changes.
 client.on("focus", function(c)
-	some.spawn({ "/home/me/bin/on-focus-change", c.app_id or "" })
+	kiln.spawn({ "/home/me/bin/on-focus-change", c.app_id or "" })
 end)
 ```
 
@@ -131,12 +131,12 @@ A layout cycler, bindable in any external tool:
 #!/bin/sh
 # kiln-next-layout: cycle the focused tag's layout
 exec scripts/kiln-eval '
-local some = require("somewm")
+local kiln = require("kiln")
 local t = screen.focused.selected_tag
 if t ~= nil then
-	t.layout = some.layout.next(t.layout)
+	t.layout = kiln.layout.next(t.layout)
 end
-return some.layout.name(t.layout) or "custom"'
+return kiln.layout.name(t.layout) or "custom"'
 ```
 
 A focused-window query for a status bar:

@@ -9,7 +9,7 @@ sidebar_position: 15
 `core` is the raw C surface of the compositor: 57 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, chrome, focus, rules) is built by calling these.
 
 :::note
-`core.*` is the raw C boundary the stdlib is built on. Configs should prefer the object model (`client`, `tag`, `screen`, `layer`, `notification`) and `some.*`, but everything here is reachable from config code and over IPC.
+`core.*` is the raw C boundary the stdlib is built on. Configs should prefer the object model (`client`, `tag`, `screen`, `layer`, `notification`) and `kiln.*`, but everything here is reachable from config code and over IPC.
 :::
 
 ```lua
@@ -22,7 +22,7 @@ print(b.x, b.y, b.width, b.height)
 
 ### Declare
 
-These build the Clay element tree and error outside a frame or lock handler ("declare primitives are only callable inside the frame handler"). Normally only the stdlib's frame handler calls them; `some.ui` nodes compile down to these.
+These build the Clay element tree and error outside a frame or lock handler ("declare primitives are only callable inside the frame handler"). Normally only the stdlib's frame handler calls them; `kiln.ui` nodes compile down to these.
 
 | Function | Description |
 |---|---|

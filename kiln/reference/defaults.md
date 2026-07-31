@@ -1,18 +1,18 @@
 ---
-title: some.defaults
+title: kiln.defaults
 description: The 10 replaceable policy functions that decide focus succession, activation, layer-shell answers, state requests, and the notification display.
 sidebar_position: 11
 ---
 
-# some.defaults
+# kiln.defaults
 
-`some.defaults` holds kiln's policy decisions as 10 plain Lua functions. There is no permissions framework and no hook API: each policy is an ordinary field on the table, and a config changes the policy wholesale by replacing the function.
+`kiln.defaults` holds kiln's policy decisions as 10 plain Lua functions. There is no permissions framework and no hook API: each policy is an ordinary field on the table, and a config changes the policy wholesale by replacing the function.
 
 ```lua
-local some = require("somewm")
+local kiln = require("kiln")
 
 -- Refuse fullscreen requests entirely.
-client.off("request::fullscreen", some.defaults.fullscreen)
+client.off("request::fullscreen", kiln.defaults.fullscreen)
 ```
 
 ## The model
@@ -23,7 +23,7 @@ The `request::*` client signals route to these functions, and the runtime consul
 - **Registered on a bus** (`activate`, `fullscreen`, `maximize`, `minimize`, `close` on client signals; `layer`, `layer_keyboard`, `layer_release` on layer signals): the stock function is subscribed at boot. To replace one, take the stock function off the bus and put yours on:
 
 ```lua
-client.off("request::activate", some.defaults.activate)
+client.off("request::activate", kiln.defaults.activate)
 client.on("request::activate", function(c, ctx)
     c:focus()  -- honor every ask, valid token or not
 end)

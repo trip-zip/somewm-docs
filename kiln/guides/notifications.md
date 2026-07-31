@@ -11,7 +11,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 <YouWillLearn>
 
 - How kiln receives desktop notifications without a separate daemon
-- Raising notifications from your config with `some.notify`
+- Raising notifications from your config with `kiln.notify`
 - Urgency, timeouts, and the theme keys behind them
 - Reacting to notification signals and action buttons
 - Replacing the entire display with your own
@@ -26,10 +26,10 @@ There is nothing to enable. A DBus session must exist (the standard `make run` l
 
 ## 2. Raise your own
 
-`some.notify{}` creates a notification from config code; the same constructor the DBus intake uses:
+`kiln.notify{}` creates a notification from config code; the same constructor the DBus intake uses:
 
 ```lua
-some.notify {
+kiln.notify {
 	title = "Battery",
 	message = "15% remaining",
 	urgency = "critical",
@@ -59,7 +59,7 @@ Critical notifications never expire on their own: dismissing them is the user's 
 When `timeout` is not given, the per-urgency default from the theme applies:
 
 ```lua
-some.theme.notification_timeout = { low = 3, normal = 5, critical = 0 }
+kiln.theme.notification_timeout = { low = 3, normal = 5, critical = 0 }
 ```
 
 The display reads a few more [theme variables](/kiln/reference/theme-variables): `notification_width` (default 320), `notification_offset` (inset from the screen edges, 12), `notification_gap` (between stacked popups, 8), and `notification_radius` (0). Urgency shows as the border color: `theme.urgent` for critical, `theme.muted` otherwise.
@@ -92,7 +92,7 @@ Actions are invoked with `n:invoke(key)`; the stock display wires each action bu
 Do-not-disturb is one flag: `notification.suspended = true` queues arrivals instead of showing them; setting it back to `false` shows the queue in arrival order. `notification.pending` is the read-only queue.
 
 ```lua
-some.key {
+kiln.key {
 	mods = { "mod", "shift" }, key = "d",
 	desc = "toggle do-not-disturb", group = "system",
 	press = function()
@@ -103,20 +103,20 @@ some.key {
 
 ## 5. Replace the display wholesale
 
-The entire presentation is one replaceable function: `some.defaults.notify_display(s)` runs inside every screen's frame and declares whatever the notifications should look like. Assign your own, or set it to `nil` to render nothing at all (signals still fire, so a `nil` display plus your own listeners is a valid setup).
+The entire presentation is one replaceable function: `kiln.defaults.notify_display(s)` runs inside every screen's frame and declares whatever the notifications should look like. Assign your own, or set it to `nil` to render nothing at all (signals still fire, so a `nil` display plus your own listeners is a valid setup).
 
 A minimal custom display, bottom-right instead of top-right:
 
 ```lua
-local some = require("somewm")
-local ui = some.ui
+local kiln = require("kiln")
+local ui = kiln.ui
 
-some.defaults.notify_display = function(s)
+kiln.defaults.notify_display = function(s)
 	local list = notification.all()
 	if #list == 0 then
 		return
 	end
-	local th = some.theme
+	local th = kiln.theme
 	ui.column({
 		id = "notifications",
 		float = {
