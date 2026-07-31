@@ -127,6 +127,42 @@ table tr:last-child td {
   text-decoration: underline;
 }
 
+/* Blog: calmer reading scale. The 17px/1400px settings above suit the
+   docs' sidebar layout but make prose posts feel oversized. Delete this
+   block to fall back to the site-wide scale. */
+.blog-wrapper {
+  --ifm-font-size-base: 16px;
+  --ifm-h1-font-size: 2rem;
+  --ifm-h2-font-size: 1.4rem;
+  --ifm-h3-font-size: 1.15rem;
+  --ifm-line-height-base: 1.65;
+}
+
+.blog-wrapper .container {
+  max-width: 1140px;
+}
+
+/* Cap the text measure on both the list page and the post page */
+.blog-wrapper article .markdown {
+  max-width: 720px;
+}
+
+/* Post titles: h1 on the post page, h2 links on the list page */
+.blog-wrapper article header h1 {
+  font-size: 2rem;
+}
+
+.blog-wrapper article header h2 {
+  font-size: 1.5rem;
+}
+
+/* Quieter byline / date row */
+.blog-wrapper article header .margin-vert--md,
+.blog-wrapper article time {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
 /* Compact footer */
 .footer {
   --ifm-footer-padding-vertical: 1.25rem;

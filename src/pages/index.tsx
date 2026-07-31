@@ -8,11 +8,15 @@ function Hero() {
     <header className={styles.hero}>
       <div className={styles.heroInner}>
         <h1 className={styles.heroTitle}>SomeWM</h1>
-        <p className={styles.heroSubtitle}>A Lua-scriptable Wayland compositor</p>
+        <p className={styles.heroSubtitle}>A Lua framework to build your perfect Wayland desktop.</p>
         <div className={styles.heroScreenshot}>
-          <div className={styles.screenshotPlaceholder}>
-            <span>screenshot coming soon</span>
-          </div>
+          <img
+            className={styles.screenshot}
+            src="/img/screenshot-styled.png"
+            alt="SomeWM desktop with a themed bar, the hotkeys popup, and tiled terminals"
+            width={1600}
+            height={900}
+          />
         </div>
         <div className={styles.heroButtons}>
           <Link className={styles.btnPrimary} to="/docs/getting-started/installation">
@@ -28,26 +32,35 @@ function Hero() {
 }
 
 function Features() {
-  const features = [
+  const features: {title: string; description: React.ReactNode}[] = [
     {
-      title: 'Hot Reload',
+      title: 'Your rc.lua works',
       description:
-        'Edit your Lua config, see changes live. No restart required.',
+        "AwesomeWM's complete Lua API. Existing configs, widgets, and themes carry over.",
     },
     {
-      title: 'Full Lua API',
+      title: 'A full widget toolkit',
       description:
-        "AwesomeWM's complete Lua scripting API, running natively on Wayland.",
+        'wibox layouts and widgets: build bars, popups, and dashboards that react to signals.',
     },
     {
-      title: 'IPC Control',
-      description:
-        'Drive your compositor from scripts and the terminal with somewm-client.',
+      title: 'Restart without losing your session',
+      description: (
+        <>
+          On Wayland, a compositor restart kills your apps.{' '}
+          <code>awesome.restart()</code> hot-reloads the Lua runtime
+          in-process. Clients stay put.
+        </>
+      ),
     },
     {
-      title: 'AwesomeWM Compatible',
-      description:
-        'Bring your existing rc.lua. Targets 100% API compatibility.',
+      title: 'Scriptable from the outside',
+      description: (
+        <>
+          <code>somewm-client</code>: ~45 commands plus event subscription,
+          from your shell or any script.
+        </>
+      ),
     },
   ];
 

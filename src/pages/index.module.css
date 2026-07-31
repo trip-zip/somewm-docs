@@ -26,6 +26,14 @@
   max-width: 640px;
 }
 
+.screenshot {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+}
+
 .screenshotPlaceholder {
   aspect-ratio: 16 / 9;
   border: 1px dashed var(--ifm-color-emphasis-400);
