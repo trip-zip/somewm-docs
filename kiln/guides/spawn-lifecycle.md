@@ -1,7 +1,7 @@
 ---
 title: Spawn Lifecycle
 description: Run apps once per session, focus running instances instead of respawning, and route new windows to the right tag.
-sidebar_position: 15
+sidebar_position: 16
 ---
 
 # Spawn Lifecycle

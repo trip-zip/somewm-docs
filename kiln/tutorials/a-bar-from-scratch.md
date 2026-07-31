@@ -100,6 +100,15 @@ space, pushing everything after it to the right edge.
 - `ui.systray(cfg?)` shows status-notifier tray items; `size` (default 18)
   sets the icon size. Press activates an item, scrolling forwards the wheel.
 
+:::tip Look at what you just built
+Press `mod+shift+i` to open Clay's debug inspector over the running desktop.
+Your bar is in there as a row of nodes, and clicking one shows the box the
+solver gave it: width, height, sizing mode, padding, alignment. This is the
+fastest way to understand `ui.spacer()`, because you can watch it report
+whatever width was left over. See [Inspect the Live Element
+Tree](/kiln/guides/inspector).
+:::
+
 ## 5. Style it
 
 The bar `cfg` takes:

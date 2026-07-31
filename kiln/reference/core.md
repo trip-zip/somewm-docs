@@ -64,7 +64,7 @@ One of each; setting again replaces. The stdlib owns all three, so a config neve
 | `core.replay()` | Re-emit the map fact for every live client. The reload verb: after Lua drops its client model, the compositor is the only one that still knows what is on screen. |
 | `core.set_idle_timeout(ms)` | Arm the idle timer for `ms` of no input (delivers `idle` events); `nil` or 0 disarms. |
 | `core.image_reload(path)` | Drop the cached decode so the next declare re-reads the file. The only image invalidation; marking dirty afterwards is the caller's job. |
-| `core.inspector(screen)` | Whether the Clay debug inspector is up on that screen. |
+| `core.inspector(screen)` | Whether the Clay debug inspector is up on that screen. `screen` is a name, as everywhere in `core`; `kiln.inspector` is the one that takes a screen object. |
 | `core.inspector(screen, on)` | Show or hide it. Returns the state after the call, read back from Clay: the panel can close itself from its own header button, so the answer is never a stored copy. Desktop screens only; the lockscreen cannot be inspected. |
 | `core.inspector(screen, cfg)` | Same, plus styling. `cfg` takes an optional `enabled`, a `width` in px (default 400), and the colours `color1`, `color2`, `color3`, `color4`, `selected` and `highlight`, each `{ r, g, b, a }` 0-255. Clay holds its debug style in process-wide globals, so the style keys apply to every screen regardless of the one named; every screen showing the panel is marked dirty. |
 | `core.inspector_scroll(screen, dx, dy)` | Feed the panel a wheel delta for its next solve. Routed by Lua only when the hits under the cursor name the panel, so it never has to decide whether a scroll was meant for the inspector. |

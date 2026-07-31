@@ -1,7 +1,7 @@
 ---
 title: Kiln vs SomeWM
 description: How kiln relates to SomeWM and AwesomeWM, what carries over conceptually, and when to choose which.
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 # Kiln vs SomeWM
@@ -23,6 +23,8 @@ What maps, conceptually rather than literally:
 - **Widgets** are declarations, not objects. Where AwesomeWM composes wibox widget instances with layouts and containers, kiln composes function calls that declare boxes, rows, text, and images each frame. There is no widget lifecycle to manage. See the [widgets tutorial](/kiln/tutorials/widgets).
 - **Rules, menus, notifications, prompts, placement helpers, the systray, the taglist and tasklist**: all present, all with kiln spellings. Most daily-driver capabilities have a direct kiln expression, and the guides cover them one by one.
 
+What has no AwesomeWM counterpart at all: **a live layout inspector**. Because one solver owns the whole screen, kiln can embed Clay's own debug panel and draw it over the running desktop, giving you the element tree of the last solve with the computed box, sizing mode, padding and alignment for every row, and hover-to-highlight back into the real scene. Debugging a wibox layout means print statements and inference; debugging a kiln layout means opening the tree and reading it. See [Inspect the Live Element Tree](/kiln/guides/inspector).
+
 What does not map at all: the imperative widget machinery (`wibox`, drawins, the widget hierarchy) and the cairo draw path. kiln draws rectangles, borders, text, and images through Clay; there is no canvas to paint on. Code built on either has no kiln translation. The full list of what kiln's drawing model excludes is in [Limitations](/kiln/concepts/limitations).
 
 :::warning
@@ -33,13 +35,14 @@ The close verbs invert between the systems. In AwesomeWM and SomeWM, `c:kill()` 
 
 Choose **SomeWM** if you have an AwesomeWM configuration or depend on its ecosystem: your `rc.lua`, your themes, and the widget libraries you use are the investment, and SomeWM is built to honor it on Wayland.
 
-Choose **kiln** if the declarative single-tree model is the draw: one tree for windows and chrome, layouts without arithmetic, widgets without lifecycle, policy as replaceable Lua functions. You will write your configuration fresh, and it will be shorter than the one you left, but it is a rewrite, not a port.
+Choose **kiln** if the declarative single-tree model is the draw: one tree for windows and chrome, layouts without arithmetic, widgets without lifecycle, policy as replaceable Lua functions, and a live inspector over the whole thing. You will write your configuration fresh, and it will be shorter than the one you left, but it is a rewrite, not a port.
 
 kiln is also younger and blunter about it: a proof of concept with an unstable API. SomeWM is the conservative choice; kiln is the experiment. Both are honest about which they are.
 
 ## See also
 
 - [The Clay Thesis](/kiln/concepts/the-clay-thesis)
+- [Inspect the Live Element Tree](/kiln/guides/inspector)
 - [Limitations](/kiln/concepts/limitations)
 - [Anatomy of rc.lua](/kiln/getting-started/rc-anatomy)
 - [Keybindings tutorial](/kiln/tutorials/keybindings)

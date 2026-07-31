@@ -1,7 +1,7 @@
 ---
 title: Hotkeys Popup
 description: Use the built-in keybinding cheat sheet, and build your own replacement from the key registry when the stock one is not enough.
-sidebar_position: 12
+sidebar_position: 13
 ---
 
 # Hotkeys Popup

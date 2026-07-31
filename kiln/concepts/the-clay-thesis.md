@@ -53,7 +53,7 @@ Those badges are themselves Clay elements, floated out of flow, which is why nam
 
 - [How Clay's UI Layout Algorithm Works](https://www.youtube.com/watch?v=by9lQvpvMIc). Nic Barker, Clay's author, walking through the solver itself. Start here if you want the algorithm rather than the API.
 - [The Clay README](https://github.com/nicbarker/clay#readme) is the documentation: the concepts, the full API, and every element macro.
-- [nicbarker.com/clay](https://www.nicbarker.com/clay) is Clay laying out its own website, compiled to WebAssembly. The debug panel there is Clay's built-in inspector, the same one kiln embeds (see [Reload and Debugging](/kiln/guides/reload-and-debugging)).
+- [nicbarker.com/clay](https://www.nicbarker.com/clay) is Clay laying out its own website, compiled to WebAssembly. The debug panel there is Clay's built-in inspector, the same one kiln embeds (see [Inspect the Live Element Tree](/kiln/guides/inspector)).
 
 kiln vendors Clay at `third_party/clay.h`, currently **v0.14**. Upstream has moved on, so read the above for the model and this site for what kiln actually exposes.
 
@@ -68,7 +68,7 @@ Every screen runs the same cycle:
 
 The declaration is cheap and rebuilt from scratch; the reconcile is incremental. Nothing happens between dirty frames. See [Frames and Dirty State](/kiln/concepts/frames-and-dirty) for when a frame is produced.
 
-The bar is the easiest place to see it. Every cell is one of the constructors above:
+The bar is the easiest place to see it. This is the bar from [the landing page](/kiln), written in terms of the constructors each cell reaches for rather than the local helpers the default config wraps them in:
 
 ![The kiln bar with each cell outlined and labelled with the constructor that declared it](/img/kiln/clay/03-bar.png)
 
@@ -114,6 +114,7 @@ Every figure above is a screenshot of a real headless kiln, rendered by `npm run
 
 ## See also
 
+- [Binding Clay](/kiln/concepts/binding-clay)
 - [Frames and Dirty State](/kiln/concepts/frames-and-dirty)
 - [Nodes, Floats, and Bands](/kiln/concepts/nodes-floats-and-bands)
 - [The C/Lua Boundary](/kiln/concepts/c-lua-boundary)

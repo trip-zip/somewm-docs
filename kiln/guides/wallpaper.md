@@ -1,7 +1,7 @@
 ---
 title: Wallpaper
 description: Set a wallpaper with a single image node in the background band, per screen or per tag, with a solid color fallback.
-sidebar_position: 10
+sidebar_position: 11
 ---
 
 # Wallpaper

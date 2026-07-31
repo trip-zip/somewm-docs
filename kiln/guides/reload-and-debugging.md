@@ -1,12 +1,12 @@
 ---
 title: Reload and Debugging
-description: The edit-reload loop, what survives kiln.reload, catching config errors, reading logs, inspecting the live element tree, and testing in a nested instance.
-sidebar_position: 18
+description: The edit-reload loop, what survives kiln.reload, catching config errors, reading logs, and testing changes in a nested instance.
+sidebar_position: 19
 ---
 
 # Reload and Debugging
 
-kiln reloads your config into the running compositor, so the edit loop never costs you a session. When something does go wrong, the config error surfaces on a signal, the logs are plain text, and the live element tree is readable from a built-in inspector.
+kiln reloads your config into the running compositor, so the edit loop never costs you a session. When something does go wrong, the config error surfaces on a signal and the logs are plain text.
 
 ## 1. The edit-reload loop
 
@@ -78,71 +78,13 @@ Tailing the log while you reload is the fastest debugging loop there is:
 tail -f ~/.cache/kiln.log
 ```
 
-## 5. Inspect the live element tree
+## 5. See what your config actually built
 
-Errors and logs tell you what broke. The inspector tells you what your config actually built: kiln embeds Clay's own debug panel and draws it over the live desktop.
+Errors and logs tell you what broke. Clay's debug inspector tells you what your config built: the live element tree, one row per element, with the solved box for each. Toggle it with `mod+shift+i`.
 
-kiln's shipped config binds it to `mod+shift+i`. In your own config:
+It is the fastest way to answer "why is this the wrong size", so it has its own page: [Inspect the Live Element Tree](/kiln/guides/inspector).
 
-```lua
-kiln.key {
-	mods = { "mod", "shift" }, key = "i",
-	desc = "toggle clay inspector", group = "system",
-	press = function() kiln.inspector() end,
-}
-```
-
-or over [IPC](/kiln/guides/ipc-and-scripting), which is the one to reach for when a keybinding is the thing you are debugging:
-
-```bash
-scripts/kiln-eval 'require("kiln").inspector()'
-```
-
-The panel takes 400px off the right of the focused screen, and the desktop is not covered: the root narrows and everything reflows into what is left, so bars and tiled clients move while it is open and return when you close it. That is worth knowing before you use it to debug a layout, because the layout you are looking at is being solved 400px narrower than usual.
-
-What is in there:
-
-- The element tree of the last solve, one row per element, with a colour chip for each config an element carries and a quoted preview of any text.
-- Hover a row and that element is highlighted in the real scene, so you can go from a row to the box it drew.
-- Click a row for its full config in the bottom pane: bounding box, sizing modes with min and max, padding, gap, alignment, colours, corner radius, aspect, border, float, clip.
-- Click the `[-]` beside a row to collapse its subtree.
-- Wheel over either pane to scroll it. Clicks and wheels over the panel never reach your clients or your root bindings, so you cannot misfire a binding into the desktop while reading it.
-- With nothing selected, the bottom pane lists Clay's own warnings for the frame instead.
-
-Close it with the same key or the `x` in its header. Colours and panel width are adjustable through `core.inspector`; see the [core reference](/kiln/reference/core).
-
-## 6. Name the containers you expect to debug
-
-Some rows in the tree have no name. Those are elements declared without an `id`: `ui.box`, `ui.row` and `ui.column` do not require one, kiln does not invent one, and so there is no name to print. A blank row is still fully inspectable, its config reads normally in the detail pane, it just cannot be identified at a glance.
-
-Giving an element an id is a pure annotation. It changes nothing about layout or behaviour:
-
-```lua
-ui.column({ id = "statusbar", h = 28, color = theme.bg }, function()
-	ui.row({ id = "statusbar.left", gap = 8 }, function()
-		-- ...
-	end)
-end)
-```
-
-Do it for anything you expect to come back to, for two reasons:
-
-- The row is labelled in the tree, and that same name is what [`core.hits`](/kiln/reference/core) reports under a point and what `core.box("statusbar")` reads the solved box back by.
-- The identity holds still. An unnamed element is identified by its position among its siblings, so inserting a sibling ahead of it makes it a different element: its collapsed state resets, and a selection lands on a different row. Nothing warns you, and it happens exactly when the tree is most interesting, which is when a client maps or a widget appears conditionally.
-
-Repeated elements need the table form, with a number as the second field:
-
-```lua
-for i, c in ipairs(t.clients) do
-	ui.box({ id = { "task", i } }, function()
-		-- ...
-	end)
-end
-```
-
-Two elements sharing an id in one frame is fatal in Clay, so a bare `id = "task"` inside a loop takes the session down. A non-numeric second field is caught earlier and reported as a config error with a stack trace.
-
-## 7. Test changes in a nested instance
+## 6. Test changes in a nested instance
 
 Editing the config of the session you are sitting in has an obvious failure mode. The safe loop is a second kiln nested as a window inside your current session:
 
@@ -162,6 +104,7 @@ For fully headless (invisible) instances for automated tests, see [Testing Headl
 
 ## See also
 
+- [Inspect the Live Element Tree](/kiln/guides/inspector)
 - [IPC and Scripting](/kiln/guides/ipc-and-scripting)
 - [Testing Headless](/kiln/guides/testing-headless)
 - [Tag Persistence](/kiln/guides/tag-persistence)

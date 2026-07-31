@@ -1,7 +1,7 @@
 ---
 title: Menus
 description: Build popup menus with kiln.menu, nest submenus, attach them to bar elements, and open a root menu on right-click.
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 # Menus

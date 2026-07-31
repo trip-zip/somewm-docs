@@ -1,7 +1,7 @@
 ---
 title: Replacing Default Policies
 description: Swap any of kiln's ten stock behaviors, from focus succession to fullscreen handling, with your own function.
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 # Replacing Default Policies

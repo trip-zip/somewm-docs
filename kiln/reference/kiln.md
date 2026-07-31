@@ -59,7 +59,7 @@ See [Spawn lifecycle](/kiln/guides/spawn-lifecycle) for how pipes and watches be
 | `kiln.dirty(screen_name?)` | Force a re-declare of the named screen, or of every screen when called with no argument. |
 | `kiln.image_reload(path)` | Drop the cached decode of an image file, so the next frame re-reads it from disk. |
 | `kiln.reload()` | Re-run the config file in the live process. |
-| `kiln.inspector(s?)` | Toggle the Clay debug inspector on a screen; default the focused screen. See [Reload and debugging](/kiln/guides/reload-and-debugging). |
+| `kiln.inspector(s?)` | Toggle the Clay debug inspector on a screen; default the focused screen. See [Inspect the Live Element Tree](/kiln/guides/inspector). |
 
 :::note
 `kiln.reload()` re-runs your `rc.lua`, not the library: it does NOT re-require stdlib modules, so edits to kiln's own Lua need a restart. A reload drops everything the config built (bindings, rules, listeners, grabs, watches) and keeps everything the compositor owns (screens, layer surfaces, notifications, running children, input settings). Clients survive as clients but are re-tagged by the new config's rules, and a client minimized from the config side comes back unminimized. A broken config leaves a live compositor; the error surfaces through `kiln.on("error")`.

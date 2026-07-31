@@ -29,6 +29,7 @@ const sidebars: SidebarsConfig = {
       label: 'How-To Guides',
       items: [
         'guides/client-rules',
+        'guides/inspector',
         'guides/custom-layouts',
         'guides/floating-and-placement',
         'guides/menus',
@@ -54,6 +55,7 @@ const sidebars: SidebarsConfig = {
       label: 'Concepts',
       items: [
         'concepts/the-clay-thesis',
+        'concepts/binding-clay',
         'concepts/frames-and-dirty',
         'concepts/object-model',
         'concepts/nodes-floats-and-bands',

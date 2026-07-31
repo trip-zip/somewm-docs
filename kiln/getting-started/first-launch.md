@@ -82,7 +82,7 @@ which is generated from the live bindings and always complete. The essentials:
 | `mod+o` | send the focused client to the next screen |
 | `mod+shift+Escape` | lock the session |
 | `mod+ctrl+r` | reload the config |
-| `mod+shift+i` | toggle the Clay inspector |
+| `mod+shift+i` | toggle the [Clay inspector](/kiln/guides/inspector) |
 | `mod+shift+q` | quit kiln |
 
 The config also binds the media keys (volume and microphone via `wpctl`,

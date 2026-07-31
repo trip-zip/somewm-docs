@@ -1,7 +1,7 @@
 ---
 title: Custom Layouts
 description: Write your own tiling layout as a plain Lua function over ui containers, and register it on a tag.
-sidebar_position: 2
+sidebar_position: 3
 ---
 
 # Custom Layouts

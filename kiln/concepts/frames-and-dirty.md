@@ -1,7 +1,7 @@
 ---
 title: Frames and Dirty State
 description: When kiln redraws, which property writes trigger a frame, and how animation rides the frame clock.
-sidebar_position: 2
+sidebar_position: 3
 ---
 
 # Frames and Dirty State

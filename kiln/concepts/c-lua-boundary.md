@@ -1,7 +1,7 @@
 ---
 title: The C/Lua Boundary
 description: C owns protocol facts and pixels; Lua owns every policy decision. Where the line sits and why.
-sidebar_position: 5
+sidebar_position: 6
 ---
 
 # The C/Lua Boundary

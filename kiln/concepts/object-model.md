@@ -1,7 +1,7 @@
 ---
 title: The Object Model
 description: One class mixin behind every kiln object, with open properties and a signal on every write.
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # The Object Model

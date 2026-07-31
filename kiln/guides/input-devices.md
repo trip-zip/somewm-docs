@@ -1,7 +1,7 @@
 ---
 title: Input Devices
 description: Configure keyboard layouts, key repeat, and pointer behavior through the kiln.input properties.
-sidebar_position: 8
+sidebar_position: 9
 ---
 
 # Input Devices

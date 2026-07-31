@@ -1,7 +1,7 @@
 ---
 title: Limitations
 description: What kiln cannot do today, what it will not do by design, and the workarounds that exist.
-sidebar_position: 7
+sidebar_position: 8
 ---
 
 # Limitations

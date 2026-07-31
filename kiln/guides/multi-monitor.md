@@ -1,7 +1,7 @@
 ---
 title: Multi-Monitor
 description: React to outputs coming and going, keep per-screen tags and bars, move clients across screens, and configure modes and scale.
-sidebar_position: 7
+sidebar_position: 8
 ---
 
 # Multi-Monitor

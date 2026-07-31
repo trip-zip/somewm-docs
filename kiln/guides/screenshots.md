@@ -1,7 +1,7 @@
 ---
 title: Screenshots
 description: Capture full outputs with core.screenshot and regions with grim and slurp, all from keybindings.
-sidebar_position: 11
+sidebar_position: 12
 ---
 
 # Screenshots

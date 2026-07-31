@@ -1,7 +1,7 @@
 ---
 title: Data Widgets
 description: Progress bars, history graphs, sliders, and toggles built from plain boxes and fed by kiln.spawn.watch.
-sidebar_position: 14
+sidebar_position: 15
 ---
 
 # Data Widgets

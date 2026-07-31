@@ -1,7 +1,7 @@
 ---
 title: Lockscreen and Idle
 description: Lock the session with kiln's native PAM-backed lockscreen, auto-lock on idle, and respect idle inhibitors.
-sidebar_position: 9
+sidebar_position: 10
 ---
 
 # Lockscreen and Idle

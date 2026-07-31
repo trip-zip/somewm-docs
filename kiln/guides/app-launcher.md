@@ -1,7 +1,7 @@
 ---
 title: App Launcher
 description: Build a .desktop application launcher on the stdlib menu, with icons and activation tokens.
-sidebar_position: 13
+sidebar_position: 14
 ---
 
 # App Launcher

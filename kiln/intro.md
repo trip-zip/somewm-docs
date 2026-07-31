@@ -7,7 +7,7 @@ slug: /
 
 # Kiln
 
-A stripped down Wayland compositor where the entire screen is one [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, tags, menus, and notifications are all nodes in it.
+A stripped down Wayland compositor where the entire screen is one [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, tags, menus, and notifications are all nodes in it. There is no window layer and a separate widget layer, no chrome pass and a separate client pass: one tree, solved as a whole, every frame that needs drawing.
 
 ![The default kiln desktop: two terminals tiled under the bar](/img/kiln/desktop.png)
 
@@ -17,13 +17,15 @@ This is the bar from the default `rc.lua`, unedited:
 
 ```lua
 ui.bar(s, { edge = "top", color = th.bg }, function()
+    backdrop(s)
+    launcher_glyph(s)
     taglist(s)
     tasklist(s)
     ui.spacer()
     ui.systray()
     layoutbox(s)
-
-    -- floated to the parent's center, with a tooltip that is just a handler
+    -- The clock, floated center. A tooltip is the on_hover handler
+    -- ui.tooltip makes, nothing else.
     ui.box({
         id = "clock",
         float = { to = "parent", anchor = "center" },
@@ -37,6 +39,7 @@ What to notice:
 
 - **`ui.spacer()` takes the leftover room** because Clay's solver gives it the leftover room, not because a bar widget has a spacer feature.
 - **A bar is a box with children.** So is a menu, a notification, and a tiled window's frame. There is one set of constructors, used everywhere.
+- **`backdrop(s)` is the wallpaper**, declared here and floated to the root's background band. It reads oddly until you accept the premise: there is one tree, so the desktop background is declared in it like everything else.
 - **Nothing here is imperative.** No draw callback, no widget object to construct and wire up. You declare what the screen should look like and the solver does the rest.
 
 ## It really is a Clay tree
@@ -45,7 +48,13 @@ Clay's own debug inspector works on the live desktop. Not a reimplementation and
 
 ![Clay's debug inspector open over the kiln desktop](/img/kiln/inspector.png)
 
-Why one tree owns the whole screen, and what that deletes: [The Clay Thesis](/kiln/concepts/the-clay-thesis).
+If you already know Clay, the parts worth knowing up front:
+
+- **Clay v0.14, vendored unpatched.** `third_party/clay.h` is byte for byte upstream. There is no fork.
+- **One `Clay_Context` per output**, declared from Lua over the LuaJIT FFI against a single reused `Clay_ElementDeclaration`. Nothing is allocated per element per frame.
+- **A client window is a `CUSTOM` leaf** whose `customData` is the client handle. Clay is solving layout for real application windows, and the renderer places each client's buffer tree at the box it solved.
+
+Why one tree owns the whole screen, and what that deletes: [The Clay Thesis](/kiln/concepts/the-clay-thesis). How it is bound, down to the render command loop: [Binding Clay](/kiln/concepts/binding-clay).
 
 ## Start here
 

@@ -1,7 +1,7 @@
 ---
 title: Notifications
 description: Receive desktop notifications, raise your own, tune timeouts and urgency, and replace the whole display.
-sidebar_position: 5
+sidebar_position: 6
 ---
 
 # Notifications

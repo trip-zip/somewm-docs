@@ -1,7 +1,7 @@
 ---
 title: IPC and Scripting
 description: "Drive a running kiln from the shell: the socket protocol, kiln-eval one-liners, and scripting patterns."
-sidebar_position: 17
+sidebar_position: 18
 ---
 
 # IPC and Scripting

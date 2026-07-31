@@ -1,7 +1,7 @@
 ---
 title: Testing Headless
 description: Run kiln invisibly for config testing and CI, drive it over IPC, and verify results with screenshots.
-sidebar_position: 19
+sidebar_position: 20
 ---
 
 # Testing Headless

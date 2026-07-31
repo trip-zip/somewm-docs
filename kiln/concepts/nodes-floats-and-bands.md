@@ -1,7 +1,7 @@
 ---
 title: Nodes, Floats, and Bands
 description: How stacking order works in kiln's one tree, and how floats, layer-shell surfaces, and hidden clients fit in.
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 # Nodes, Floats, and Bands

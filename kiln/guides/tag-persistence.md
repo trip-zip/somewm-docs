@@ -1,7 +1,7 @@
 ---
 title: Tag Persistence
 description: Remember each monitor's tag arrangement across unplug and replug, and put clients back where they lived.
-sidebar_position: 16
+sidebar_position: 17
 ---
 
 # Tag Persistence
