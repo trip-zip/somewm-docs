@@ -76,7 +76,7 @@ The bar is the easiest place to see it. This is the bar from [the landing page](
 ui.bar(s, { edge = "top" }, function()
   ui.row({ w = "33.33%", h = "grow", gap = 6,
       clip = { horizontal = true }, align = { y = "center" } }, function()
-    ui.box({ id = "launcher", w = 28, h = 28 }, glyph)
+    ui.box({ id = "launcher", w = 28, h = 28 }, launcher_glyph)
     kiln.widgets.taglist(s)
     kiln.widgets.tasklist(s)
   end)
@@ -84,7 +84,7 @@ ui.bar(s, { edge = "top" }, function()
     ui.box({ id = "clock", pad = { x = 8 } }, kiln.widgets.clock)
   end)
   ui.row({ w = "33.33%", h = "grow", gap = 6,
-      align = { x = "right", y = "center" } }, function()
+      clip = { horizontal = true }, align = { x = "right", y = "center" } }, function()
     kiln.widgets.systray()
     kiln.widgets.layoutbox(s)
   end)
@@ -122,11 +122,11 @@ Layouts are ordinary Lua functions that declare nodes, so writing your own is sh
 
 **There is no separate widget toolkit.** A widget is not an object with a draw method. It is a function that declares nodes, using the constructors the layouts and the titlebar already use. The stock ones live on [`kiln.widgets`](/kiln/reference/widgets); building your own is the [widgets tutorial](/kiln/tutorials/widgets).
 
-## The experiment, honestly
+## Two retained trees
 
-wlroots already ships a retained scene graph, so kiln deliberately keeps two retained trees: Clay's and the scene's. The bet is that Clay earns its place by owning layout and hit testing so nothing else has to. kiln is the working test of that bet: a proof of concept with an unstable API, not a finished product. What the model deliberately excludes is documented in [Limitations](/kiln/concepts/limitations), and how the work splits between C and Lua is in [The C/Lua Boundary](/kiln/concepts/c-lua-boundary).
+wlroots already ships a retained scene graph, so kiln keeps two: Clay's tree and the scene's. That redundancy is the price of the thesis, and the bet is that Clay pays for it by owning layout and hit testing so nothing else has to. What the model deliberately excludes is documented in [Limitations](/kiln/concepts/limitations), and how the work splits between C and Lua is in [The C/Lua Boundary](/kiln/concepts/c-lua-boundary).
 
-Every figure above is a screenshot of a real headless kiln, rendered by `npm run generate:figures`.
+*Every figure on this page is a screenshot of a real headless kiln, rendered by `npm run generate:figures`.*
 
 ## See also
 
