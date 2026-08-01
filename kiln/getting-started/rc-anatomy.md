@@ -135,20 +135,30 @@ screen.on("added", function(s)
 	tag.new { name = "media", screen = s, layout = kiln.layout.tile }
 	s.tags[1]:view()
 
-	ui.bar(s, { edge = "top", color = th.bg }, function()
+	ui.bar(s, { edge = "top", dir = "row", h = th.bar_height,
+		color = th.bg, pad = { x = 8 } }, function()
 		backdrop(s)          -- wallpaper, floated to the background band
-		launcher_glyph(s)    -- the menu button (SUBSTITUTION 2)
-		taglist(s)
-		tasklist(s)
-		ui.spacer()
-		ui.systray()
-		layoutbox(s)
-		ui.box({
-			id = "clock",
-			float = { to = "parent", anchor = "center" },
-			color = th.bg2, radius = 4, pad = { x = 8 }, align = "center",
-			on_hover = ui.tooltip(function() return os.date("%A %d %B %Y") end),
-		}, ui.clock)
+		ui.row({ w = "33.33%", h = "grow", gap = 6,
+				clip = { horizontal = true },
+				align = { y = "center" } }, function()
+			launcher_glyph(s)    -- the menu button (SUBSTITUTION 2)
+			taglist(s)
+			tasklist(s)
+		end)
+		ui.row({ w = "33.33%", h = "grow", align = "center" }, function()
+			ui.box({ id = "clock", color = th.bg2, radius = 4,
+				pad = { x = 8 },
+				on_hover = ui.tooltip(function()
+					return os.date("%A %d %B %Y")
+				end),
+			}, widgets.clock)
+		end)
+		ui.row({ w = "33.33%", h = "grow", gap = 6,
+				clip = { horizontal = true },
+				align = { x = "right", y = "center" } }, function()
+			widgets.systray()
+			layoutbox(s)
+		end)
 		declare_launcher(s)
 	end)
 end)
@@ -158,14 +168,22 @@ end)
 plugged in, so tags and bars exist on every screen without special-casing
 multi-monitor. `tag.new` creates a tag with a layout; `t:view()` selects it.
 
-`ui.bar(s, cfg, fn)` registers a bar. The `fn` is a declare function: it runs
-again on every dirty frame and simply states what the bar contains right now.
-The local `taglist`, `tasklist`, and `layoutbox` are thin wrappers over the
-stock cells that pass an `on = { press = ..., scroll = ... }` table, adding
-gestures the stdlib does not wire by default (mod+click to move a client to
-a tag, wheel to walk tags). A handler that returns a truthy value preempts
-the stock behavior; returning nil declines to it. The clock is a plain box
-floated to the bar's center with a tooltip. The full build-up is the
+`ui.bar(s, cfg, fn)` registers a bar. The cfg is ordinary element cfg plus
+`edge`; the `fn` is a declare function: it runs again on every dirty frame
+and simply states what the bar contains right now. Its body is three
+percent-third regions in a row. The thirds are the centering mechanism:
+Clay sizes a percent child unconditionally, so the middle region's center
+is the bar's center however wide the tasklist gets, and the side regions
+clip so an overfull tasklist truncates at its third instead of pushing
+into the middle. The clock is a plain box in the middle region with a
+tooltip; nothing floats and nothing computes a position.
+
+The local `taglist`, `tasklist`, and `layoutbox` are thin wrappers over
+the [`kiln.widgets`](/kiln/reference/widgets) shelf that pass an
+`on = { press = ..., scroll = ... }` table, adding gestures the stdlib
+does not wire by default (mod+click to move a client to a tag, wheel to
+walk tags). A handler that returns a truthy value preempts the stock
+behavior; returning nil declines to it. The full build-up is the
 [bar tutorial](/kiln/tutorials/a-bar-from-scratch).
 
 ## Bindings

@@ -71,9 +71,15 @@ kh_halt() {
 # quietly use whatever config the operator has installed.
 kh_boot() {
 	rm -f "$KH_SOCK"
-	WLR_BACKENDS=headless WLR_LIBINPUT_NO_DEVICES=1 \
-		XDG_CONFIG_HOME="$KH_WORK/cfg" KILN_SOCK="$KH_SOCK" KILN_RC="$1" \
-		"$KH_BIN" >"$KH_LOG" 2>&1 &
+	case "$1" in /*) kh_rc="$1" ;; *) kh_rc="$PWD/$1" ;; esac
+	# Launched from the kiln repo, because kiln resolves its Lua stdlib
+	# through cwd-relative lua/?.lua entries before the installed
+	# KILN_DATADIR copy. Booted anywhere else, an rc outside the repo runs
+	# whatever stdlib was last installed, and these docs would verify
+	# against that instead of current main.
+	( cd "$KILN_REPO" && WLR_BACKENDS=headless WLR_LIBINPUT_NO_DEVICES=1 \
+		XDG_CONFIG_HOME="$KH_WORK/cfg" KILN_SOCK="$KH_SOCK" KILN_RC="$kh_rc" \
+		exec "$KH_BIN" ) >"$KH_LOG" 2>&1 &
 	KH_PID=$!
 	n=0
 	while [ ! -S "$KH_SOCK" ]; do

@@ -62,11 +62,11 @@ kiln.key {
 -- In your bar function:
 screen.on("added", function(s)
 	kiln.ui.bar(s, { edge = "top" }, function()
-		kiln.ui.taglist(s)
+		kiln.widgets.taglist(s)
 		kiln.ui.spacer()
 		kiln.ui.text((kiln.input.keymap and kiln.input.keymap.layout or "us"),
 			{ size = 12, color = kiln.theme.muted })
-		kiln.ui.clock()
+		kiln.widgets.clock()
 	end)
 end)
 ```

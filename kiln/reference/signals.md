@@ -1,7 +1,7 @@
 ---
 title: Signal Index
 description: Every signal in kiln, per object class, with payloads.
-sidebar_position: 14
+sidebar_position: 15
 ---
 
 # Signal Index

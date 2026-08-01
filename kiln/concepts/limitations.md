@@ -43,7 +43,7 @@ What does not:
 
 ## The AwesomeWM ecosystem
 
-AwesomeWM widget libraries (vicious, lain, bling, awesome-wm-widgets) are wibox and cairo code, and cannot be ported: the machinery they are written against does not exist in kiln, by design. Their outcomes are often reachable anyway, since most data widgets reduce to a poll plus a declaration; see [Data widgets](/kiln/guides/data-widgets) for the kiln way to build them. But the libraries themselves will never load, and no compatibility layer is planned.
+AwesomeWM widget libraries (vicious, lain, bling, awesome-wm-widgets) are wibox and cairo code, and cannot be ported: the machinery they are written against does not exist in kiln, by design. Their outcomes are often reachable anyway: the standard forms (progress bars, sliders, toggles) ship on [`kiln.widgets`](/kiln/reference/widgets), and the rest usually reduce to a poll plus a declaration; see [Data widgets](/kiln/guides/data-widgets) for both paths. But the libraries themselves will never load, and no compatibility layer is planned.
 
 ## See also
 

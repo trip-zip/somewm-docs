@@ -59,7 +59,9 @@ One subtlety: values the stdlib reads at declare time follow later changes
 automatically, but values you copy into a cfg table are fixed at that call.
 In `ui.bar(s, { color = th.bg }, ...)` the bar captured the current `th.bg`;
 change the theme later and that bar keeps its captured color until the config
-reloads. Omit `color` from the cfg and the bar reads `theme.bg` live instead.
+reloads. Omit `color` from the cfg and the bar reads `theme.bg` live instead:
+a bar's defaults are filled per frame, which is a guarantee, not an accident.
+See [the bar defaults](/kiln/reference/ui#bars).
 
 ## 4. Per-tag gap
 

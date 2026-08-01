@@ -147,10 +147,10 @@ screen.on("added", function(s)
   end
 
   ui.bar(s, { edge = "top", color = th.bg }, function()
-    ui.taglist(s)
-    ui.tasklist(s)
+    kiln.widgets.taglist(s)
+    kiln.widgets.tasklist(s)
     ui.spacer()
-    ui.clock()
+    kiln.widgets.clock()
   end)
 end)
 ```

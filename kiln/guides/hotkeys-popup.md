@@ -156,7 +156,7 @@ registry so the sheet lists its own summon key:
 
 ```lua
 ui.bar(s, { edge = "top", color = th.bg }, function()
-  -- taglist, tasklist, clock ...
+  -- kiln.widgets.taglist, tasklist, clock ...
   declare_hotkeys(s)
 end)
 

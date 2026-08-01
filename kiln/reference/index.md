@@ -35,7 +35,8 @@ The `kiln` stdlib: everything a config composes with.
 | Module | Description |
 |--------|-------------|
 | [kiln](kiln.md) | The top-level module: spawn, rules, key, button, and what it re-exports. |
-| [kiln.ui](ui.md) | The declarative UI layer: every constructor, the cfg contract, floats, bands, and menus. |
+| [kiln.ui](ui.md) | The declarative UI layer: every constructor, the cfg contract, floats, bands, and menus. Maps cfg onto Clay, adds no policy. |
+| [kiln.widgets](widgets.md) | The widget shelf: taglist, tasklist, clock, titlebar and their kin. Policy a config could have written in `ui.*`, written once. |
 | [kiln.layout](layout.md) | The layout contract, the nine built-in families, and the tag properties they read. |
 | [Keys, Buttons, and Rules](keybindings-and-rules.md) | Binding keys and pointer buttons, and matching clients with rules. |
 | [kiln.defaults](defaults.md) | The replaceable default policies the runtime installs. |

@@ -40,7 +40,7 @@ The image is decoded once and cached by its path. Declaring it every frame costs
 ## The default config's version
 
 kiln's bundled config declares a `backdrop` box at the top of its bar
-function, before the bar's own widgets. The path comes from the
+function, before the bar's three regions. The path comes from the
 `KILN_WALLPAPER` environment variable when set; otherwise the config
 *generates* a wallpaper (a gradient in the theme's colors with the kiln mark,
 an SVG rendered to a cached PNG by `rsvg-convert`, memoized per resolution

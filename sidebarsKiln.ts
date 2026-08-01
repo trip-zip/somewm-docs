@@ -82,6 +82,7 @@ const sidebars: SidebarsConfig = {
         },
         'reference/kiln',
         'reference/ui',
+        'reference/widgets',
         'reference/layout',
         'reference/keybindings-and-rules',
         'reference/defaults',

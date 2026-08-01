@@ -12,10 +12,10 @@ A screen is one output. The `screen` global is the class; instances appear when 
 screen.on("added", function(s)
   tag.new { name = "1", screen = s }
   tag.new { name = "2", screen = s }
-  kiln.ui.bar(s, {}, function()
-    kiln.ui.taglist(s)
+  kiln.ui.bar(s, { edge = "top" }, function()
+    kiln.widgets.taglist(s)
     kiln.ui.spacer()
-    kiln.ui.clock()
+    kiln.widgets.clock()
   end)
 end)
 ```
@@ -32,7 +32,7 @@ end)
 | `name` | string | seeded | The output name (for example `"eDP-1"`). Read only. |
 | `width`, `height` | number | seeded | Output size in logical pixels, re-seeded every frame. Do not write. |
 | `tags` | list of tags | `{}` | The screen's tags, in creation order. `tag.new` appends. Read only. |
-| `bars` | list | `{}` | The registered bars, as `{cfg, fn}` pairs. `kiln.ui.bar` appends. Read only. |
+| `bars` | list | `{}` | The registered bars, as `{cfg, fn}` pairs. `kiln.ui.bar` appends; each reserves workarea on the edge its cfg names, any of the four. Read only. |
 
 ## Class functions and fields
 

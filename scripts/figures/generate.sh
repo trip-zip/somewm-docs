@@ -98,14 +98,17 @@ if run 03; then
 	clock="$(box_of "'clock'")"
 	layoutbox="$(box_of "'layoutbox:HEADLESS-1'")"
 
-	# The bar plus a band underneath for the callout chips.
+	# The bar plus a band underneath for the callout chips. The launcher chip
+	# draws last: the widgets.taglist chip reaches into the left corner where
+	# the launcher chip clamps, and the shorter label is the one that must
+	# stay fully readable.
 	magick "$KH_WORK/03.png" -crop 1280x104+0+0 +repage "$KH_WORK/03-c.png"
 	"$here/annotate.sh" "$KH_WORK/03-c.png" "$out/03-bar.png" \
-		"$(f1 "$launcher"),$(f2 "$launcher"),$(f3 "$launcher"),$(f4 "$launcher"),below,ui.box" \
-		"$(f1 "$taglist"),$(f2 "$taglist"),$(f3 "$taglist"),$(f4 "$taglist"),below,ui.taglist(s)" \
-		"$(f1 "$tasklist"),$(f2 "$tasklist"),$(f3 "$tasklist"),$(f4 "$tasklist"),below,ui.tasklist(s)" \
-		"$(f1 "$clock"),$(f2 "$clock"),$(f3 "$clock"),$(f4 "$clock"),below,ui.clock()" \
-		"$(f1 "$layoutbox"),$(f2 "$layoutbox"),$(f3 "$layoutbox"),$(f4 "$layoutbox"),below,ui.layoutbox(s)"
+		"$(f1 "$taglist"),$(f2 "$taglist"),$(f3 "$taglist"),$(f4 "$taglist"),below,widgets.taglist" \
+		"$(f1 "$tasklist"),$(f2 "$tasklist"),$(f3 "$tasklist"),$(f4 "$tasklist"),below,widgets.tasklist" \
+		"$(f1 "$clock"),$(f2 "$clock"),$(f3 "$clock"),$(f4 "$clock"),below,widgets.clock" \
+		"$(f1 "$layoutbox"),$(f2 "$layoutbox"),$(f3 "$layoutbox"),$(f4 "$layoutbox"),below,widgets.layoutbox" \
+		"$(f1 "$launcher"),$(f2 "$launcher"),$(f3 "$launcher"),$(f4 "$launcher"),below,ui.box"
 	echo "  03-bar.png"
 	kh_halt
 fi
@@ -143,7 +146,7 @@ if run 04; then
 	ox=$((cx - m)); oy=$((cy - m))
 	magick "$KH_WORK/04.png" -crop "$((cw + m + m))x$((chh + m + m))+$ox+$oy" +repage "$KH_WORK/04-c.png"
 	"$here/annotate.sh" "$KH_WORK/04-c.png" "$out/04-leaf.png" \
-		"$((tx - ox)),$((ty - oy)),$tw,$th,below,ui.titlebar - Clay draws this" \
+		"$((tx - ox)),$((ty - oy)),$tw,$th,below,widgets.titlebar - Clay draws this" \
 		"$((sx - ox)),$((sy - oy)),$sw,$sh,center,ui.surface - the client's own pixels"
 	echo "  04-leaf.png"
 	kh_halt

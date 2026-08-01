@@ -41,9 +41,10 @@ First hit wins:
 
 The stock desktop is the default `rc.lua`:
 
-- A top bar (32 px) carrying, left to right: a launcher button, a taglist,
-  a tasklist, a system tray, a layout indicator, and a clock floated in the
-  center. Hovering the clock shows the full date as a tooltip.
+- A top bar (32 px) of three equal regions: launcher button, taglist, and
+  tasklist on the left, the clock centered in the middle, the system tray
+  and layout indicator on the right. Hovering the clock shows the full
+  date as a tooltip.
 - Five tags per screen: `dev`, `web`, `chat`, `files`, `media`, all on the
   tile layout. The first tag is selected.
 - A generated wallpaper: a gradient in the theme's colors with the kiln mark

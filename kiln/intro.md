@@ -16,28 +16,38 @@ A stripped down Wayland compositor where the entire screen is one [Clay](https:/
 This is the bar from the default `rc.lua`, unedited:
 
 ```lua
-ui.bar(s, { edge = "top", color = th.bg }, function()
+ui.bar(s, { edge = "top", dir = "row", h = th.bar_height,
+    color = th.bg, pad = { x = 8 } }, function()
     backdrop(s)
-    launcher_glyph(s)
-    taglist(s)
-    tasklist(s)
-    ui.spacer()
-    ui.systray()
-    layoutbox(s)
-    -- The clock, floated center. A tooltip is the on_hover handler
-    -- ui.tooltip makes, nothing else.
-    ui.box({
-        id = "clock",
-        float = { to = "parent", anchor = "center" },
-        color = th.bg2, radius = 4, pad = { x = 8 }, align = "center",
-        on_hover = ui.tooltip(function() return os.date("%A %d %B %Y") end),
-    }, ui.clock)
+    ui.row({ w = "33.33%", h = "grow", gap = 6,
+            clip = { horizontal = true },
+            align = { y = "center" } }, function()
+        launcher_glyph(s)
+        taglist(s)
+        tasklist(s)
+    end)
+    ui.row({ w = "33.33%", h = "grow", align = "center" }, function()
+        -- A tooltip is the on_hover handler ui.tooltip makes,
+        -- nothing else.
+        ui.box({ id = "clock", color = th.bg2, radius = 4,
+            pad = { x = 8 },
+            on_hover = ui.tooltip(function()
+                return os.date("%A %d %B %Y")
+            end),
+        }, widgets.clock)
+    end)
+    ui.row({ w = "33.33%", h = "grow", gap = 6,
+            clip = { horizontal = true },
+            align = { x = "right", y = "center" } }, function()
+        widgets.systray()
+        layoutbox(s)
+    end)
 end)
 ```
 
 What to notice:
 
-- **`ui.spacer()` takes the leftover room** because Clay's solver gives it the leftover room, not because a bar widget has a spacer feature.
+- **You can see the tree.** A row of three percent-third regions, each region a container of cells. The clock is centered because its region's center is the bar's center, not because anything computed a position: Clay sizes a percent child unconditionally, so the middle third holds the center at any tasklist width. The side regions clip, so an overfull tasklist truncates at its third instead of pushing into the middle.
 - **A bar is a box with children.** So is a menu, a notification, and a tiled window's frame. There is one set of constructors, used everywhere.
 - **`backdrop(s)` is the wallpaper**, declared here and floated to the root's background band. It reads oddly until you accept the premise: there is one tree, so the desktop background is declared in it like everything else.
 - **Nothing here is imperative.** No draw callback, no widget object to construct and wire up. You declare what the screen should look like and the solver does the rest.

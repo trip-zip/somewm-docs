@@ -1,18 +1,19 @@
 ---
 title: Data Widgets
-description: Progress bars, history graphs, sliders, and toggles built from plain boxes and fed by kiln.spawn.watch.
+description: Feed the kiln.widgets form widgets from kiln.spawn.watch, and build the bespoke ones (a history graph) from plain boxes when the shelf does not fit.
 sidebar_position: 15
 ---
 
 # Data Widgets
 
-kiln has no canvas or drawing API, and bar meters do not need one. A meter is boxes: fixed and grow sizing, percent widths, colors, and handlers. The data lives in plain Lua variables; a shell command polled by `kiln.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers.
+kiln has no canvas or drawing API, and bar meters do not need one. The standard forms (a progress bar, a slider, a toggle) ship on [`kiln.widgets`](/kiln/reference/widgets) as controlled widgets: your config owns the value, the widget draws it. The data lives in plain Lua variables; a shell command polled by `kiln.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers. When the shelf has no widget for the shape you want, it is boxes all the way down, and the history graph below shows that path.
 
 Snippets assume the standard config preamble:
 
 ```lua
 local kiln = require("kiln")
 local ui = kiln.ui
+local widgets = kiln.widgets
 local th = kiln.theme
 ```
 
@@ -40,30 +41,18 @@ The returned handle has a `:stop()` if you ever need to cancel the poll.
 
 ## A progress bar
 
-Two boxes: an outer track with a fixed width, and an inner fill sized as a percentage of it. The `"N%"` sizing form does the arithmetic:
+`widgets.progress` is the track-and-fill pair, drawn from whatever `value` you pass:
 
 ```lua
-local function progressbar(id, fraction, width)
-  ui.box({
-    id = id, w = width, h = 8,
-    color = th.bg2, radius = 4,
-    align = { y = "center" },
-  }, function()
-    ui.box({
-      w = math.floor(fraction * 100 + 0.5) .. "%",
-      h = "grow",
-      color = th.accent, radius = 4,
-    })
-  end)
-end
-
 -- inside the bar function:
-progressbar("mem-bar", mem, 120)
+widgets.progress({ id = "mem-bar", value = mem, w = 120 })
 ```
+
+Underneath it is exactly two boxes, an outer track and an inner fill sized as a fraction of it, which matters when you outgrow it: the [reference](/kiln/reference/widgets#form-widgets) lists its cfg, and the history graph below is what building a shape the shelf lacks looks like.
 
 ## A history graph
 
-A graph is a row of thin grow boxes whose heights come from a ring buffer. Give each sample a monotonic sequence number so its identity is stable as it slides left, and declare the row through `ui.each`, keyed by that number:
+The shelf has no graph, and this is the bespoke path. A graph is a row of thin grow boxes whose heights come from a ring buffer. Give each sample a monotonic sequence number so its identity is stable as it slides left, and declare the row through `ui.each`, keyed by that number:
 
 ```lua
 local cpu_hist, cpu_seq = {}, 0
@@ -109,79 +98,38 @@ end
 
 ## A slider
 
-A slider is a progress bar that writes back. On press, set the value from the pointer's x inside the track, then take the pointer with `kiln.mousegrabber` so dragging keeps updating until the button releases. `core.box(id)` reads the track's solved geometry, which is in the same coordinate space as the event's `x`:
-
-```lua
-local function slider(id, width, get, set)
-  local function apply(px)
-    local b = core.box(id)
-    if b == nil or b.width == 0 then return end
-    set(math.max(0, math.min(1, (px - b.x) / b.width)))
-    kiln.dirty()
-  end
-  ui.box({
-    id = id, w = width, h = 8,
-    color = th.bg2, radius = 4,
-    align = { y = "center" },
-    on_scroll = function(ev)
-      set(math.max(0, math.min(1, get() - (ev.dy or 0) * 0.05)))
-      kiln.dirty()
-    end,
-    on_press = function(ev)
-      apply(ev.x)
-      local grab
-      grab = kiln.mousegrabber {
-        motion = function(mev) apply(mev.x) end,
-        button = function(bev)
-          if not bev.pressed then grab:stop() end
-        end,
-      }
-    end,
-  }, function()
-    ui.box({
-      w = math.floor(get() * 100 + 0.5) .. "%", h = "grow",
-      color = th.accent, radius = 4,
-    })
-  end)
-end
-```
-
-Wired to volume:
+`widgets.slider` is a progress bar that writes back: press or drag anywhere on the track and `changed` receives the new 0 to 1 value. The drag is a mousegrabber the widget manages, reading the track's solved box through `core.box`, and it ends on the release of the button that started it. Wired to volume:
 
 ```lua
 local vol = 0.5
 
 -- inside the bar function:
-slider("vol-slider", 100,
-  function() return vol end,
-  function(f)
+widgets.slider({ id = "vol-slider", w = 100, value = vol,
+  changed = function(f)
     vol = f
     kiln.spawn(string.format(
       "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%",
       math.floor(f * 100 + 0.5)))
-  end)
+  end })
 ```
 
-To keep the slider honest against volume changed elsewhere, add a `kiln.spawn.watch` on `wpctl get-volume @DEFAULT_AUDIO_SINK@` that parses the number back into `vol`.
+The slider holds no copy of the value: it draws `value` and reports through `changed`, so the fill is honest the frame after your variable changes and never before. To keep it honest against volume changed elsewhere, add a `kiln.spawn.watch` on `wpctl get-volume @DEFAULT_AUDIO_SINK@` that parses the number back into `vol`.
 
-## A checkbox
+## A toggle
 
-A toggle is a bordered box that fills when on, empties when off, and flips its state on press. Do-not-disturb, backed by the notification module's own switch:
+`widgets.toggle` is the same contract for a boolean: `on` in, `press` out. Do-not-disturb, backed by the notification module's own switch:
 
 ```lua
-ui.box({
-  id = "dnd-toggle", w = 14, h = 14, radius = 3,
-  align = { y = "center" },
-  color = notification.suspended and th.accent or nil,
-  border = { width = 1, color = th.accent },
-  on_press = function()
+-- inside the bar function:
+widgets.toggle({ id = "dnd-toggle",
+  on = notification.suspended,
+  press = function()
     notification.suspended = not notification.suspended
     kiln.dirty()
-  end,
-})
+  end })
 ```
 
-Any boolean works the same way: fill from the state, flip in `on_press`, dirty.
+Any boolean works the same way: draw from the state, flip in `press`, dirty.
 
 ## Complete example
 
@@ -191,33 +139,28 @@ The meters assembled into a bar. The watchers and helpers above sit at the top l
 screen.on("added", function(s)
   tag.new { name = "main", screen = s }
 
-  ui.bar(s, { edge = "top", height = 28, color = th.bg }, function()
-    ui.taglist(s)
+  ui.bar(s, { edge = "top", h = 28, color = th.bg }, function()
+    widgets.taglist(s)
     ui.spacer()
     ui.text("cpu", { size = 12, color = th.muted })
     cpu_graph("cpu-graph", 18)
     ui.text("mem", { size = 12, color = th.muted })
-    progressbar("mem-bar", mem, 120)
+    widgets.progress({ id = "mem-bar", value = mem, w = 120 })
     ui.text("vol", { size = 12, color = th.muted })
-    slider("vol-slider", 100,
-      function() return vol end,
-      function(f)
+    widgets.slider({ id = "vol-slider", w = 100, value = vol,
+      changed = function(f)
         vol = f
         kiln.spawn(string.format(
           "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%",
           math.floor(f * 100 + 0.5)))
-      end)
-    ui.box({
-      id = "dnd-toggle", w = 14, h = 14, radius = 3,
-      align = { y = "center" },
-      color = notification.suspended and th.accent or nil,
-      border = { width = 1, color = th.accent },
-      on_press = function()
+      end })
+    widgets.toggle({ id = "dnd-toggle",
+      on = notification.suspended,
+      press = function()
         notification.suspended = not notification.suspended
         kiln.dirty()
-      end,
-    })
-    ui.clock()
+      end })
+    widgets.clock()
   end)
 end)
 ```
@@ -225,6 +168,7 @@ end)
 ## See also
 
 - [Widgets tutorial](/kiln/tutorials/widgets)
+- [kiln.widgets reference](/kiln/reference/widgets)
 - [ui reference](/kiln/reference/ui)
 - [Frames and dirty](/kiln/concepts/frames-and-dirty)
 - [kiln reference](/kiln/reference/kiln), for `spawn.watch`, `spawn.pipe`, and the grabbers

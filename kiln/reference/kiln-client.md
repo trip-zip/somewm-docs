@@ -1,7 +1,7 @@
 ---
 title: kiln-client
 description: The command-line client, every verb by namespace, selectors, reflection, JSON output, and shell completions.
-sidebar_position: 18
+sidebar_position: 19
 ---
 
 # kiln-client

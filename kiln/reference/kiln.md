@@ -24,6 +24,7 @@ kiln.spawn("foot")
 | `kiln.defaults` | The 10 replaceable policy functions. See [kiln.defaults](/kiln/reference/defaults). |
 | `kiln.input` | Input device settings as plain read-write properties. See [kiln.input](#kilninput) below. |
 | `kiln.ui` | The declarative node tree: boxes, text, bars, floats. See [kiln.ui](/kiln/reference/ui). |
+| `kiln.widgets` | The widget shelf: taglist, tasklist, clock, titlebar, the form widgets. Compositions of `ui.*` a config can replace by assignment. See [kiln.widgets](/kiln/reference/widgets). |
 | `kiln.layout` | The tiling layouts and the layout registry. See [kiln.layout](/kiln/reference/layout). |
 | `kiln.animation` | Frame-clock easing: `get` and `start`. See [kiln.animation](#kilnanimation) below. |
 | `kiln.lockscreen` | The built-in lockscreen. `configure{}` overrides its colors and formats. See [Lockscreen and idle](/kiln/guides/lockscreen-and-idle). |

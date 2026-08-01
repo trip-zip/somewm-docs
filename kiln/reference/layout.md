@@ -1,7 +1,7 @@
 ---
 title: kiln.layout
 description: The layout contract, the nine built-in layout families and their variants, and the tag properties they read.
-sidebar_position: 9
+sidebar_position: 10
 ---
 
 # kiln.layout
@@ -26,7 +26,7 @@ screen.focused.selected_tag.layout = kiln.layout.corner.se
 | `area` | The workarea box from the last solve, inset by the gap: `{ x, y, width, height }`. Most layouts ignore it; carousel and magnifier use it for their arithmetic. |
 | `tag` | The tag being laid out, for reading its layout parameters. |
 
-The function declares elements (usually `ui.client` cells inside `ui.row`/`ui.column` containers) and returns nothing. There is no geometry API to call and no client positions to compute: a layout describes structure, and the solver produces the pixels.
+The function declares elements (usually `kiln.widgets.client` cells inside `ui.row`/`ui.column` containers) and returns nothing. There is no geometry API to call and no client positions to compute: a layout describes structure, and the solver produces the pixels.
 
 ## How layouts tile
 
@@ -64,11 +64,11 @@ Layout parameters are plain tag properties. Set them per tag; each has a default
 
 | Function | Description |
 |---|---|
-| `layout.name(fn)` | The display name of a layout function, variants included: a tag on `tile.left` names as `"tile.left"`. Only the stock families have names: for a custom layout it returns nil (the stock `ui.layoutbox` then shows `?`). |
+| `layout.name(fn)` | The display name of a layout function, variants included: a tag on `tile.left` names as `"tile.left"`. Only the stock families have names: for a custom layout it returns nil (the stock `kiln.widgets.layoutbox` then shows `?`). |
 | `layout.next(fn)` | The layout after `fn` in the cycle order; from a variant (or anything not in the list) it restarts the list. |
 | `layout.list` | The cycle order, one entry per family. A config can replace it: `kiln.layout.list = { kiln.layout.tile, kiln.layout.max }`. |
 
-`ui.layoutbox` and `ui.layoutlist` are built on these three.
+`kiln.widgets.layoutbox` and `kiln.widgets.layoutlist` are built on these three.
 
 ## See also
 

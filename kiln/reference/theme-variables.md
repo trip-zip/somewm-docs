@@ -1,7 +1,7 @@
 ---
 title: Theme Variables
 description: Every kiln.theme key, its default, and what it styles, plus kiln.modkey.
-sidebar_position: 13
+sidebar_position: 14
 ---
 
 # Theme Variables
@@ -30,7 +30,7 @@ Colors take any form `ui.color` accepts: `"#rrggbb"`, `"#rrggbbaa"`, or `{ r, g,
 | `font` | `"Sans"` | Default font family, a Pango description without a size (`ui.text`'s `font` cfg overrides per leaf). |
 | `font_size` | `14` | Default text size. |
 | `gap` | `8` | Workarea inset and the space between layout cells. Per-tag override: `t.gap`. |
-| `bar_height` | `32` | Bar height; notifications offset below it. |
+| `bar_height` | `32` | A bar's across-edge axis: the height of a top or bottom bar, the width of a left or right one. Notifications offset below it. |
 | `titlebar_height` | `22` | Titlebar row height. |
 | `titlebar` | `"#22222c"` | Unfocused titlebar background. |
 | `titlebar_focus` | `"#2c2c3a"` | Focused titlebar background. |
@@ -52,7 +52,7 @@ Colors take any form `ui.color` accepts: `"#rrggbb"`, `"#rrggbbaa"`, or `{ r, g,
 | `prompt_offset` | `80` | Prompt offset from the top of the screen. |
 | `cursors` | `{ move = "grabbing", resize = { n/s/e/w/ne/nw/se/sw = "<edge>-resize" } }` | Xcursor names for the move grab and each resize edge (compass-point keys). |
 | `menu_submenu_icon` | unset | Image path for the submenu marker; unset, menus draw a text `>`. The default config sets it to a generated chevron glyph. |
-| `layout_icons` | unset | Table of layout family name to image path for `ui.layoutbox`; unset, the box draws the layout name as text. |
+| `layout_icons` | unset | Table of layout family name to image path for `kiln.widgets.layoutbox`; unset, the box draws the layout name as text. |
 
 ## kiln.modkey
 

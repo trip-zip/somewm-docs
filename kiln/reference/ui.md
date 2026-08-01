@@ -6,17 +6,17 @@ sidebar_position: 8
 
 # kiln.ui
 
-`kiln.ui` is how anything gets on screen in kiln: bars, titlebars, widgets, menus, even the clients themselves are declared as a tree of elements that the Clay solver lays out each frame. There are no widget objects and no update paths. You write a function that declares what the screen looks like right now, and kiln reruns it whenever something changes.
+`kiln.ui` is how anything gets on screen in kiln: bars, titlebars, widgets, menus, even the clients themselves are declared as a tree of elements that the Clay solver lays out each frame. There are no widget objects and no update paths. You write a function that declares what the screen looks like right now, and kiln reruns it whenever something changes. Every constructor here maps its cfg onto Clay and adds no policy; the stock taglist, tasklist, clock and their kin are policy, and live one tier up on [`kiln.widgets`](/kiln/reference/widgets).
 
 ```lua
 local kiln = require("kiln")
 local ui = kiln.ui
 
 screen.on("added", function(s)
-  ui.bar(s, {}, function()
-    ui.taglist(s)
+  ui.bar(s, { edge = "top" }, function()
+    kiln.widgets.taglist(s)
     ui.spacer()
-    ui.clock()
+    kiln.widgets.clock()
   end)
 end)
 ```
@@ -38,48 +38,50 @@ end)
 
 | Constructor | Description |
 |---|---|
-| `ui.box(cfg, children?)` | Plain container or leaf. No layout direction of its own. |
+| `ui.box(cfg, children?)` | Plain container or leaf. Children run left to right unless cfg says `dir = "column"`; `ui.row` and `ui.column` are this with the direction in the name. |
 | `ui.row(cfg, children?)` | Left-to-right container. |
 | `ui.column(cfg, children?)` | Top-to-bottom container. |
 | `ui.text(str, cfg?)` | Text leaf. cfg: `color` (default `theme.fg`), `size` (default `theme.font_size`), `font` (a Pango font description such as `"Sans Bold"`, see [Fonts](#fonts)), `wrap` (`"words"` default, `"newlines"`, `"none"`), `align` (`"left"` default, `"center"`, `"right"`; places wrapped lines within the text box, use the parent's `align` for a single line), `line_height` (px per line; 0, the default, uses the font height), `ellipsize` (see [Truncation](#truncation)). |
-| `ui.spacer(n?)` | Flexible gap: `ui.box{ w = n or "grow", h = n }`. With no argument it grows to fill the row. |
+| `ui.spacer()` | Exactly `ui.box({ w = "grow" })`: an empty element the solver hands the leftover room. Takes no argument. |
 | `ui.image(path, cfg?)` | Image leaf. cfg: `id, w, h, aspect, radius, on_press, recolor`. Images have no intrinsic size: give both axes, or one axis plus `aspect`. Decoded once and cached by path. `recolor` takes a color spec and uses the file as a stencil: the color replaces the decoded pixels and only their alpha survives, so one glyph file draws in any ink. |
 | `ui.surface(c, cfg?)` | The client leaf: places the client's own buffer tree at the solved box. |
-| `ui.titlebar(c, focused?)` | Stock titlebar row: icon, title, maximize and close buttons. Replaceable: assign `kiln.ui.titlebar = fn`. |
-| `ui.resize_handles(c, z?)` | Eight invisible edge and corner handles over a floating client. |
-| `ui.client(c, cfg?)` | The composite: border plus titlebar plus surface, rounded, colored by focus; adds resize handles when the client floats. |
 | `ui.scroll(cfg, children)` | Clipped scroll viewport. cfg: `id` (required, keys the offset), `w, h, color, pad, step` (default 40). |
 | `ui.each(items, key, declare)` | Keyed list: `key(item)` returns each element id, `declare(item, id, st)` gets a per-key state table that survives reorder. |
 | `ui.widget(spec)` | Self-updating region: `{ fn or [1], watch = { "Class::signal", ... }, every = seconds }`. Returns the declare function; `watch` and `every` mark the screen dirty. |
-| `ui.bar(s, cfg, fn)` | Register a bar on screen `s`. cfg: `color` (`theme.bg`), `height` (`theme.bar_height`), `gap` (6), `edge` (`"top"` or `"bottom"`, default top), `band` (default `"above"`). |
-| `ui.taglist(s, cfg?)` | Stock taglist: one pressable cell per tag, accent when selected. cfg: `on` (see the handler table below). |
-| `ui.tasklist(s, cfg?)` | Stock tasklist. cfg: `filter` (default `ui.filter.currenttags`), `width` (default `{ "grow", max = 180 }`), `on`. |
-| `ui.systray(cfg?)` | Status-notifier tray items as pressable icon cells. cfg: `size` (default 18). |
-| `ui.layoutbox(s, cfg?)` | Current layout indicator; pressing cycles to the next layout. Draws `theme.layout_icons[family]` when set, else the layout name as text. cfg: `on`. |
-| `ui.layoutlist(s, cfg?)` | Layout picker, as a menu over `kiln.layout.list`. |
-| `ui.clock()` | Minute-aligned clock text. |
+| `ui.bar(s, cfg, fn)` | Register a bar on screen `s`. cfg is ordinary element cfg plus `edge`; see [Bars](#bars). |
+| `ui.popup(spec)` | Build a popup: open state, a keyboard claim, a scrim that closes on an outside press, and a per-frame declare, in one session-lived object with `show`, `close`, `toggle`. Built once at load, never inside a handler (construction registers a declare hook). |
 | `ui.menu(cfg)` | Alias for `kiln.menu.show` (see [Menus](#menus)). |
 | `ui.tooltip(text)` | Alias for `kiln.tooltip.attach`: returns an `on_hover` handler that shows a tooltip. `text` is a string or a function read at declare. |
+
+:::note
+The stock widgets that used to sit beside these constructors (taglist, tasklist, systray, layoutbox, layoutlist, clock, titlebar, resize handles, the client composite, and the form widgets) live on [`kiln.widgets`](/kiln/reference/widgets). They are compositions of the constructors above, not primitives.
+:::
 
 Helpers that are not constructors:
 
 | Helper | Description |
 |---|---|
 | `ui.color(spec)` | Parses `"#rrggbb"`, `"#rrggbbaa"`, or passes a `{ r, g, b, a }` table through. Every `color` cfg field accepts the same forms. |
-| `ui.filter.currenttags` | Tasklist filter: clients on any selected tag of the screen. |
-| `ui.filter.alltags` | Tasklist filter: every client. |
-| `ui.filter.minimized` | Tasklist filter: minimized clients on the screen's selected tags. |
 | `ui.bands` | The band name to z base table (see [Bands](#bands-z-order)). |
 
-### The widget handler table
+## Bars
 
-`ui.taglist`, `ui.tasklist`, and `ui.layoutbox` take an `on` sub-table of
-named gestures: `press(item, ev)` (the tag, client, or tag under the
-pointer, plus the ordinary press event with `button` and `mods`) and
-`scroll(ev)`. A handler preempts: returning a truthy value means handled and
-the stdlib default (view the tag, focus the client, cycle the layout) does
-not run; returning nil declines to it. `on` is a sub-table because
-`on_press` on an element cfg already means the box's own edge.
+`ui.bar(s, cfg, fn)` registers `fn` as a bar on screen `s`, and the bar reserves workarea on whichever edge it names. The bar's body is a container built from the bar's own cfg: ordinary element cfg plus `edge`, one of `"top"`, `"bottom"`, `"left"`, or `"right"` (default top), and `band` (default `"above"`). A left or right bar is a real bar, laid out as a column, reserving workarea on its side.
+
+Everything else is a documented default, overridden by the ordinary element key:
+
+| Field | Default | Meaning |
+|---|---|---|
+| `dir` | from the edge | `"row"` for top and bottom, `"column"` for left and right. |
+| `h` (top/bottom), `w` (left/right) | `theme.bar_height` | The across-edge axis. The along-edge axis is always `"grow"`; only it and the bar's id are forced. |
+| `pad` | `{ x = 8 }` horizontal, `{ y = 8 }` vertical | Padding on the along axis. |
+| `gap` | 6 | Space between cells. |
+| `align` | cross-axis center | `{ y = "center" }` on a row, `{ x = "center" }` on a column. |
+| `color` | `theme.bg` | Background. |
+
+**The defaults are filled per frame, not when the bar registers.** Assign `kiln.theme.bg` live and every bar that left `color` unset draws the new value on the next frame; the same goes for `bar_height` and the rest.
+
+**There is no `height` key.** The across-edge axis is plain element sizing, `h` on a horizontal bar and `w` on a vertical one. A config carrying `height` from an older kiln gets the default silently, because unknown cfg keys pass through to the element layer, which also ignores them.
 
 ## The cfg contract
 
@@ -88,7 +90,8 @@ Every `box`, `row`, `column`, and `surface` cfg accepts exactly these fields (`i
 | Field | Values | Meaning |
 |---|---|---|
 | `id` | string, or `{ name, index }` | Element id. Needed for handlers, `core.box` readback, and float anchoring, and it is what labels the element in the [inspector](/kiln/guides/inspector). Auto-assigned when absent and a handler is present; an element with neither is anonymous, which is supported but shows as a blank row. Two elements sharing an id in one frame is fatal, so repeated elements need `{ name, index }` with a numeric index. |
-| `w`, `h` | number (px), `"fit"`, `"grow"`, `"N%"`, `{ "grow", min =, max = }` | Sizing per axis. |
+| `w`, `h` | number (px), `"fit"`, `"grow"`, `"N%"`, `{ "grow", min =, max = }` | Sizing per axis. Omitted means `"fit"`: the element hugs its children. |
+| `dir` | `"row"`/`"ltr"`, `"column"`/`"ttb"` | Layout direction of the children, on any container. `ui.row` and `ui.column` set it by name; on `ui.box` it defaults to left to right. |
 | `pad` | number, `{ x =, y = }`, or `{ left =, right =, top =, bottom = }` | Padding. |
 | `gap` | number | Space between children. |
 | `align` | `"center"`, or `{ x =, y = }` with x in `"left"/"center"/"right"` and y in `"top"/"center"/"bottom"` | Child alignment. |
@@ -229,6 +232,7 @@ while a pointer descent does not (the pointer already says where it is).
 
 ## See also
 
+- [kiln.widgets](/kiln/reference/widgets)
 - [A bar from scratch](/kiln/tutorials/a-bar-from-scratch)
 - [Widgets](/kiln/tutorials/widgets)
 - [Menus](/kiln/guides/menus)

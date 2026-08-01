@@ -68,20 +68,30 @@ Every screen runs the same cycle:
 
 The declaration is cheap and rebuilt from scratch; the reconcile is incremental. Nothing happens between dirty frames. See [Frames and Dirty State](/kiln/concepts/frames-and-dirty) for when a frame is produced.
 
-The bar is the easiest place to see it. This is the bar from [the landing page](/kiln), written in terms of the constructors each cell reaches for rather than the local helpers the default config wraps them in:
+The bar is the easiest place to see it. This is the bar from [the landing page](/kiln), reduced to the constructors each cell reaches for: three percent-third regions in a row, each region a container, the clock an ordinary in-flow box in the middle one.
 
 ![The kiln bar with each cell outlined and labelled with the constructor that declared it](/img/kiln/clay/03-bar.png)
 
 ```lua
 ui.bar(s, { edge = "top" }, function()
-  ui.box({ id = "launcher", w = 28, h = 28 }, glyph)
-  ui.taglist(s)
-  ui.tasklist(s)
-  ui.spacer()
-  ui.layoutbox(s)
-  ui.box({ id = "clock", float = { anchor = "center" } }, ui.clock)
+  ui.row({ w = "33.33%", h = "grow", gap = 6,
+      clip = { horizontal = true }, align = { y = "center" } }, function()
+    ui.box({ id = "launcher", w = 28, h = 28 }, glyph)
+    kiln.widgets.taglist(s)
+    kiln.widgets.tasklist(s)
+  end)
+  ui.row({ w = "33.33%", h = "grow", align = "center" }, function()
+    ui.box({ id = "clock", pad = { x = 8 } }, kiln.widgets.clock)
+  end)
+  ui.row({ w = "33.33%", h = "grow", gap = 6,
+      align = { x = "right", y = "center" } }, function()
+    kiln.widgets.systray()
+    kiln.widgets.layoutbox(s)
+  end)
 end)
 ```
+
+The percent thirds are the centering mechanism: Clay sizes a percent child unconditionally, so the middle third's center is the bar's center at any tasklist width, and the side regions clip so an overfull tasklist truncates at its third instead of pushing the clock aside. No float, no spacer arithmetic, no arithmetic at all.
 
 ## One fork, at the leaf
 
@@ -90,9 +100,15 @@ Every node in the tree is one of two things:
 - **Clay owns the content.** A rectangle, a border, text, or an image, arriving as `RECTANGLE`, `BORDER`, `TEXT`, or `IMAGE`. This is all of kiln's chrome: bars, titlebars, taglists, menus, notifications, tooltips.
 - **The node is someone else's Wayland surface.** A client's buffer tree, placed at the box Clay solved. It arrives as `CUSTOM`, which the renderer reads as "put this client's buffers here". kiln never draws into a client.
 
-![One window with its titlebar outlined and labelled ui.titlebar, and its content area labelled ui.surface](/img/kiln/clay/04-leaf.png)
+![One window with its titlebar outlined and labelled widgets.titlebar, and its content area labelled ui.surface](/img/kiln/clay/04-leaf.png)
 
 A titlebar and the window under it are siblings, differing only in who supplies the pixels. Because the fork sits at the leaf and nowhere else, everything above it (containers, sizing, alignment, floats, stacking) is uniform.
+
+## The two tiers
+
+The API splits along one line, and the bar above shows both sides of it. [`ui.*`](/kiln/reference/ui) is the primitives: each constructor maps a cfg table onto one Clay concept and adds no policy. [`kiln.widgets.*`](/kiln/reference/widgets) is the shelf: compositions of those primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion about what a taglist or a titlebar should be.
+
+The distinction is enforced, not aspirational. Every shelf widget is written in public API a config can reach with the same spelling, and a standing check in the kiln repo fails any widget that uses a private door. So the shelf holds no privileged position: `kiln.widgets.taglist` is what your config would have written, written once, and replacing it is one assignment, because every caller reaches it through the module table.
 
 ## What this deletes
 
@@ -104,7 +120,7 @@ Layouts are ordinary Lua functions that declare nodes, so writing your own is sh
 
 **Hit testing is Clay's order.** A click asks Clay what is under the point, innermost first, in the same tree that was drawn. No second bookkeeping structure can disagree with the screen: if a menu draws over a button, the menu gets the click. See [Nodes, Floats, and Bands](/kiln/concepts/nodes-floats-and-bands).
 
-**There is no separate widget toolkit.** A widget is not an object with a draw method. It is a function that declares nodes, using the constructors the layouts and the titlebar already use: see the [widgets tutorial](/kiln/tutorials/widgets) and the [ui reference](/kiln/reference/ui).
+**There is no separate widget toolkit.** A widget is not an object with a draw method. It is a function that declares nodes, using the constructors the layouts and the titlebar already use. The stock ones live on [`kiln.widgets`](/kiln/reference/widgets); building your own is the [widgets tutorial](/kiln/tutorials/widgets).
 
 ## The experiment, honestly
 

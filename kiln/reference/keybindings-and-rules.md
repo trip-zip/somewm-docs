@@ -1,7 +1,7 @@
 ---
 title: Keys, Buttons, and Rules
 description: Full reference for kiln.key, kiln.button, kiln.rule, and kiln.focused, kiln's binding and client-rule specs.
-sidebar_position: 10
+sidebar_position: 11
 ---
 
 # Keys, Buttons, and Rules

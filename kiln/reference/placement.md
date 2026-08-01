@@ -1,7 +1,7 @@
 ---
 title: kiln.placement
 description: The 14 float placement helpers, arithmetic over the screen workarea that writes c.float.
-sidebar_position: 12
+sidebar_position: 13
 ---
 
 # kiln.placement

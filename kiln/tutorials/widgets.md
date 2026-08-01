@@ -1,6 +1,6 @@
 ---
 title: Widgets
-description: "Self-updating bar regions with ui.widget: timers, watched signals, external data via spawn.watch, keyed lists, and a meter."
+description: "Self-updating bar regions with ui.widget: timers, watched signals, external data via spawn.watch, keyed lists, and wiring the kiln.widgets shelf."
 sidebar_position: 4
 ---
 
@@ -12,6 +12,11 @@ the only question a widget ever raises is "what makes the screen dirty when
 my data changes?" `ui.widget{}` answers it, wiring timers and signals to
 dirty marks and handing you back the plain function.
 
+Two names sound alike and do different jobs. `ui.widget` is the wiring
+constructor this page is about. [`kiln.widgets`](/kiln/reference/widgets) is
+the shelf of stock widgets (taglist, clock, the form widgets); your own
+widgets compose shelf pieces the same way your bar does.
+
 ## Prerequisites
 
 A bar of your own (see [A bar from scratch](/kiln/tutorials/a-bar-from-scratch)).
@@ -20,6 +25,7 @@ Snippets assume:
 ```lua
 local kiln = require("kiln")
 local ui = kiln.ui
+local widgets = kiln.widgets
 local th = kiln.theme
 ```
 
@@ -31,7 +37,7 @@ calling it inside a declare function would arm a new timer every frame.
 
 ## 1. A seconds clock with `every`
 
-The built-in `ui.clock()` redraws on the minute. For seconds you need a
+The built-in `widgets.clock()` redraws on the minute. For seconds you need a
 faster cadence:
 
 ```lua
@@ -47,7 +53,7 @@ The spec's first positional entry (or a `fn` field) is the declare function;
 `every = 1` marks every screen dirty each second. Then, in your bar:
 
 ```lua
-	ui.bar(s, {}, function()
+	ui.bar(s, { edge = "top" }, function()
 		ui.spacer()
 		seconds_clock()
 	end)
@@ -146,22 +152,25 @@ across frames as long as the key is still declared, then vanishes with it.
 Define the key function at module level, not inline: the state store is
 scoped by the key function's identity.
 
-## 5. A meter from two boxes
+## 5. A meter from the shelf
 
 A percent meter is a track with a fill whose width is a percentage of its
-parent. Two nested boxes, no drawing code:
+parent: two nested boxes, no drawing code. The shelf already keeps that
+composition as `widgets.progress`, so a meter is one call:
 
 ```lua
-local function meter(pct)
-	ui.row({ w = { "grow", max = 100 }, h = 8, color = th.muted, radius = 4 },
-		function()
-			ui.box({ w = pct .. "%", h = "grow", color = th.accent, radius = 4 })
-		end)
-end
+	widgets.progress({ id = "meter", value = 0.42,
+		w = { "grow", max = 100 }, h = 8 })
 ```
 
-The outer row grows up to 100 px; the inner box's `"N%"` width resolves
-against the parent, so `meter(42)` fills 42 percent of the track.
+The form widgets (`progress`, `separator`, `toggle`, `slider`) are
+controlled: you own the value and the widget draws it. Nothing inside
+`widgets.progress` remembers 0.42; the next frame draws whatever your
+declare function passes, which is exactly how every other fact on the bar
+already behaves. Wiring one to `ui.widget` is therefore just reading your
+own state in the declare function, as the complete example below does. The
+cfg for each form widget is in the
+[kiln.widgets reference](/kiln/reference/widgets#form-widgets).
 
 ## Complete example
 
@@ -170,6 +179,7 @@ A battery meter, wired end to end:
 ```lua
 local kiln = require("kiln")
 local ui = kiln.ui
+local widgets = kiln.widgets
 local th = kiln.theme
 
 local stats = { battery = nil }
@@ -189,28 +199,27 @@ local battery = ui.widget {
 		end
 		ui.row({ gap = 6, align = { y = "center" } }, function()
 			ui.text(pct .. "%", { size = 12 })
-			ui.row({ w = { "grow", max = 100 }, h = 8, color = th.muted,
-				radius = 4 }, function()
-				ui.box({ w = pct .. "%", h = "grow",
-					color = pct < 20 and th.urgent or th.accent, radius = 4 })
-			end)
+			widgets.progress({ id = "bat", value = pct / 100,
+				w = { "grow", max = 100 }, h = 8,
+				color = pct < 20 and th.urgent or th.accent })
 		end)
 	end,
 }
 
 screen.on("added", function(s)
 	tag.new { name = "1", screen = s, layout = kiln.layout.tile }
-	ui.bar(s, {}, function()
-		ui.taglist(s)
+	ui.bar(s, { edge = "top" }, function()
+		widgets.taglist(s)
 		ui.spacer()
 		battery()
-		ui.clock()
+		widgets.clock()
 	end)
 end)
 ```
 
 The fill even recolors below 20 percent, because state read at declare time
-is the entire styling model.
+is the entire styling model: `spawn.watch` owns the number, `ui.widget` owns
+the dirty mark, and `widgets.progress` just draws whatever it is handed.
 
 ## See also
 

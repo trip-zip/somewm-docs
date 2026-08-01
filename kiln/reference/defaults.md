@@ -1,7 +1,7 @@
 ---
 title: kiln.defaults
 description: The 10 replaceable policy functions that decide focus succession, activation, layer-shell answers, state requests, and the notification display.
-sidebar_position: 11
+sidebar_position: 12
 ---
 
 # kiln.defaults

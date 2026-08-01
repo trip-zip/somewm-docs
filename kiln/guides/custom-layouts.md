@@ -14,7 +14,7 @@ function my_layout(clients, area, tag)
 end
 ```
 
-The runtime calls it every frame with the tiled clients of the visible tag, in stacking order, inside a workarea container it has already opened. The function declares [ui containers](/kiln/reference/ui) and one `ui.client(c)` leaf per client; the solver turns those declarations into geometry and configures every client to its cell. There is no arrange pass, no geometry storage, and nothing to invalidate: the function just runs again whenever the screen redraws.
+The runtime calls it every frame with the tiled clients of the visible tag, in stacking order, inside a workarea container it has already opened. The function declares [ui containers](/kiln/reference/ui) and one `kiln.widgets.client(c)` leaf per client; the solver turns those declarations into geometry and configures every client to its cell. There is no arrange pass, no geometry storage, and nothing to invalidate: the function just runs again whenever the screen redraws.
 
 ## 1. The smallest layout
 
@@ -31,7 +31,7 @@ local function stack(cs, area, t)
 	local gap = (t and t.gap) or kiln.theme.gap
 	ui.column({ w = "grow", h = "grow", gap = gap }, function()
 		for _, c in ipairs(cs) do
-			ui.client(c)
+			kiln.widgets.client(c)
 		end
 	end)
 end
@@ -42,7 +42,7 @@ Two things every layout should copy from this:
 - Guard the empty case. An empty `"grow"` container is not invisible to the solver: it is a sibling that takes its share of space. Declaring one next to real cells hands half the screen to a hole.
 - Read the gap from the tag with a theme fallback, so per-tag `t.gap` overrides work.
 
-`ui.client(c)` declares the full composite (border, titlebar, surface). Sizing accepts numbers (pixels), `"grow"`, `"fit"`, and percent strings like `"60%"`.
+`kiln.widgets.client(c)` declares the full composite (border, titlebar, surface). Sizing accepts numbers (pixels), `"grow"`, `"fit"`, and percent strings like `"60%"`.
 
 ## 2. A two-column layout
 
@@ -58,13 +58,13 @@ local function twocol(cs, area, t)
 	ui.row({ w = "grow", h = "grow", gap = gap }, function()
 		ui.column({ w = "grow", h = "grow", gap = gap }, function()
 			for i = 1, half do
-				ui.client(cs[i])
+				kiln.widgets.client(cs[i])
 			end
 		end)
 		if #cs > half then
 			ui.column({ w = "grow", h = "grow", gap = gap }, function()
 				for i = half + 1, #cs do
-					ui.client(cs[i])
+					kiln.widgets.client(cs[i])
 				end
 			end)
 		end
@@ -93,13 +93,13 @@ local function twocol(cs, area, t)
 	ui.row({ w = "grow", h = "grow", gap = gap }, function()
 		ui.column({ w = left_w, h = "grow", gap = gap }, function()
 			for i = 1, half do
-				ui.client(cs[i])
+				kiln.widgets.client(cs[i])
 			end
 		end)
 		if #cs > half then
 			ui.column({ w = "grow", h = "grow", gap = gap }, function()
 				for i = half + 1, #cs do
-					ui.client(cs[i])
+					kiln.widgets.client(cs[i])
 				end
 			end)
 		end
@@ -128,14 +128,14 @@ local function tile(cs, area, t)
 		ui.column({ w = stacked and (f * 100) .. "%" or "grow",
 				h = "grow", gap = gap }, function()
 			for i = 1, n do
-				ui.client(cs[i])
+				kiln.widgets.client(cs[i])
 			end
 		end)
 		-- The stack, only when non-empty.
 		if stacked then
 			ui.column({ w = "grow", h = "grow", gap = gap }, function()
 				for i = n + 1, #cs do
-					ui.client(cs[i])
+					kiln.widgets.client(cs[i])
 				end
 			end)
 		end
@@ -171,7 +171,7 @@ kiln.layout.list = {
 ```
 
 :::note
-`kiln.layout.name(fn)` only knows the built-in families, so the stock `ui.layoutbox` shows `?` for a custom layout, and `ui.layoutlist` has no label for it. If you want a name in your bar, render your own indicator, for example `t.layout == twocol and "twocol" or kiln.layout.name(t.layout)`.
+`kiln.layout.name(fn)` only knows the built-in families, so the stock `kiln.widgets.layoutbox` shows `?` for a custom layout, and `kiln.widgets.layoutlist` has no label for it. If you want a name in your bar, render your own indicator, for example `t.layout == twocol and "twocol" or kiln.layout.name(t.layout)`.
 :::
 
 ## 6. When you need area, and when you do not
@@ -200,13 +200,13 @@ local function twocol(cs, area, t)
 	ui.row({ w = "grow", h = "grow", gap = gap }, function()
 		ui.column({ w = left_w, h = "grow", gap = gap }, function()
 			for i = 1, half do
-				ui.client(cs[i])
+				kiln.widgets.client(cs[i])
 			end
 		end)
 		if #cs > half then
 			ui.column({ w = "grow", h = "grow", gap = gap }, function()
 				for i = half + 1, #cs do
-					ui.client(cs[i])
+					kiln.widgets.client(cs[i])
 				end
 			end)
 		end

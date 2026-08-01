@@ -1,7 +1,7 @@
 ---
 title: Environment and IPC
 description: Runtime environment variables, the config search order, the -s flag, and the Lua eval socket.
-sidebar_position: 17
+sidebar_position: 18
 ---
 
 # Environment and IPC

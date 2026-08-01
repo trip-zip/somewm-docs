@@ -1,7 +1,7 @@
 ---
 title: core
 description: The raw C boundary, 57 functions across core.*, core.client.*, core.input.*, and core.output.*.
-sidebar_position: 15
+sidebar_position: 16
 ---
 
 # core
@@ -9,12 +9,13 @@ sidebar_position: 15
 `core` is the raw C surface of the compositor: 57 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, chrome, focus, rules) is built by calling these.
 
 :::note
-`core.*` is the raw C boundary the stdlib is built on. Configs should prefer the object model (`client`, `tag`, `screen`, `layer`, `notification`) and `kiln.*`, but everything here is reachable from config code and over IPC.
+`core.*` is the raw C boundary the stdlib is built on. Configs should prefer the object model (`client`, `tag`, `screen`, `layer`, `notification`) and `kiln.*`, but everything here is reachable from config code and over IPC. Five names are also the sanctioned vocabulary for [widget authors](/kiln/reference/widgets): `core.box`, `core.dirty`, `core.timer`, `core.tray_activate`, and `core.input.set_cursor`. Every stock widget confines itself to these, and a standing check in the kiln repo keeps it that way.
 :::
 
 ```lua
--- readback over IPC: where did the element named "bar" land?
-local b = core.box("bar")
+-- readback over IPC: where did the first bar land? Bars carry the
+-- indexed id form, { name, index }.
+local b = core.box({ "bar", 1 })
 print(b.x, b.y, b.width, b.height)
 ```
 
@@ -33,6 +34,8 @@ These build the Clay element tree and error outside a frame or lock handler ("de
 | `core.surface(handle, decl?)` | Place a client surface as a self-closing leaf. Without `decl` it grows in both axes. The element id derives from the handle, so the key is stable across frames. Declaring the same handle twice in one frame is an error. |
 
 ### Readback
+
+Reading the box Clay answered with is allowed; computing where a box should be is not. `core.box` is how a widget turns a pointer position into a value with no layout arithmetic of its own: `kiln.widgets.slider` reads its own solved track and divides, which is also why it demands a stable id. Before the first solve there is no box and no honest answer, so the read returns nil rather than a guess.
 
 | Function | Description |
 |---|---|
