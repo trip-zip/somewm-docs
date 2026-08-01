@@ -94,8 +94,8 @@ end
 
 ### Step 3: declare the overlay
 
-The popup is chrome in the screen's tree, declared while a boolean is set and
-not declared at all when it is not. Two floats in the `overlay` band: a
+The popup is ordinary nodes in the screen's tree, declared while a boolean is
+set and not declared at all when it is not. Two floats in the `overlay` band: a
 screen-sized scrim that dismisses on any press outside, and the sheet one z
 above it:
 

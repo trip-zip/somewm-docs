@@ -6,7 +6,7 @@ sidebar_position: 12
 
 # Screenshots
 
-kiln has no screenshot object, format menu, or naming scheme. A screenshot is one function call: `core.screenshot(name[, path])` reads back the composed scene of one output, everything the frame holds (clients, chrome, wallpaper). Everything else (which screen, which file, which key) is your config.
+kiln has no screenshot object, format menu, or naming scheme. A screenshot is one function call: `core.screenshot(name[, path])` reads back the composed scene of one output, everything the frame holds (clients, widgets, wallpaper). Everything else (which screen, which file, which key) is your config.
 
 Snippets assume the standard config preamble:
 

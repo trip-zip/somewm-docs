@@ -1,12 +1,12 @@
 ---
 title: Data Widgets
-description: Feed the kiln.widgets form widgets from kiln.spawn.watch, and build the bespoke ones (a history graph) from plain boxes when the shelf does not fit.
+description: Feed the kiln.widgets form widgets from kiln.spawn.watch, and build the bespoke ones (a history graph) from plain boxes when the stock widgets do not fit.
 sidebar_position: 15
 ---
 
 # Data Widgets
 
-kiln has no canvas or drawing API, and bar meters do not need one. The standard forms (a progress bar, a slider, a toggle) ship on [`kiln.widgets`](/kiln/reference/widgets) as controlled widgets: your config owns the value, the widget draws it. The data lives in plain Lua variables; a shell command polled by `kiln.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers. When the shelf has no widget for the shape you want, it is boxes all the way down, and the history graph below shows that path.
+kiln has no canvas or drawing API, and bar meters do not need one. The standard forms (a progress bar, a slider, a toggle) ship on [`kiln.widgets`](/kiln/reference/widgets) as controlled widgets: your config owns the value, the widget draws it. The data lives in plain Lua variables; a shell command polled by `kiln.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers. When no stock widget matches the shape you want, it is boxes all the way down, and the history graph below shows that path.
 
 Snippets assume the standard config preamble:
 
@@ -48,11 +48,11 @@ The returned handle has a `:stop()` if you ever need to cancel the poll.
 widgets.progress({ id = "mem-bar", value = mem, w = 120 })
 ```
 
-Underneath it is exactly two boxes, an outer track and an inner fill sized as a fraction of it, which matters when you outgrow it: the [reference](/kiln/reference/widgets#form-widgets) lists its cfg, and the history graph below is what building a shape the shelf lacks looks like.
+Underneath it is exactly two boxes, an outer track and an inner fill sized as a fraction of it, which matters when you outgrow it: the [reference](/kiln/reference/widgets#form-widgets) lists its cfg, and the history graph below is what building a shape the stock widgets lack looks like.
 
 ## A history graph
 
-The shelf has no graph, and this is the bespoke path. A graph is a row of thin grow boxes whose heights come from a ring buffer. Give each sample a monotonic sequence number so its identity is stable as it slides left, and declare the row through `ui.each`, keyed by that number:
+There is no stock graph, and this is the bespoke path. A graph is a row of thin grow boxes whose heights come from a ring buffer. Give each sample a monotonic sequence number so its identity is stable as it slides left, and declare the row through `ui.each`, keyed by that number:
 
 ```lua
 local cpu_hist, cpu_seq = {}, 0

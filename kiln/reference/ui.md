@@ -198,7 +198,7 @@ Layer-shell surfaces declare into the band their protocol layer names: `backgrou
 
 ## Menus
 
-A menu is chrome in the screen's Clay tree, declared while open, gone when closed. There is no menu widget object.
+A menu is ordinary nodes in the screen's Clay tree, declared while open, gone when closed. There is no menu widget object.
 
 ```lua
 kiln.menu.show({

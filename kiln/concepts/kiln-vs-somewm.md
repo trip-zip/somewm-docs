@@ -35,7 +35,7 @@ The close verbs invert between the systems. In AwesomeWM and SomeWM, `c:kill()` 
 
 Choose **SomeWM** if you have an AwesomeWM configuration or depend on its ecosystem: your `rc.lua`, your themes, and the widget libraries you use are the investment, and SomeWM is built to honor it on Wayland.
 
-Choose **kiln** if the declarative single-tree model is the draw: one tree for windows and chrome, layouts without arithmetic, widgets without lifecycle, policy as replaceable Lua functions, and a live inspector over the whole thing. You will write your configuration fresh, and it will be shorter than the one you left, but it is a rewrite, not a port.
+Choose **kiln** if the declarative single-tree model is the draw: one tree for windows and widgets, layouts without arithmetic, widgets without lifecycle, policy as replaceable Lua functions, and a live inspector over the whole thing. You will write your configuration fresh, and it will be shorter than the one you left, but it is a rewrite, not a port.
 
 kiln is also younger and blunter about it: a proof of concept with an unstable API. SomeWM is the conservative choice; kiln is the experiment. Both are honest about which they are.
 

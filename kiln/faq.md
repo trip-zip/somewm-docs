@@ -14,7 +14,7 @@ No, by design. kiln has no compatibility layer, and AwesomeWM widget libraries (
 
 ## How is kiln related to SomeWM?
 
-kiln started as an experiment from SomeWM, an AwesomeWM-style framework for Wayland, re-based on the Clay layout library: an experiment in whether a compositor can use Clay as its base layer for layout, chrome, and hit testing. It keeps SomeWM's desktop concepts (clients, tags, layouts, rules) but replaces the API with its own declarative one, with no compat layer in either direction. See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) and [The Clay Bet](/kiln/concepts/the-clay-bet).
+kiln started as an experiment from SomeWM, an AwesomeWM-style framework for Wayland, re-based on the Clay layout library: an experiment in whether a compositor can use Clay as its base layer for layout, widgets, and hit testing. It keeps SomeWM's desktop concepts (clients, tags, layouts, rules) but replaces the API with its own declarative one, with no compat layer in either direction. See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) and [The Clay Bet](/kiln/concepts/the-clay-bet).
 
 ## Can I draw gradients, arcs, or custom shapes?
 

@@ -6,7 +6,7 @@ sidebar_position: 16
 
 # core
 
-`core` is the raw C surface of the compositor: 57 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, chrome, focus, rules) is built by calling these.
+`core` is the raw C surface of the compositor: 57 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, widgets, focus, rules) is built by calling these.
 
 :::note
 `core.*` is the raw C boundary the stdlib is built on. Configs should prefer the object model (`client`, `tag`, `screen`, `layer`, `notification`) and `kiln.*`, but everything here is reachable from config code and over IPC. Five names are also the sanctioned vocabulary for [widget authors](/kiln/reference/widgets): `core.box`, `core.dirty`, `core.timer`, `core.tray_activate`, and `core.input.set_cursor`. Every stock widget confines itself to these, and a standing check in the kiln repo keeps it that way.

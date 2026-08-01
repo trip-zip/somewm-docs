@@ -1,6 +1,6 @@
 ---
 title: A Bar from Scratch
-description: Build a status bar step by step with ui.bar and the kiln.widgets shelf, center the clock honestly, then turn it sideways.
+description: Build a status bar step by step with ui.bar and the stock kiln.widgets, center the clock honestly, then turn it sideways.
 sidebar_position: 3
 ---
 
@@ -132,7 +132,7 @@ per frame:
 | `gap` | 6 | space between cells |
 | `align` | cross-axis center | cell alignment |
 | `color` | `theme.bg` | bar background |
-| `band` | `"above"` | stacking band for the bar's chrome |
+| `band` | `"above"` | stacking band for the bar's widgets |
 
 ```lua
 	ui.bar(s, { edge = "bottom", h = 24, color = "#101014", gap = 10 },

@@ -1,12 +1,12 @@
 ---
 title: kiln.widgets
-description: The widget shelf, 13 widgets and the filter table, every one a composition of ui.* primitives that a config could have written itself.
+description: The stock widgets, 13 of them plus the filter table, every one a composition of ui.* primitives that a config could have written itself.
 sidebar_position: 9
 ---
 
 # kiln.widgets
 
-`kiln.widgets` is the widget shelf: compositions of the [`ui.*`](/kiln/reference/ui) primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion. This is the API's one distinction: `ui.*` maps a cfg table onto Clay and adds no policy, `kiln.widgets.*` is policy a config could have written in the public element API, written once. None of them computes a position, because Clay solves everything. See [the two tiers](/kiln/concepts/the-clay-bet#the-two-tiers) for why the split exists.
+`kiln.widgets` is the stock widgets: compositions of the [`ui.*`](/kiln/reference/ui) primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion. This is the API's one distinction: `ui.*` maps a cfg table onto Clay and adds no policy, `kiln.widgets.*` is policy a config could have written in the public element API, written once. None of them computes a position, because Clay solves everything. See [the two tiers](/kiln/concepts/the-clay-bet#the-two-tiers) for why the split exists.
 
 ```lua
 local kiln = require("kiln")
@@ -27,11 +27,11 @@ end)
 
 ## The module table is the extension point
 
-**Widget-to-widget calls go through the module table, never a private upvalue.** `widgets.client` reaches the titlebar as `kiln.widgets.titlebar`, so a config that assigns `kiln.widgets.titlebar = fn` governs every caller, stdlib included: the tiled layouts, the floating composite, all of it. Any shelf symbol can be replaced the same way, and the replacement needs no registration step beyond the assignment.
+**Widget-to-widget calls go through the module table, never a private upvalue.** `widgets.client` reaches the titlebar as `kiln.widgets.titlebar`, so a config that assigns `kiln.widgets.titlebar = fn` governs every caller, stdlib included: the tiled layouts, the floating composite, all of it. Any `kiln.widgets` symbol can be replaced the same way, and the replacement needs no registration step beyond the assignment.
 
 ## Writable by a config
 
-Every widget on the shelf uses only API a config can reach with the same spelling, and a standing check in the kiln repo (`scripts/widget-lint.sh`) fails the build of any widget that reaches for a private door. The vocabulary, beyond `ui.*` and the shelf itself:
+Every stock widget uses only API a config can reach with the same spelling, and a standing check in the kiln repo (`scripts/widget-lint.sh`) fails the build of any widget that reaches for a private door. The vocabulary, beyond `ui.*` and `kiln.widgets` itself:
 
 | Name | What a widget uses it for |
 |---|---|
@@ -128,7 +128,7 @@ A tasklist filter is a predicate `(client, screen)`, not a class and not a regis
 
 `widgets.taglist`, `widgets.tasklist`, and `widgets.layoutbox` take an `on` sub-table of named gestures: `press(item, ev)` (the tag, client, or tag under the pointer, plus the ordinary press event with `button` and `mods`) and `scroll(ev)`. A handler preempts: returning a truthy value means handled and the stdlib default (view the tag, focus the client, cycle the layout) does not run; returning nil declines to it. `on` is a sub-table because `on_press` on an element cfg already means the box's own edge.
 
-## Client chrome
+## Client widgets
 
 What the stock layouts declare per client. A custom layout composes these the same way; see [Custom Layouts](/kiln/guides/custom-layouts).
 

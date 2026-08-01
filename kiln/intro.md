@@ -7,7 +7,7 @@ slug: /
 
 # Kiln
 
-A stripped down Wayland compositor where the entire screen is one [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, tags, menus, and notifications are all nodes in it. There is no window layer and a separate widget layer, no chrome pass and a separate client pass: one tree, solved as a whole, every frame that needs drawing.
+A stripped down Wayland compositor where the entire screen is one [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, tags, menus, and notifications are all nodes in it. There is no window layer and a separate widget layer, no widget pass and a separate window pass: one tree, solved as a whole, every frame that needs drawing.
 
 ![The default kiln desktop: two terminals tiled under the bar](/img/kiln/desktop.png)
 

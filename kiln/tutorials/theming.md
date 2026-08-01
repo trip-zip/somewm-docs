@@ -32,7 +32,7 @@ The full list with defaults lives in the
 - Metrics: `font_size`, `gap` (workarea inset and space between layout
   cells), `bar_height`, `border_width`, `client_radius`, `min_size`,
   `resize_handle`.
-- Client chrome: `titlebar`, `titlebar_focus`, `titlebar_height`.
+- Titlebars: `titlebar`, `titlebar_focus`, `titlebar_height`.
 - Popups: `menu_width`, `menu_height`, `tooltip_gap`, `prompt_width`,
   `prompt_offset`, the `notification_*` keys, and `cursors` (the xcursor
   names used by move and resize grabs).
@@ -120,7 +120,7 @@ th.muted = "#4c566a"
 th.urgent = "#d08770"
 th.close = "#bf616a"
 
--- client chrome
+-- titlebars
 th.titlebar = "#3b4252"
 th.titlebar_focus = "#434c5e"
 th.client_radius = 6

@@ -63,7 +63,7 @@ The registry keeps one entry per `key{}` call, ranges intact, so a hotkeys popup
 | `press` | `function(c)` on the press edge. `c` is the clicked client, or `nil` for `on = "root"`. |
 | `release` | `function(c)` on the release edge. |
 
-Dispatch order for a press: a client surface checks the `on = "client"` specs first and falls back to click-to-focus if none fires; elsewhere, chrome elements get first claim, and only a press no element handled reaches the `on = "root"` specs.
+Dispatch order for a press: a client surface checks the `on = "client"` specs first and falls back to click-to-focus if none fires; elsewhere, widgets get first claim, and only a press no element handled reaches the `on = "root"` specs.
 
 | Function | Description |
 |---|---|

@@ -121,7 +121,7 @@ Two verifiers run on every reconcile and abort on divergence:
 - every declared node is enabled, positioned at its clipped box, sized to it, and inside its clip scope
 - scene sibling order equals command order
 
-A third check, that the scene and Clay name the same chrome leaf under the cursor, is sampled on pointer motion but only when `KILN_AGREE` is set, since it walks the scene and runs a Clay pointer query on every motion event.
+A third check, that the scene and Clay name the same widget leaf under the cursor, is sampled on pointer motion but only when `KILN_AGREE` is set, since it walks the scene and runs a Clay pointer query on every motion event.
 
 ## Measuring text
 
@@ -133,7 +133,7 @@ A third check, that the scene and Clay name the same chrome leaf under the curso
 
 ## Hit testing
 
-Chrome hit testing is Clay's answer, read from the last solve. `ui.c` calls `Clay_SetPointerState` and then `Clay_GetPointerOverIds`, and reverses the array, since Clay lists ancestors first and innermost-first is the natural dispatch order. Lua walks that list and fires the first element carrying a handler for the edge in question.
+Widget hit testing is Clay's answer, read from the last solve. `ui.c` calls `Clay_SetPointerState` and then `Clay_GetPointerOverIds`, and reverses the array, since Clay lists ancestors first and innermost-first is the natural dispatch order. Lua walks that list and fires the first element carrying a handler for the edge in question.
 
 Client surfaces are arbitration territory: the scene overrides Clay there by design, which is what lets a client popup overhang its box.
 

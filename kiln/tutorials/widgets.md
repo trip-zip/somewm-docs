@@ -1,6 +1,6 @@
 ---
 title: Widgets
-description: "Self-updating bar regions with ui.widget: timers, watched signals, external data via spawn.watch, keyed lists, and wiring the kiln.widgets shelf."
+description: "Self-updating bar regions with ui.widget: timers, watched signals, external data via spawn.watch, keyed lists, and wiring the stock kiln.widgets."
 sidebar_position: 4
 ---
 
@@ -14,8 +14,8 @@ dirty marks and handing you back the plain function.
 
 Two names sound alike and do different jobs. `ui.widget` is the wiring
 constructor this page is about. [`kiln.widgets`](/kiln/reference/widgets) is
-the shelf of stock widgets (taglist, clock, the form widgets); your own
-widgets compose shelf pieces the same way your bar does.
+the stock widgets (taglist, clock, the form widgets); your own
+widgets compose stock pieces the same way your bar does.
 
 ## Prerequisites
 
@@ -152,11 +152,11 @@ across frames as long as the key is still declared, then vanishes with it.
 Define the key function at module level, not inline: the state store is
 scoped by the key function's identity.
 
-## 5. A meter from the shelf
+## 5. A stock meter
 
 A percent meter is a track with a fill whose width is a percentage of its
-parent: two nested boxes, no drawing code. The shelf already keeps that
-composition as `widgets.progress`, so a meter is one call:
+parent: two nested boxes, no drawing code. That composition ships stock
+as `widgets.progress`, so a meter is one call:
 
 ```lua
 	widgets.progress({ id = "meter", value = 0.42,

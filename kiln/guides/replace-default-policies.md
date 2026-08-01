@@ -103,7 +103,7 @@ end)
 
 ## 5. Worked example: fake fullscreen
 
-Some apps insist on fullscreening themselves (video players on double-click). This replacement tells the client it is fullscreen, so it hides its own chrome and plays full-surface, but keeps it exactly where the layout put it:
+Some apps insist on fullscreening themselves (video players on double-click). This replacement tells the client it is fullscreen, so it hides its own controls and plays full-surface, but keeps it exactly where the layout put it:
 
 ```lua
 client.off("request::fullscreen", kiln.defaults.fullscreen)

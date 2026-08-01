@@ -50,7 +50,7 @@ Written by the compositor when the window maps or its metadata changes. Read the
 | `window_type` | list of strings | X11 only | _NET_WM_WINDOW_TYPE atoms, in client order. |
 | `role` | string or nil | seeded | X11 window role. |
 | `icon` | string or nil | seeded | Icon name or path. |
-| `override_redirect` | boolean | X11 OR only | True for override-redirect windows (menus, tooltips). No rules, no chrome, no focus-on-open. |
+| `override_redirect` | boolean | X11 OR only | True for override-redirect windows (menus, tooltips). No rules, no titlebar or border, no focus-on-open. |
 | `wants_focus` | boolean | X11 OR only | Whether an override-redirect window takes focus, per the ICCCM answer. |
 | `mapped` | boolean | true on map | Liveness. Maintained by the map/unmap handlers. |
 

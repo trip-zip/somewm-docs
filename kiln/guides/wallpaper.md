@@ -6,7 +6,7 @@ sidebar_position: 11
 
 # Wallpaper
 
-kiln has no wallpaper object and no wallpaper API. A wallpaper is an image-filled box floated to the root in the `background` band, the lowest z range, so it sits behind every client and every piece of chrome. You declare it in your bar function like everything else on screen.
+kiln has no wallpaper object and no wallpaper API. A wallpaper is an image-filled box floated to the root in the `background` band, the lowest z range, so it sits behind every client and every widget. You declare it in your bar function like everything else on screen.
 
 Snippets assume the standard config preamble:
 
@@ -66,7 +66,7 @@ end
 ```
 
 Three details worth stealing: `w = "grow"` fills the root box rather than
-naming the output size, so it stays correct when chrome takes a strip off
+naming the output size, so it stays correct when a bar takes a strip off
 the screen; the theme color is the fallback fill only when no image resolved
 (a fill and an image on one box are one channel, not two layers); and the
 passthrough float still carries a scroll handler, which is how wheeling over

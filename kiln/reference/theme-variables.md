@@ -6,7 +6,7 @@ sidebar_position: 14
 
 # Theme Variables
 
-`kiln.theme` is a plain Lua table. There is no theme engine and no reload step: assign a key at load or at any time, and everything that reads it picks up the new value on the next frame, because chrome reads the theme at declare.
+`kiln.theme` is a plain Lua table. There is no theme engine and no reload step: assign a key at load or at any time, and everything that reads it picks up the new value on the next frame, because every widget reads the theme at declare.
 
 ```lua
 local kiln = require("kiln")

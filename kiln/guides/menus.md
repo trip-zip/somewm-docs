@@ -151,7 +151,7 @@ kiln.menu.keys.k = "up"
 `"down"`, `"up"`, `"enter"`, `"back"`, and `"close"`; it returns whether the
 verb was handled.
 
-Menu colors and sizing come from the theme: `menu_width` (default 200) and `menu_height` (row height, default 24), with `bg`, `bg2`, and `accent` for the chrome.
+Menu colors and sizing come from the theme: `menu_width` (default 200) and `menu_height` (row height, default 24), with `bg` for the panel, `accent` for its border, and `bg2` for the highlighted row.
 
 ## See also
 

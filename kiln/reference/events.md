@@ -40,7 +40,7 @@ The envelope always carries `class` and `name`; payload fields ride flat beside 
 | Event | Payload | Emitted when |
 |---|---|---|
 | `key` | `keysym, key, utf8, pressed, mods` | A key went down or up. `utf8` is always present (empty string mid-compose or on release). |
-| `button` | `button, pressed, x, y, screen, client, mods` | A pointer button. `client` is the handle under the pointer, `nil` when the topmost node is chrome or nothing. |
+| `button` | `button, pressed, x, y, screen, client, mods` | A pointer button. `client` is the handle under the pointer, `nil` when the topmost node is a widget or nothing. |
 | `motion` | `x, y, screen, client` | The pointer moved. Same `client` rule as `button`. |
 | `axis` | `dx, dy, x, y, screen, client, mods` | A scroll. Same `client` rule as `button`. |
 | `pointer_enter` | `handle` | The pointer crossed onto a client; `handle` is `nil` when it is over no client. |

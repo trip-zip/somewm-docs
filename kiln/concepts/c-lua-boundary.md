@@ -14,7 +14,7 @@ C holds everything that is forced to be C by a protocol or by hardware: the wlro
 
 ## What Lua owns
 
-Every policy: what focuses and when, how tags behave, what a fullscreen or activation request actually does, where anything sits on screen, what the chrome looks like. Layouts, rules, keybindings, menus, notifications: all Lua, all replaceable, most of it running in your own config's process and language.
+Every policy: what focuses and when, how tags behave, what a fullscreen or activation request actually does, where anything sits on screen, what every widget looks like. Layouts, rules, keybindings, menus, notifications: all Lua, all replaceable, most of it running in your own config's process and language.
 
 ## One event stream in, verbs out
 

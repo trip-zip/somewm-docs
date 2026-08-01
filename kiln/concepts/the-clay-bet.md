@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # The Clay Bet
 
-kiln is built on one idea: the entire visible surface of each screen is a single [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, the contents of your tags, menus, notifications, the wallpaper: every one of them is a node in that tree. There is no window layer and a separate widget layer, no chrome pass and a separate client pass. One tree, solved as a whole, every frame that needs drawing.
+kiln is built on one idea: the entire visible surface of each screen is a single [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, the contents of your tags, menus, notifications, the wallpaper: every one of them is a node in that tree. There is no window layer and a separate widget layer, no widget pass and a separate window pass. One tree, solved as a whole, every frame that needs drawing.
 
 ## What Clay does
 
@@ -97,7 +97,7 @@ The percent thirds are the centering mechanism: Clay sizes a percent child uncon
 
 Every node in the tree is one of two things:
 
-- **Clay owns the content.** A rectangle, a border, text, or an image, arriving as `RECTANGLE`, `BORDER`, `TEXT`, or `IMAGE`. This is all of kiln's chrome: bars, titlebars, taglists, menus, notifications, tooltips.
+- **Clay owns the content.** A rectangle, a border, text, or an image, arriving as `RECTANGLE`, `BORDER`, `TEXT`, or `IMAGE`. This is everything kiln draws itself: bars, titlebars, taglists, menus, notifications, tooltips.
 - **The node is someone else's Wayland surface.** A client's buffer tree, placed at the box Clay solved. It arrives as `CUSTOM`, which the renderer reads as "put this client's buffers here". kiln never draws into a client.
 
 ![One window with its titlebar outlined and labelled widgets.titlebar, and its content area labelled ui.surface](/img/kiln/clay/04-leaf.png)
@@ -106,9 +106,9 @@ A titlebar and the window under it are siblings, differing only in who supplies 
 
 ## The two tiers
 
-The API splits along one line, and the bar above shows both sides of it. [`ui.*`](/kiln/reference/ui) is the primitives: each constructor maps a cfg table onto one Clay concept and adds no policy. [`kiln.widgets.*`](/kiln/reference/widgets) is the shelf: compositions of those primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion about what a taglist or a titlebar should be.
+The API splits along one line, and the bar above shows both sides of it. [`ui.*`](/kiln/reference/ui) is the primitives: each constructor maps a cfg table onto one Clay concept and adds no policy. [`kiln.widgets.*`](/kiln/reference/widgets) is the stock widgets: compositions of those primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion about what a taglist or a titlebar should be.
 
-The distinction is enforced, not aspirational. Every shelf widget is written in public API a config can reach with the same spelling, and a standing check in the kiln repo fails any widget that uses a private door. So the shelf holds no privileged position: `kiln.widgets.taglist` is what your config would have written, written once, and replacing it is one assignment, because every caller reaches it through the module table.
+The distinction is enforced, not aspirational. Every stock widget is written in public API a config can reach with the same spelling, and a standing check in the kiln repo fails any widget that uses a private door. So the stock widgets hold no privileged position: `kiln.widgets.taglist` is what your config would have written, written once, and replacing it is one assignment, because every caller reaches it through the module table.
 
 ## What this deletes
 
