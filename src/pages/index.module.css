@@ -119,6 +119,43 @@
   line-height: 1.5;
 }
 
+.kiln {
+  padding: 0 2rem 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.kilnCard {
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  text-align: center;
+}
+
+[data-theme='dark'] .kilnCard {
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+.kilnCard h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.kilnCard p {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.kilnLinks {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
 .release {
   padding: 2rem;
   text-align: center;

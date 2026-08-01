@@ -78,6 +78,30 @@ function Features() {
   );
 }
 
+function Kiln() {
+  return (
+    <section className={styles.kiln}>
+      <div className={styles.kilnCard}>
+        <h2>kiln</h2>
+        <p>
+          SomeWM's parallel experiment: a Wayland compositor whose entire
+          surface is one <a href="https://github.com/nicbarker/clay">Clay</a>{' '}
+          layout tree per screen. Windows, bars, widgets, and notifications
+          are all Clay nodes, declared from Lua.
+        </p>
+        <div className={styles.kilnLinks}>
+          <Link className={styles.btnSecondary} to="/kiln">
+            Explore kiln
+          </Link>
+          <Link className={styles.btnSecondary} to="/kiln/concepts/the-clay-bet">
+            Read the Clay bet
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Release() {
   return (
     <section className={styles.release}>
@@ -96,6 +120,7 @@ export default function Home(): React.ReactElement {
       <main>
         <Hero />
         <Features />
+        <Kiln />
         <Release />
       </main>
     </Layout>

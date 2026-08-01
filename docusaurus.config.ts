@@ -129,6 +129,7 @@ const config: Config = {
         {label: 'Tutorials', to: '/docs/tutorials/basics'},
         {label: 'Reference', to: '/docs/reference/lua-libraries'},
         {label: 'Blog', to: '/blog'},
+        {label: 'kiln', to: '/kiln'},
         {label: 'Discussions', href: 'https://github.com/trip-zip/somewm/discussions'},
         {label: 'AwesomeWM', href: 'https://awesomewm.org/community/'},
         {label: 'Source Code', href: 'https://github.com/trip-zip/somewm'},
