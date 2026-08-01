@@ -76,6 +76,11 @@ const config: Config = {
         indexBlog: true,
         docsRouteBasePath: ['/docs', '/kiln'],
         highlightSearchTermsOnTargetPage: true,
+        searchContextByPaths: [
+          {label: 'SomeWM', path: 'docs'},
+          {label: 'kiln', path: 'kiln'},
+        ],
+        useAllContextsWithNoSearchContext: true,
       },
     ],
   ],
@@ -100,13 +105,6 @@ const config: Config = {
           label: 'Docs',
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'kilnSidebar',
-          docsPluginId: 'kiln',
-          position: 'left',
-          label: 'Kiln',
-        },
-        {
           to: '/blog',
           label: 'Blog',
           position: 'left',
@@ -114,6 +112,13 @@ const config: Config = {
         {
           type: 'docsVersionDropdown',
           position: 'left',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'kilnSidebar',
+          docsPluginId: 'kiln',
+          position: 'right',
+          label: 'Kiln',
         },
         {
           href: 'https://github.com/trip-zip/somewm',
@@ -125,14 +130,33 @@ const config: Config = {
     footer: {
       style: 'dark',
       links: [
-        {label: 'Getting Started', to: '/docs/getting-started/installation'},
-        {label: 'Tutorials', to: '/docs/tutorials/basics'},
-        {label: 'Reference', to: '/docs/reference/lua-libraries'},
-        {label: 'Blog', to: '/blog'},
-        {label: 'kiln', to: '/kiln'},
-        {label: 'Discussions', href: 'https://github.com/trip-zip/somewm/discussions'},
-        {label: 'AwesomeWM', href: 'https://awesomewm.org/community/'},
-        {label: 'Source Code', href: 'https://github.com/trip-zip/somewm'},
+        {
+          title: 'SomeWM',
+          items: [
+            {label: 'Getting Started', to: '/docs/getting-started/installation'},
+            {label: 'Tutorials', to: '/docs/tutorials/basics'},
+            {label: 'Reference', to: '/docs/reference/lua-libraries'},
+            {label: 'Blog', to: '/blog'},
+          ],
+        },
+        {
+          title: 'kiln',
+          items: [
+            {label: 'Overview', to: '/kiln'},
+            {label: 'Installation', to: '/kiln/getting-started/installation'},
+            {label: 'Reference', to: '/kiln/reference/'},
+            {label: 'kiln vs SomeWM', to: '/kiln/concepts/kiln-vs-somewm'},
+            {label: 'Source Code', href: 'https://github.com/trip-zip/kiln'},
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            {label: 'Discussions', href: 'https://github.com/trip-zip/somewm/discussions'},
+            {label: 'AwesomeWM', href: 'https://awesomewm.org/community/'},
+            {label: 'Source Code', href: 'https://github.com/trip-zip/somewm'},
+          ],
+        },
       ],
       copyright: `© ${new Date().getFullYear()} SomeWM Contributors. Portions copyright the AwesomeWM contributors. Licensed under GPL v3 or later — see <a href="https://github.com/trip-zip/somewm-docs/blob/main/LICENSE">LICENSE</a> and <a href="https://github.com/trip-zip/somewm-docs/blob/main/ATTRIBUTION.md">ATTRIBUTION</a>.`,
     },
