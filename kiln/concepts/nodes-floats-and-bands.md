@@ -6,7 +6,7 @@ sidebar_position: 5
 
 # Nodes, Floats, and Bands
 
-Everything on a kiln screen lives in one tree (see [The Clay Thesis](/kiln/concepts/the-clay-thesis)), so "what draws over what" has one answer with two ingredients: declaration order, and float bands.
+Everything on a kiln screen lives in one tree (see [The Clay Bet](/kiln/concepts/the-clay-bet)), so "what draws over what" has one answer with two ingredients: declaration order, and float bands.
 
 ## Declaration order is the base
 
@@ -45,7 +45,7 @@ kiln has no hidden flag, no unmapped-but-tracked visibility state. A minimized c
 
 ## See also
 
-- [The Clay Thesis](/kiln/concepts/the-clay-thesis)
+- [The Clay Bet](/kiln/concepts/the-clay-bet)
 - [ui reference](/kiln/reference/ui)
 - [Floating and placement](/kiln/guides/floating-and-placement)
 - [Wallpaper](/kiln/guides/wallpaper)

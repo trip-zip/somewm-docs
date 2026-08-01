@@ -8,7 +8,7 @@ sidebar_position: 2
 
 kiln vendors [Clay](https://github.com/nicbarker/clay) at `third_party/clay.h`, v0.14, byte for byte identical to upstream. Nothing in the header is patched, and there is no fork. Everything that would normally be a patch is done around the header instead.
 
-This page is the engineering detail: how a Lua config ends up calling Clay's element API, and how solved boxes become windows on a screen. For why the whole screen is one tree in the first place, see [The Clay Thesis](/kiln/concepts/the-clay-thesis).
+This page is the engineering detail: how a Lua config ends up calling Clay's element API, and how solved boxes become windows on a screen. For why the whole screen is one tree in the first place, see [The Clay Bet](/kiln/concepts/the-clay-bet).
 
 ## One context per output
 
@@ -162,7 +162,7 @@ Three behaviors that cost real debugging time and are not obvious from the API:
 
 ## See also
 
-- [The Clay Thesis](/kiln/concepts/the-clay-thesis)
+- [The Clay Bet](/kiln/concepts/the-clay-bet)
 - [Frames and Dirty State](/kiln/concepts/frames-and-dirty)
 - [The C/Lua Boundary](/kiln/concepts/c-lua-boundary)
 - [ui reference](/kiln/reference/ui)

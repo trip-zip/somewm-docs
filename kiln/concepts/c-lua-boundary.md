@@ -45,7 +45,7 @@ Keeping decisions out of C keeps them changeable at Lua speed: a reload, not a r
 
 ## See also
 
-- [The Clay Thesis](/kiln/concepts/the-clay-thesis)
+- [The Clay Bet](/kiln/concepts/the-clay-bet)
 - [The Object Model](/kiln/concepts/object-model)
 - [defaults reference](/kiln/reference/defaults)
 - [core reference](/kiln/reference/core)

@@ -1,4 +1,4 @@
--- Shared palette and canvas helper for the Clay thesis figures.
+-- Shared palette and canvas helper for the Clay Bet figures.
 --
 -- This file is concatenated ahead of each figure config by generate.sh, so it
 -- defines the global F rather than returning a module: there is no package.path

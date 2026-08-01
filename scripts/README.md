@@ -3,7 +3,7 @@
 Scripts that produce documentation assets from upstream sources of truth.
 
 - **Reference pages** (below) - the long enumerated reference pages.
-- **[Clay thesis figures](figures/README.md)** - `npm run generate:figures` renders
+- **[Clay Bet figures](figures/README.md)** - `npm run generate:figures` renders
   every image under `static/img/kiln/clay/` from a real headless kiln. Safe to run
   while kiln is your live session; see that README for how.
 - **`kiln-verify.sh`** - boot a headless kiln on a config and report whether it

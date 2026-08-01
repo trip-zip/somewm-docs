@@ -41,7 +41,7 @@ kiln is also younger and blunter about it: a proof of concept with an unstable A
 
 ## See also
 
-- [The Clay Thesis](/kiln/concepts/the-clay-thesis)
+- [The Clay Bet](/kiln/concepts/the-clay-bet)
 - [Inspect the Live Element Tree](/kiln/guides/inspector)
 - [Limitations](/kiln/concepts/limitations)
 - [Anatomy of rc.lua](/kiln/getting-started/rc-anatomy)

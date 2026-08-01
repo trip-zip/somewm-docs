@@ -1,10 +1,10 @@
 ---
-title: The Clay Thesis
+title: The Clay Bet
 description: Why kiln's entire screen is a single Clay layout tree, and what falls out of that one decision.
 sidebar_position: 1
 ---
 
-# The Clay Thesis
+# The Clay Bet
 
 kiln is built on one idea: the entire visible surface of each screen is a single [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, the contents of your tags, menus, notifications, the wallpaper: every one of them is a node in that tree. There is no window layer and a separate widget layer, no chrome pass and a separate client pass. One tree, solved as a whole, every frame that needs drawing.
 
@@ -124,7 +124,7 @@ Layouts are ordinary Lua functions that declare nodes, so writing your own is sh
 
 ## Two retained trees
 
-wlroots already ships a retained scene graph, so kiln keeps two: Clay's tree and the scene's. That redundancy is the price of the thesis, and the bet is that Clay pays for it by owning layout and hit testing so nothing else has to. What the model deliberately excludes is documented in [Limitations](/kiln/concepts/limitations), and how the work splits between C and Lua is in [The C/Lua Boundary](/kiln/concepts/c-lua-boundary).
+wlroots already ships a retained scene graph, so kiln keeps two: Clay's tree and the scene's. That redundancy is the price, and the bet is that Clay pays it by owning layout and hit testing so nothing else has to. What the model deliberately excludes is documented in [Limitations](/kiln/concepts/limitations), and how the work splits between C and Lua is in [The C/Lua Boundary](/kiln/concepts/c-lua-boundary).
 
 *Every figure on this page is a screenshot of a real headless kiln, rendered by `npm run generate:figures`.*
 

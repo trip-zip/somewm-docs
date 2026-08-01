@@ -1,4 +1,4 @@
-# Clay thesis figures
+# Clay Bet figures
 
 Every image under `static/img/kiln/clay/` is rendered by a real headless kiln
 and screenshotted. Nothing is drawn by hand, mocked up, or traced in a vector

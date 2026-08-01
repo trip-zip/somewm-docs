@@ -106,7 +106,7 @@ Clay holds its debug style in process-wide globals, so the style keys apply to e
 ## See also
 
 - [Reload and Debugging](/kiln/guides/reload-and-debugging)
-- [The Clay Thesis](/kiln/concepts/the-clay-thesis)
+- [The Clay Bet](/kiln/concepts/the-clay-bet)
 - [Binding Clay](/kiln/concepts/binding-clay)
 - [ui reference](/kiln/reference/ui)
 - [core reference](/kiln/reference/core)

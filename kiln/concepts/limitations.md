@@ -48,5 +48,5 @@ AwesomeWM widget libraries (vicious, lain, bling, awesome-wm-widgets) are wibox 
 ## See also
 
 - [Kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm)
-- [The Clay Thesis](/kiln/concepts/the-clay-thesis)
+- [The Clay Bet](/kiln/concepts/the-clay-bet)
 - [FAQ](/kiln/faq)

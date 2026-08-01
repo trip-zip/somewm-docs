@@ -64,7 +64,7 @@ If you already know Clay, the parts worth knowing up front:
 - **One `Clay_Context` per output**, declared from Lua over the LuaJIT FFI against a single reused `Clay_ElementDeclaration`. Nothing is allocated per element per frame.
 - **A client window is a `CUSTOM` leaf** whose `customData` is the client handle. Clay is solving layout for real application windows, and the renderer places each client's buffer tree at the box it solved.
 
-Why one tree owns the whole screen, and what that deletes: [The Clay Thesis](/kiln/concepts/the-clay-thesis). How it is bound, down to the render command loop: [Binding Clay](/kiln/concepts/binding-clay).
+Why one tree owns the whole screen, and what that deletes: [The Clay Bet](/kiln/concepts/the-clay-bet). How it is bound, down to the render command loop: [Binding Clay](/kiln/concepts/binding-clay).
 
 ## Start here
 
@@ -94,6 +94,6 @@ These docs follow the [Diátaxis framework](https://diataxis.fr/). The sidebar l
 | [Tutorials](/kiln/tutorials/basics) | You are new and want to build up a config step by step |
 | [How-To Guides](/kiln/guides/client-rules) | You have a specific task in hand |
 | [Reference](/kiln/reference/) | You need the exact property, method, signal, or default |
-| [Concepts](/kiln/concepts/the-clay-thesis) | You want to understand how kiln works and why |
+| [Concepts](/kiln/concepts/the-clay-bet) | You want to understand how kiln works and why |
 
 Short answers to common questions are in the [FAQ](/kiln/faq). The source lives at [github.com/trip-zip/kiln](https://github.com/trip-zip/kiln).

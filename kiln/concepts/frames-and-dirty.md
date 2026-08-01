@@ -40,7 +40,7 @@ C holds none of this: no easing curves, no animation state, no durations. The cl
 
 ## See also
 
-- [The Clay Thesis](/kiln/concepts/the-clay-thesis)
+- [The Clay Bet](/kiln/concepts/the-clay-bet)
 - [The Object Model](/kiln/concepts/object-model)
 - [The C/Lua Boundary](/kiln/concepts/c-lua-boundary)
 - [Widgets tutorial](/kiln/tutorials/widgets)

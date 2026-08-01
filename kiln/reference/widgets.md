@@ -6,7 +6,7 @@ sidebar_position: 9
 
 # kiln.widgets
 
-`kiln.widgets` is the widget shelf: compositions of the [`ui.*`](/kiln/reference/ui) primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion. This is the API's one distinction: `ui.*` maps a cfg table onto Clay and adds no policy, `kiln.widgets.*` is policy a config could have written in the public element API, written once. None of them computes a position, because Clay solves everything. See [the two tiers](/kiln/concepts/the-clay-thesis#the-two-tiers) for why the split exists.
+`kiln.widgets` is the widget shelf: compositions of the [`ui.*`](/kiln/reference/ui) primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion. This is the API's one distinction: `ui.*` maps a cfg table onto Clay and adds no policy, `kiln.widgets.*` is policy a config could have written in the public element API, written once. None of them computes a position, because Clay solves everything. See [the two tiers](/kiln/concepts/the-clay-bet#the-two-tiers) for why the split exists.
 
 ```lua
 local kiln = require("kiln")

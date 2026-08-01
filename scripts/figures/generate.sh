@@ -1,5 +1,5 @@
 #!/bin/sh
-# Render the Clay thesis figures by booting a real headless kiln, declaring the
+# Render the Clay Bet figures by booting a real headless kiln, declaring the
 # figure, and screenshotting what Clay solved.
 #
 #   scripts/figures/generate.sh          # all figures

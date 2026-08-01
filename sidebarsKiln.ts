@@ -54,7 +54,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Concepts',
       items: [
-        'concepts/the-clay-thesis',
+        'concepts/the-clay-bet',
         'concepts/binding-clay',
         'concepts/frames-and-dirty',
         'concepts/object-model',
