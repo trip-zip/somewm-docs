@@ -89,19 +89,7 @@ with the new values. Persistent overrides go in `.local.mk`, for example
 
 ## Other make targets
 
-| Target | What it does |
-|---|---|
-| `make run` | Build, then run the daily session: default IPC socket, log at `~/.cache/kiln.log` |
-| `make dev` | Build, then run a nested dev instance on a private socket (`/tmp/kiln-dev-N.sock`), so it never steals the live session's IPC socket. Prints the socket and log paths |
-| `make headless` | Build, then run an invisible instance for IPC-driven testing, same private-socket scheme |
-| `make install` | `meson install -C build` |
-| `make uninstall` | Remove the installed files |
-| `make clean` | Remove `build/` |
-| `make reconfigure` | Wipe and reconfigure `build/` (needed after changing `prefix` or `buildtype`) |
-
-The convention the targets encode: the daily session owns the default socket,
-so every script works against it with no environment variables; dev and
-headless instances get private sockets.
+`make run` builds and runs the daily session on the default IPC socket. `make dev` and `make headless` run nested or invisible instances on private sockets, so they never steal the live session's IPC socket; they matter once you start iterating on a config ([Reload and Debugging](/kiln/guides/reload-and-debugging), [Testing Headless](/kiln/guides/testing-headless)). The rest (`uninstall`, `clean`, `reconfigure`) are the standard meson wrappers.
 
 ## See also
 

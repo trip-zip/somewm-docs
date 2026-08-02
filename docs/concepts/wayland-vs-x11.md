@@ -42,7 +42,7 @@ This page explains why some AwesomeWM features work differently (or don't work) 
 
 **Wayland**: Security model prevents apps from injecting input into other apps.
 
-**Impact**: `root.fake_input()` is a stub. Automation tools need compositor support.
+**Impact**: External tools like `xdotool` cannot inject input. `root.fake_input()` works, because it is the compositor doing the injecting (via `wlr_seat`), so automation goes through SomeWM itself. See [Deviations](/docs/reference/deviations) for status.
 
 ### No X Properties
 

@@ -8,7 +8,7 @@ description: Screenshot capture and interactive snipping tool
 
 Screenshot capture with support for full screen, screen, client, geometry, and interactive region selection.
 
-**Upstream documentation:** [awful.screenshot](https://awesomewm.org/apidoc/popups_and_டlayouts/awful.screenshot.html)
+**Upstream documentation:** [awful.screenshot](https://awesomewm.org/apidoc/classes/awful.screenshot.html)
 
 ## Usage
 

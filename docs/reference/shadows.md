@@ -192,110 +192,24 @@ end)
 
 ## Using Rules
 
-Apply shadow settings automatically based on window properties:
+`shadow` is settable from `ruled.client` like any client property:
 
 ```lua
 ruled.client.append_rule {
     rule = { class = "mpv" },
     properties = { shadow = false }  -- No shadows on video players
 }
-
-ruled.client.append_rule {
-    rule = { type = "dialog" },
-    properties = {
-        shadow = {
-            radius = 8,
-            opacity = 0.9
-        }
-    }
-}
-
-ruled.client.append_rule {
-    rule = { class = "Rofi" },
-    properties = {
-        shadow = {
-            color = "#5588FF",
-            radius = 24,
-            opacity = 0.5
-        }
-    }
-}
 ```
 
-## Dynamic Control
+## Runtime Control
 
-Use `somewm-client` to control shadows at runtime:
+`shadow` is writable at runtime on any client or drawin, including over IPC:
 
 ```bash
-# Enable shadows on all clients (uses theme defaults)
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = true end'
-
-# Classic drop shadow (bottom-right)
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { offset_x = 8, offset_y = 8, radius = 12, opacity = 0.6, clip_directional = true } end'
-
-# Soft halo (all sides)
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { offset_x = 0, offset_y = 0, radius = 24, opacity = 0.5, clip_directional = false } end'
-
-# Blue glow
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { color = "#3399FF", radius = 20, opacity = 0.6, offset_x = 0, offset_y = 0, clip_directional = false } end'
-
-# Tight, sharp shadow
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { radius = 4, offset_x = 3, offset_y = 3, opacity = 0.9, clip_directional = true } end'
-
-# Wibar panel shadow (downward)
-somewm-client eval 'for s in screen do if s.mywibox then s.mywibox.shadow = { radius = 12, offset_x = 0, offset_y = 4, opacity = 0.7, clip_directional = true } end end'
-
-# Disable shadows
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = false end'
+somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { radius = 24, opacity = 0.5 } end'
 ```
 
-## Complete Example
-
-A full theme.lua shadow configuration:
-
-```lua
-local theme = {}
-
--- ... other theme settings ...
-
--- Shadow configuration
-theme.shadow_enabled = true
-theme.shadow_radius = 14
-theme.shadow_offset_x = -18
-theme.shadow_offset_y = -18
-theme.shadow_opacity = 0.7
-theme.shadow_color = "#000000"
-
--- Wiboxes/panels: subtle shadows or none
-theme.shadow_drawin_enabled = true
-theme.shadow_drawin_radius = 8
-theme.shadow_drawin_opacity = 0.4
-
-return theme
-```
-
-Combined with rules in rc.lua:
-
-```lua
--- Fullscreen windows don't need shadows
-ruled.client.append_rule {
-    rule_any = { fullscreen = true },
-    properties = { shadow = false }
-}
-
--- Floating windows get enhanced shadows
-ruled.client.append_rule {
-    rule_any = { floating = true },
-    properties = {
-        shadow = {
-            radius = 20,
-            offset_x = -20,
-            offset_y = -20,
-            opacity = 0.85
-        }
-    }
-}
-```
+The [Shadows guide](/docs/guides/shadows) has tested recipes (drop shadows, halos, glows, per-window rules) ready to copy.
 
 ## Technical Notes
 

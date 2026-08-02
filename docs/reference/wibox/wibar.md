@@ -133,18 +133,9 @@ awful.wibar {
 }
 ```
 
-## Controlling Visibility
+## Visibility
 
-```lua
--- Toggle wibar
-s.mywibox.visible = not s.mywibox.visible
-
--- Keybinding to toggle
-awful.key({ modkey }, "b", function()
-    local s = awful.screen.focused()
-    s.mywibox.visible = not s.mywibox.visible
-end)
-```
+`visible` is a plain read/write boolean; writing it shows or hides the wibar and updates the screen's workarea.
 
 ## Background Image
 

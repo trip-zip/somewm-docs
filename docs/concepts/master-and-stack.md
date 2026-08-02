@@ -102,7 +102,7 @@ You can move a client to the master or stack section by changing its position in
 | `c:to_secondary_section()` | Move to stack (end of client list) |
 | `c:swap(other)` | Swap positions with another client |
 
-### New Windows Always Go to Stack
+### Making New Windows Go to the Stack
 
 By default, new clients become master, pushing everything else down. This surprises most people. To make new windows go to the stack instead, add a callback to your default rule:
 

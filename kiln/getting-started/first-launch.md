@@ -28,14 +28,9 @@ Flags and environment:
   launching a terminal or a session script on a TTY boot.
 - `KILN_RC=<path>` loads an explicit config file, overriding the search order.
 
-## The config search order
+## Which config runs
 
-First hit wins:
-
-1. `KILN_RC`
-2. `$XDG_CONFIG_HOME/kiln/rc.lua` (falling back to `~/.config/kiln/rc.lua`)
-3. the installed default under `<prefix>/share/kiln/rc.lua`
-4. `rc.lua` in the working directory (how it runs from the source tree)
+kiln loads `~/.config/kiln/rc.lua` if it exists, and the installed default otherwise. `KILN_RC` overrides both; the full search order is in the [Environment and IPC reference](/kiln/reference/environment-and-ipc#config-search-order).
 
 ## What you see
 
@@ -66,29 +61,15 @@ which is generated from the live bindings and always complete. The essentials:
 | Chord | Action |
 |---|---|
 | `mod+Return` | open a terminal (`$TERMINAL`, falling back to foot) |
-| `mod+r` | run prompt (type a command with Tab completion, Enter to spawn) |
 | `mod+p` | app launcher: every installed `.desktop` app, type to filter |
-| `mod+w` | main menu (theme switcher, lock, quit, ...) |
-| `mod+s` | hotkeys sheet |
 | `mod+shift+c` | close the focused client |
-| `mod+j` / `mod+k` | focus next / previous client |
-| `mod+Tab` | focus the previously focused client |
 | `mod+1` .. `mod+9` | view tag by index |
-| `mod+shift+1` .. `mod+shift+9` | move the focused client to a tag |
-| `mod+Left` / `mod+Right` | view previous / next tag |
-| `mod+space` | next layout |
-| `mod+h` / `mod+l` | shrink / grow the master area |
-| `mod+ctrl+space` | toggle floating |
-| `mod+f` / `mod+m` / `mod+n` | fullscreen / maximize / minimize |
-| `mod+o` | send the focused client to the next screen |
-| `mod+shift+Escape` | lock the session |
 | `mod+ctrl+r` | reload the config |
-| `mod+shift+i` | toggle the [Clay inspector](/kiln/guides/inspector) |
 | `mod+shift+q` | quit kiln |
 
-The config also binds the media keys (volume and microphone via `wpctl`,
-brightness via `brightnessctl`) and screenshots (`Print` for the full output,
-`shift+Print` for a region via `slurp` and `grim`).
+Everything else (focus, layouts, floating, media keys, screenshots, the
+lock chord) is on the `mod+s` sheet, which never goes stale: it reads the
+binding registry live.
 
 Mouse bindings:
 

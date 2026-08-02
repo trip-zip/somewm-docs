@@ -61,6 +61,10 @@ The spec's first positional entry (or a `fn` field) is the declare function;
 
 The widget is the function itself: you call it where you want its cells.
 
+Reload. The clock sits at the right end of your bar and the seconds tick
+visibly: `every = 1` marks the screen dirty once a second, so the bar
+redraws once a second, and only because this widget asked it to.
+
 ## 2. External data: a battery reader with spawn.watch
 
 For data that lives outside the compositor, poll a command and park the
@@ -83,6 +87,11 @@ local battery = ui.widget {
 	end,
 }
 ```
+
+Add `battery()` to your bar and reload. The bar shows your charge percentage,
+or `n/a` if there is no `BAT0` to read (some machines name it `BAT1`; adjust
+the path). Either way the widget renders: the fallback is part of the declare
+function, not an error case.
 
 The callback stores the fact and calls `kiln.dirty()`, so the redraw happens
 when the data changes, not on a render timer; the widget itself needs no
@@ -110,6 +119,8 @@ local focus_indicator = ui.widget {
 }
 ```
 
+Put it in your bar, reload, and click between two windows: the label follows
+the focused title as you switch, and reads "nothing focused" on an empty tag.
 Whenever any client emits `focus` or `property::title`, the screens are
 marked dirty and the next frame re-declares the widget with the new fact.
 Listeners are registered once per signal name no matter how many widgets
@@ -147,6 +158,16 @@ local notification_chips = ui.widget {
 }
 ```
 
+Wire the chips into your bar, reload, and send yourself a notification:
+
+```bash
+scripts/kiln-eval 'require("kiln").notify { title = "hello" }'
+```
+
+A chip labeled "hello" appears in the bar alongside the popup. Press the chip
+and both vanish: the press handler dismisses the notification, the dismissal
+fires `notification::dismissed`, and the next frame declares one chip fewer.
+
 `declare(item, id, st)` receives a per-key state table `st` that survives
 across frames as long as the key is still declared, then vanishes with it.
 Define the key function at module level, not inline: the state store is
@@ -162,6 +183,9 @@ as `widgets.progress`, so a meter is one call:
 	widgets.progress({ id = "meter", value = 0.42,
 		w = { "grow", max = 100 }, h = 8 })
 ```
+
+Drop that line into your bar function and reload: a thin 100 px track
+appears with the left 42 percent filled in the accent color.
 
 The form widgets (`progress`, `separator`, `toggle`, `slider`) are
 controlled: you own the value and the widget draws it. Nothing inside
@@ -217,9 +241,11 @@ screen.on("added", function(s)
 end)
 ```
 
-The fill even recolors below 20 percent, because state read at declare time
-is the entire styling model: `spawn.watch` owns the number, `ui.widget` owns
-the dirty mark, and `widgets.progress` just draws whatever it is handed.
+Reload. On battery hardware the meter tracks your charge; on anything else
+the bar reads "no battery" instead of erroring. The fill even recolors below
+20 percent, because state read at declare time is the entire styling model:
+`spawn.watch` owns the number, `ui.widget` owns the dirty mark, and
+`widgets.progress` just draws whatever it is handed.
 
 ## See also
 

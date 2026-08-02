@@ -6,7 +6,7 @@ sidebar_position: 99
 
 # FAQ
 
-Short answers to the questions that come up most. Each one links to the page that covers the topic in depth.
+kiln makes a few choices that surprise newcomers: no compat layer, no drawing API, inverted close/kill semantics. The short answers live here; each links to the page that covers the topic in depth.
 
 ## Is kiln compatible with AwesomeWM configs or widgets?
 
@@ -49,7 +49,7 @@ kiln.rule{
 }
 ```
 
-`match` clauses take Lua patterns against `app` (the app_id), `class`, `instance`, `title`, and `role`, plus a `dialog` boolean and an `fn(c)` predicate. See [Client Rules](/kiln/guides/client-rules).
+[Client Rules](/kiln/guides/client-rules) covers what clauses can match and how rules stack.
 
 ## Why does my bar or widget not update?
 
@@ -67,14 +67,7 @@ See [First Launch](/kiln/getting-started/first-launch).
 
 ## Where is the config file?
 
-First hit wins:
-
-1. `$KILN_RC`, if set
-2. `$XDG_CONFIG_HOME/kiln/rc.lua` (falling back to `~/.config/kiln/rc.lua`)
-3. the installed default under `<prefix>/share/kiln/rc.lua`
-4. `rc.lua` in the working directory (how kiln runs from the source tree)
-
-Copy the installed default to `~/.config/kiln/rc.lua` to start customizing. See [Anatomy of rc.lua](/kiln/getting-started/rc-anatomy).
+`~/.config/kiln/rc.lua`, falling back to the installed default; `KILN_RC` overrides both ([full search order](/kiln/reference/environment-and-ipc#config-search-order)). Copy the installed default to `~/.config/kiln/rc.lua` to start customizing. See [Anatomy of rc.lua](/kiln/getting-started/rc-anatomy).
 
 ## How do I reload the config without restarting?
 

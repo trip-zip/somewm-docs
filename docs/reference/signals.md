@@ -88,6 +88,7 @@ Each `property::*` fires after the property changes. Read the new value off the 
 | `removed` | `s` | Output disconnected. Tags on this screen will get `request::screen` next. |
 | `request::desktop_decoration` | `s` | Screen needs tags and wibars. Your handler creates them. See [Tag Persistence](/docs/reference/tag-persistence). |
 | `request::wallpaper` | `s` | Screen wants its wallpaper drawn. Default consumers in `gears.wallpaper`. |
+| `request::focus_restore` | `s` | Something that had focus went away (client closed, layer surface dismissed, session unlocked, monitor disconnected). Default handler: `awful.permissions.focus_restore`, which activates the most recent visible client from focus history. If no handler focuses a client, C focuses the topmost client on the monitor. <SomewmOnly /> |
 | `property::geometry` | `s` | Screen geometry changed (resolution or layout). |
 | `property::workarea` | `s` | Workarea (geometry minus struts) changed. Fires when wibars appear or resize. |
 | `property::scale` | `s` | Output scale changed. <SomewmOnly /> |
@@ -148,7 +149,7 @@ See [layer_surface reference](/docs/reference/layer_surface/) for context.
 
 | Signal | Args | Notes |
 |--------|------|-------|
-| `lock::activate` | `source` (string) | Session locked. `source` identifies the locker (`"swaylock"`, `"loginctl"`, etc.). |
+| `lock::activate` | `source` (string) | Session locked via `awesome.lock()`. `source` is always `"user"`. |
 | `lock::deactivate` | none | Session unlocked. |
 | `lock::auth_failed` | none | Password authentication failed. |
 

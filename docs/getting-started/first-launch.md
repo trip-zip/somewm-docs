@@ -10,7 +10,7 @@ description: Running SomeWM and essential configuration
 
 ### From a Display Manager
 
-If you ran `make install-session`, select **"SomeWM"** from your display manager's session list (GDM, SDDM, etc.).
+`sudo make install` installs a Wayland session file, so you can select **"SomeWM"** from your display manager's session list (GDM, SDDM, etc.).
 
 ### From a TTY
 
@@ -55,30 +55,23 @@ The `nix-build` approach installs only binaries. Get the default config from the
 
 ## Essential Keybindings
 
-The default configuration uses these keybindings (where **Mod4** is usually the Super/Windows key):
+Enough to survive your first session (**Mod4** is usually the Super/Windows key):
 
 | Keybinding | Action |
 |------------|--------|
 | `Mod4 + Return` | Open terminal |
-| `Mod4 + r` | Run prompt |
-| `Mod4 + j/k` | Focus next/previous client |
-| `Mod4 + Shift + j/k` | Swap client with next/previous |
-| `Mod4 + 1-9` | View tag 1-9 |
-| `Mod4 + Shift + 1-9` | Move client to tag 1-9 |
-| `Mod4 + Space` | Toggle layout |
 | `Mod4 + Shift + c` | Close focused client |
+| `Mod4 + 1-9` | View tag 1-9 |
 | `Mod4 + Ctrl + r` | Reload configuration |
 | `Mod4 + Shift + q` | Quit SomeWM |
 
-:::info Full Keybinding Reference
-See [Default Keybindings](/docs/reference/default-keybindings) for the complete list.
-:::
+Press `Mod4 + s` for the built-in cheat sheet with every binding, or see the [Default Keybindings reference](/docs/reference/default-keybindings).
 
 ## Troubleshooting
 
 ### "No config found" error
 
-Make sure you ran `make install` (or `make install-local`). Running SomeWM directly from the build directory won't work because Lua libraries aren't in the expected paths.
+Make sure you ran `sudo make install`. Running SomeWM directly from the build directory won't work because Lua libraries aren't in the expected paths.
 
 ### Config loads but crashes immediately
 

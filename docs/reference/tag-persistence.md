@@ -89,77 +89,11 @@ After restore, the saved state for that connector is cleared (`awful.permissions
 
 ## Default Implementation
 
-The save handler lives in `awful.permissions` and is connected automatically:
+The save handler is `awful.permissions.tag_screen`, connected automatically to `tag` `request::screen`. On `context == "removed"` it appends each dying tag's saved state (the fields above) to `awful.permissions.saved_tags[output_name]`.
 
-```lua
--- awful/permissions/init.lua
+The restore handler lives in `somewmrc.lua`'s `request::desktop_decoration` handler. If saved state exists for the screen's output name it consumes it, recreating tags in a two-pass approach (first recreate all tags and collect each client's tag list, then move clients and assign the full lists) so clients that belong to multiple tags keep all of them. With no saved state, it falls back to creating the default "1"-"9" tags.
 
-awful.permissions.saved_tags = {}
-
-function awful.permissions.tag_screen(t, context)
-    if context ~= "removed" then return end
-    local s = t.screen
-    local output_name = s and s.output and s.output.name
-    if not output_name then return end
-    if not awful.permissions.saved_tags[output_name] then
-        awful.permissions.saved_tags[output_name] = {}
-    end
-    table.insert(awful.permissions.saved_tags[output_name], {
-        name = t.name,
-        selected = t.selected,
-        layout = t.layout,
-        master_width_factor = t.master_width_factor,
-        master_count = t.master_count,
-        gap = t.gap,
-        clients = t:clients(),
-    })
-end
-
-tag.connect_signal("request::screen", awful.permissions.tag_screen)
-```
-
-The restore handler lives in `somewmrc.lua`'s `request::desktop_decoration`. It uses a two-pass approach to correctly preserve clients that belong to multiple tags:
-
-```lua
--- somewmrc.lua
-
-screen.connect_signal("request::desktop_decoration", function(s)
-    local output_name = s.output and s.output.name
-    local restore = output_name and awful.permissions.saved_tags[output_name]
-    if restore then
-        awful.permissions.saved_tags[output_name] = nil
-        -- Pass 1: recreate tags and build per-client tag lists
-        local client_tags = {}
-        for _, td in ipairs(restore) do
-            local t = awful.tag.add(td.name, {
-                screen = s,
-                layout = td.layout,
-                master_width_factor = td.master_width_factor,
-                master_count = td.master_count,
-                gap = td.gap,
-                selected = td.selected,
-            })
-            for _, c in ipairs(td.clients) do
-                if c.valid then
-                    if not client_tags[c] then
-                        client_tags[c] = {}
-                    end
-                    table.insert(client_tags[c], t)
-                end
-            end
-        end
-        -- Pass 2: move clients and assign full tag lists
-        for c, tags in pairs(client_tags) do
-            c:move_to_screen(s)
-            c:tags(tags)
-        end
-    else
-        awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" },
-                  s, awful.layout.layouts[1])
-    end
-    -- ... wibar setup follows
-end)
-```
+To replace or disable either handler, see the [Tag Persistence guide](/docs/guides/tag-persistence); the source lives in `awful/permissions/init.lua` and `somewmrc.lua`.
 
 ## Related Properties
 

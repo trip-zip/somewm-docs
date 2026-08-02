@@ -10,9 +10,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 SomeWM supports fractional output scaling for HiDPI displays through the `screen.scale` property.
 
-## What is Fractional Scaling?
-
-Display scaling makes UI elements larger on high-resolution displays:
+## Choosing a Scale
 
 | Scale | Effect | Use Case |
 |-------|--------|----------|
@@ -21,7 +19,7 @@ Display scaling makes UI elements larger on high-resolution displays:
 | 1.5 | 50% larger | 4K laptop displays |
 | 2.0 | Double size | 4K desktop / Retina |
 
-Without scaling, a 4K display makes everything tiny. Fractional scaling (1.25, 1.5, 1.75) offers more options than just integer scaling (1x, 2x).
+How scaling works under the hood, and why Wayland's version is crisp where X11's was blurry, is covered in [Display Scaling Concepts](/docs/concepts/display-scaling).
 
 ## Setting Scale from Lua
 

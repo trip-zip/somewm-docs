@@ -100,10 +100,8 @@ leftover room, pushing everything after it to the right edge.
   cycles to the next layout.
 - `widgets.tasklist(s, cfg?)` declares one row per visible client: icon,
   title, accent when focused, press to focus (and restore, if minimized).
-  Options: `filter` (default `widgets.filter.currenttags`; also
-  `widgets.filter.alltags`, `widgets.filter.minimized`, or any
-  `function(c, s)` predicate) and `width` (default `{ "grow", max = 180 }`
-  per entry).
+  Which clients it lists and how wide each row grows are configurable; see
+  [the widgets reference](/kiln/reference/widgets#bar-cells).
 - `widgets.systray(cfg?)` shows status-notifier tray items; `size` (default
   18) sets the icon size. Press activates an item, scrolling forwards the
   wheel.
@@ -120,19 +118,10 @@ Tree](/kiln/guides/inspector).
 ## 5. Style it
 
 The bar `cfg` is element cfg, so styling a bar is the same vocabulary as
-styling any box. What you leave unset falls to a documented default, filled
-per frame:
-
-| field | default | meaning |
-|---|---|---|
-| `edge` | `"top"` | `"top"`, `"bottom"`, `"left"`, or `"right"` |
-| `dir` | from the edge | `"row"` on top/bottom, `"column"` on left/right |
-| `h` / `w` | `theme.bar_height` (32) | the across-edge axis: `h` on a horizontal bar, `w` on a vertical one |
-| `pad` | `{ x = 8 }` or `{ y = 8 }` | padding along the bar |
-| `gap` | 6 | space between cells |
-| `align` | cross-axis center | cell alignment |
-| `color` | `theme.bg` | bar background |
-| `band` | `"above"` | stacking band for the bar's widgets |
+styling any box: `h` for the bar's height, `color`, `gap`, `pad`, and the
+rest. What you leave unset falls to a documented default, filled per frame;
+the [ui reference](/kiln/reference/ui#bars) lists every bar field and its
+default.
 
 ```lua
 	ui.bar(s, { edge = "bottom", h = 24, color = "#101014", gap = 10 },

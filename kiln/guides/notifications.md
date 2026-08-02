@@ -26,25 +26,11 @@ kiln.notify {
 }
 ```
 
-Accepted fields:
-
-| Field | Meaning |
-|---|---|
-| `title`, `message` | the text |
-| `urgency` | `"low"`, `"normal"` (default), `"critical"` |
-| `timeout` | seconds until auto-dismiss; `0` means sticky |
-| `icon` | image path |
-| `value` | a number 0 to 100; the display draws it as a progress bar |
-| `actions` | list of `{ key = "id", label = "text" }` buttons |
-| `screen` | where to show it (default: the focused screen) |
-| `id` | an id that names a live notification updates it in place |
-| anything else | kept verbatim on the object for your display or listeners to read |
-
-It returns the notification object. The update-in-place behavior of `id` is what makes a volume popup one repeated call rather than a stack of popups.
+It returns the notification object. The [notification reference](/kiln/reference/notification) lists every accepted field; the one worth knowing by heart is `id`, whose update-in-place behavior is what makes a volume popup one repeated call rather than a stack of popups.
 
 Critical notifications never expire on their own: dismissing them is the user's (or your code's) job. `n:dismiss()` is the one way any notification ends; `notification.all()` lists the currently visible ones.
 
-## 3. Timeouts and theme keys
+## 3. Tune timeouts per urgency
 
 When `timeout` is not given, the per-urgency default from the theme applies:
 
@@ -52,20 +38,11 @@ When `timeout` is not given, the per-urgency default from the theme applies:
 kiln.theme.notification_timeout = { low = 3, normal = 5, critical = 0 }
 ```
 
-The display reads a few more [theme variables](/kiln/reference/theme-variables): `notification_width` (default 320), `notification_offset` (inset from the screen edges, 12), `notification_gap` (between stacked popups, 8), and `notification_radius` (0). Urgency shows as the border color: `theme.urgent` for critical, `theme.muted` otherwise.
+The display's size, insets, stacking gap, corner radius, and urgency border colors are all `notification_*` [theme variables](/kiln/reference/theme-variables).
 
-## 4. Signals and actions
+## 4. React to notifications: rules, actions, do-not-disturb
 
-The `notification` global is a class like `client` and `tag`:
-
-| Signal | Payload | Fires |
-|---|---|---|
-| `added` | none | before the notification is first shown |
-| `dismissed` | reason string | when it ends, however it ends |
-| `invoked` | action key | when an action button is pressed |
-| `property::<name>` | new value | on any property write |
-
-`added` fires before the first frame that draws the notification, so mutating it there is a rule system in a few lines:
+The `notification` global is a class like `client` and `tag`; its four signals are in the [signals reference](/kiln/reference/signals). The one that carries most weight here is `added`: it fires before the first frame that draws the notification, so mutating it there is a rule system in a few lines:
 
 ```lua
 notification.on("added", function(n)
@@ -75,9 +52,7 @@ notification.on("added", function(n)
 end)
 ```
 
-Live properties really are live: writing `n.timeout` re-arms the expiry, and writing `n.title`, `n.message`, `n.urgency`, `n.icon`, or `n.actions` redraws.
-
-Actions are invoked with `n:invoke(key)`; the stock display wires each action button's press to exactly that. Invoking reports the action back to the sending app (for a notification that arrived over DBus) and dismisses the notification.
+Live properties really are live: writing `n.timeout` re-arms the expiry, and writing the text or icon redraws. Actions are invoked with `n:invoke(key)`; the stock display wires each action button's press to exactly that.
 
 Do-not-disturb is one flag: `notification.suspended = true` queues arrivals instead of showing them; setting it back to `false` shows the queue in arrival order. `notification.pending` is the read-only queue.
 

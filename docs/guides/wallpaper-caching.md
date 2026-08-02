@@ -42,15 +42,20 @@ The first time you visit a tag, the wallpaper loads normally (~20ms). Every subs
 For instant first-switch too, preload wallpapers at startup:
 
 ```lua
--- Preload all wallpapers into cache
+-- Preload all wallpapers into cache (screen defaults to primary)
 root.wallpaper_cache_preload({
     "/home/user/wallpapers/mountains.jpg",
     "/home/user/wallpapers/forest.png",
     "/home/user/wallpapers/ocean.jpg",
 })
+
+-- For multi-monitor, preload per screen:
+for s in screen do
+    root.wallpaper_cache_preload(my_wallpaper_list, s)
+end
 ```
 
-This loads all images during startup so even the first visit to each tag is instant.
+This loads all images during startup so even the first visit to each tag is instant. `root.wallpaper_cache_has(path, s)` tells you whether a wallpaper is already cached.
 
 ## Multi-Monitor Support
 
@@ -68,77 +73,15 @@ tag.connect_signal("property::selected", function(t)
 end)
 ```
 
-## Cache API
+## Freeing Memory
 
-SomeWM provides four functions for cache control:
-
-### Check if Cached
+Cached wallpapers live in GPU memory. The cache holds up to 32 entries (all screens combined) and evicts the least recently used when full, so a typical multi-tag setup fits comfortably. If memory is tight (many unique 4K wallpapers), free everything and let it rebuild as you switch tags:
 
 ```lua
--- Check if wallpaper is cached for a specific screen
-if root.wallpaper_cache_has("/path/to/wallpaper.jpg", screen.primary) then
-    -- Already in cache for this screen
-end
-```
-
-### Show Cached Wallpaper
-
-```lua
--- Returns true if cache hit, false if not cached
--- You normally don't need to call this directly
-local hit = root.wallpaper_cache_show("/path/to/wallpaper.jpg", screen.primary)
-```
-
-This is used internally by the automatic caching.
-
-### Preload Multiple Wallpapers
-
-```lua
--- Preload wallpapers for a specific screen
--- Screen defaults to primary if not specified
-local count = root.wallpaper_cache_preload({
-    "/path/to/image1.jpg",
-    "/path/to/image2.png",
-    "/path/to/image3.jpg",
-}, screen.primary)
-print("Preloaded " .. count .. " wallpapers")
-
--- For multi-monitor, preload for each screen:
-for s in screen do
-    root.wallpaper_cache_preload({
-        tag_wallpapers[1],
-        tag_wallpapers[2],
-        -- ...
-    }, s)
-end
-```
-
-### Clear Cache
-
-```lua
--- Free all cached wallpaper textures (all screens)
 root.wallpaper_cache_clear()
 ```
 
-Use this to free GPU memory if needed. The cache will rebuild as you switch tags.
-
-## Cache Limits
-
-The cache holds up to 32 wallpapers total (all screens combined). With a typical 2-screen setup and 9 tags each, that's 18 wallpapers which fits comfortably.
-
-When the cache is full, the least recently used wallpaper is evicted to make room for new ones.
-
-## Memory Usage
-
-Each cached wallpaper uses GPU memory:
-
-| Resolution | Memory per Wallpaper |
-|------------|---------------------|
-| 1920x1080 | ~8 MB |
-| 2560x1440 | ~15 MB |
-| 3840x2160 | ~33 MB |
-
-With 16 cached 1080p wallpapers, expect ~128 MB of GPU memory usage. For 4K displays, consider reducing the number of unique wallpapers or clearing the cache when memory is tight.
+The memory arithmetic and eviction design are covered in [Wallpaper Caching Concepts](/docs/concepts/wallpaper-caching).
 
 ## What Gets Cached
 

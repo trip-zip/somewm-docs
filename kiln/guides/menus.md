@@ -6,9 +6,7 @@ sidebar_position: 5
 
 # Menus
 
-A kiln menu is a floating column of pressable rows drawn by the compositor itself: no popup window, no external process. It comes with its own dismissal behavior: a press anywhere outside the menu closes it.
-
-## 1. Show a menu
+A kiln menu is a floating column of pressable rows drawn by the compositor itself: no popup window, no external process. It comes with its own dismissal behavior: a press anywhere outside the menu closes it. The smallest one is a list of labeled actions:
 
 ```lua
 local kiln = require("kiln")
@@ -22,53 +20,9 @@ kiln.menu.show {
 }
 ```
 
-`kiln.menu.show(cfg)` takes:
+Each item is label first, payload second, and the payload's type is the whole schema: a function is an action, a nested table is a submenu, and an optional `icon = "/path"` draws an image before the label. The full cfg and item schema are in the [kiln.menu reference](/kiln/reference/menu); this guide is the recipes.
 
-| Key | Meaning |
-|---|---|
-| `items` | the item list (required) |
-| `screen` | which screen to open on (default: the focused screen) |
-| `x`, `y` | open at a point, in screen coordinates (default 0, 0) |
-| `under` | an element id; the menu drops below that element instead of using `x`/`y` |
-
-It returns the open-menu state; `kiln.menu.open` is non-nil while a menu is up, and `kiln.menu.close()` closes it (submenus included). `kiln.ui.menu` is the same function under another name.
-
-## 2. Items
-
-Each item is a table: label first, payload second.
-
-```lua
-local items = {
-	{ "label", action_function },          -- a row that runs the function
-	{ "label", { subitems } },             -- a row that opens a submenu
-	{ "label", action, icon = "/path" },   -- optional icon before the label
-}
-```
-
-The payload's type is the whole schema: a function is an action, a table is a submenu. Actions run after the menu closes, so an action can itself open another menu.
-
-`icon` is an image path (the same values `ui.image` accepts); `kiln.icon.client(c)` resolves a client's icon into one, which is how the window-list menu gets its icons.
-
-## 3. Submenus
-
-A nested table opens as a second column attached to the right edge of its row. It opens on hover and on press, and it nests as deep as you like:
-
-```lua
-kiln.menu.show {
-	items = {
-		{ "session", {
-			{ "lock", kiln.lock },
-			{ "reload config", kiln.reload },
-			{ "quit", kiln.quit },
-		} },
-		{ "terminal", function() kiln.spawn("foot") end },
-	},
-}
-```
-
-Moving the pointer to a different row closes the submenu chain below it; walking into the submenu keeps its parent row highlighted.
-
-## 4. Attach to a bar element with under
+## Attach a menu to a bar button
 
 Passing `under = "<element id>"` anchors the menu to a declared element instead of a point. A root menu opened under a bar button drops from the button's bottom edge, clearing the bar:
 
@@ -99,21 +53,9 @@ screen.on("added", function(s)
 end)
 ```
 
-The open-or-close check makes the button a toggle: pressing it while its menu is up dismisses instead of reopening.
+The open-or-close check makes the button a toggle: pressing it while its menu is up dismisses instead of reopening. `kiln.menu.open` is non-nil exactly while a menu is up, which is what makes the check work.
 
-## 5. The window list
-
-`kiln.menu.client_list(cfg)` is a prebuilt menu over every mapped client: one row per window with its icon and title, and pressing a row unminimizes, views its tag, focuses, and raises it. `cfg` passes through to `menu.show`, so `screen`, `under`, `x`, and `y` all work:
-
-```lua
-kiln.key {
-	mods = { "mod" }, key = "e",
-	desc = "window list", group = "client",
-	press = function() kiln.menu.client_list {} end,
-}
-```
-
-## 6. A root menu on right-click
+## A root menu on right-click
 
 A button bind with `on = "root"` fires when the press lands on empty desktop, which is the classic place for a main menu:
 
@@ -135,27 +77,50 @@ kiln.button { mods = {}, button = 3, on = "root",
 	end }
 ```
 
-## Keyboard navigation
+## The window list on a key
 
-An open menu holds the keyboard. The defaults: Down and Up move the
-selection, Right, Return, or KP_Enter enter a submenu or run the row, Left
-and Escape close one level (and the whole chain at the root). The map is
-`kiln.menu.keys`, keysym to verb, replaceable one key at a time or wholesale:
+`kiln.menu.client_list(cfg)` is a prebuilt menu over every mapped client: one row per window with its icon and title, and pressing a row unminimizes, views its tag, focuses, and raises it. `cfg` passes through to `menu.show`, so `screen`, `under`, `x`, and `y` all work:
+
+```lua
+kiln.key {
+	mods = { "mod" }, key = "e",
+	desc = "window list", group = "client",
+	press = function() kiln.menu.client_list {} end,
+}
+```
+
+## Group actions into submenus
+
+A nested table opens as a second column attached to the right edge of its row, on hover and on press, nesting as deep as you like:
+
+```lua
+kiln.menu.show {
+	items = {
+		{ "session", {
+			{ "lock", kiln.lock },
+			{ "reload config", kiln.reload },
+			{ "quit", kiln.quit },
+		} },
+		{ "terminal", function() kiln.spawn("foot") end },
+	},
+}
+```
+
+Moving the pointer to a different row closes the submenu chain below it; walking into the submenu keeps its parent row highlighted.
+
+## Drive it from the keyboard
+
+An open menu holds the keyboard: arrows move, Return enters or runs, Escape backs out ([the full default map](/kiln/reference/menu#keyboard-navigation)). If you want vim keys, each is one assignment:
 
 ```lua
 kiln.menu.keys.j = "down"
 kiln.menu.keys.k = "up"
 ```
 
-`kiln.menu.nav(verb)` drives the same machinery from code, with verbs
-`"down"`, `"up"`, `"enter"`, `"back"`, and `"close"`; it returns whether the
-verb was handled.
-
-Menu colors and sizing come from the theme: `menu_width` (default 200) and `menu_height` (row height, default 24), with `bg` for the panel, `accent` for its border, and `bg2` for the highlighted row.
+Menu colors and sizing come from `menu_*` [theme variables](/kiln/reference/theme-variables).
 
 ## See also
 
+- [kiln.menu reference](/kiln/reference/menu)
 - [App Launcher](/kiln/guides/app-launcher)
 - [A bar from scratch](/kiln/tutorials/a-bar-from-scratch)
-- [UI reference](/kiln/reference/ui)
-- [Theme variables](/kiln/reference/theme-variables)

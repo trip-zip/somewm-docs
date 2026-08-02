@@ -41,6 +41,7 @@ The `kiln` stdlib: everything a config composes with.
 | [Keys, Buttons, and Rules](keybindings-and-rules.md) | Binding keys and pointer buttons, and matching clients with rules. |
 | [kiln.defaults](defaults.md) | The replaceable default policies the runtime installs. |
 | [kiln.placement](placement.md) | Placement helpers for floating clients. |
+| [kiln.menu](menu.md) | Popup menus: the show cfg, item schema, keyboard navigation, and the client list. |
 | [Theme Variables](theme-variables.md) | Every kiln.theme key with its default, plus kiln.modkey. |
 
 ## System

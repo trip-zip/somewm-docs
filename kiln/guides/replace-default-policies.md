@@ -10,24 +10,11 @@ Everything kiln decides on your behalf is a function in `kiln.defaults`, and eve
 
 ## 1. The ten policies
 
-| Policy | Signature | Decides |
-|---|---|---|
-| `successor` | `(gone) -> client or nil` | who gets focus when the focused client goes away |
-| `activate` | `(c, ctx)` | what a client's request to be focused does |
-| `layer` | `(l)` | how a layer-shell surface (bars, launchers) is sized and answered |
-| `layer_keyboard` | `(l)` | whether a layer surface gets the keyboard |
-| `layer_release` | `(l)` | cleanup when a layer surface goes away |
-| `notify_display` | `(s)` | the entire notification UI |
-| `fullscreen` | `(c, on)` | what a fullscreen request does |
-| `maximize` | `(c, on)` | what a maximize request does |
-| `minimize` | `(c, on)` | what a minimize request does |
-| `close` | `(c)` | what an external close request (a taskbar button) does |
-
-Stock behavior, briefly: `successor` picks the most recently focused living client visible on the same screen. `activate` focuses a user-initiated request (one backed by a valid activation token) and marks anything else urgent. The `layer` trio implements standard layer-shell sizing and keyboard rules. `notify_display` is the stacked top-right popup UI. The four request policies simply honor the ask: `fullscreen`/`maximize`/`minimize` write the matching client property, `close` calls `c:close()`.
+They cover focus succession (`successor`), activation (`activate`), layer-shell handling (`layer`, `layer_keyboard`, `layer_release`), the notification UI (`notify_display`), and the four external requests (`fullscreen`, `maximize`, `minimize`, `close`). The [defaults reference](/kiln/reference/defaults) documents each one's signature, when it runs, how it is registered, and what the stock version does.
 
 ## 2. The two replacement patterns
 
-The general recipe is always: understand what the stock function does (the table above, plus the relevant reference page), write your own with the same signature, install it. How you install it depends on how the policy is invoked.
+The general recipe is always: understand what the stock function does (its section in the [defaults reference](/kiln/reference/defaults)), write your own with the same signature, install it. How you install it depends on how the policy is invoked.
 
 **Called through the table.** `successor` and `notify_display` are looked up on `kiln.defaults` at call time, so replacing them is one assignment:
 

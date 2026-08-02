@@ -65,7 +65,7 @@ Only four things stayed in C, because Lua cannot do them without boxing a cdata 
 
 ## What is exposed
 
-`core.open` takes a table mirroring `Clay_ElementDeclaration` one to one, so the raw Clay shape is reachable from a config. The `ui.*` layer is shorthand over it:
+`core.open` takes a table mirroring `Clay_ElementDeclaration` one to one, so the raw Clay shape is reachable from a config. The `ui.*` layer is shorthand over it. The [ui reference](/kiln/reference/ui) owns each prop's accepted values and semantics; this table only names which Clay field each one lands in:
 
 | `ui.*` prop | Clay field |
 |---|---|

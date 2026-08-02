@@ -21,24 +21,7 @@ for s in screen do
 end
 ```
 
-### Accessing Screens
-
-```lua
--- The primary screen (usually the first one)
-local primary = screen.primary
-
--- Get screen by index (1-based)
-local first = screen[1]
-local second = screen[2]
-
--- The screen with keyboard focus
-local focused = awful.screen.focused()
-
--- Iterate all screens
-for s in screen do
-    -- Do something with each screen
-end
-```
+The recipes below use three idioms: `screen.primary`, `awful.screen.focused()`, and iterating every screen with `for s in screen do ... end`. The [Screen Reference](/docs/reference/screen) covers the full screen API.
 
 ## Per-Screen Setup
 
@@ -110,24 +93,6 @@ c:move_to_screen()
 -- Move client to screen by direction
 c:move_to_screen(c.screen:get_next_in_direction("right"))
 ```
-
-## Screen Geometry
-
-Each screen has geometry properties:
-
-```lua
-local s = awful.screen.focused()
-
--- Full screen area
-print(s.geometry.x, s.geometry.y)       -- Position
-print(s.geometry.width, s.geometry.height) -- Size
-
--- Workarea (minus panels/struts)
-print(s.workarea.x, s.workarea.y)
-print(s.workarea.width, s.workarea.height)
-```
-
-The `workarea` is the usable space after subtracting wibars and other panels.
 
 ## Handling Hotplug
 
@@ -282,6 +247,21 @@ awful.screen.connect_for_each_screen(function(s)
             -- ...
         }
     end
+end)
+```
+
+### Different Wallpaper Per Screen
+
+Replace the default `request::wallpaper` handler with one that picks by screen index:
+
+```lua
+local wallpapers = {
+    "/home/user/wallpapers/primary.jpg",
+    "/home/user/wallpapers/secondary.jpg",
+}
+
+screen.connect_signal("request::wallpaper", function(s)
+    gears.wallpaper.maximized(wallpapers[s.index] or wallpapers[1], s, true)
 end)
 ```
 

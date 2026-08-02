@@ -21,7 +21,7 @@ awful.spawn("pasystray")
 
 **Problem:** These run every time you reload your config, spawning duplicates.
 
-## spawn.once - Run Once Per Session
+## Run Something Once Per Session (`spawn.once`)
 
 Use `awful.spawn.once` to only run on initial startup, not on config reload:
 
@@ -34,7 +34,7 @@ awful.spawn.once("pasystray")
 
 `spawn.once` tracks commands by their command string. If you reload config, it won't spawn duplicates.
 
-## spawn.single_instance - Check for Existing Process
+## Avoid Duplicates Across Restarts (`spawn.single_instance`)
 
 `spawn.single_instance` checks if the process is already running:
 
@@ -50,7 +50,7 @@ The difference from `spawn.once`:
 
 Use `single_instance` for apps you might restart manually, or that might crash and need re-launching.
 
-## spawn.with_shell - For Complex Commands
+## Run Commands That Need a Shell (`spawn.with_shell`)
 
 Some commands need shell features (pipes, redirects, `&&`, `||`):
 

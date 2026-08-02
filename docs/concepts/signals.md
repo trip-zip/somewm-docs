@@ -49,18 +49,9 @@ This is the same pattern LOVE and Bitsquid use: the engine (C) runs the loop and
 
 ### What's queued
 
-C-emitted signals are queued. As of this writing, the queue is wired for:
+C-emitted signals are queued, wired incrementally by group: property changes, focus, mouse motion, lifecycle, and a set of `request::*` signals so far. Conversion is ongoing, so the exact membership lives in one place: the [Signals Reference dispatch section](../reference/signals.md#dispatch) is the current list.
 
-| Group | Signals |
-|-------|---------|
-| Property | `property::geometry`, `property::position`, `property::size`, `property::x`, `property::y`, `property::width`, `property::height`, `property::active` |
-| Focus | `focus`, `unfocus`, `client::focus`, `client::unfocus` |
-| Mouse | `mouse::enter`, `mouse::leave`, `mouse::move` (coalesced) |
-| Lifecycle | `list`, `swapped` |
-| Request | `request::activate`, `request::urgent`, `request::tag`, `request::select` |
-| Systray | `request::secondary_activate`, `request::context_menu`, `request::scroll` |
-
-Other C-emitted signals (`request::manage`, `request::unmanage`, `request::titlebars`, `request::border`, the various `request::default_*`, scanning, layer-shell) still dispatch synchronously. Conversion is incremental; the list will grow.
+Other C-emitted signals (`request::manage`, `request::unmanage`, `request::titlebars`, and the rest) still dispatch synchronously.
 
 ### What stays synchronous
 

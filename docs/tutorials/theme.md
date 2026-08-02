@@ -12,8 +12,8 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 - How `beautiful` variables flow to every widget
 - How to write and load a theme file
-- How to build a swappable color scheme system
-- How to set wallpapers and recolor icons
+- How to organize colors into a reusable palette
+- How to set a wallpaper and recolor icons
 
 </YouWillLearn>
 
@@ -89,7 +89,17 @@ local config_dir = os.getenv("HOME") .. "/.config/somewm"
 beautiful.init(config_dir .. "/theme/theme.lua")
 ```
 
-Press **Mod4 + Ctrl + r** to reload.
+Press **Mod4 + Ctrl + r** to reload. Your theme is live: windows now sit apart with a small gap between them (`useless_gap` at work), and the focused window's border is slate blue instead of the default.
+
+## Watch a Change Land
+
+The edit-reload-observe loop is the whole workflow, so run it once deliberately. In your `theme.lua`, change the gap:
+
+```lua
+theme.useless_gap = dpi(16)
+```
+
+Reload with **Mod4 + Ctrl + r**. The windows jump apart; the gap is now unmissable. Change it back to taste. Every theme variable works this way: edit, reload, see it.
 
 ## Understanding DPI Scaling
 
@@ -139,47 +149,7 @@ theme.bg_urgent = colors.red
 theme.border_color_active = colors.green
 ```
 
-## Supporting Multiple Color Schemes
-
-Take it further by defining multiple palettes:
-
-```lua
-local colors = {
-    gruvbox = {
-        bg      = "#282828",
-        fg      = "#ebdbb2",
-        red     = "#cc241d",
-        green   = "#98971a",
-        yellow  = "#d79921",
-        blue    = "#458588",
-        purple  = "#b16286",
-        orange  = "#d65d0e",
-    },
-    nord = {
-        bg      = "#2E3440",
-        fg      = "#D8DEE9",
-        red     = "#BF616A",
-        green   = "#A3BE8C",
-        yellow  = "#EBCB8B",
-        blue    = "#8FBCBB",
-        purple  = "#B48EAD",
-        orange  = "#D08770",
-    },
-}
-
--- Switch schemes by changing this one line
-local color_scheme = "gruvbox"
-local c = colors[color_scheme]
-
-theme.bg_normal = c.bg
-theme.fg_normal = c.fg
--- ... etc
-```
-
-{/* TODO: Screenshot needed
-   - Side-by-side comparison of gruvbox vs nord theme
-   - Show the same desktop with different color schemes
-*/}
+Once your theme reads from a palette table, swappable color schemes come almost free: keep several palettes keyed by name (`colors.gruvbox`, `colors.nord`) and select one at the top of the file. Switching schemes becomes a one-line edit and a reload.
 
 ## Theme Variable Reference
 
@@ -193,46 +163,13 @@ The most commonly customized categories include:
 
 ## Setting a Wallpaper
 
-### Simple Wallpaper
+Point the `wallpaper` variable at an image:
 
 ```lua
 theme.wallpaper = "/home/user/wallpapers/mountain.jpg"
 ```
 
-This is used by the default `request::wallpaper` handler in your rc.lua.
-
-### Per-Screen Wallpapers
-
-For different wallpapers on each screen, modify your rc.lua:
-
-```lua
-local wallpapers = {
-    "/home/user/wallpapers/primary.jpg",
-    "/home/user/wallpapers/secondary.jpg",
-}
-
-screen.connect_signal("request::wallpaper", function(s)
-    gears.wallpaper.maximized(wallpapers[s.index] or wallpapers[1], s, true)
-end)
-```
-
-### Wallpaper Functions
-
-The `gears.wallpaper` module offers several options:
-
-```lua
--- Fill screen, cropping if needed
-gears.wallpaper.maximized("/path/to/wallpaper.jpg", s, true)
-
--- Fit to screen, may show background color
-gears.wallpaper.fit("/path/to/wallpaper.jpg", s, "#000000")
-
--- Tile a pattern
-gears.wallpaper.tiled("/path/to/pattern.png", s)
-
--- Solid color
-gears.wallpaper.set("#282828")
-```
+Reload, and the default `request::wallpaper` handler in your rc.lua draws it filling each screen. (Fit, tile, and solid-color modes exist too; see [gears.wallpaper](https://awesomewm.org/apidoc/theme_related_libraries/gears.wallpaper.html). For a different wallpaper on each monitor, see the [Multi-Monitor guide](/docs/guides/multi-monitor).)
 
 ## Recoloring Icons
 
@@ -251,48 +188,14 @@ This is especially useful for layout icons in the wibar.
 
 ## Customizing Specific Widgets
 
-### Taglist
+Every widget reads its own family of theme variables, named by prefix. The taglist, for example:
 
 ```lua
-theme.taglist_bg_focus    = colors.grey
-theme.taglist_bg_occupied = nil  -- use default
-theme.taglist_bg_empty    = colors.bg
-theme.taglist_bg_urgent   = colors.red
-
-theme.taglist_fg_focus    = colors.yellow
-theme.taglist_fg_occupied = colors.orange
-theme.taglist_fg_empty    = colors.fg
+theme.taglist_bg_focus = colors.grey
+theme.taglist_fg_focus = colors.yellow
 ```
 
-### Tasklist
-
-```lua
-theme.tasklist_bg_focus = colors.grey
-theme.tasklist_fg_focus = colors.fg
-theme.tasklist_disable_icon = true  -- text-only tasklist
-```
-
-### Notifications
-
-```lua
-theme.notification_bg = colors.bg
-theme.notification_fg = colors.fg
-theme.notification_border_color = colors.orange
-theme.notification_border_width = dpi(2)
-theme.notification_icon_size = dpi(64)
-```
-
-### Hotkeys Popup
-
-```lua
-theme.hotkeys_bg = colors.bg
-theme.hotkeys_fg = colors.fg
-theme.hotkeys_border_color = colors.yellow
-theme.hotkeys_border_width = dpi(2)
-theme.hotkeys_modifiers_fg = colors.orange
-theme.hotkeys_label_bg = colors.green
-theme.hotkeys_label_fg = colors.fg
-```
+The same pattern covers the tasklist (`tasklist_*`), notifications (`notification_*`), the hotkeys popup (`hotkeys_*`), and more. The [Theme Variables Reference](/docs/reference/beautiful/theme-variables) lists every variable with its source.
 
 ## Complete Example Theme
 

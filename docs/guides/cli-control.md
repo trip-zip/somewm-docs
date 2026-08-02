@@ -38,159 +38,31 @@ somewm-client client help
 somewm-client input help
 ```
 
-## Window (Client) Management
+## Everyday Control
 
-### List Windows
-
-```bash
-# List all windows with IDs
-somewm-client client list
-```
-
-Output format:
-```
-id=1 title="Firefox" class="firefox" tags=1 floating=false
-id=2 title="Alacritty" class="Alacritty" tags=1 floating=false
-id=3 title="Code - project" class="code" tags=2 floating=false
-```
-
-Client IDs are simple integers assigned when windows open. They increment but don't reuse within a session, and reset when the compositor restarts. The `id` property is read-only in Lua (`c.id`).
-
-### Focus Window
+The [somewm-client reference](/docs/reference/somewm-client) documents the full command surface (clients, tags, screens, input, screenshots, session). A taste of what one-liners cover:
 
 ```bash
-# Focus window by ID
-somewm-client client focus 1
+somewm-client client list              # windows with IDs
+somewm-client client focus 3           # focus by ID
+somewm-client tag view "web"           # switch workspace
+somewm-client screen scale 1.5         # set focused screen scale
+somewm-client screenshot ~/shot.png    # capture to file
+somewm-client lock                     # lock the session
 ```
 
-### Close Window
+`lock` requires a lock surface to be registered (i.e., `require("lockscreen").init()` in rc.lua).
+
+## Tune Input Devices at Runtime <SomewmOnly />
+
+Try input settings live, then persist the keepers in rc.lua:
 
 ```bash
-# Close window by ID
-somewm-client client close 1
-
-# Close focused window
-somewm-client client close
+somewm-client input tap_to_click 1     # set
+somewm-client input accel_speed        # query (no argument)
 ```
 
-### Window Properties
-
-```bash
-# Toggle floating
-somewm-client client floating toggle
-
-# Toggle fullscreen
-somewm-client client fullscreen toggle
-
-# Toggle maximized
-somewm-client client maximized toggle
-
-# Toggle minimized
-somewm-client client minimized toggle
-
-# Toggle ontop
-somewm-client client ontop toggle
-```
-
-## Tag Management
-
-```bash
-# View tag by index (1-9)
-somewm-client tag view 3
-
-# View tag by name
-somewm-client tag view "web"
-
-# List all tags
-somewm-client tag list
-
-# Toggle tag visibility
-somewm-client tag toggle 2
-```
-
-## Screen Management
-
-```bash
-# List screens
-somewm-client screen list
-
-# Get/set scale
-somewm-client screen scale           # Get current scale
-somewm-client screen scale 1.5       # Set focused screen to 1.5
-somewm-client screen scale 1 1.5     # Set screen 1 to 1.5
-```
-
-## Input Configuration <SomewmOnly />
-
-Change input settings at runtime without editing rc.lua:
-
-### Pointer Settings
-
-```bash
-# Tap to click (0 = off, 1 = on)
-somewm-client input tap_to_click 1
-
-# Natural scrolling
-somewm-client input natural_scrolling 1
-
-# Pointer speed (-1.0 to 1.0)
-somewm-client input accel_speed 0.5
-
-# Left-handed mode
-somewm-client input left_handed 1
-
-# Scroll method ("two_finger", "edge", "button", or nil for default)
-somewm-client input scroll_method two_finger
-
-# Scroll button (for button scroll)
-somewm-client input scroll_button 274
-```
-
-### Keyboard Settings
-
-```bash
-# Repeat rate (keys per second)
-somewm-client input keyboard_repeat_rate 30
-
-# Repeat delay (milliseconds)
-somewm-client input keyboard_repeat_delay 300
-
-# Keyboard layout
-somewm-client input xkb_layout "us"
-
-# Layout variant
-somewm-client input xkb_variant "dvorak"
-
-# XKB options
-somewm-client input xkb_options "ctrl:nocaps"
-```
-
-### Query Current Values
-
-```bash
-# Get current value (no argument)
-somewm-client input tap_to_click
-somewm-client input accel_speed
-somewm-client input xkb_layout
-```
-
-## Screenshots
-
-```bash
-# Take screenshot of focused screen
-somewm-client screenshot
-
-# Save to specific path
-somewm-client screenshot ~/Pictures/shot.png
-```
-
-## Session Locking <SomewmOnly />
-
-```bash
-somewm-client lock
-```
-
-This triggers `awesome.lock()` via IPC. Requires a lock surface to be registered (i.e., `require("lockscreen").init()` must have been called in rc.lua).
+All 24 properties (pointer and keyboard) are listed in the [input commands reference](/docs/reference/somewm-client#input-commands).
 
 ## Lua Evaluation
 
@@ -230,17 +102,9 @@ return table.concat(result, '\n')
 "
 ```
 
-## Exit Codes
+## Exit Codes in Scripts
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | Connection failed (SomeWM not running) |
-| 2 | Command not found |
-| 3 | Invalid arguments |
-| 4 | Command execution failed |
-
-Use in scripts:
+Exit codes distinguish "not running" from "bad command" ([full table](/docs/reference/somewm-client#exit-codes)):
 
 ```bash
 if somewm-client ping > /dev/null 2>&1; then

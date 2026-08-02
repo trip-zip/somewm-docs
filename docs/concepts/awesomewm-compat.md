@@ -50,46 +50,11 @@ When we say an API is compatible, we mean:
 
 ## Compatibility Status
 
-### Fully Compatible Modules
+The broad picture: the standard library surface (`awful`, `wibox`, `gears`, `beautiful`, `naughty`, `ruled`) works as in AwesomeWM, and the exceptions are small and enumerable. The exceptions live in exactly one place: the [Deviations reference](/docs/reference/deviations) is the canonical list of what is stubbed, what is partial, and what SomeWM adds. This page explains *why* the deviations exist; it does not duplicate the list.
 
-These work exactly as in AwesomeWM:
+The pattern behind most stubs is the same: an API whose entire job was to touch X11 machinery that Wayland deliberately does not have. The clearest case is the X-property family (`register_xproperty` and friends). In X11, windows have arbitrary named properties (atoms) that apps and WMs use to communicate: `_NET_WM_NAME`, `_MOTIF_WM_HINTS`, custom properties. Wayland has no equivalent; apps communicate via Wayland protocols instead. So those APIs exist (configs don't error) but cannot do anything meaningful.
 
-| Category | Modules |
-|----------|---------|
-| **Window Management** | `awful.client`, `awful.tag`, `awful.screen`, `awful.layout` |
-| **Input** | `awful.key`, `awful.button`, `awful.keyboard`, `awful.mouse` |
-| **Spawning** | `awful.spawn`, `ruled.client` |
-| **Widgets** | All `wibox.*` modules |
-| **Utilities** | All `gears.*` modules |
-| **Theming** | `beautiful` |
-| **Notifications** | `naughty`, `ruled.notification` |
-
-### Stubbed APIs (Exist but Don't Function)
-
-These APIs exist so configs don't error, but they don't do anything meaningful:
-
-| API | What It Did in AwesomeWM | Why Stubbed |
-|-----|--------------------------|-------------|
-| `awesome.register_xproperty()` | Register X11 window property | X11 properties don't exist on Wayland |
-| `awesome.get_xproperty()` | Read X11 root window property | Always returns nil |
-| `awesome.set_xproperty()` | Write X11 root window property | No-op, prints warning |
-| `c:get_xproperty()` | Read X11 client property | Always returns nil |
-| `c:set_xproperty()` | Write X11 client property | No-op |
-
-#### Why X Properties Can't Work
-
-In X11, windows have arbitrary named properties (atoms) that apps and WMs use to communicate. Examples: `_NET_WM_NAME`, `_MOTIF_WM_HINTS`, custom properties. Wayland has no equivalent - apps communicate via Wayland protocols instead.
-
-### Working APIs (Previously Stubbed)
-
-These were stubs but are now fully implemented:
-
-| API | Status | Notes |
-|-----|--------|-------|
-| `root.fake_input()` | **Working** | Injects key/button/motion events via wlr_seat |
-| `awesome.restart()` | **Working** | Exec's self to restart (clients reconnect) |
-
-`root.fake_input()` supports all event types: `key_press`, `key_release`, `button_press`, `button_release`, and `motion_notify`.
+The inverse pattern also exists: APIs that were impossible early on and later got Wayland-native implementations, like `root.fake_input()` (the compositor injects events itself) and `awesome.restart()` (an in-process Lua state rebuild instead of an exec). The reference tracks their current status.
 
 ### Behavioral Differences
 
@@ -113,36 +78,7 @@ AwesomeWM embeds X11 windows directly via the `_NET_SYSTEMTRAY` protocol. SomeWM
 
 ## Testing Your Config
 
-### Before Migrating
-
-1. **Check for X11-specific code**:
-   - `get_xproperty()` / `set_xproperty()` usage (these are stubs)
-
-2. **Check for external X11 tools**:
-   - Replace `xclip` with `wl-copy`/`wl-paste`
-   - Replace `scrot`/`import` with `grim`/`slurp`
-   - Replace `xdotool` with somewm-client eval
-
-### Quick Migration Checklist
-
-```lua
--- OLD (X11)
-awful.spawn("xclip -selection clipboard")
--- NEW (Wayland)
-awful.spawn("wl-copy")
-
--- OLD (X11)
-awful.spawn("scrot ~/screenshot.png")
--- NEW (Wayland)
-awful.spawn("grim ~/screenshot.png")
-
--- These X property APIs are no-ops on Wayland
-c:set_xproperty("MY_PROP", value)  -- Does nothing
-
--- These now work on SomeWM!
-awesome.restart()  -- Restarts the compositor
-root.fake_input("key_press", "a")  -- Injects input
-```
+The practical migration workflow (scanning your config with `somewm --check`, the X11-to-Wayland tool substitutions, suppressing false positives) lives in the [Migrating guide](/docs/getting-started/migrating).
 
 ### Running AwesomeWM Tests
 

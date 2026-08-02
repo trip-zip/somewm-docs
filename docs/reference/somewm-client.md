@@ -16,6 +16,8 @@ IPC command-line tool for controlling SomeWM. This is SomeWM's equivalent to Awe
 somewm-client <command> [arguments...]
 ```
 
+Over 90 commands are registered; this page documents the common ones. Run `somewm-client commands` for the authoritative list in your build, and `somewm-client eval` for anything without a dedicated command. Last synced against the SomeWM source: `6de5e1ef3`.
+
 ## General Commands
 
 | Command | Description |

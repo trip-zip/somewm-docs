@@ -6,7 +6,7 @@ sidebar_position: 8
 
 # Limitations
 
-kiln is a proof of concept, and this page is the honest inventory: what the model excludes on purpose, what is simply not built yet, and what external tools can and cannot expect. Where a workaround exists, it is linked.
+kiln is a proof of concept with three honest kinds of gaps: things the model excludes on purpose, things simply not built yet, and things external tools expect that the protocol list does not grant. Where a workaround exists, it is linked.
 
 ## The drawing vocabulary
 
@@ -41,9 +41,9 @@ What does not:
 
 `kiln.input` settings (acceleration, natural scrolling, tap-to-click, and the rest) apply to every device. There are no per-device settings, so a laptop with an external mouse cannot give the touchpad and the mouse different acceleration profiles. Single-pointer setups lose nothing. See [Input devices](/kiln/guides/input-devices).
 
-## The AwesomeWM ecosystem
+## External widget libraries
 
-AwesomeWM widget libraries (vicious, lain, bling, awesome-wm-widgets) are wibox and cairo code, and cannot be ported: the machinery they are written against does not exist in kiln, by design. Their outcomes are often reachable anyway: the standard forms (progress bars, sliders, toggles) ship on [`kiln.widgets`](/kiln/reference/widgets), and the rest usually reduce to a poll plus a declaration; see [Data widgets](/kiln/guides/data-widgets) for both paths. But the libraries themselves will never load, and no compatibility layer is planned.
+Widget libraries written for other compositors will never load in kiln: the imperative drawing machinery they are built against does not exist here, by design, and no compatibility layer is planned. Their outcomes are often reachable anyway: the standard forms (progress bars, sliders, toggles) ship on [`kiln.widgets`](/kiln/reference/widgets), and the rest usually reduce to a poll plus a declaration; see [Data widgets](/kiln/guides/data-widgets) for both paths. For what carries over from AwesomeWM and what does not, see [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm).
 
 ## See also
 

@@ -1,23 +1,16 @@
 ---
-sidebar_position: 3.5
+sidebar_position: 4
 title: Anatomy of rc.lua
 description: Section-by-section map of the default SomeWM config
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Anatomy of `rc.lua`
 
-<YouWillLearn>
+The default config ships as `somewmrc.lua` (1134 lines), installed to `/usr/share/somewm/somewmrc.lua` and as `/etc/xdg/somewm/rc.lua`. Copy it to `~/.config/somewm/rc.lua` to customize. This page maps each section to its purpose and the line you'd edit for a given goal.
 
-- How the default config is organized
-- Which section to edit to change a specific behavior
-- Which sections are SomeWM-specific vs. upstream-compatible
-
-</YouWillLearn>
-
-The default config ships as `somewmrc.lua` (1118 lines), installed to `/usr/share/somewm/somewmrc.lua`. Copy it to `~/.config/somewm/rc.lua` to customize. This page maps each section to its purpose and the line you'd edit for a given goal.
+Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Line numbers drift as the config evolves; the section order is the stable part.
 
 ## At a glance
 
@@ -40,6 +33,7 @@ The default config ships as `somewmrc.lua` (1118 lines), installed to `/usr/shar
 | 15 | [Titlebars](#15-titlebars) | 1053-1086 | Customize per-window titlebar widgets |
 | 16 | [Notifications](#16-notifications) | 1088-1113 | Change notification display and rules |
 | 17 | [Sloppy focus](#17-sloppy-focus) | 1115-1118 | Disable focus-follows-mouse |
+| 18 | [Busy Bar integration](#18-busy-bar-integration) | 1120-1134 | Remove the optional busybar hookup |
 
 ## 1. Error handling
 
@@ -428,6 +422,16 @@ client.connect_signal("mouse::enter", function(c)
     c:activate { context = "mouse_enter", raise = false }
 end)
 ```
+
+## 18. Busy Bar integration
+
+**Lines:** 1120-1134
+**Purpose:** Optionally load the maintainer's external busybar module from `~/projects/busybar`. The whole block runs under `pcall`, so on machines without that directory it prints one line and does nothing.
+**Modules:** `package.path`, `pcall`
+**Common edits:**
+
+- Delete the block; nothing else references it
+- Point `package.path` at your own external module and `require` it the same way: the pcall-guarded pattern is how to load optional code without a missing directory breaking your config
 
 ## Related
 

@@ -12,9 +12,9 @@ kiln draws nothing until something marks a screen dirty. A dirty screen gets one
 
 Most dirtying is automatic. The stdlib listens for the property writes that change what a frame looks like and marks the affected screen.
 
-On a **client**, these writes redraw: `floating`, `float`, `ontop`, `urgent`, `titlebar`, `sticky`, `title`, `app_id`, `icon`. That is the literal, complete list. Each of these changes something a frame draws: the tiled/floating split, a float's box, a stacking band, a border color, a titlebar's presence or its label.
+On a **client**, the writes that redraw are exactly the ones that change something a frame draws: the tiled/floating split, a float's box, a stacking band, a border color, a titlebar's presence or its label. The exact property list is in the [client reference](/kiln/reference/client#which-property-writes-redraw).
 
-On a **tag**, these writes redraw: `layout`, `master_width_factor`, `master_count`, `column_count`, `gap`, `carousel_width`. They are gated on the tag being selected, because an unselected tag's arrangement is not on screen. `name` is the exception with no gate: the taglist draws every tag's name, selected or not, so a rename always redraws.
+On a **tag**, the layout-parameter writes redraw, gated on the tag being selected, because an unselected tag's arrangement is not on screen ([exact list](/kiln/reference/tag)). `name` is the exception with no gate: the taglist draws every tag's name, selected or not, so a rename always redraws.
 
 Beyond the lists, the structural writes dirty too: tagging and untagging clients, changing a screen's `selected_tags`, mapping and unmapping. Writing a tag property is the whole verb; there is no arrange call to make afterward.
 

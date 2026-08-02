@@ -6,21 +6,7 @@ sidebar_position: 9
 
 # Input Devices
 
-Input configuration is a set of plain read/write properties on `kiln.input`. Writing one applies it; reading one returns the last value you wrote (there is no readback from the hardware, so an unwritten property reads `nil` unless a default is listed below).
-
-| Property | Default | Meaning |
-|---|---|---|
-| `keymap` | unset | `{ rules, model, layout, variant, options }`, XKB names |
-| `repeat_rate` | `25` | key repeats per second |
-| `repeat_delay` | `600` | ms before repeat starts |
-| `numlock` | unset | boolean, numlock LED state |
-| `tap_to_click` | unset | boolean, touchpad tap |
-| `natural_scrolling` | unset | boolean |
-| `left_handed` | unset | boolean, swaps pointer buttons |
-| `accel_speed` | unset | number, -1.0 to 1.0 |
-| `accel_profile` | unset | `"flat"`, anything else selects adaptive |
-| `scroll_method` | unset | `"two_finger"`, `"edge"`, `"button"`, other values disable scrolling |
-| `click_method` | unset | `"button_areas"`, `"clickfinger"` |
+Input configuration is a set of plain read/write properties on `kiln.input`. Writing one applies it; reading one returns the last value you wrote (there is no readback from the hardware). The [kiln.input reference](/kiln/reference/kiln#kilninput) lists all 11 properties with their defaults.
 
 ## 1. Keyboard layout
 
@@ -83,7 +69,7 @@ kiln.input.numlock = true
 
 Rate and delay always travel together to the keyboard, which is why both have defaults: writing one keeps the other's current value.
 
-## 4. Pointer settings
+## 4. Set up the touchpad and mouse
 
 ```lua
 kiln.input.tap_to_click = true

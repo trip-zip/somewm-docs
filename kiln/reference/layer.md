@@ -52,7 +52,7 @@ Layer surfaces carry no built-in behavior; three replaceable policies on `kiln.d
 
 | Policy | Runs on | Decides |
 |---|---|---|
-| `kiln.defaults.layer(l)` | `map`, `commit` | How the surface is sized and answered. The stock one implements standard protocol sizing: a zero desired axis anchored to both opposite edges stretches between them minus margins; everything else is honored as asked. |
+| `kiln.defaults.layer(l)` | `map`, `commit` | How the surface is sized and answered; stock behavior in the [defaults reference](/kiln/reference/defaults). |
 | `kiln.defaults.layer_keyboard(l)` | `map`, `commit` | Whether the surface gets the keyboard. Stock: `exclusive` takes the seat, `on_demand` stays inert. |
 | `kiln.defaults.layer_release(l)` | `unmap`, `destroy` | Cleanup; the stock one returns the seat to the focused client if the surface held it. |
 

@@ -28,10 +28,7 @@ SomeWM is in active development. Most AwesomeWM functionality works, but some fe
 
 ### Where is my config file?
 
-SomeWM looks for configs in this order:
-1. `~/.config/somewm/rc.lua`
-2. `~/.config/awesome/rc.lua`
-3. System fallback
+`~/.config/somewm/rc.lua` (with `~/.config/awesome/rc.lua` as an AwesomeWM-compatibility fallback). The [Troubleshooting guide](./troubleshooting.md) has the full search order including the system paths.
 
 ### How do I reload my config?
 
@@ -39,7 +36,7 @@ Press `Mod4 + Ctrl + r` to reload your Lua configuration without restarting.
 
 ### Can I restart SomeWM like AwesomeWM?
 
-No. Wayland compositors can't restart in place - all clients would disconnect. Use config reload instead.
+Yes. `awesome.restart()` works: it hot-reloads the Lua state in process, and clients survive. What SomeWM can't do is the X11-style exec-self restart, which would disconnect every client. See [Why SomeWM](/docs/next/concepts/why-somewm) for the mechanism.
 
 ## Compatibility
 

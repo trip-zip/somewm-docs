@@ -10,7 +10,7 @@ description: Common issues and solutions
 
 ### "No config found" error
 
-Make sure you ran `make install` (or `make install-local`). Running SomeWM directly from the build directory won't work because Lua libraries aren't in the expected paths.
+Make sure you ran `sudo make install`. Running SomeWM directly from the build directory won't work because Lua libraries aren't in the expected paths.
 
 After installation, SomeWM searches for configs in this order:
 1. `~/.config/somewm/rc.lua`
@@ -173,15 +173,13 @@ wlr-randr --output DP-1 --mode 1920x1080@60
 
 ## Current Limitations {#current-limitations}
 
-These features are not yet implemented:
+The [Deviations reference](/docs/reference/deviations) is the canonical status list. Highlights:
 
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Systray (XEmbed apps) | Partial | SNI works, XEmbed doesn't |
-| `root.fake_input()` | Stub | Virtual input not implemented |
 | X property APIs | Stub | X11 doesn't exist on Wayland |
 | Keybinding removal | Stub | `root._remove_key()` is no-op |
-| WM restart | N/A | Wayland architecture limitation |
 
 ### Partially Implemented
 

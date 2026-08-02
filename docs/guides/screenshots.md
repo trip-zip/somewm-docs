@@ -8,13 +8,11 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Screenshots
 
-SomeWM provides built-in screenshot support through `awful.screenshot` (interactive region selection), `somewm-client` (CLI), and external Wayland-native tools like grim and slurp.
+This guide shows how to capture the screen, a region, or a window, and how to bind it all to keys. Three tools cover every case, and which to reach for depends on the goal: the built-in `awful.screenshot` for interactive snipping with no external dependencies, `grim` + `slurp` for scriptable pipelines and clipboard work, and `somewm-client screenshot` when you are in a shell.
 
-## Method 1: awful.screenshot (Interactive)
+## Snip a Region Interactively
 
-`awful.screenshot` provides a built-in interactive snipping tool. It captures the desktop, shows an overlay, and lets you draw a selection rectangle.
-
-### Basic Usage
+`awful.screenshot` captures the desktop, shows an overlay, and lets you draw a selection rectangle:
 
 ```lua
 awful.key({ modkey }, "Print", function()
@@ -23,57 +21,19 @@ awful.key({ modkey }, "Print", function()
 end, { description = "interactive screenshot", group = "screenshot" }),
 ```
 
-This captures the screen, shows it as a fullscreen overlay, and lets you drag a rectangle. The screenshot saves to `$HOME` by default.
+The screenshot saves to `$HOME` by default; pass `directory` and `prefix` to change that.
 
-### Customizing Save Location
+For daily use, two upgrades are worth copying together: the HiDPI overlay tuning (the default overlay repaints the full captured image on every mouse move, which can be slow on HiDPI displays) and a saved-file notification:
 
 ```lua
 awful.key({ modkey }, "Print", function()
     local s = awful.screenshot({
         interactive = true,
         directory = os.getenv("HOME") .. "/Pictures/screenshots/",
-        prefix = "shot",
     })
-    s:refresh()
-end, { description = "interactive screenshot", group = "screenshot" }),
-```
-
-### Smooth Interactive Mode on HiDPI
-
-On HiDPI displays, the default overlay repaints the full captured image on every mouse move, which can be slow. A faster approach: hide the screenshot background and show only a dimmed overlay over the live desktop. The final crop still uses the pre-captured surface, so image quality is unaffected.
-
-```lua
-awful.key({ modkey }, "Print", function()
-    local s = awful.screenshot({ interactive = true })
     s:connect_signal("snipping::start", function(self)
         if self._private.frame then
             -- Hide the screenshot background, show selection over live desktop
-            self._private.imagebox.visible = false
-            self._private.frame.bg = "#00000040"
-            self._private.frame.surface_scale = 1.0
-        end
-    end)
-    s:refresh()
-end, { description = "interactive screenshot", group = "screenshot" }),
-```
-
-Why this works:
-
-- `imagebox.visible = false` prevents expensive image repaints on every mouse move
-- `bg = "#00000040"` adds a semi-transparent dim so the selection rectangle is visible against the live desktop
-- `surface_scale = 1.0` keeps even the dim overlay redraws cheap (no HiDPI upscaling)
-- `accept()` still crops from the pre-captured surface, so the saved screenshot is full quality
-
-### Notifications on Save
-
-```lua
-awful.key({ modkey }, "Print", function()
-    local s = awful.screenshot({
-        interactive = true,
-        directory = os.getenv("HOME") .. "/Pictures/screenshots/",
-    })
-    s:connect_signal("snipping::start", function(self)
-        if self._private.frame then
             self._private.imagebox.visible = false
             self._private.frame.bg = "#00000040"
             self._private.frame.surface_scale = 1.0
@@ -90,9 +50,61 @@ awful.key({ modkey }, "Print", function()
 end, { description = "interactive screenshot", group = "screenshot" }),
 ```
 
-### Delayed Capture
+Why the overlay tuning works:
 
-Use `auto_save_delay` to wait before entering interactive mode (useful for capturing menus):
+- `imagebox.visible = false` prevents expensive image repaints on every mouse move
+- `bg = "#00000040"` adds a semi-transparent dim so the selection rectangle is visible against the live desktop
+- `surface_scale = 1.0` keeps even the dim overlay redraws cheap (no HiDPI upscaling)
+- The final crop still uses the pre-captured surface, so the saved screenshot is full quality
+
+## Capture From the Command Line
+
+The quickest capture is one command. With SomeWM's own CLI: <SomewmOnly />
+
+```bash
+somewm-client screenshot                          # focused screen
+somewm-client screenshot ~/Pictures/shot.png      # to a specific path
+```
+
+Or with the Wayland-native tools (`pacman -S grim slurp wl-clipboard` on Arch, `apt install grim slurp wl-clipboard` on Debian/Ubuntu):
+
+```bash
+grim ~/Pictures/screenshot.png                    # full screen
+grim -g "$(slurp)" ~/Pictures/screenshot.png      # draw a region
+grim -o DP-1 ~/Pictures/screenshot.png            # one monitor (grim -l lists them)
+```
+
+## Copy to the Clipboard
+
+Pipe grim to `wl-copy` instead of a file:
+
+```bash
+grim - | wl-copy                        # full screen
+grim -g "$(slurp)" - | wl-copy          # region
+```
+
+## Capture a Specific Window
+
+The focused window's geometry becomes grim's region:
+
+```lua
+awful.key({ modkey }, "Print", function()
+    local c = client.focus
+    if not c then return end
+
+    local g = c:geometry()
+    local filename = os.date("~/Pictures/window_%Y%m%d_%H%M%S.png")
+
+    awful.spawn.with_shell(string.format(
+        'grim -g "%d,%d %dx%d" %s',
+        g.x, g.y, g.width, g.height, filename
+    ))
+end)
+```
+
+## Capture After a Delay
+
+For menus and dropdowns that dismiss on focus loss. With the built-in tool, `auto_save_delay` counts down before entering interactive mode:
 
 ```lua
 local s = awful.screenshot({
@@ -104,108 +116,15 @@ s:connect_signal("timer::tick", function(self, remaining)
 end)
 ```
 
-## Method 2: somewm-client <SomewmOnly />
-
-The simplest method - use `somewm-client screenshot`:
+With grim, a plain sleep does it:
 
 ```bash
-# Full screen screenshot
-somewm-client screenshot
-
-# Save to specific path
-somewm-client screenshot ~/Pictures/screenshot.png
+sleep 3 && grim ~/Pictures/screenshot.png
 ```
 
-This captures the focused screen and saves to the specified path (or a default location).
+## A Screenshot Module, Bound to Keys
 
-### From Lua
-
-```lua
--- Take screenshot via IPC
-awful.spawn("somewm-client screenshot ~/Pictures/screenshot.png")
-```
-
-## Method 3: grim + slurp
-
-For more flexibility, use the external Wayland-native tools:
-
-```bash
-# Install on Arch
-pacman -S grim slurp wl-clipboard
-
-# Install on Debian/Ubuntu
-apt install grim slurp wl-clipboard
-```
-
-### Full Screen
-
-```bash
-grim ~/Pictures/screenshot.png
-```
-
-### Select Region
-
-```bash
-grim -g "$(slurp)" ~/Pictures/screenshot.png
-```
-
-`slurp` lets you draw a rectangle to capture.
-
-### Specific Output (Monitor)
-
-```bash
-# List outputs
-grim -l
-
-# Capture specific output
-grim -o DP-1 ~/Pictures/screenshot.png
-```
-
-### To Clipboard
-
-```bash
-# Full screen to clipboard
-grim - | wl-copy
-
-# Region to clipboard
-grim -g "$(slurp)" - | wl-copy
-```
-
-## Keybinding Setup
-
-Add these keybindings to your rc.lua:
-
-```lua
-awful.keyboard.append_global_keybindings({
-    -- Print: Full screen screenshot
-    awful.key({}, "Print", function()
-        local filename = os.date("~/Pictures/screenshot_%Y%m%d_%H%M%S.png")
-        awful.spawn.with_shell("grim " .. filename)
-        naughty.notification { title = "Screenshot", message = "Saved to " .. filename }
-    end, { description = "screenshot full screen", group = "screenshot" }),
-
-    -- Shift+Print: Select region
-    awful.key({ "Shift" }, "Print", function()
-        local filename = os.date("~/Pictures/screenshot_%Y%m%d_%H%M%S.png")
-        awful.spawn.with_shell('grim -g "$(slurp)" ' .. filename)
-    end, { description = "screenshot region", group = "screenshot" }),
-
-    -- Ctrl+Print: Full screen to clipboard
-    awful.key({ "Control" }, "Print", function()
-        awful.spawn.with_shell("grim - | wl-copy")
-        naughty.notification { title = "Screenshot", message = "Copied to clipboard" }
-    end, { description = "screenshot to clipboard", group = "screenshot" }),
-
-    -- Ctrl+Shift+Print: Region to clipboard
-    awful.key({ "Control", "Shift" }, "Print", function()
-        awful.spawn.with_shell('grim -g "$(slurp)" - | wl-copy')
-    end, { description = "screenshot region to clipboard", group = "screenshot" }),
-})
-```
-
-## Screenshot Module
-
-For a reusable screenshot module, create `~/.config/somewm/screenshot.lua`:
+To keep all of the above behind consistent keybindings, collect the recipes into `~/.config/somewm/screenshot.lua`:
 
 ```lua
 -- screenshot.lua
@@ -285,53 +204,14 @@ awful.keyboard.append_global_keybindings({
 })
 ```
 
-## Screenshot with Delay
+## Annotate What You Captured
 
-For menus or dropdowns that dismiss on focus loss:
-
-```bash
-# 3 second delay
-sleep 3 && grim ~/Pictures/screenshot.png
-
-# Or in Lua
-awful.spawn.with_shell("sleep 3 && grim ~/Pictures/screenshot.png")
-```
-
-## Screenshot Specific Window
-
-Using window geometry from Lua:
+Pipe a capture into swappy (`pacman -S swappy` / `apt install swappy`) to draw on it before saving:
 
 ```lua
-awful.key({ modkey }, "Print", function()
-    local c = client.focus
-    if not c then return end
-
-    local g = c:geometry()
-    local filename = os.date("~/Pictures/window_%Y%m%d_%H%M%S.png")
-
-    awful.spawn.with_shell(string.format(
-        'grim -g "%d,%d %dx%d" %s',
-        g.x, g.y, g.width, g.height, filename
-    ))
-end)
-```
-
-## Annotating Screenshots
-
-After capturing, open in an annotation tool:
-
-```lua
--- Take screenshot and open in swappy for annotation
 awful.key({}, "Print", function()
     awful.spawn.with_shell('grim -g "$(slurp)" - | swappy -f -')
 end)
-```
-
-Install swappy:
-
-```bash
-pacman -S swappy  # Arch
-apt install swappy  # Debian/Ubuntu
 ```
 
 ## Troubleshooting
@@ -350,15 +230,7 @@ Make sure your compositor supports the `wlr-layer-shell` protocol. SomeWM suppor
 
 ### Clipboard not working
 
-Install wl-clipboard:
-
-```bash
-pacman -S wl-clipboard
-# or
-apt install wl-clipboard
-```
-
-Test it:
+Install wl-clipboard, then test it:
 
 ```bash
 echo "test" | wl-copy

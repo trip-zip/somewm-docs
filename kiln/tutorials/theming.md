@@ -26,16 +26,12 @@ comes after the config runs); at runtime you follow a write with
 The full list with defaults lives in the
 [theme variable reference](/kiln/reference/theme-variables). The groups:
 
-- Palette: `bg`, `bg2`, `fg`, `accent`, `muted`, `urgent`, `close`. `accent`
-  works hardest: focus ring, selected tag, focused tasklist entry, caret,
-  selection.
-- Metrics: `font_size`, `gap` (workarea inset and space between layout
-  cells), `bar_height`, `border_width`, `client_radius`, `min_size`,
-  `resize_handle`.
-- Titlebars: `titlebar`, `titlebar_focus`, `titlebar_height`.
-- Popups: `menu_width`, `menu_height`, `tooltip_gap`, `prompt_width`,
-  `prompt_offset`, the `notification_*` keys, and `cursors` (the xcursor
-  names used by move and resize grabs).
+- Palette: `bg`, `fg`, `accent`, and friends. `accent` works hardest: focus
+  ring, selected tag, focused tasklist entry, caret, selection.
+- Metrics: sizes and spacing, from `font_size` and `gap` to `bar_height`
+  and `border_width`.
+- Titlebars and popups: the `titlebar_*`, `menu_*`, `prompt_*`, and
+  `notification_*` keys.
 
 ## 3. Edit theme values in your rc
 

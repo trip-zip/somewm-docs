@@ -26,12 +26,12 @@ screen.connect_signal("request::desktop_decoration", function(s)
     s.mywibox = awful.wibar {
         position = "top",
         screen = s,
-        widget = { ... },
+        widget = wibox.widget.textclock(),
     }
 end)
 ```
 
-The `widget` property contains your entire bar layout - typically organized into left, center, and right sections.
+The `widget` property contains your entire bar layout; a single clock here, but typically a tree organized into left, center, and right sections.
 
 ## The Three-Section Pattern
 
@@ -93,7 +93,7 @@ return function(s)
 end
 ```
 
-Use it in your `rc.lua`:
+Now wire it in. In your `rc.lua`, find the existing `request::desktop_decoration` handler (the one that builds the default wibar) and replace it:
 
 ```lua
 local wibar = require("wibar")
@@ -107,7 +107,11 @@ screen.connect_signal("request::desktop_decoration", function(s)
 end)
 ```
 
+Reload with **Mod4 + Ctrl + r**. The default bar is gone, and in its place is a thin, completely empty strip. Empty is correct: this is *your* bar now, and you haven't put anything in it yet. Every section below adds something and ends with a reload, so you can watch it fill up.
+
 ## Adding Standard Widgets
+
+Replace your `wibar.lua` with a version that builds the four standard widgets and places them in the three sections:
 
 ```lua
 -- wibar.lua
@@ -175,22 +179,26 @@ return function(s)
 end
 ```
 
+Reload. The bar comes alive: tags 1-5 on the left, the clock and layout icon on the right, and the center fills with a button for each open window. Click a tag and the view switches; click a window's tasklist entry and it minimizes. Scroll on the taglist and you cycle tags: the buttons you declared are all live.
+
 ## Adding Custom Widgets
+
+Widgets you build yourself (like the clock from the [Widgets tutorial](/docs/tutorials/widgets)) drop into a section the same way:
 
 ```lua
 -- At the top of wibar.lua
 local my_clock = require("widgets.clock")
-local my_battery = require("widgets.battery")
 
 -- In the right section:
 { -- Right section
     layout = wibox.layout.fixed.horizontal,
     wibox.widget.systray(),
-    my_battery,
     my_clock,
     s.mylayoutbox,
 },
 ```
+
+Reload, and your clock renders in the bar next to the built-ins, indistinguishable from them.
 
 ## Adding Separators
 
@@ -215,51 +223,25 @@ end
     layout = wibox.layout.fixed.horizontal,
     wibox.widget.systray(),
     separator(),
-    my_battery,
-    separator(),
     my_clock,
     separator(),
     s.mylayoutbox,
 },
 ```
 
-## Wibar Properties
-
-For a complete reference of all wibar properties, see the [Wibar Properties Reference](/docs/reference/wibox/wibar).
-
-Key properties include:
-- `position` - `"top"`, `"bottom"`, `"left"`, `"right"`
-- `height`/`width` - Size in pixels
-- `margins` - Create floating effect with gaps
-- `shape` - Custom shape function (e.g., rounded corners)
-- `bg`/`fg` - Colors (can include alpha for transparency)
+Reload. Faint vertical lines now separate the right-side widgets; the margins give each one room to breathe.
 
 ## Styling the Wibar
 
-### Through Theme Variables
-
-In your `theme.lua`:
+Style the bar from your theme, so it changes with your color scheme. In your `theme.lua`:
 
 ```lua
 theme.wibar_bg = "#282828"
 theme.wibar_fg = "#ebdbb2"
 theme.wibar_height = 28
-theme.wibar_border_color = "#3c3836"
-theme.wibar_border_width = 1
 ```
 
-### Inline Styling
-
-```lua
-awful.wibar {
-    position = "top",
-    screen = s,
-    bg = beautiful.wibar_bg .. "e0",  -- Slightly transparent
-    fg = beautiful.wibar_fg,
-    border_width = 1,
-    border_color = beautiful.wibar_border_color,
-}
-```
+Reload, and the bar picks up the new background, text color, and height. (Per-bar overrides like `bg` can also be passed straight to `awful.wibar`; the [Wibar Properties Reference](/docs/reference/wibox/wibar) documents every property.)
 
 ## Complete Example
 
@@ -269,6 +251,9 @@ local awful = require("awful")
 local wibox = require("wibox")
 local gears = require("gears")
 local beautiful = require("beautiful")
+
+-- rc.lua's modkey is a local; define our own for the taglist buttons
+local modkey = "Mod4"
 
 -- Optional: import custom widgets
 -- local widgets = require("widgets")
@@ -377,31 +362,23 @@ end
    - Show taglist, tasklist, systray, clock, layoutbox
 */}
 
-## Multiple Wibars
+## Try a Second Bar
 
-You can have multiple wibars on a screen:
+A screen can carry any number of wibars. Add one line to your `request::desktop_decoration` handler, after the `s.mywibox = wibar(s)` call:
 
 ```lua
-screen.connect_signal("request::desktop_decoration", function(s)
-    -- Top bar with tags and systray
-    s.top_wibar = awful.wibar {
-        position = "top",
-        screen = s,
-        widget = { ... },
-    }
-
-    -- Bottom bar with tasklist only
-    s.bottom_wibar = awful.wibar {
-        position = "bottom",
-        screen = s,
-        widget = s.mytasklist,
-    }
-end)
+s.mybottombar = awful.wibar {
+    position = "bottom",
+    screen = s,
+    widget = wibox.widget.textclock(" %A %B %d "),
+}
 ```
+
+Reload. A second bar appears along the bottom edge showing the date, and your windows shrink to fit between the two bars: each wibar reserves its own strip of the workarea. Remove the line and reload when you've seen it.
 
 ## Toggling Visibility
 
-Hide/show the wibar with a keybinding:
+Finish with a quality-of-life binding. Add this to your global keybindings:
 
 ```lua
 awful.key({ modkey }, "b", function()
@@ -409,6 +386,8 @@ awful.key({ modkey }, "b", function()
     s.mywibox.visible = not s.mywibox.visible
 end, { description = "toggle wibar", group = "awesome" }),
 ```
+
+Reload, then press **Mod4 + b**. The bar vanishes and your windows expand into its space; press it again and the bar is back. You have built, styled, and wired up your own wibar.
 
 ## Troubleshooting
 

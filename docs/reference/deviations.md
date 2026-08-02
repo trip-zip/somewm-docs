@@ -10,6 +10,8 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 This page is the dense reference for every place somewm's behavior or API surface differs from AwesomeWM. Architectural differences come from Wayland vs X11; stubs exist so configs don't error; somewm-only APIs add what AwesomeWM has no equivalent for.
 
+This is the canonical status list: other pages (FAQ, troubleshooting, compatibility concepts) link here rather than keeping their own copies. Last synced against the SomeWM source: `6de5e1ef3`.
+
 ## Looking for...
 
 | If you want | Read |
@@ -86,7 +88,7 @@ These extend the AwesomeWM API with capabilities AwesomeWM has no equivalent for
 
 ### `awful.input` - Input device configuration
 
-A number of properties for pointer (libinput) and keyboard settings. AwesomeWM delegated this to `xinput`, `xset`, and `setxkbmap` on X11.
+18 properties for pointer (libinput) and keyboard settings. AwesomeWM delegated this to `xinput`, `xset`, and `setxkbmap` on X11.
 
 ```lua
 local awful = require("awful")
@@ -94,7 +96,7 @@ local awful = require("awful")
 -- Pointer
 awful.input.tap_to_click       = 1
 awful.input.natural_scrolling  = 1
-awful.input.pointer_speed      = 0.5
+awful.input.accel_speed        = 0.5
 awful.input.scroll_button      = 274  -- middle mouse
 awful.input.left_handed        = 0
 
@@ -102,8 +104,8 @@ awful.input.left_handed        = 0
 awful.input.xkb_layout         = "us"
 awful.input.xkb_variant        = ""
 awful.input.xkb_options        = "ctrl:nocaps"
-awful.input.repeat_rate        = 25
-awful.input.repeat_delay       = 600
+awful.input.keyboard_repeat_rate  = 25
+awful.input.keyboard_repeat_delay = 600
 ```
 
 See [`awful.input`](/docs/reference/awful/input) for the full property list.
@@ -120,7 +122,7 @@ Implementation: `some_set_numlock()` in `somewm_api.c` toggles the Mod2 lock mas
 
 ### `somewm-client` - IPC CLI
 
-About 45 commands for external control. Replaces ad-hoc `awesome-client` use.
+Over 90 commands for external control (run `somewm-client commands` for the full list in your build). Replaces ad-hoc `awesome-client` use.
 
 ```bash
 somewm-client ping

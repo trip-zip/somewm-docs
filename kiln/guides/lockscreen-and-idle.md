@@ -26,21 +26,7 @@ On the lockscreen itself: Enter submits, Backspace deletes, Escape clears the fi
 
 ## 2. Style the native lockscreen
 
-`kiln.lockscreen.configure{}` overrides any of the lockscreen's appearance keys; unset keys keep their defaults:
-
-| Key | Default | Meaning |
-|---|---|---|
-| `bg` | `"#101014"` | background |
-| `fg` | `"#dcdce6"` | text |
-| `error` | `"#c05068"` | failure message color |
-| `clock_size` | `48` | clock text size |
-| `date_size` | `16` | date text size |
-| `dots_size` | `22` | password dots size |
-| `status_size` | `14` | prompt/status size |
-| `clock_format` | `"%H:%M"` | `os.date` format |
-| `date_format` | `"%A, %B %d"` | `os.date` format |
-| `prompt` | `"Enter password to unlock"` | idle prompt text |
-| `fail` | `"Authentication failed"` | failure text |
+`kiln.lockscreen.configure{}` overrides any of the lockscreen's appearance keys (colors, text sizes, clock and date formats, prompt strings); unset keys keep their defaults. The [kiln.lockscreen reference](/kiln/reference/kiln#kilnlockscreen) lists all 11 keys.
 
 ```lua
 kiln.lockscreen.configure {

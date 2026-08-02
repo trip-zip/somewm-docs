@@ -8,13 +8,11 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Input Device Configuration <SomewmOnly />
 
-## Overview
+This guide shows how to configure your touchpad, mouse, and keyboard from your config, give different devices different settings, and change the cursor theme, all at runtime with no restart. The mechanism is `awful.input`, a SomeWM addition (AwesomeWM delegated this to X11 tools).
 
-SomeWM provides `awful.input` for runtime input device configuration, a feature not available in AwesomeWM. You can set global defaults that apply to all devices, and use rules to configure specific device types or individual devices differently.
+## Set Defaults for All Devices
 
-## Global Settings
-
-Global settings apply to all connected devices. Set them directly on `awful.input`:
+Settings written directly on `awful.input` apply to every connected device:
 
 ```lua
 local awful = require("awful")
@@ -33,7 +31,7 @@ awful.input.keyboard_repeat_delay = 300
 
 A value of `-1` means "leave at device default." A value of `0` disables the feature, `1` enables it.
 
-## Per-Device Configuration with Rules
+## Give Different Devices Different Settings
 
 If you use both a touchpad and an external mouse, you probably want different settings for each. Input rules let you do this using the same `{ rule, properties }` pattern as [client rules](/docs/guides/client-rules):
 
@@ -97,79 +95,49 @@ awful.input.rules = {
 
 See [awful.input Reference](/docs/reference/awful/input) for the complete property list and rule API.
 
-## Cursor Theming {#cursor-theming}
+## Change the Cursor Theme and Size {#cursor-theming}
 
-### Setting the Cursor Theme
+Try a theme live, then persist the keeper. At runtime, from Lua or the CLI: <SomewmOnly />
 
-Cursor themes can be configured via environment variables before launching SomeWM:
+```lua
+root.cursor_theme("Adwaita")  -- Change theme (no argument returns the current one)
+root.cursor_size(32)          -- Change size in pixels
+```
+
+```bash
+somewm-client eval 'root.cursor_theme("Adwaita")'
+somewm-client eval 'return root.cursor_theme(), root.cursor_size()'
+```
+
+To persist it, set the standard environment variables before SomeWM starts (shell profile or a wrapper script):
 
 ```bash
 export XCURSOR_THEME="Adwaita"  # Theme name (from /usr/share/icons/)
 export XCURSOR_SIZE="24"        # Size in pixels
-somewm
-```
-
-You can also set these in your shell profile (`~/.bashrc`, `~/.zshrc`) or in a wrapper script.
-
-### Runtime Cursor Theme Changes <SomewmOnly />
-
-You can change the cursor theme and size at runtime without restarting:
-
-```lua
--- In rc.lua or via somewm-client eval
-root.cursor_theme("Adwaita")  -- Change theme
-root.cursor_theme()           -- Returns current theme name
-
-root.cursor_size(32)          -- Change size in pixels
-root.cursor_size()            -- Returns current size
-```
-
-Via CLI:
-```bash
-somewm-client eval 'root.cursor_theme("Adwaita")'
-somewm-client eval 'root.cursor_size(48)'
-somewm-client eval 'return root.cursor_theme(), root.cursor_size()'
 ```
 
 :::note Fallback Behavior
 If a cursor theme cannot be loaded (e.g., theme not installed), wlroots provides built-in fallback cursors. These are basic black-and-white cursors that ensure your mouse always works, even on minimal systems.
 :::
 
-### Cursor APIs
+## Use a Different Cursor Per Context
 
-SomeWM supports AwesomeWM's cursor APIs:
+The desktop cursor, hover cursors on wiboxes, and the cursors shown during move/resize grabs are each settable. Values are standard X cursor names like `left_ptr` or `hand1` ([the AwesomeWM appearance docs](https://awesomewm.org/apidoc/documentation/06-appearance.md.html) list them):
 
 ```lua
--- Set the root/desktop cursor
+-- Root/desktop cursor
 root.cursor("left_ptr")
 
--- Set cursor for a wibox (changes when mouse hovers over it)
+-- Hover cursor for a wibox
 mywibox.cursor = "hand1"
-```
 
-### Theme Variables
-
-Customize cursors for specific operations in your theme:
-
-```lua
--- In theme.lua
+-- In theme.lua: per-operation cursors
 theme.cursor_mouse_move = "fleur"      -- During window move
 theme.cursor_mouse_resize = "cross"    -- During window resize
 theme.enable_spawn_cursor = true       -- Show "watch" during app startup
 ```
 
 See [Theme Variables: Cursors](/docs/reference/beautiful/theme-variables#cursors) for all options.
-
-### Common Cursor Names
-
-Standard X cursor names include: `left_ptr`, `right_ptr`, `hand1`, `hand2`, `watch`, `xterm`, `crosshair`, `fleur`, `sb_h_double_arrow`, `sb_v_double_arrow`, `top_left_corner`, `top_right_corner`, `bottom_left_corner`, `bottom_right_corner`.
-
-### AwesomeWM Reference
-
-For complete API documentation, see the AwesomeWM docs:
-- [root.cursor()](https://awesomewm.org/apidoc/core_components/root.html#cursor)
-- [wibox.cursor](https://awesomewm.org/apidoc/popups_and_layered_windows/wibox.html#cursor)
-- [Appearance](https://awesomewm.org/apidoc/documentation/06-appearance.md.html) - All theme variables including cursors
 
 ## Next Steps
 

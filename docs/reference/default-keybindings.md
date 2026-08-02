@@ -6,9 +6,9 @@ description: Complete list of default keyboard shortcuts
 
 # Default Keybindings
 
-<!-- TODO: Complete keybinding list from themes/default/lua/rc.lua -->
-
 All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
+
+Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press `Mod4 + s` in a running session for the live list.
 
 ## Launcher
 
@@ -16,7 +16,9 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 |------------|--------|
 | `Mod4 + Return` | Open terminal |
 | `Mod4 + r` | Run prompt |
+| `Mod4 + x` | Lua execute prompt |
 | `Mod4 + p` | Show menubar |
+| `Mod4 + w` | Show main menu |
 | `Mod4 + s` | Show keybinding help |
 
 ## Window Focus
@@ -34,6 +36,7 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 |------------|--------|
 | `Mod4 + Shift + j` | Swap with next client |
 | `Mod4 + Shift + k` | Swap with previous client |
+| `Mod4 + Ctrl + Return` | Move to master |
 
 ## Layout
 
@@ -45,6 +48,8 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 | `Mod4 + l` | Increase master width |
 | `Mod4 + Shift + h` | Increase master count |
 | `Mod4 + Shift + l` | Decrease master count |
+| `Mod4 + Ctrl + h` | Increase columns |
+| `Mod4 + Ctrl + l` | Decrease columns |
 
 ## Tags
 
@@ -55,6 +60,8 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 | `Mod4 + Ctrl + 1-9` | Toggle tag view |
 | `Mod4 + Ctrl + Shift + 1-9` | Toggle client on tag |
 | `Mod4 + Left/Right` | View previous/next tag |
+| `Mod4 + Escape` | Go back to previous tag |
+| `Mod4 + Shift + r` | Rename current tag |
 
 ## Screens
 
@@ -71,16 +78,39 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 | `Mod4 + Shift + c` | Close client |
 | `Mod4 + f` | Toggle fullscreen |
 | `Mod4 + m` | Toggle maximize |
+| `Mod4 + Ctrl + m` | Toggle maximize vertically |
+| `Mod4 + Shift + m` | Toggle maximize horizontally |
 | `Mod4 + n` | Minimize |
 | `Mod4 + Ctrl + n` | Restore minimized |
-| `Mod4 + t` | Toggle floating |
-| `Mod4 + Ctrl + t` | Toggle always-on-top |
+| `Mod4 + Ctrl + Space` | Toggle floating |
+| `Mod4 + t` | Toggle keep on top |
+| `Mod4 + ,` | Toggle sticky (show on all tags) |
+
+## Screenshots
+
+| Keybinding | Action |
+|------------|--------|
+| `Print` | Screenshot full output |
+| `Shift + Print` | Screenshot region |
+| `Mod4 + Ctrl + p` | Interactive screenshot (region/window) |
+
+## Media Keys
+
+| Keybinding | Action |
+|------------|--------|
+| `XF86AudioRaiseVolume` | Raise volume |
+| `XF86AudioLowerVolume` | Lower volume |
+| `XF86AudioMute` | Mute output |
+| `XF86AudioMicMute` | Mute microphone |
+| `XF86MonBrightnessUp` | Raise brightness |
+| `XF86MonBrightnessDown` | Lower brightness |
 
 ## Session
 
 | Keybinding | Action |
 |------------|--------|
 | `Mod4 + Shift + Escape` | Lock screen |
+| `Mod4 + Shift + d` | Toggle do-not-disturb |
 | `Mod4 + Ctrl + r` | Reload configuration |
 | `Mod4 + Shift + q` | Quit SomeWM |
 

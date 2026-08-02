@@ -6,7 +6,7 @@ sidebar_position: 18
 
 # Environment and IPC
 
-How kiln finds its config, which environment variables it reads and sets, and the IPC socket that gives you a live Lua REPL into the running compositor.
+A running kiln is scriptable from the outside: it loads its config from a fixed search order, exports its socket path to every child process, and evaluates any Lua written to that socket, which makes the socket a live REPL into the compositor.
 
 ```bash
 # ask a running kiln a question from a shell

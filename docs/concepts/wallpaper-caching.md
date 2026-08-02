@@ -123,50 +123,11 @@ The entire Lua pipeline is bypassed.
 
 ## Per-Screen Caching
 
-Wallpapers are cached per-screen. The cache key is `(path, screen_index)`, meaning the same image file can be cached separately for different screens with different positions and sizes.
-
-```c
-typedef struct wallpaper_cache_entry {
-    struct wl_list link;              // Linked list for LRU ordering
-    char *path;                       // Filepath (part of cache key)
-    int screen_index;                 // Screen index (part of cache key)
-    struct wlr_scene_buffer *scene_node;  // GPU texture positioned at screen coords
-    cairo_surface_t *surface;         // For getter compatibility
-} wallpaper_cache_entry_t;
-```
-
-Each cached entry's scene node is positioned at the screen's coordinates and sized to match the screen's dimensions. This means switching tags on screen 1 only toggles screen 1's wallpaper node, leaving screen 2's wallpaper untouched.
-
-### Cache Operations
-
-| Operation | Complexity | Description |
-|-----------|------------|-------------|
-| Lookup | O(n) | Linear scan by (filepath, screen) |
-| Insert | O(1) | Add to head of list |
-| Evict | O(n) | Remove oldest not currently displayed |
-| Show | O(1) | Toggle visibility flags for screen |
-
-With a max of 32 entries, O(n) operations are fast enough.
+Wallpapers are cached per-screen. The cache key is `(path, screen_index)`, meaning the same image file can be cached separately for different screens with different positions and sizes. Each cached entry holds a GPU texture (a scene node) positioned at the screen's coordinates, so switching tags on screen 1 only toggles screen 1's wallpaper node, leaving screen 2's wallpaper untouched.
 
 ### LRU Eviction
 
-When the cache is full (32 entries), the least recently used wallpaper is evicted:
-
-```c
-void wallpaper_cache_evict_oldest(void) {
-    // Find oldest not currently displayed on any screen
-    wallpaper_cache_entry_t *oldest = NULL;
-    wl_list_for_each(entry, &cache, link) {
-        if (!is_current_on_any_screen(entry))
-            oldest = entry;
-    }
-
-    if (oldest) {
-        wlr_scene_node_destroy(&oldest->scene_node->node);
-        // ... cleanup
-    }
-}
-```
+The cache holds up to 32 entries. When it is full, the least recently used wallpaper that is not currently displayed on any screen is evicted and its GPU texture destroyed. A wallpaper that is on screen somewhere is never evicted, so eviction can never blank a monitor.
 
 ## Memory Considerations
 

@@ -87,6 +87,7 @@ const sidebars: SidebarsConfig = {
         'reference/keybindings-and-rules',
         'reference/defaults',
         'reference/placement',
+        'reference/menu',
         'reference/theme-variables',
         'reference/signals',
         'reference/core',

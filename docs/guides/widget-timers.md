@@ -30,33 +30,7 @@ gears.timer {
 }
 ```
 
-### Timer Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `timeout` | number | Seconds between callbacks |
-| `autostart` | boolean | Start timer when created |
-| `call_now` | boolean | Call callback immediately |
-| `single_shot` | boolean | Only fire once, then stop |
-| `callback` | function | Function to call |
-
-### Timer Methods
-
-```lua
-local timer = gears.timer {
-    timeout = 5,
-    callback = update_function,
-}
-
-timer:start()   -- Start the timer
-timer:stop()    -- Stop the timer
-timer:again()   -- Restart the timer (resets countdown)
-
--- Check if running
-if timer.started then
-    print("Timer is running")
-end
-```
+Timers can also be started, stopped, and restarted after creation (`timer:start()`, `timer:stop()`, `timer:again()`); the [AwesomeWM timer docs](https://awesomewm.org/apidoc/core_components/gears.timer.html) cover the full API, including `single_shot` for one-off fires.
 
 ## One-Shot Timer
 

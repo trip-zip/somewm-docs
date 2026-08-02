@@ -76,10 +76,7 @@ Why one tree owns the whole screen, and what that deletes: [The Clay Bet](/kiln/
 
 ## Coming from AwesomeWM or SomeWM
 
-- **The concepts carry over.** Clients, tags, layouts, rules, a status bar, a theme table.
-- **The API does not.** It is declarative rather than imperative, with no compatibility layer. Existing configs and widget libraries do not run on kiln.
-
-See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) for the full comparison.
+[kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) is the bridge page: what carries over, what does not, and when to choose which.
 
 :::info
 kiln is a young project. The API is functional and fully documented here, but it is not yet frozen: names and shapes may still change between releases.

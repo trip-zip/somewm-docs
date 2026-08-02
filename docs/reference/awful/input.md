@@ -136,19 +136,7 @@ awful.input.rules = {
 
 Both fields are optional. Omitting a field matches all devices. When both are present, both must match.
 
-### Finding Device Names
-
-To see connected device names, use a Lua snippet:
-
-```bash
-somewm-client eval 'for _, d in ipairs(awesome._get_input_devices and awesome._get_input_devices() or {}) do print(d) end'
-```
-
-Or check your system's libinput device list:
-
-```bash
-libinput list-devices | grep "Device:"
-```
+Device names match the names libinput reports; the [Input Devices guide](/docs/guides/input-devices) shows how to discover them.
 
 ### Rule Properties
 

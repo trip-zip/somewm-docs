@@ -57,8 +57,9 @@ key { mods = { "mod" }, key = "v",
 	release = function() kiln.spawn("pactl set-source-mute @DEFAULT_SOURCE@ 1") end }
 ```
 
-A push-to-talk key: unmute while held. A release-only binding works too; the
-chord is still consumed on the press edge so the release reliably arrives.
+A push-to-talk key: reload, hold `mod+v`, and the mic is live for exactly as
+long as the key is down. A release-only binding works too; the chord is still
+consumed on the press edge so the release reliably arrives.
 
 ## 4. desc and group: the hotkeys popup
 
@@ -69,9 +70,12 @@ key { mods = { "mod" }, key = "d", desc = "app launcher", group = "launch",
 
 `desc` and `group` change nothing about dispatch. They are recorded in the
 binding registry, which `kiln.key.all()` returns, and the default config's
-`mod+s` cheat sheet is built entirely from that registry: one column per
-group, one row per binding. Annotate your bindings and they appear in the
-popup automatically. The popup ships in the stdlib (`kiln.hotkeys`), and the
+`mod+s` cheat sheet is built entirely from that registry.
+
+Reload, then press `mod+s`. Your binding is on the sheet: a **launch** group
+with an "app launcher" row, next to everything the default config declared.
+Press `mod+s` again to dismiss it. Every binding you annotate documents
+itself this way. The popup ships in the stdlib (`kiln.hotkeys`), and the
 same registry powers a custom one; see the
 [hotkeys popup guide](/kiln/guides/hotkeys-popup).
 
@@ -93,8 +97,10 @@ key { mods = { "mod", "ctrl" }, key = "a-z", desc = "mark", group = "demo",
 	end }
 ```
 
-The registry keeps the range as one entry, so the cheat sheet shows a single
-`1-9  view tag` row instead of nine.
+Reload and press `mod+ctrl+m`. A notification pops up with the letter you
+pressed; try a few others and the message follows the key. The registry keeps
+each range as one entry, so the cheat sheet shows a single `1-9  view tag`
+row instead of nine.
 
 ## 6. Client verbs with kiln.focused
 
@@ -108,6 +114,10 @@ key { mods = { "mod" }, key = "q", desc = "close client", group = "client",
 key { mods = { "mod" }, key = "f", desc = "fullscreen", group = "client",
 	press = kiln.focused(function(c) c:toggle_fullscreen() end) }
 ```
+
+Reload, focus a window, and press `mod+f`: it fills the screen; again and it
+tiles back. Press `mod+q` on an empty tag and nothing happens, quietly: that
+is the guard doing its job, not an error being swallowed.
 
 :::warning
 `c:close()` is the polite close (the client is asked to quit). `c:kill()`
@@ -131,7 +141,9 @@ button { mods = {}, button = 2, on = "root",
 	press = function() kiln.spawn(os.getenv("TERMINAL") or "foot") end }
 ```
 
-The first two are the default config's move and resize drags. Buttons: 1
+The first two are the default config's move and resize drags: hold `mod` and
+drag with the left button and the window follows the pointer; drag with the
+right button and it resizes from whichever corner is nearest. Buttons: 1
 left, 2 middle, 3 right. A plain unbound click on a client simply focuses it.
 Presses on bar cells are handled by the cells' own `on_press` handlers, not
 by `button{}`; see the [bar tutorial](/kiln/tutorials/a-bar-from-scratch).

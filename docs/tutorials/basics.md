@@ -19,8 +19,12 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 ## Prerequisites
 
-- SomeWM [installed](/docs/getting-started/installation) and working
+- You are logged into a running SomeWM session ([First Launch](/docs/getting-started/first-launch) gets you there)
 - A terminal emulator installed (the default config uses `xterm`, but any terminal works)
+
+:::tip
+Don't want to log out of your current desktop? The [nested compositor tutorial](/docs/tutorials/try-somewm-without-installing) runs SomeWM in a window, and everything below works the same there.
+:::
 
 ## What is a Tiling Window Manager?
 
@@ -29,22 +33,6 @@ SomeWM is a **tiling** window manager. This means:
 - **Windows don't overlap** - they automatically arrange to fill your screen
 - **Keyboard-driven** - most actions use keyboard shortcuts instead of mouse
 - **Highly customizable** - everything is configured in Lua
-
-## Starting SomeWM
-
-### From a Display Manager
-
-If you use a display manager (GDM, SDDM, LightDM), select **SomeWM** from the session menu before logging in.
-
-### From TTY
-
-If you prefer starting from a terminal:
-
-```bash
-# Make sure no other compositor/WM is running
-somewm
-```
-
 
 ## Understanding the Desktop
 
@@ -117,11 +105,11 @@ Try pressing **Mod4 + j** and **Mod4 + k** to move focus between windows.
 
 ### Closing Windows
 
-Press **Mod4 + Shift + c** to close the focused window.
+Press **Mod4 + Shift + c** to close the focused window. Notice that the remaining windows immediately re-tile to fill the gap; nothing is left where the closed window was.
 
 ### The Run Prompt
 
-Press **Mod4 + r** to open a run prompt in the wibar. Type any command (like `firefox` or `nautilus`) and press Enter.
+Press **Mod4 + r**. A text prompt appears in the wibar where the prompt area sits. Type any command (like `firefox` or `nautilus`) and press Enter; the prompt disappears and the app opens as a new tile.
 
 {/* TODO: Screenshot needed
    - Wibar with run prompt visible
@@ -162,13 +150,15 @@ To move the focused window to another tag:
 |------------|--------|
 | **Mod4 + Shift + 1-9** | Move window to tag 1-9 |
 
+Try it: with a terminal focused, press **Mod4 + Shift + 3**. The window vanishes from this tag. Press **Mod4 + 3** and there it is, alone on tag 3.
+
 ### Viewing Multiple Tags
 
 | Keybinding | Action |
 |------------|--------|
 | **Mod4 + Ctrl + 1-9** | Toggle viewing tag 1-9 |
 
-Press **Mod4 + Ctrl + 2** while on tag 1 to view both tags simultaneously.
+Press **Mod4 + Ctrl + 2** while on tag 1. Windows from both tags now tile together on screen, and both tag numbers are highlighted in the taglist. Press **Mod4 + Ctrl + 2** again to go back to just tag 1.
 
 ## Understanding Layouts
 
@@ -223,31 +213,16 @@ SomeWM looks for configuration in this order:
 2. `~/.config/awesome/rc.lua` (AwesomeWM compatibility)
 3. System fallback config
 
-If you don't have a config yet, copy the default:
+If you don't have a config yet, copy the installed default:
 
 ```bash
 mkdir -p ~/.config/somewm
-cp /usr/share/somewm/somewmrc.lua ~/.config/somewm/rc.lua
-```
-
-Or if you installed from source:
-
-```bash
-mkdir -p ~/.config/somewm
-cp /path/to/somewm/somewmrc.lua ~/.config/somewm/rc.lua
+cp /etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
 ```
 
 ### Changing Your Terminal
 
-Open your config file in any text editor:
-
-```bash
-nano ~/.config/somewm/rc.lua
-# or
-vim ~/.config/somewm/rc.lua
-```
-
-Find this line near the top:
+Open `~/.config/somewm/rc.lua` in your editor and find this line near the top:
 
 ```lua
 terminal = "xterm"
@@ -263,44 +238,15 @@ Save the file.
 
 ### Reloading Your Config
 
-Press **Mod4 + Ctrl + r** to reload your configuration.
+Press **Mod4 + Ctrl + r** to reload your configuration. The wibar rebuilds, and your open windows stay exactly where they were: a reload replaces the Lua state, not your session.
 
-Now **Mod4 + Enter** opens your new terminal.
+Now press **Mod4 + Enter**. Your new terminal opens instead of xterm. You have made and verified your first configuration change.
 
 :::caution
 If there's an error in your config, SomeWM will show a notification and continue with the old config. Check the notification for details about what went wrong.
 :::
 
-### Changing the Modkey
-
-If you prefer a different modifier key, find this line:
-
-```lua
-modkey = "Mod4"
-```
-
-Common alternatives:
-- `"Mod4"` - Super/Windows key (default)
-- `"Mod1"` - Alt key
-
-:::note
-Be careful when changing modkey - you'll need to use the new key for all shortcuts, including the reload shortcut!
-:::
-
-## Quick Reference Card
-
-| Action | Keybinding |
-|--------|------------|
-| Open terminal | `Mod4 + Enter` |
-| Close window | `Mod4 + Shift + c` |
-| Run prompt | `Mod4 + r` |
-| Show help | `Mod4 + s` |
-| Switch tag | `Mod4 + 1-9` |
-| Move window to tag | `Mod4 + Shift + 1-9` |
-| Focus next/prev | `Mod4 + j/k` |
-| Change layout | `Mod4 + Space` |
-| Reload config | `Mod4 + Ctrl + r` |
-| Quit SomeWM | `Mod4 + Shift + q` |
+Forgot a shortcut? Press `Mod4 + s` anytime for the built-in cheat sheet, or see the [Default Keybindings reference](/docs/reference/default-keybindings).
 
 ## What's Next?
 

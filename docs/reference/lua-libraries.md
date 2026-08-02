@@ -30,11 +30,20 @@ These APIs are unique to SomeWM and not available in AwesomeWM:
 |-----|---------|
 | [awful.input](./awful/input) | Runtime input device configuration |
 | [somewm-client](./somewm-client) | IPC command-line tool |
+| [output](./output) | Physical output objects that persist across disable/enable |
+| [layer_surface](./layer_surface/) | Layer-shell surfaces (bars, launchers) and their rules |
+| [Shadows](./shadows) | Built-in drop shadows for clients and drawins |
+| [Lock, Idle & DPMS](./lock) | C-level session lock, idle, and display power APIs |
+| [Lockscreen Module](./lockscreen) | The Lua lockscreen UI module |
+| [Tag Persistence](./tag-persistence) | Signals and saved-state schema for tag persistence |
 
 ## Other References
 
 | Reference | Description |
 |-----------|-------------|
+| [Screen](./screen) | Screen objects, geometry, and scaling |
 | [Key Names](./key-names) | Modifier keys and key name reference |
 | [Signals](./signals) | Event signals by object type |
 | [Default Keybindings](./default-keybindings) | Built-in keyboard shortcuts |
+| [Deviations from AwesomeWM](./deviations) | Canonical status list: stubs, partials, SomeWM-only APIs |
+| [Wayland Protocols](./wayland-protocols) | Protocols somewm advertises to clients |
