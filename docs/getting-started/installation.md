@@ -15,7 +15,7 @@ You can run a sandboxed nested SomeWM inside your current Wayland or X11 session
 :::note wlroots
 SomeWM builds against wlroots 0.20, or 0.19 if your system is too old for 0.20. If wlroots is not installed, Meson fetches the matching version as a subproject during the build.
 
-wlroots 0.20 needs wayland-server 1.24.0, libdrm 2.4.129 and xkbcommon 1.8.0. Debian 13 and Ubuntu 24.04 ship older versions of all three, so they get 0.19. Force a version with `-Dwlroots_version=0.19` or `-Dwlroots_version=0.20`.
+wlroots 0.20 needs wayland-server 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0, wayland-protocols 1.47 and pixman 0.46.0. Debian 13 and Ubuntu 24.04 ship older versions, so they get 0.19. An already-installed wlroots 0.20 is used regardless. Force a version with `-Dwlroots_version=0.19` or `-Dwlroots_version=0.20`.
 
 The 0.19 path exists for these older distributions and will be dropped once they ship wlroots 0.20 or the dependency versions it needs.
 :::
@@ -55,7 +55,7 @@ sudo pacman -S xorg-xwayland libxcb
 
 ### Debian/Ubuntu
 
-Debian and Ubuntu do not ship a wlroots version SomeWM can use, so Meson builds wlroots from source. That needs wlroots' own build dependencies as well as SomeWM's.
+If your release does not package wlroots 0.19 or 0.20, Meson builds wlroots from source. That needs wlroots' own build dependencies as well as SomeWM's.
 
 ```bash
 # Required dependencies
