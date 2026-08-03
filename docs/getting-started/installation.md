@@ -13,7 +13,11 @@ You can run a sandboxed nested SomeWM inside your current Wayland or X11 session
 ## Dependencies
 
 :::note wlroots
-SomeWM is tightly coupled to wlroots 0.19. Meson fetches it automatically as a subproject during the build.
+SomeWM builds against wlroots 0.20, or 0.19 if your system is too old for 0.20. If wlroots is not installed, Meson fetches the matching version as a subproject during the build.
+
+wlroots 0.20 needs wayland-server 1.24.0, libdrm 2.4.129 and xkbcommon 1.8.0. Debian 13 and Ubuntu 24.04 ship older versions of all three, so they get 0.19. Force a version with `-Dwlroots_version=0.19` or `-Dwlroots_version=0.20`.
+
+The 0.19 path exists for these older distributions and will be dropped once they ship wlroots 0.20 or the dependency versions it needs.
 :::
 
 ### Arch Linux
@@ -51,22 +55,43 @@ sudo pacman -S xorg-xwayland libxcb
 
 ### Debian/Ubuntu
 
+Debian and Ubuntu do not ship a wlroots version SomeWM can use, so Meson builds wlroots from source. That needs wlroots' own build dependencies as well as SomeWM's.
+
 ```bash
 # Required dependencies
 sudo apt install \
+    build-essential \
     meson \
+    ninja-build \
+    pkg-config \
     luajit \
+    libluajit-5.1-dev \
     lua-lgi \
     libcairo2-dev \
     libpango1.0-dev \
     libgdk-pixbuf-2.0-dev \
+    libglib2.0-dev \
     libwayland-dev \
+    libwayland-bin \
     wayland-protocols \
     libdrm-dev \
     libdbus-1-dev \
     libinput-dev \
     libxkbcommon-dev \
     libxcb-util-dev
+
+# wlroots build dependencies
+sudo apt install \
+    libgbm-dev \
+    libegl-dev \
+    libgles-dev \
+    libvulkan-dev \
+    libpixman-1-dev \
+    libudev-dev \
+    libseat-dev \
+    libdisplay-info-dev \
+    libliftoff-dev \
+    hwdata
 
 # Optional: XWayland support
 sudo apt install \
@@ -75,7 +100,15 @@ sudo apt install \
     libxcb-icccm4-dev \
     libxcb-composite0-dev \
     libxcb-ewmh-dev \
-    libxcb-res0-dev
+    libxcb-res0-dev \
+    libxcb-render0-dev \
+    libxcb-render-util0-dev \
+    libxcb-errors-dev \
+    libxcb-xfixes0-dev \
+    libxcb-xinput-dev
+
+# Optional: lock screen authentication
+sudo apt install libpam0g-dev
 ```
 
 ### Fedora
