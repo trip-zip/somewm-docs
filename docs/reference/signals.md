@@ -24,7 +24,7 @@ Currently queued:
 - Lifecycle: `list`, `swapped`
 - Request: `request::activate`, `request::urgent`, `request::tag`, `request::select`
 - Systray: `request::secondary_activate`, `request::context_menu`, `request::scroll`
-- Output and screen topology, when triggered by output hotplug or state changes (wlr-randr, kanshi): output `property::enabled`, `property::scale`, `property::transform`, `property::mode`, `property::adaptive_sync`, `property::screen` (screen attached), output `added`; screen `property::scale`, `property::geometry`, `property::workarea`, `primary_changed`, `list`, `property::_viewports`. The same signals dispatch synchronously when triggered from Lua (`screen.fake_add`, `screen.fake_remove`, `s:swap(...)`, `screen.primary = s`).
+- Output and screen topology, when triggered by output hotplug or state changes (wlr-randr, kanshi): output `property::enabled`, `property::scale`, `property::transform`, `property::mode`, `property::adaptive_sync`, `property::screen` (screen attached), output `added`; screen `property::scale`, `property::geometry`, `property::workarea`, `primary_changed`, `list`, `property::_viewports`. The Lua-initiated paths dispatch synchronously: `screen.fake_add`, `screen.fake_remove`, and `s:swap(...)` emit `list` inline, and `screen.primary = s` emits `primary_changed` inline.
 - Layer shell: `property::layer`, `property::anchor`, `property::exclusive_zone`, `property::keyboard_interactive`, `property::margin`
 - Globals: `xkb::map_changed`, `xkb::group_changed`, `idle::start`, `idle::stop`, `dpms::on` (from input activity; `awesome.dpms_on()` emits synchronously), `spawn::timeout`, `spawn::completed`, `switch::toggle`, `screen::focus`, `logind::prepare_sleep`, `client::map`, `client::unmap`
 
