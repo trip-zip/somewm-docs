@@ -142,6 +142,49 @@ awful.key({ "Mod1", "Shift" }, "space", function()
 end)
 ```
 
+### A key doesn't repeat when held
+
+If **no** key repeats, check that the rate is not zero:
+
+```lua
+awful.input.keyboard_repeat_rate = 25   -- repeats per second
+awful.input.keyboard_repeat_delay = 600 -- ms before the first repeat
+```
+
+If only **some** keys are affected (often arrows or remapped keys), the keymap has repeat turned off for them. Check for a custom XKB directory:
+
+```bash
+ls ~/.config/xkb
+```
+
+libxkbcommon reads that directory before the system layouts, so a symbols file written for X11 is active under SomeWM even though X11 ignored it.
+
+Compile your keymap and look at the key that misbehaves:
+
+```bash
+xkbcli compile-keymap --layout us | grep -A4 'key <UP>'
+```
+
+A key that has lost repeat looks like this:
+
+```
+key <UP> {
+    repeat= No,
+    symbols[1]= [ Up ],
+    actions[1]= [ SetMods(modifiers=none) ]
+};
+```
+
+The `actions[1]=` line is the cause and `repeat= No` is the result. Any key defining an action skips compat interpretation and falls back to not repeating.
+
+Add `repeat= yes` to those definitions in your symbols file:
+
+```
+key <UP> { symbols[Group1]=[ Up ], actions[Group1]=[ ... ], repeat= yes };
+```
+
+Re-run the `xkbcli` command to confirm `repeat= Yes`, then reload your config.
+
 ### Touch input not working
 
 Make sure libinput is properly configured. Check `awful.input` settings:

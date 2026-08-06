@@ -44,6 +44,14 @@ This page explains why some AwesomeWM features work differently (or don't work) 
 
 **Impact**: External tools like `xdotool` cannot inject input. `root.fake_input()` works, because it is the compositor doing the injecting (via `wlr_seat`), so automation goes through SomeWM itself. See [Deviations](/docs/reference/deviations) for status.
 
+### Key Repeat Is Client-Side
+
+**X11**: The X server generates repeat events while a key is held, from its own per-key repeat table, which is on by default for ordinary keys.
+
+**Wayland**: The compositor sends the repeat rate and delay once, along with the keymap. Each application does its own repeating, and asks the keymap whether the held key is allowed to repeat.
+
+**Impact**: `keyboard_repeat_rate` and `keyboard_repeat_delay` set the timing, not which keys are eligible. Eligibility is a per-key flag in the keymap, so a layout can leave a key not repeating no matter what those properties say. This is not specific to SomeWM. The flag lives in the keymap and the application reads it, so the same layout behaves the same way under any Wayland compositor. See [A key doesn't repeat when held](../troubleshooting.md#a-key-doesnt-repeat-when-held) if you hit this.
+
 ### No X Properties
 
 **X11**: Windows can store arbitrary properties that persist across sessions.
