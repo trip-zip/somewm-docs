@@ -24,8 +24,11 @@ Currently queued:
 - Lifecycle: `list`, `swapped`
 - Request: `request::activate`, `request::urgent`, `request::tag`, `request::select`
 - Systray: `request::secondary_activate`, `request::context_menu`, `request::scroll`
+- Output and screen topology, when triggered by output hotplug or state changes (wlr-randr, kanshi): output `property::enabled`, `property::scale`, `property::transform`, `property::mode`, `property::adaptive_sync`, `property::screen` (screen attached), output `added`; screen `property::scale`, `property::geometry`, `property::workarea`, `primary_changed`, `list`, `property::_viewports`. The same signals dispatch synchronously when triggered from Lua (`screen.fake_add`, `screen.fake_remove`, `s:swap(...)`, `screen.primary = s`).
+- Layer shell: `property::layer`, `property::anchor`, `property::exclusive_zone`, `property::keyboard_interactive`, `property::margin`
+- Globals: `xkb::map_changed`, `xkb::group_changed`, `idle::start`, `idle::stop`, `dpms::on` (from input activity; `awesome.dpms_on()` emits synchronously), `spawn::timeout`, `spawn::completed`, `switch::toggle`, `screen::focus`, `logind::prepare_sleep`, `client::map`, `client::unmap`
 
-All other C-emitted signals (and every Lua-emitted signal) dispatch synchronously today.
+All other C-emitted signals (and every Lua-emitted signal) dispatch synchronously today. Notable synchronous holdouts, each for a concrete reason: `request::manage` and screen `added` (rules and tags must exist before C continues), `request::unmanage` and screen/output `removed` (objects are invalidated before the next drain), `request::geometry`, `request::keyboard`, and `request::focus_restore` (C reads the handler's response immediately), and key/button/grabber dispatch (C uses the result to decide whether input propagates to the client).
 
 ## `client` signals
 
