@@ -1,13 +1,17 @@
 ---
 title: "Lock Screen"
 description: Build a native lock screen with SomeWM's session-lock API, a masked password prompt with real UTF-8 handling, PAM authentication, and multi-monitor covers, then wire the Lock action into the exit screen and main menu.
-sidebar_position: 14
+sidebar_label: "12 · Lock Screen"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Lock Screen <SomewmOnly />
+
+<ChapterNav chapter="12" />
 
 <YouWillLearn>
 
@@ -21,7 +25,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 ## Where We Are
 
-In [the dashboard chapter](./11-dashboard.md) we finished the control center: profile, sliders, toggles, and a calendar, all reading system state through shared widget modules. Every modal surface in this config, from [the exit screen](./07-exitscreen.md) onward, has used the same vocabulary: a fullscreen or popup surface, a keygrabber that owns the keyboard while it is up, and widgets rebuilt when state changes. This chapter is the last of them, and the one where that vocabulary meets a real security boundary. To catch up: `git checkout 11-dashboard`.
+In [chapter 11](./11-dashboard.md) we finished the control center: profile, sliders, toggles, and a calendar, all reading system state through shared widget modules. Every modal surface in this config, from [the exit screen](./07-exitscreen.md) onward, has used the same vocabulary: a fullscreen or popup surface, a keygrabber that owns the keyboard while it is up, and widgets rebuilt when state changes. This chapter is the last of them, and the one where that vocabulary meets a real security boundary. To catch up: `git checkout 11-dashboard`.
 
 ## Why Lock Screens Are Different
 
@@ -397,3 +401,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 11-dashboard 12-lockscreen`
+
+<NextChapter chapter="12" />

@@ -1,12 +1,16 @@
 ---
 title: "Main Menu"
 description: Replace awful.menu with a data-driven, fully themed main menu built on the modal pattern.
-sidebar_position: 10
+sidebar_label: "08 · Main Menu"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Main Menu
+
+<ChapterNav chapter="08" />
 
 <YouWillLearn>
 
@@ -300,3 +304,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 07-exitscreen 08-mainmenu`
+
+<NextChapter chapter="08" />

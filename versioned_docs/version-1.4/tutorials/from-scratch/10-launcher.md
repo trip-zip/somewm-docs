@@ -1,12 +1,16 @@
 ---
 title: "Launcher: A Menubar Replacement"
 description: "Build a native fuzzy-search application launcher: parse .desktop files, scan asynchronously, score matches, and cache icon lookups on disk."
-sidebar_position: 12
+sidebar_label: "10 · Launcher"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Launcher: A Menubar Replacement
+
+<ChapterNav chapter="10" />
 
 <YouWillLearn>
 
@@ -387,3 +391,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 09-switcher 10-launcher`
+
+<NextChapter chapter="10" />

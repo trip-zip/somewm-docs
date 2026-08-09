@@ -1,12 +1,16 @@
 ---
 title: "Dashboard: The Control Center"
 description: Compose profile, sliders, toggles, and calendar modules into one popup, bind sliders two ways to the system without feedback loops, and make toggle buttons tell the truth.
-sidebar_position: 13
+sidebar_label: "11 · Dashboard"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Dashboard: The Control Center
+
+<ChapterNav chapter="11" />
 
 <YouWillLearn>
 
@@ -20,7 +24,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 ## Where We Are
 
-In [the launcher chapter](./10-launcher.md) we replaced the menubar with a fuzzy-search launcher, our fourth overlay UI built on [the modal pattern](./07-exitscreen.md): a popup plus a controller that owns visibility, Escape, click-outside dismissal, and the `<name>::visible` signal. This chapter builds the fifth and largest one: a control center on Mod+D with a clock, volume and brightness sliders, six quick-setting toggles, and a browsable calendar. To catch up: `git checkout 10-launcher`.
+In [chapter 10](./10-launcher.md) we replaced the menubar with a fuzzy-search launcher, our fourth overlay UI built on [the modal pattern](./07-exitscreen.md): a popup plus a controller that owns visibility, Escape, click-outside dismissal, and the `<name>::visible` signal. This chapter builds the fifth and largest one: a control center on Mod+D with a clock, volume and brightness sliders, six quick-setting toggles, and a browsable calendar. To catch up: `git checkout 10-launcher`.
 
 ## One Popup, Four Modules
 
@@ -337,3 +341,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 10-launcher 11-dashboard`
+
+<NextChapter chapter="11" />

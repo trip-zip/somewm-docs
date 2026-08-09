@@ -1,12 +1,16 @@
 ---
 title: "The Default Config"
 description: "A guided tour of the stock rc.lua: how the compositor loads it, what each section does, and how to test changes in a nested session without breaking your desktop."
-sidebar_position: 2
+sidebar_label: "00 · The Default Config"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # The Default Config
+
+<ChapterNav chapter="00" />
 
 <YouWillLearn>
 
@@ -29,7 +33,7 @@ cd awesome-from-scratch
 git checkout 00-default
 ```
 
-The branch contains two files: a README and a 657-line `rc.lua`. That rc.lua is the stock configuration that ships with the compositor, unmodified. Every later branch is exactly one commit on top of the branch before it, so `git diff` between neighboring branches always shows you one chapter's worth of change.
+The branch contains two files: a README and a 693-line `rc.lua`. That rc.lua is the stock configuration that ships with the compositor, unchanged apart from running it through this repository's `stylua` formatting. Every later branch is exactly one commit on top of the branch before it, so `git diff` between neighboring branches always shows you one chapter's worth of change.
 
 ## What rc.lua Is
 
@@ -235,3 +239,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 There is no previous branch to diff against: this is the baseline every later `git diff` starts from.
+
+<NextChapter chapter="00" />

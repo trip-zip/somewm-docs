@@ -1,12 +1,16 @@
 ---
 title: "Keybindings: A Table You Can Read"
 description: Extract every keybinding into its own module, flatten the awful.key boilerplate into a scannable table, and learn how global, client, and tag bindings differ.
-sidebar_position: 4
+sidebar_label: "02 · Keybindings"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Keybindings: A Table You Can Read
+
+<ChapterNav chapter="02" />
 
 <YouWillLearn>
 
@@ -20,7 +24,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 ## Where We Are
 
-In [the theme chapter](./01-theme.md) we built `theme/theme.lua`: palettes, `beautiful.font_size(size, style)`, shape helpers, and recolored SVG assets. The window manager looks like ours now, but rc.lua is still the stock monolith. To catch up: `git checkout 01-theme`.
+In [chapter 01](./01-theme.md) we built `theme/theme.lua`: palettes, `beautiful.font_size(size, style)`, shape helpers, and recolored SVG assets. The window manager looks like ours now, but rc.lua is still the stock monolith. To catch up: `git checkout 01-theme`.
 
 ## A Third of Your Config Is Keybindings
 
@@ -233,3 +237,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 01-theme 02-keybindings`
+
+<NextChapter chapter="02" />

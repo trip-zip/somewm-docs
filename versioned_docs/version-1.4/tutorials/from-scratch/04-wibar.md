@@ -1,12 +1,16 @@
 ---
 title: "Wibar: Our Own Bar"
 description: "Replace the stock bar with a wibar factory: named tags with icons, a custom taglist, a centered clock, and a styled systray."
-sidebar_position: 6
+sidebar_label: "04 · Wibar"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Wibar: Our Own Bar
+
+<ChapterNav chapter="04" />
 
 <YouWillLearn>
 
@@ -329,3 +333,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 03-widgets 04-wibar`
+
+<NextChapter chapter="04" />

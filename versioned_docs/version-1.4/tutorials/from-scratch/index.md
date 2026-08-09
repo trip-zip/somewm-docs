@@ -1,24 +1,24 @@
 ---
 title: Awesome From Scratch
 description: Build a complete AwesomeWM/SomeWM desktop in thirteen chapters, one feature at a time.
-sidebar_position: 1
+sidebar_label: Overview
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import ChapterList from '@site/src/components/FromScratch/ChapterList';
 
-# Awesome From Scratch
+# Awesome(And SomeWM 1.4) From Scratch
 
-Build a complete desktop configuration from the stock config to a finished environment: a themed bar with live widgets, a notification system with history and a notification center, an app launcher, a control center, a window switcher, and a native lockscreen. Thirteen chapters, each one adding a single feature, each backed by a git branch holding the finished code.
+Build a complete desktop configuration from the stock config to a finished environment: a themed bar with live widgets, a notification system with history and a notification center, an app launcher, a control center, a window switcher, and a native lockscreen. Thirteen chapters, each one adding a single feature.
 
-**100% native.** No rofi, no polybar, no conky. Everything in this series is built from the widget system the window manager already ships.
+**100% native.** No rofi, no polybar, no conky. Everything in this series is built from the widget system.
+
+**Read it in order.** This is a course, not a collection of recipes. Every chapter starts from the config the previous one finished, so chapter 10 opens `launcher/init.lua` expecting the theme from chapter 01, the wrapper helpers from chapter 03, and the modal pattern you extract in chapter 07. Jumping straight to a chapter that looks interesting means editing files that do not exist yet. If you want one feature bolted onto a config you already have, the [short standalone tutorials](../basics.md) are the right tool.
 
 ![The finished desktop: tiled terminals under a themed bar, with the dashboard and launcher open](/img/from-scratch/intro-final-desktop.png)
 
-## What You'll Build
+## The Chapters
 
-- **Chapters 00-05** are the foundation: the theme system, table-driven keybindings, your first widgets, a bar to put them in, and client rules with titlebars.
-- **Chapters 06-11** are the features: a full notification system, then a run of overlay UIs - exit screen, main menu, window switcher, launcher, dashboard - all built on one modal pattern you extract yourself in chapter 07.
-- **Chapter 12** is the finale: a native lockscreen on SomeWM's session-lock API. <SomewmOnly />
+<ChapterList />
 
 ![The notification center and power menu](/img/from-scratch/intro-notifications-menu.png)
 
@@ -26,14 +26,14 @@ Build a complete desktop configuration from the stock config to a finished envir
 
 You are new to AwesomeWM or SomeWM, and comfortable reading Lua. Every window-manager concept - widgets, signals, timers, theming, rules, keygrabbers - is explained when it first appears. Lua itself is not; if you can read a table constructor and a closure, you're equipped.
 
-The configuration runs on **both** AwesomeWM (X11) and SomeWM (Wayland). The handful of SomeWM-only features are marked with a badge like the one above, always with a note on what AwesomeWM users should do instead.
+The configuration runs on **both** AwesomeWM (X11) and SomeWM 1.4 (Wayland). The handful of SomeWM-only features are marked with a badge like the one above, always with a note on what AwesomeWM users should do instead.
 
 ## Prerequisites
 
-- [SomeWM](https://github.com/trip-zip/somewm) or AwesomeWM 4.3+
+- [SomeWM](https://github.com/trip-zip/somewm) or AwesomeWM master branch
 - git and a terminal emulator
 - JetBrainsMono Nerd Font (or any Nerd Font; you'll learn to change it in one line)
-- Optional CLI tools the widgets shell out to: `wpctl` (volume), `brightnessctl`, `nmcli`, `bluetoothctl`, `upower`, `playerctl`
+- Optional CLI tools the widgets shell out to: `wpctl` (volume), `brightnessctl`, `nmcli`, `bluetoothctl`, `upower`, `playerctl`.  Specifics are not as important as knowing which cli tools you have installed and how to call them from the terminal.
 
 ## How the Checkpoint Branches Work
 

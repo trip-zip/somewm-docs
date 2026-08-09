@@ -1,12 +1,16 @@
 ---
 title: "Widgets: Wrappers, Clock, Volume, Battery, WiFi"
 description: "Build the widget system: the wibox widget tree, shared wrapper helpers, timers, async shell reads, and custom signals."
-sidebar_position: 5
+sidebar_label: "03 · Widgets"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Widgets: Wrappers, Clock, Volume, Battery, WiFi
+
+<ChapterNav chapter="03" />
 
 <YouWillLearn>
 
@@ -400,3 +404,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 02-keybindings 03-widgets`
+
+<NextChapter chapter="03" />

@@ -1,13 +1,17 @@
 ---
 title: "Theme: Palettes, Shapes, Recolored Assets"
 description: "Build a theme system from scratch: named palettes, semantic color roles, a one-line font rule, DPI-aware sizing, a global shape switch, and SVG assets recolored at load time."
-sidebar_position: 3
+sidebar_label: "01 · Theme"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Theme: Palettes, Shapes, Recolored Assets
+
+<ChapterNav chapter="01" />
 
 <YouWillLearn>
 
@@ -20,7 +24,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 ## Where We Are
 
-In [the previous chapter](./00-default.md) we toured the stock `rc.lua` that ships with AwesomeWM and got it running in a nested test session. It works, but it looks like 2008: the default theme, the default xterm, the default everything. This chapter replaces the built-in theme with our own `theme/theme.lua`, an 830-line file that will style every single widget we build for the rest of the series. To catch up: `git checkout 00-default`.
+In [chapter 00](./00-default.md) we toured the baseline `rc.lua` and got it running in a nested test session. It works, but it looks like 2008: the default theme, the default xterm, the default everything. This chapter replaces the built-in theme with our own `theme/theme.lua`, an 830-line file that will style every single widget we build for the rest of the series. To catch up: `git checkout 00-default`.
 
 ## What Beautiful Actually Is
 
@@ -310,3 +314,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 00-default 01-theme`
+
+<NextChapter chapter="01" />

@@ -1,12 +1,16 @@
 ---
 title: "Notifications: Routing, History, Center"
-description: Chapter 06 of Awesome From Scratch.
-sidebar_position: 8
+description: "Replace the notification defaults with a system of your own: rule-based routing and styling, a history store with unread tracking, a notification center popup, and do-not-disturb."
+sidebar_label: "06 · Notifications"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Notifications: Routing, History, Center
+
+<ChapterNav chapter="06" />
 
 <YouWillLearn>
 
@@ -489,3 +493,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 05-rules-titlebars 06-notifications`
+
+<NextChapter chapter="06" />

@@ -25,10 +25,13 @@ const sidebars: SidebarsConfig = {
         'tutorials/wibar',
         'tutorials/carousel',
         {
+          // A course, not a menu: every chapter assumes the code from the ones
+          // above it, so the labels carry their chapter numbers and the order
+          // here is the reading order.
           type: 'category',
           label: 'From Scratch',
-          link: {type: 'doc', id: 'tutorials/from-scratch/index'},
           items: [
+            'tutorials/from-scratch/index',
             'tutorials/from-scratch/00-default',
             'tutorials/from-scratch/01-theme',
             'tutorials/from-scratch/02-keybindings',

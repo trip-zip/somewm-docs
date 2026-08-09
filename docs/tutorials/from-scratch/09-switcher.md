@@ -1,12 +1,16 @@
 ---
 title: "Window Switcher"
-description: Chapter 09 of Awesome From Scratch.
-sidebar_position: 11
+description: "Build Alt-Tab: clients ordered most-recently-used, and hold-and-release input that deliberately does not fit the modal pattern."
+sidebar_label: "09 · Window Switcher"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Window Switcher
+
+<ChapterNav chapter="09" />
 
 <YouWillLearn>
 
@@ -237,3 +241,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 08-mainmenu 09-switcher`
+
+<NextChapter chapter="09" />

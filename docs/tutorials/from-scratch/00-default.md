@@ -1,17 +1,22 @@
 ---
 title: "The Default Config"
-description: "A guided tour of the stock rc.lua: how the compositor loads it, what each section does, and how to test changes in a nested session without breaking your desktop."
-sidebar_position: 2
+description: "A guided tour of the baseline rc.lua: how the compositor loads it, what each section does, how it differs from the config SomeWM 2.0 ships, and how to test changes in a nested session without breaking your desktop."
+sidebar_label: "00 · The Default Config"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # The Default Config
+
+<ChapterNav chapter="00" />
 
 <YouWillLearn>
 
 - how the compositor loads rc.lua, and what happens when it contains an error
-- the structure of the stock config: error handling, theme, menu, wibar, keybindings, rules, signals
+- the structure of the baseline config: error handling, theme, menu, wibar, keybindings, rules, signals
+- how that baseline differs from the config SomeWM 2.0 ships, and why the series starts from the smaller one
 - how to run a work-in-progress config in a nested session on SomeWM or AwesomeWM
 - how to recover when a config change goes wrong
 
@@ -29,7 +34,34 @@ cd awesome-from-scratch
 git checkout 00-default
 ```
 
-The branch contains two files: a README and a 657-line `rc.lua`. That rc.lua is the stock configuration that ships with the compositor, unmodified. Every later branch is exactly one commit on top of the branch before it, so `git diff` between neighboring branches always shows you one chapter's worth of change.
+The branch contains two files: a README and a 693-line `rc.lua`. That rc.lua is the SomeWM 1.4 stock configuration, unchanged apart from running it through this repository's `stylua` formatting. Every later branch is exactly one commit on top of the branch before it, so `git diff` between neighboring branches always shows you one chapter's worth of change.
+
+## Heads Up: Your 2.0 Default Is a Different File
+
+:::caution Read this before you compare notes
+The `somewmrc.lua` that ships with SomeWM 2.0 is **not** the file this series starts from. It was rewritten after 1.4 to showcase the compositor, and it is about 1,100 lines against this baseline's 693. If you open `~/.config/somewm/rc.lua` and try to follow along there, nothing will line up.
+:::
+
+The series builds on the 1.4-lineage config because it is the smaller, more conventional starting point: it is essentially the AwesomeWM default with SomeWM's additions folded in, so it reads the same on both compositors and it leaves you something to build. The 2.0 default already hands you several of the things you are about to write.
+
+| | `00-default` branch (this series) | shipped SomeWM 2.0 default |
+|---|---|---|
+| Lines | 693 | 1,118 |
+| Section markers | `-- {{{ Menu` folds, `-- @DOC_*@` doc anchors | plain comments, no folds or anchors |
+| Theme | `default/theme.lua` | `gruvbox`, persisted to `~/.config/somewm/theme`, with a switcher in the menu |
+| Terminal | `xterm` | `foot` |
+| Tags | nine numbered, `"1"` through `"9"` | five named: `dev`, `web`, `chat`, `files`, `media` |
+| Clock | bare `wibox.widget.textclock()` | rounded background, centered with `wibox.layout.stack` |
+| Keybinding style | positional: `awful.key({ modkey }, "l", fn, desc)` | declarative: `awful.key { modifiers =, key =, on_press = }` |
+| Media, brightness, screenshot keys | none | `wpctl`, `brightnessctl`, `grim`/`slurp`, and `awful.screenshot` |
+| Commented-out extras | none | `awful.input` pointer and xkb, fractional scaling, autostart, idle auto-lock, layout animation, `awful.ipc.register` |
+
+Two practical consequences:
+
+1. **Run the checkout, not your installed config.** `somewm-client test start --config "$PWD/rc.lua"` points the nested session at the baseline in the git checkout. The public Lua API is the same in both releases, so the baseline runs correctly under 2.0.
+2. **Several rows above are chapters.** The theme is chapter 01, media keys are chapter 02, the styled clock is chapter 03, named tags and a centered bar are chapter 04, do-not-disturb is chapter 06, and locking is chapter 12. The 2.0 default gives them to you already configured. This series has you write them, which is what makes them yours to change.
+
+If you are on SomeWM 1.4, or on AwesomeWM, none of this applies: the baseline is your stock config.
 
 ## What rc.lua Is
 
@@ -42,9 +74,9 @@ Two consequences matter from day one:
 
 The compositor looks for the file at `$XDG_CONFIG_HOME/somewm/rc.lua` (or `~/.config/awesome/rc.lua` on AwesomeWM), but you can point it at any path, which is exactly what the nested test session below does. Throughout this series we run straight out of the git checkout.
 
-## A Tour of the File
+## A Tour of the Baseline
 
-Open `rc.lua` and skim it alongside this section. The file is divided by fold-marker comments like `-- {{{ Menu`, and you will see markers like `-- @DOC_WIBAR@` scattered around: those are anchors used to generate the official API docs from this same file. Ignore them.
+Open the `rc.lua` from the checkout and skim it alongside this section. The file is divided by fold-marker comments like `-- {{{ Menu`, and you will see markers like `-- @DOC_WIBAR@` scattered around: those are anchors used to generate the official API docs from this same file. Ignore them.
 
 ### Libraries and Error Handling
 
@@ -235,3 +267,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 There is no previous branch to diff against: this is the baseline every later `git diff` starts from.
+
+<NextChapter chapter="00" />

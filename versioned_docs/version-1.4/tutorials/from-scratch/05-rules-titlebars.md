@@ -1,12 +1,16 @@
 ---
 title: "Client Rules and Titlebars"
 description: "Route apps to tags, float the right windows, and draw titlebars with ruled.client and awful.titlebar."
-sidebar_position: 7
+sidebar_label: "05 · Rules and Titlebars"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Client Rules and Titlebars
+
+<ChapterNav chapter="05" />
 
 <YouWillLearn>
 
@@ -417,3 +421,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 04-wibar 05-rules-titlebars`
+
+<NextChapter chapter="05" />

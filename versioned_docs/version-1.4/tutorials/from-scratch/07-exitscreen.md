@@ -1,12 +1,16 @@
 ---
 title: "Exit Screen: The Modal Pattern"
 description: "Extract the modal pattern into modal.lua, refactor the notification center onto it, and build a full-screen power menu as its first consumer."
-sidebar_position: 9
+sidebar_label: "07 · Exit Screen"
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
+import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
+import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 # Exit Screen: The Modal Pattern
+
+<ChapterNav chapter="07" />
 
 <YouWillLearn>
 
@@ -404,3 +408,5 @@ somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
 Compare your work: `git diff 06-notifications 07-exitscreen`
+
+<NextChapter chapter="07" />
