@@ -35,20 +35,6 @@ const config: Config = {
         editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
       },
     ],
-    [
-      '@docusaurus/plugin-content-docs',
-      {
-        id: 'from-scratch',
-        path: 'from-scratch',
-        routeBasePath: '/from-scratch',
-        sidebarPath: './sidebarsFromScratch.ts',
-        editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
-        // Chapter files are 00-default.md .. 12-lockscreen.md and their URLs
-        // must keep the numeric prefix (the checkpoint branch READMEs link
-        // to /from-scratch/chapters/NN-<name>), so don't strip it.
-        numberPrefixParser: false,
-      },
-    ],
   ],
 
   presets: [
@@ -57,6 +43,10 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          // The From Scratch chapters are 00-default.md .. 12-lockscreen.md
+          // and their URLs keep the numeric prefix (checkpoint branch READMEs
+          // link to them); no other docs use numbered filenames.
+          numberPrefixParser: false,
           editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
           routeBasePath: '/docs',
           lastVersion: '1.4',
@@ -88,12 +78,11 @@ const config: Config = {
       {
         hashed: true,
         indexBlog: true,
-        docsRouteBasePath: ['/docs', '/kiln', '/from-scratch'],
+        docsRouteBasePath: ['/docs', '/kiln'],
         highlightSearchTermsOnTargetPage: true,
         searchContextByPaths: [
           {label: 'SomeWM', path: 'docs'},
           {label: 'kiln', path: 'kiln'},
-          {label: 'From Scratch', path: 'from-scratch'},
         ],
         useAllContextsWithNoSearchContext: true,
       },
@@ -118,13 +107,6 @@ const config: Config = {
           sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Docs',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'fromScratchSidebar',
-          docsPluginId: 'from-scratch',
-          position: 'left',
-          label: 'From Scratch',
         },
         {
           to: '/blog',
@@ -157,7 +139,7 @@ const config: Config = {
           items: [
             {label: 'Getting Started', to: '/docs/getting-started/installation'},
             {label: 'Tutorials', to: '/docs/tutorials/basics'},
-            {label: 'From Scratch', to: '/from-scratch'},
+            {label: 'From Scratch', to: '/docs/tutorials/from-scratch/'},
             {label: 'Reference', to: '/docs/reference/lua-libraries'},
             {label: 'Blog', to: '/blog'},
           ],

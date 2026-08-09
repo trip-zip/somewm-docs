@@ -90,7 +90,7 @@ function FromScratch() {
           config runs on both SomeWM and AwesomeWM.
         </p>
         <div className={styles.kilnLinks}>
-          <Link className={styles.btnSecondary} to="/from-scratch">
+          <Link className={styles.btnSecondary} to="/docs/tutorials/from-scratch/">
             Start the series
           </Link>
         </div>

@@ -2,7 +2,6 @@
 title: Awesome From Scratch
 description: Build a complete AwesomeWM/SomeWM desktop in thirteen chapters, one feature at a time.
 sidebar_position: 1
-slug: /
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly';
@@ -60,7 +59,7 @@ Never test a work-in-progress config on your real session. Both compositors can 
 somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
-That opens a nested SomeWM in a window; your real session is untouched. See [testing with a nested compositor](/docs/guides/testing-with-nested-compositor) for the details, and note the [Mod4 remapping caveat](/docs/troubleshooting) for nested sessions.
+That opens a nested SomeWM in a window; your real session is untouched. See [testing with a nested compositor](../../guides/testing-with-nested-compositor.md) for the details, and note the [Mod4 remapping caveat](../../troubleshooting.md) for nested sessions.
 
 **AwesomeWM:** use Xephyr:
 
@@ -73,10 +72,10 @@ The config resolves its own modules relative to the rc.lua you point it at, so r
 
 ## How This Relates to the Other Tutorials
 
-The [SomeWM tutorials](/docs/tutorials/basics) are short and standalone: if you just want to add [a theme](/docs/tutorials/theme), [widgets](/docs/tutorials/widgets), [keybindings](/docs/tutorials/keybindings), or [a bar](/docs/tutorials/wibar) to your *current* config, start there. This series is a course: each chapter builds on the last, and you end with a complete configuration you understand top to bottom.
+The [SomeWM tutorials](../basics.md) are short and standalone: if you just want to add [a theme](../theme.md), [widgets](../widgets.md), [keybindings](../keybindings.md), or [a bar](../wibar.md) to your *current* config, start there. This series is a course: each chapter builds on the last, and you end with a complete configuration you understand top to bottom.
 
 ## Start
 
-Head to [Chapter 00: The Default Config](chapters/00-default.md).
+Head to [Chapter 00: The Default Config](00-default.md).
 
 ![The native lockscreen](/img/from-scratch/intro-lockscreen.png)

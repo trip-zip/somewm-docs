@@ -208,7 +208,7 @@ Xephyr :1 -ac -br -noreset -screen 1280x720 &
 DISPLAY=:1 awesome -c "$PWD/rc.lua"
 ```
 
-Either way you get the stock desktop in a window: gray bar on top, nine tags, right-click menu. Open a terminal with `Mod4+Return`, cycle layouts with `Mod4+Space`, press `Mod4+s` for the help popup. The [series intro](../intro.md) covers this setup in more detail, including the Mod4 remapping caveat for nested sessions, and there is a full guide at [testing with a nested compositor](/docs/guides/testing-with-nested-compositor).
+Either way you get the stock desktop in a window: gray bar on top, nine tags, right-click menu. Open a terminal with `Mod4+Return`, cycle layouts with `Mod4+Space`, press `Mod4+s` for the help popup. The [series intro](./index.md) covers this setup in more detail, including the Mod4 remapping caveat for nested sessions, and there is a full guide at [testing with a nested compositor](../../guides/testing-with-nested-compositor.md).
 
 ## When You Break It
 

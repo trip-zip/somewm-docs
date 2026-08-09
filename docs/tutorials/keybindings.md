@@ -18,7 +18,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 </YouWillLearn>
 
 :::tip Building a full config?
-This page retrofits one feature into an existing config. If you would rather build a complete desktop from the ground up, the [Awesome From Scratch](/from-scratch) series covers this topic as part of a thirteen-chapter course.
+This page retrofits one feature into an existing config. If you would rather build a complete desktop from the ground up, the [Awesome From Scratch](from-scratch/index.md) series covers this topic as part of a thirteen-chapter course.
 :::
 
 We will add two keybindings to your config: one that opens a browser from anywhere, and one that changes the focused window. By the end you will have pressed both and seen them listed in the built-in help popup.
