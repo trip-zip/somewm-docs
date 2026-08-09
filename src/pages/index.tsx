@@ -78,6 +78,27 @@ function Features() {
   );
 }
 
+function FromScratch() {
+  return (
+    <section className={styles.kiln}>
+      <div className={styles.kilnCard}>
+        <h2>Awesome From Scratch</h2>
+        <p>
+          Build a complete desktop configuration in thirteen chapters: theme,
+          widgets, bar, notifications, launcher, dashboard, lockscreen. Each
+          chapter has a checkpoint branch with the finished code, and the
+          config runs on both SomeWM and AwesomeWM.
+        </p>
+        <div className={styles.kilnLinks}>
+          <Link className={styles.btnSecondary} to="/from-scratch">
+            Start the series
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Kiln() {
   return (
     <section className={styles.kiln}>
@@ -120,6 +141,7 @@ export default function Home(): React.ReactElement {
       <main>
         <Hero />
         <Features />
+        <FromScratch />
         <Kiln />
         <Release />
       </main>
