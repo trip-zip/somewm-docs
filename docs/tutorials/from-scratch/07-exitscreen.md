@@ -74,6 +74,9 @@ The fix is a discipline, not a trick: flip the visibility flag *first*, route bo
       self.popup = args.build_popup()
     end
 
+    -- Every modal opens on the screen the user is looking at
+    self.popup.screen = awful.screen.focused()
+
     if args.on_show then
       args.on_show(self.popup)
     end
@@ -81,31 +84,29 @@ The fix is a discipline, not a trick: flip the visibility flag *first*, route bo
     self.popup.visible = true
     visible = true
 
-    if args.grab_keys ~= false then
-      grabber = awful.keygrabber({
-        autostart = true,
-        stop_key = "Escape",
-        stop_callback = function()
-          -- The grabber is already stopped when this fires (Escape, or an
-          -- explicit stop from hide()). Clearing the reference first and
-          -- routing through hide() gives both paths one cleanup; hide()'s
-          -- visibility guard ends the re-entry.
-          grabber = nil
-          self.hide()
-        end,
-        keypressed_callback = function(_, mods, key, _)
-          if args.keypressed then
-            args.keypressed(mods, key)
-          end
-        end,
-      })
-    end
+    grabber = awful.keygrabber({
+      autostart = true,
+      stop_key = "Escape",
+      stop_callback = function()
+        -- The grabber is already stopped when this fires (Escape, or an
+        -- explicit stop from hide()). Clearing the reference first and
+        -- routing through hide() gives both paths one cleanup; hide()'s
+        -- visibility guard ends the re-entry.
+        grabber = nil
+        self.hide()
+      end,
+      keypressed_callback = function(_, mods, key, _)
+        if args.keypressed then
+          args.keypressed(mods, key)
+        end
+      end,
+    })
 
     awesome.emit_signal(args.name .. "::visible", true)
   end
 ```
 
-Note the lazy creation: the popup is not built until the first `show()`. Modules can `require("modal")` and call `modal.new` at startup without paying for widgets nobody has opened yet. `on_show` runs before the popup becomes visible, which is where consumers refresh their content and position the popup on the currently focused screen.
+Note the lazy creation: the popup is not built until the first `show()`. Modules can `require("modal")` and call `modal.new` at startup without paying for widgets nobody has opened yet. And note the screen assignment: `show()` sets `self.popup.screen = awful.screen.focused()` itself, because every modal opens on the screen the user is looking at; no consumer has to remember it. `on_show` runs after that, before the popup becomes visible, which is where consumers refresh their content and re-apply their placement on the freshly assigned screen.
 
 And `hide()`, where the guard does its work:
 
@@ -160,7 +161,7 @@ The last piece of `modal.new` handles dismissal by mouse and by tag switch:
 
 These are global signals: `client` fires `button::press` when you click any client window, and `tag` fires `property::selected` when the visible tag changes. Since both handlers route through `hide()`, they get the same single-cleanup guarantee as everything else.
 
-That is nearly the whole file: `modal.new(args)` takes a `name` (the signal prefix), the required `build_popup`, optional `on_show`, `on_hide`, and `keypressed` callbacks, and `grab_keys` (default true; pass false for a mouse-only modal). It returns a controller exposing `show()`, `hide()`, `toggle()`, `is_visible()`, and `.popup`. Escape is reserved: the controller owns it, and `keypressed` sees everything else. Browse `modal.lua` on the branch for the few lines we skipped.
+That is nearly the whole file: `modal.new(args)` takes a `name` (the signal prefix), the required `build_popup`, and optional `on_show`, `on_hide`, and `keypressed` callbacks. It returns a controller exposing `show()`, `hide()`, `toggle()`, `is_visible()`, and `.popup`. Escape is reserved: the controller owns it, and `keypressed` sees everything else. Browse `modal.lua` on the branch for the few lines we skipped.
 
 ## Refactoring the Notification Center
 
@@ -168,6 +169,15 @@ The proof that the extraction is right: last chapter's code collapses onto it. T
 
 ```lua
 -- notifications.lua
+local center_anchor = { x = 0, y = 0 }
+
+local function place_center(d)
+  local wa = d.screen.workarea
+  d.x = center_anchor.x - d.width / 2
+  d.y = wa.y + (beautiful.useless_gap or 4)
+  awful.placement.no_offscreen(d, { honor_workarea = true, margins = beautiful.useless_gap or 4 })
+end
+
 local center = modal.new({
   name = "notification_center",
   build_popup = function()
@@ -180,11 +190,18 @@ local center = modal.new({
       border_width = beautiful.border_width or 1,
       border_color = beautiful.primary_color,
       shape = beautiful.shape or gears.shape.rounded_rect,
+      placement = place_center,
     })
   end,
+  on_show = function(popup)
+    center_anchor = mouse.coords()
+    popup.widget = create_popup_widget()
+    place_center(popup)
+  end,
+})
 ```
 
-The `on_show` callback keeps the positioning logic from last chapter (center under the mouse, clamp to the screen edges) unchanged; it just moved inside the callback. The public API survives as three assignments, so nothing else in the config notices the refactor:
+Last chapter's positioning (center under the click point, tuck below the bar, keep on screen) survives, but tightened into one named `place_center` function, with `awful.placement.no_offscreen` doing the edge clamping instead of hand-written arithmetic. It is wired in twice, deliberately: installed as the popup's `placement` property, which `awful.popup` re-applies whenever the popup's size changes (covering the very first show, before the widget has been measured), and called directly from `on_show`, so a freshly captured mouse anchor takes effect on every open. The screen is not this module's problem anymore: `modal.show` has already put the popup on the focused screen before `on_show` runs. This one-place-function shape repeats in every modal consumer from here on. The public API survives as three assignments, so nothing else in the config notices the refactor:
 
 ```lua
 -- notifications.lua
@@ -211,7 +228,7 @@ The best deletion is in the snooze picker. Remember its click-outside handling? 
   end)
 ```
 
-That 0.1 second hack is gone entirely. The picker is now `M.snooze_picker = modal.new({...})` and the controller's dismissal handlers cover it. This is the beat to internalize: we hand-rolled the pattern once, felt exactly where it hurt, and *then* extracted it. Extracting before you have felt the pain produces the wrong abstraction; extracting after your first copy produces this one.
+That 0.1 second hack is gone entirely. The picker is now a module-local `snooze_picker = modal.new({...})` with the same anchor-plus-place-function shape as the center (`picker_anchor` and `place_picker`), and the controller's dismissal handlers cover the click-outside case. `show_snooze_picker` opens it with an unconditional `snooze_picker.hide()` first (a no-op when it is already hidden), so clicking Snooze on a second notification re-anchors the picker instead of ignoring the click. This is the beat to internalize: we hand-rolled the pattern once, felt exactly where it hurt, and *then* extracted it. Extracting before you have felt the pain produces the wrong abstraction; extracting after your first copy produces this one.
 
 ## Building the Exit Screen
 
@@ -258,7 +275,7 @@ A power menu usually has a Lock entry, and ours does not, deliberately. We have 
     widget = wibox.container.background,
 ```
 
-There is no in-place highlight toggling. When the selection changes, we rebuild the whole widget tree and swap it in; `exitscreen.refresh()` does exactly that. For a four-button menu, rebuild-on-change is simpler than tracking widget references, and it is the approach every modal in this series uses. Mouse support comes from two handlers on each button: a click runs the option's command, and `mouse::enter` sets `selected_index` and refreshes, so hovering and arrow keys fight over the same state instead of maintaining two.
+There is no in-place highlight toggling. When the selection changes, we rebuild the whole widget tree and swap it in; `exitscreen.refresh()` does exactly that. For a four-button menu, rebuild-on-change is simpler than tracking widget references, and it is the approach every modal in this series uses. Mouse support comes from two handlers on each button: a click runs the option's command, and `mouse::enter` sets `selected_index` and refreshes, so hovering and arrow keys fight over the same state instead of maintaining two. The hover handler starts with a guard, `if selected_index == index then return end`, so re-entering the already selected button does not trigger a pointless rebuild.
 
 ### Assembling the Layout
 
@@ -334,7 +351,7 @@ local controller = modal.new({
   name = "exitscreen",
 ```
 
-with `build_popup` creating the maximized popup and `on_show` resetting `selected_index = 1`, re-placing the popup on the focused screen, and rebuilding the widget. Then `exitscreen.show`, `.hide`, `.toggle`, and `.is_visible` are just the controller's functions assigned onto the module table. Notice what this file does *not* contain: no visibility flag, no keygrabber, no Escape handling, no dismissal signals. Content and keys only.
+with `build_popup` creating the maximized popup and `on_show` resetting `selected_index = 1`, re-running `awful.placement.maximize(popup)` so the popup fills whichever screen the controller just moved it to, and rebuilding the widget. Then `exitscreen.show`, `.hide`, `.toggle`, and `.is_visible` are just the controller's functions assigned onto the module table. Notice what this file does *not* contain: no visibility flag, no keygrabber, no Escape handling, no dismissal signals. Content and keys only.
 
 ## Wiring It Up
 

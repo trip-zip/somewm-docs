@@ -299,7 +299,7 @@ end
 
 `initial_colors` is a list of theme accents (`beautiful.primary_color`, `beautiful.highlight`, `beautiful.active`, and friends), and the byte-sum hash picks one deterministically from the app's name. The fallback widget draws the app's first letter, bold, dark-on-accent, in a colored square. Because the color is a pure function of the name, the same app gets the same tile every session; it reads as a designed icon set, not a failure state.
 
-Rows respond to the mouse as well: clicking launches, hovering moves the selection, and the results container binds buttons 4 and 5 (how both X11 and Wayland deliver the scroll wheel) to step the selection up and down.
+Rows respond to the mouse as well: clicking launches, hovering moves the selection (with a guard that skips the rebuild when the row is already the selected one), and the results container binds buttons 4 and 5 (how both X11 and Wayland deliver the scroll wheel) to step the selection up and down.
 
 The modal controller from chapter 07 wires it all together. `build_popup` creates a centered, borderless-background `awful.popup` once; `on_show` is where lazy loading lives:
 
@@ -324,7 +324,7 @@ The modal controller from chapter 07 wires it all together. `build_popup` create
     filter_apps()
 ```
 
-The first open triggers the async scan, and the completion callback only refreshes the UI if the launcher is *still* visible - you may have opened and immediately dismissed it. Every open resets the search and selection, then the rest of `on_show` re-places the popup on the currently focused screen. The controller owns Escape, click-outside dismissal, and the `launcher::visible` signal; this module never touches a keygrabber directly.
+The first open triggers the async scan, and the completion callback only refreshes the UI if the launcher is *still* visible - you may have opened and immediately dismissed it. Every open resets the search and selection, then the rest of `on_show` recenters the popup with `awful.placement.centered(popup, { parent = popup.screen })` and rebuilds the widget - the controller has already moved the popup to the focused screen before `on_show` runs, so centering it on its own screen is all that is left. The controller owns Escape, click-outside dismissal, and the `launcher::visible` signal; this module never touches a keygrabber directly.
 
 The `keypressed` handler routes `Return` to launch, `Up`/`Down` to move the selection, `BackSpace` to delete, and then:
 

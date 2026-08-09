@@ -145,18 +145,38 @@ The selected row inverts its colors: primary background, dark foreground. Becaus
 ```lua
 -- widgets/mainmenu.lua
   item_widget:connect_signal("mouse::enter", function()
+    if item.selectable_index == selected_index then
+      return
+    end
     selected_index = item.selectable_index
     mainmenu.refresh()
   end)
 ```
 
-That keeps mouse and keyboard in one model. Hovering does not paint a separate hover state; it moves the same `selected_index` the arrow keys move, and `refresh` rebuilds the menu widget from scratch, the rebuild-on-change half of the modal pattern.
+That keeps mouse and keyboard in one model. Hovering does not paint a separate hover state; it moves the same `selected_index` the arrow keys move, and `refresh` rebuilds the menu widget from scratch, the rebuild-on-change half of the modal pattern. The guard at the top skips that rebuild when the pointer re-enters the row that is already selected, so mouse motion over the current row costs nothing.
 
 `create_separator` is a thin `wibox.widget.separator` (a one-pixel line widget) wrapped in margins, indented past the icon column so it aligns with the labels, and drawn in `beautiful.fg_normal .. "33"`, our usual trick of appending a hex alpha byte to a theme color. `create_menu_widget` then loops over `menu_items`, adds a row or a separator per entry, sums the heights so the popup is sized exactly, and wraps everything in a translucent rounded background. Browse the branch for the full builders; they hold no surprises.
 
 ## Wiring the Modal
 
-Here is the whole reason chapter 07 factored out `modal.lua`. The controller owns visibility, the keygrabber, Escape, click-outside, and tag-change dismissal. Our module supplies three callbacks:
+Here is the whole reason chapter 07 factored out `modal.lua`. The controller owns visibility, the keygrabber, Escape, click-outside, and tag-change dismissal, and `modal.show` puts the popup on the focused screen. Our module supplies content, placement, and keys. Placement first. Unlike the exit screen, which centers itself, a context menu belongs where the mouse is, so the module keeps an anchor and one named `place` function:
+
+```lua
+-- widgets/mainmenu.lua
+-- Where the menu opens: the mouse position at show time. One placement
+-- function, installed on the popup (so awful.popup re-applies it whenever
+-- the popup is resized, covering the not-yet-measured first show) and called
+-- from on_show (so a new anchor takes effect even when the size is unchanged).
+local anchor = { x = 0, y = 0 }
+
+local function place(d)
+  d.x = anchor.x
+  d.y = anchor.y
+  awful.placement.no_offscreen(d, { honor_workarea = true, margins = 10 })
+end
+```
+
+`mouse.coords()` (captured into `anchor` at show time) is a global AwesomeWM API returning the pointer position in screen coordinates. `place` puts the popup's top-left corner there, then lets `awful.placement.no_offscreen` do the clamping: if the menu would overhang a screen edge, it is pulled back inside the workarea with a 10-pixel cushion. Right-click near the bottom-right corner and the menu opens up-and-left of the cursor instead of getting clipped. This is the same one-place-function shape the notification center used in chapter 07, wired in the same two spots:
 
 ```lua
 -- widgets/mainmenu.lua
@@ -172,39 +192,18 @@ local controller = modal.new({
       shape = beautiful.shape,
       border_width = beautiful.border_width or 1,
       border_color = beautiful.primary_color,
+      placement = place,
     })
   end,
-```
-
-`on_show` runs every time the menu opens. Unlike the exit screen, which centers itself, a context menu belongs where the mouse is:
-
-```lua
--- widgets/mainmenu.lua
   on_show = function(popup)
     selected_index = 1
-
-    -- Position at mouse cursor
-    local coords = mouse.coords()
-    local s = awful.screen.focused()
-    popup.x = coords.x
-    popup.y = coords.y
-    popup.screen = s
-
-    -- Keep on screen
-    local geo = popup:geometry()
-    local screen_geo = s.geometry
-    if geo.x + geo.width > screen_geo.x + screen_geo.width then
-      popup.x = screen_geo.x + screen_geo.width - geo.width - 10
-    end
-    if geo.y + geo.height > screen_geo.y + screen_geo.height then
-      popup.y = screen_geo.y + screen_geo.height - geo.height - 10
-    end
-
+    anchor = mouse.coords()
     popup.widget = create_menu_widget()
+    place(popup)
   end,
 ```
 
-`mouse.coords()` is a global AwesomeWM API returning the pointer position in screen coordinates. We place the popup's top-left corner there, then clamp: if the menu would overhang the right or bottom edge of the screen, we pull it back inside with a 10-pixel cushion. Right-click near the bottom-right corner and the menu opens up-and-left of the cursor instead of getting clipped. Finally we rebuild the content so the reset `selected_index = 1` is actually visible.
+`on_show` runs every time the menu opens, and it has shrunk to exactly what changes between opens: reset the selection, capture a fresh anchor, rebuild the content so the reset `selected_index = 1` is actually visible, and call `place` so the new anchor takes effect. The `placement = place` constructor property covers the case `on_show` cannot: on the very first show the widget has not been measured yet, and `awful.popup` re-applies its `placement` function once the popup gets its real size.
 
 `keypressed` handles navigation with wrap-around, and both arrow keys and vim keys work:
 

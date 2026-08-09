@@ -231,7 +231,7 @@ end)
 
 One direct call to paint the initial state, then a listener that re-reads on every announcement. Press the volume key and the chain runs: keybinding spawns `wpctl`, emits the signal, the widget hears it, asynchronously reads the actual level, and updates the text, icon, and tooltip. No polling, no lag, no coupling.
 
-This announce-and-reread pattern is the nervous system of the whole config. Later chapters emit `battery::update`, `notification::unread_count`, and `dashboard::visible` the same way, and anything that cares just subscribes. When you wonder how two far-apart modules coordinate, the answer is almost always a signal.
+This announce-and-reread pattern is the nervous system of the whole config. The battery widget below broadcasts a `battery::update` signal from its poll, and later chapters emit `notification::unread_count` and `dashboard::visible` the same way; anything that cares just subscribes. When you wonder how two far-apart modules coordinate, the answer is almost always a signal.
 
 ## Battery: A Widget With an API
 
@@ -314,12 +314,16 @@ When the dashboard and the lockscreen color their battery displays, they call th
 
 ### Hiding When There Is No Battery
 
-The bar widget itself is the familiar pattern - `image_widget` plus `icon_with_text`, a tooltip, a `gears.timer` with `call_now` polling every 10 seconds - with one addition worth seeing:
+The bar widget itself is the familiar pattern - `image_widget` plus `icon_with_text`, a tooltip, a `gears.timer` with `call_now` polling every 10 seconds - with two additions worth seeing:
 
 ```lua
 -- widgets/battery.lua
 local function update()
   M.get_status(function(status)
+    -- Broadcast for every other battery display (the dashboard profile
+    -- listens), so the whole config shares this one 10-second poll
+    awesome.emit_signal("battery::update", status)
+
     -- No percentage means no battery: hide the widget rather than parking a
     -- permanent "N/A" in the bar.
     if not status.percentage then
@@ -329,7 +333,7 @@ local function update()
     M.widget.visible = true
 ```
 
-Every widget has a `visible` property, and a hidden widget takes no space in its layout. On a desktop, in a VM, or in your nested test session, the battery widget simply is not there, instead of displaying a permanent apology. The rest of the update function sets the percentage text, swaps between `battery.svg` and `battery-charging.svg`, and puts the time-to-empty or time-to-full estimate in the tooltip.
+The first addition is the volume trick from earlier, turned up a notch: every poll broadcasts a `battery::update` signal, and this time the emission *does* carry a payload, the whole `status` table. Volume's bare announcement made the widget re-read; here the poll has already done the read, so it shares the result, and future battery displays (the dashboard profile in [chapter 11](./11-dashboard.md)) render the broadcast instead of running polls of their own. The second addition is the hide: every widget has a `visible` property, and a hidden widget takes no space in its layout. On a desktop, in a VM, or in your nested test session, the battery widget simply is not there, instead of displaying a permanent apology. The rest of the update function sets the percentage text, swaps between `battery.svg` and `battery-charging.svg`, and puts the time-to-empty or time-to-full estimate in the tooltip.
 
 ## WiFi: Nothing New
 

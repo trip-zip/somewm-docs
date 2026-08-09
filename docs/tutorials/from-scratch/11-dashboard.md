@@ -72,10 +72,21 @@ Four sections stacked in a `fixed.vertical` layout, wrapped in a margin and a ba
 
 ### Build Once, Refresh Forever
 
-The controller is a `modal.new` call, same as the exit screen, the switcher, and the launcher:
+The controller is a `modal.new` call, same as the exit screen, the launcher, and the notification center, with the same named place function they all carry:
 
 ```lua
 -- dashboard/init.lua
+-- Docked top right, under the bar, on whatever screen the popup is on
+local function place(d)
+  awful.placement.top_right(d, {
+    margins = {
+      top = beautiful.wibar_height + beautiful.useless_gap * 3,
+      right = beautiful.useless_gap * 2,
+    },
+    parent = d.screen,
+  })
+end
+
 local controller = modal.new({
   name = "dashboard",
   build_popup = function()
@@ -91,27 +102,21 @@ local controller = modal.new({
       -- Placement lives on the popup itself, not in on_show: awful.popup
       -- re-applies it whenever the popup's size changes, which covers the
       -- first show, when the widget has not been measured yet.
-      placement = function(d)
-        awful.placement.top_right(d, {
-          margins = {
-            top = beautiful.wibar_height + beautiful.useless_gap * 3,
-            right = beautiful.useless_gap * 2,
-          },
-          parent = awful.screen.focused(),
-        })
-      end,
+      placement = place,
     })
   end,
 ```
 
+Note `parent = d.screen`, not `awful.screen.focused()`: `place` docks the popup on whatever screen the popup is currently on, and *which* screen that is stays the controller's decision, made in `modal.show` before `on_show` runs.
+
 The critical decision hides in what this does *not* do. The launcher and switcher rebuild their result lists every time the selection changes, because their content is cheap: textboxes with no behavior. The dashboard sections are not cheap. `profile.create()` starts timers. `sliders.create()` and `toggles.create()` connect signal handlers and register refresh functions. If we rebuilt the tree on every open, each open would create a fresh set of timers and signal connections while the old ones kept running against widgets nothing displays anymore. That is a leak, and one that grows a little every time you press Mod+D.
 
-So the tree is built exactly once. The modal controller already gives us the right hook: `build_popup` runs on the first show only, and `on_show` runs on every show. Placement rides on the popup itself, and the comment in `build_popup` says why: `awful.popup` re-applies its `placement` function whenever the popup's size changes, which covers the very first show, before the widget has been measured. That leaves `on_show` doing only what legitimately changes between opens, the screen and freshness:
+So the tree is built exactly once. The modal controller already gives us the right hook: `build_popup` runs on the first show only, and `on_show` runs on every show. Placement rides on the popup itself, and the comment in `build_popup` says why: `awful.popup` re-applies its `placement` function whenever the popup's size changes, which covers the very first show, before the widget has been measured. That leaves `on_show` doing only what legitimately changes between opens, position and freshness:
 
 ```lua
 -- dashboard/init.lua
   on_show = function(popup)
-    popup.screen = awful.screen.focused()
+    place(popup)
 
     -- Sync sections that mirror system state (volume, brightness, radios)
     sliders.refresh()
@@ -119,7 +124,7 @@ So the tree is built exactly once. The modal controller already gives us the rig
   end,
 ```
 
-`awful.placement.top_right` pins the popup to the top-right corner of the focused screen, and the top margin pushes it just below the wibar, so it drops down under the clock like a phone's control center. On every open, `sliders.refresh()` and `toggles.refresh()` re-read the system: volume may have changed from a keybinding, WiFi may have been switched off in a terminal. The widgets persist; their contents are re-synced at the moment you look at them.
+The `place(popup)` call re-docks the popup on the screen the controller just assigned; without it, reopening the dashboard on a different monitor would leave it where the last size change put it. `awful.placement.top_right` pins the popup to the top-right corner of that screen, and the top margin pushes it just below the wibar, so it drops down under the clock like a phone's control center. On every open, `sliders.refresh()` and `toggles.refresh()` re-read the system: volume may have changed from a keybinding, WiFi may have been switched off in a terminal. The widgets persist; their contents are re-synced at the moment you look at them.
 
 :::note
 This split is worth internalizing: **build** what is expensive and stateful once, **refresh** what mirrors the outside world on every show. Every section module below is shaped by it, exporting `create()` for the first job and, where it matters, `refresh()` for the second.
@@ -279,19 +284,19 @@ The top section is the friendly one: a large `wibox.widget.textclock` for the ti
 
 ```lua
 -- dashboard/profile.lua
--- Poll through the shared battery module so this section, the wibar widget,
--- and the lockscreen all read the battery the same way
-local function update_battery()
-  battery.get_status(function(status)
-    if battery_icon then
-      battery_icon.text = battery.level_icon(status.percentage or 0, status.charging)
-      battery_text.text = battery_line(status)
-    end
-  end)
+local function render_battery(status)
+  if battery_icon then
+    battery_icon.text = battery.level_icon(status.percentage or 0, status.charging)
+    battery_text.text = battery_line(status)
+  end
 end
+
+-- The shared battery module already polls every 10 seconds; this section
+-- just renders whatever it broadcasts instead of running its own poll
+awesome.connect_signal("battery::update", render_battery)
 ```
 
-Back in [the widgets chapter](./03-widgets.md) we made `widgets/battery.lua` export `get_status()` and `level_icon()` instead of keeping them local to the wibar widget. Here is why: the profile section gets battery reporting, upower fallbacks included, for the cost of a `require`, and its icon can never disagree with the wibar's because they are the same function. `battery_line` then formats the status into "87% · 1.2h remaining" style text. The rest of the section is layout, browse the branch.
+Back in [the widgets chapter](./03-widgets.md) we made `widgets/battery.lua` export `get_status()` and `level_icon()` instead of keeping them local to the wibar widget, and its 10-second poll broadcasts every reading as a `battery::update` signal. Here is why: the profile section gets battery reporting, upower fallbacks included, without running a poll of its own. It connects `render_battery` to that signal and, in `create()`, seeds the display with one direct `battery.get_status(render_battery)` call so the line is correct before the next broadcast arrives. Its icon can never disagree with the wibar's, because they are the same function fed by the same poll. `battery_line` then formats the status into "87% · 1.2h remaining" style text. The rest of the section is layout, browse the branch.
 
 ## Calendar: Same Techniques, New Widget
 
