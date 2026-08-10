@@ -121,7 +121,7 @@ AwesomeWM embeds X11 windows directly via the `_NET_SYSTEMTRAY` protocol. SomeWM
 2. **Check for external X11 tools**:
    - Replace `xclip` with `wl-copy`/`wl-paste`
    - Replace `scrot`/`import` with `grim`/`slurp`
-   - Replace `xdotool` with somewm-client eval
+   - Replace `xdotool` with `somewm-client`. Window queries, focus, and geometry are [first-class commands](/docs/reference/somewm-client#client-commands); only input injection needs `eval`
 
 ### Quick Migration Checklist
 
@@ -173,7 +173,7 @@ If you find something that works in AwesomeWM but not in SomeWM:
    - Minimal rc.lua that reproduces the problem
    - Expected behavior (what AwesomeWM does)
    - Actual behavior (what SomeWM does)
-   - SomeWM version (`somewm-client eval "return awesome.version"`)
+   - SomeWM version (`somewm-client version`)
 
 ## See Also
 

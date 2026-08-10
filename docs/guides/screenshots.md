@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Screenshots
 
-This guide shows how to capture the screen, a region, or a window, and how to bind it all to keys. Three tools cover every case, and which to reach for depends on the goal: the built-in `awful.screenshot` for interactive snipping with no external dependencies, `grim` + `slurp` for scriptable pipelines and clipboard work, and `somewm-client screenshot` when you are in a shell.
+This guide shows how to capture the screen, a region, or a window, and how to bind it all to keys. Three tools cover every case, and which to reach for depends on the goal: the built-in `awful.screenshot` for interactive snipping with no external dependencies, `grim` + `slurp` for scriptable pipelines and clipboard work, and the `somewm-client screenshot` commands when you are in a shell.
 
 ## Snip a Region Interactively
 
@@ -62,9 +62,17 @@ Why the overlay tuning works:
 The quickest capture is one command. With SomeWM's own CLI: <SomewmOnly />
 
 ```bash
-somewm-client screenshot                          # focused screen
-somewm-client screenshot ~/Pictures/shot.png      # to a specific path
+somewm-client screenshot save ~/Pictures/shot.png        # whole desktop, all outputs
+somewm-client screenshot screen ~/Pictures/shot.png 1    # one screen by index
+somewm-client screenshot client ~/Pictures/shot.png      # focused window
+somewm-client screenshot interactive ~/Pictures/shot.png # pick a region
 ```
+
+The path is required, and there is no default location. Add `--transparent` to `screenshot save` to keep the alpha channel.
+
+:::note
+Paths are resolved by the compositor process, not your shell, so a relative path lands in the compositor's working directory. Use absolute paths.
+:::
 
 Or with the Wayland-native tools (`pacman -S grim slurp wl-clipboard` on Arch, `apt install grim slurp wl-clipboard` on Debian/Ubuntu):
 

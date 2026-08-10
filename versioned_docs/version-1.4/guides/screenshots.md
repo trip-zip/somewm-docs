@@ -106,23 +106,33 @@ end)
 
 ## Method 2: somewm-client <SomewmOnly />
 
-The simplest method - use `somewm-client screenshot`:
+The simplest method. Every form takes a destination path; there is no bare `screenshot` command and no default location.
 
 ```bash
-# Full screen screenshot
-somewm-client screenshot
+# Whole desktop, spanning every output
+somewm-client screenshot save ~/Pictures/screenshot.png
 
-# Save to specific path
-somewm-client screenshot ~/Pictures/screenshot.png
+# One screen by index
+somewm-client screenshot screen ~/Pictures/screenshot.png 1
+
+# The focused window, or one by ID
+somewm-client screenshot client ~/Pictures/screenshot.png
+
+# Pick a region interactively
+somewm-client screenshot interactive ~/Pictures/screenshot.png
 ```
 
-This captures the focused screen and saves to the specified path (or a default location).
+`screenshot save` captures the full layout across all outputs, not the focused screen. On a dual-monitor setup that is the two screens side by side in one image. Use `screenshot screen` for a single output. Add `--transparent` to `screenshot save` to preserve the alpha channel.
+
+:::note
+Paths are resolved by the compositor process, not your shell, so a relative path lands in the compositor's working directory. Use absolute paths.
+:::
 
 ### From Lua
 
 ```lua
 -- Take screenshot via IPC
-awful.spawn("somewm-client screenshot ~/Pictures/screenshot.png")
+awful.spawn("somewm-client screenshot save " .. os.getenv("HOME") .. "/Pictures/screenshot.png")
 ```
 
 ## Method 3: grim + slurp
