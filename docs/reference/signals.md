@@ -24,8 +24,33 @@ Currently queued:
 - Lifecycle: `list`, `swapped`
 - Request: `request::activate`, `request::urgent`, `request::tag`, `request::select`
 - Systray: `request::secondary_activate`, `request::context_menu`, `request::scroll`
+- Output: `property::enabled`, `property::scale`, `property::transform`, `property::mode`, `property::adaptive_sync`, `property::screen` (screen attached), and the output class `added`
+- Screen: `property::scale`, `property::geometry`, `property::workarea`, `primary_changed`, and the screen class `property::_viewports`
+- Layer shell: `property::layer`, `property::anchor`, `property::exclusive_zone`, `property::keyboard_interactive`, `property::margin`
+- Globals: `xkb::map_changed`, `xkb::group_changed`, `idle::stop`, `dpms::on`, `spawn::timeout`, `spawn::completed`, `switch::toggle`, `screen::focus`, `client::map`, `client::unmap`
 
-All other C-emitted signals (and every Lua-emitted signal) dispatch synchronously today.
+The output and screen entries cover changes the compositor makes on its own: a monitor being
+plugged or unplugged, or an external tool like `wlr-randr` or `kanshi` changing output state.
+The equivalent changes made from Lua stay synchronous, so `screen.fake_add`, `screen.fake_remove`
+and `s:swap(...)` still deliver `list` inline, `screen.primary = s` still delivers
+`primary_changed` inline, and `awesome.dpms_on()` still delivers `dpms::on` inline.
+
+`property::geometry` appears on both `client` and `screen`. The screen version carries the
+previous geometry as a second argument; the client version carries none.
+
+Everything else C emits, and every Lua-emitted signal, dispatches synchronously. The notable
+synchronous survivors are `request::manage` and `request::unmanage`, screen and output `added`
+and `removed`, `request::geometry`, and the client scalar properties such as `property::name`
+and `property::fullscreen`.
+
+Two signals stay synchronous because a queued one would arrive too late to be useful.
+`idle::start` is emitted just before your `awesome.set_idle_timeout` callback runs, so it has to
+reach you first. `logind::prepare_sleep` is your window to lock the screen before the machine
+suspends, and the event loop may stop before the next drain.
+
+Signals queued against a screen or output that is then removed are dropped rather than
+delivered, because a torn-down screen or output reports itself invalid. Reading any property
+other than `valid` on one raises `invalid object`, and `screen[s]` returns nil for it.
 
 ## `client` signals
 
