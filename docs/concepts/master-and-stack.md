@@ -124,7 +124,7 @@ The default keybinding **Mod4+Return** (with Shift, if using the default `rc.lua
 
 ```lua
 awful.key({ modkey, "Shift" }, "Return", function(c)
-    c:swap(awful.client.getmaster())
+    c:swap(awful.client.visible(c.screen)[1])
 end)
 ```
 
