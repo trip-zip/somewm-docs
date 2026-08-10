@@ -53,6 +53,8 @@ C-emitted signals are queued, wired incrementally by group: property changes, fo
 
 Other C-emitted signals (`request::manage`, `request::unmanage`, `request::titlebars`, and the rest) still dispatch synchronously.
 
+Where a signal has both a compositor-driven and a Lua-driven path, only the compositor-driven one is queued. Monitor hotplug queues the screen and output signals it causes; `screen.fake_add`, `screen.primary = s` and `awesome.dpms_on()` deliver theirs inline. This keeps a change you make from Lua visible to the next line of your own code.
+
 ### What stays synchronous
 
 - Signals you emit from Lua. `c:emit_signal("my::custom")`, `awesome.emit_signal("volume::changed")`, and the AwesomeWM libraries' Lua-side emits (`ruled.client` `request::rules`, `naughty` `request::display`) run handlers immediately. The queue applies to the C/Lua boundary, not to Lua-only signal use.

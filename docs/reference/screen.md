@@ -98,6 +98,26 @@ When you change `scale`, the `geometry` and `workarea` update to reflect logical
 | `clients` | table | read | All clients on this screen |
 | `tiled_clients` | table | read | Non-floating, non-minimized clients |
 
+### Lifetime
+
+| Property | Type | Access | Description |
+|----------|------|--------|-------------|
+| `valid` | boolean | read | `false` once the screen has been removed |
+
+A screen object outlives the monitor it came from: your handlers, timers and closures can
+still hold one after the monitor is unplugged or `fake_remove()` is called. Once that
+happens, `valid` is the only property you can read. Every other read raises
+`invalid object`, and `screen[s]` gives you `nil`.
+
+Check it before touching a screen you captured earlier:
+
+```lua
+gears.timer.delayed_call(function()
+    if not s.valid then return end
+    -- safe to use s here
+end)
+```
+
 ## Methods
 
 ### Screen Management
@@ -136,12 +156,28 @@ fake:fake_remove()
 | `added` | `s` | New screen connected |
 | `removed` | `s` | Screen disconnected |
 | `list` | (none) | Screen list changed |
-| `primary_changed` | (none) | Primary screen changed |
-| `property::geometry` | `s` | Screen geometry changed |
-| `property::workarea` | `s` | Workarea changed (panel added/removed) |
+| `primary_changed` | `s` | Primary screen changed |
+| `property::geometry` | `s, old_geometry` | Screen geometry changed |
+| `property::workarea` | `s, old_workarea` | Workarea changed (panel added/removed) |
 | `property::scale` | `s` | Output scale changed <SomewmOnly /> |
 | `property::outputs` | `s` | Output metadata changed |
 | `property::index` | `s` | Screen index changed |
+
+`property::geometry` and `property::workarea` pass the previous value as a second
+argument, so you can work out what moved rather than only that something did:
+
+```lua
+screen.connect_signal("property::geometry", function(s, old_geometry)
+    local dx = s.geometry.x - old_geometry.x
+    local dy = s.geometry.y - old_geometry.y
+    -- dx/dy is how far the screen moved
+end)
+```
+
+When a monitor is plugged or unplugged, `added` and `removed` reach you immediately,
+while the others are queued and arrive at the next frame. So inside an `added` handler
+the screen already exists, but `list` has not fired yet. See
+[Signals Reference: Dispatch](./signals.md#dispatch) for the full list.
 
 ### Example: React to Scale Changes
 
