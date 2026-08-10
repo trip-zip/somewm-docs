@@ -109,7 +109,7 @@ If you find something that works in AwesomeWM but not in SomeWM:
    - Minimal rc.lua that reproduces the problem
    - Expected behavior (what AwesomeWM does)
    - Actual behavior (what SomeWM does)
-   - SomeWM version (`somewm-client eval "return awesome.version"`)
+   - SomeWM version (`somewm-client version`)
 
 ## See Also
 

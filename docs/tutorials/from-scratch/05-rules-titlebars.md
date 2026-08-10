@@ -197,12 +197,21 @@ place, opening a browser while you are on "code" silently files it under
 
 ### Finding a Window's Class
 
-To write rules for your own apps you need their class strings. On SomeWM,
-focus the window and ask the compositor directly:
+To write rules for your own apps you need their class strings. On SomeWM, ask
+the compositor for every open window at once:
 
 ```bash
-somewm-client eval "return client.focus.class, client.focus.name"
+somewm-client client list
 ```
+
+```
+id=1 title="tmux a" class="com.mitchellh.ghostty" tags=1 floating=false
+id=2 title="Hacker News — Mozilla Firefox" class="firefox" tags=1 floating=false
+```
+
+The `class=` field is what a rule's `class` matcher compares against. For one
+window in full, including `instance` and `role`, pass its id to
+`somewm-client client info <id>`.
 
 On AwesomeWM under X11, run `xprop` in a terminal and click the window; look
 for the `WM_CLASS` line. Either way, thirty seconds of inspection beats
@@ -400,10 +409,9 @@ decide where it sits.
 ## Try It
 
 1. Float your password manager. Find its class with
-   `somewm-client eval "return client.focus.class"` (or `xprop` on X11),
-   then write a rule that sets `floating = true` and uses
-   `awful.placement.centered` in a callback. Bonus: add `ontop = true` and
-   decide whether it belongs in the tasklist.
+   `somewm-client client list` (or `xprop` on X11), then write a rule that
+   sets `floating = true` and uses `awful.placement.centered` in a callback.
+   Bonus: add `ontop = true` and decide whether it belongs in the tasklist.
 2. Route your music player to a tag. Pick a tag from the chapter 04 table
    (or add a sixth one, with its icon) and write a rule assigning the player
    to it. If the player has a mini-mode window, use `except` to keep the

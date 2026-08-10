@@ -220,21 +220,27 @@ end)
 
 ## Inspect at Runtime
 
-Use `somewm-client` to evaluate Lua expressions against the running compositor:
+`somewm-client` queries the running compositor without touching your config. Most of what you want to know has a dedicated command:
 
 ```bash
-# Check the focused window
-somewm-client eval 'return client.focus and client.focus.class'
+# The focused window: class, title, geometry, every property
+somewm-client client info focused
 
-# List all tags on the current screen
-somewm-client eval 'local t = {}; for _, tag in ipairs(awful.screen.focused().tags) do table.insert(t, tag.name) end; return table.concat(t, ", ")'
+# Tags on the focused screen, with the selected one marked
+somewm-client tag list
 
-# Check if a module loaded correctly
-somewm-client eval 'return type(beautiful)'
-
-# Get screen geometry
-somewm-client eval 'local s = awful.screen.focused(); return s.geometry.width .. "x" .. s.geometry.height'
+# Screen geometry and current layout
+somewm-client screen focused
 ```
+
+Fall back to `eval` for state no command exposes:
+
+```bash
+# Check if a module loaded correctly
+somewm-client eval "return type(require('beautiful'))"
+```
+
+`eval` runs one line at a time (use semicolons, not newlines) and sees only the capi globals: `client`, `screen`, `tag`, `mouse`, `awesome`, `root`, and `require`. `awful`, `beautiful`, `gears`, and the rest are `nil` until required, so `type(beautiful)` reports `nil` whether or not the module loaded.
 
 This is invaluable for testing changes before editing your config file. See [CLI Control](/docs/guides/cli-control) for more.
 

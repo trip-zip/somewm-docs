@@ -23,33 +23,37 @@ To try commands without affecting your real session, run them against a nested i
 ### Check If Running
 
 ```bash
-# Returns "pong" if SomeWM is running
+# Prints PONG if SomeWM is running
 somewm-client ping
 ```
 
 ### Help
 
 ```bash
-# Show all commands
-somewm-client help
+# Usage and the flag list
+somewm-client --help
 
-# Help for specific command group
-somewm-client client help
-somewm-client input help
+# Every command registered in this build
+somewm-client commands
 ```
+
+There is no per-group help verb. `somewm-client commands` prints the authoritative list, and the [reference](/docs/reference/somewm-client) documents the arguments.
 
 ## Everyday Control
 
 The [somewm-client reference](/docs/reference/somewm-client) documents the full command surface (clients, tags, screens, input, screenshots, session). A taste of what one-liners cover:
 
 ```bash
-somewm-client client list              # windows with IDs
-somewm-client client focus 3           # focus by ID
-somewm-client tag view "web"           # switch workspace
-somewm-client screen scale 1.5         # set focused screen scale
-somewm-client screenshot ~/shot.png    # capture to file
-somewm-client lock                     # lock the session
+somewm-client client list                   # windows with IDs
+somewm-client client info focused           # everything about the focused window
+somewm-client client focus 3                # focus by ID
+somewm-client tag view 2                    # switch workspace by index
+somewm-client screen scale 1.5              # set focused screen scale
+somewm-client screenshot save ~/shot.png    # capture to file
+somewm-client lock                          # lock the session
 ```
+
+`tag view` takes an index, not a tag name.
 
 `lock` requires a lock surface to be registered (i.e., `require("lockscreen").init()` in rc.lua).
 
@@ -62,45 +66,58 @@ somewm-client input tap_to_click 1     # set
 somewm-client input accel_speed        # query (no argument)
 ```
 
-All 24 properties (pointer and keyboard) are listed in the [input commands reference](/docs/reference/somewm-client#input-commands).
+All 21 IPC-reachable properties are listed in the [input commands reference](/docs/reference/somewm-client#input-commands). Run `somewm-client input` with no arguments to dump them with their current values.
 
 ## Lua Evaluation
 
-Run arbitrary Lua code in SomeWM's context:
+`eval` runs arbitrary Lua in SomeWM's context. Reach for it only when no dedicated command covers the job, since command output is parseable and survives API changes:
+
+```bash
+# Version, focused window, client count: use the commands
+somewm-client version
+somewm-client client info focused
+somewm-client client list | grep -c '^id='
+
+# Move the focused window to tag 2
+somewm-client client movetotag 2
+
+# Float the focused window (get-or-set, not a toggle)
+somewm-client client floating focused true
+```
+
+What `eval` is actually for:
 
 ```bash
 # Simple expression
 somewm-client eval "return 1 + 1"
 # Output: 2
 
-# Get focused client name
-somewm-client eval "return client.focus and client.focus.name or 'none'"
-
-# Count clients
-somewm-client eval "return #client.get()"
-
-# Get awesome version
-somewm-client eval "return awesome.version"
-
-# Complex operations
-somewm-client eval "client.focus:move_to_tag(awful.screen.focused().tags[2])"
-
-# Multi-statement (use semicolons)
+# Toggle rather than set, which no command does
 somewm-client eval "local c = client.focus; if c then c.floating = not c.floating end"
+
+# Reach state no command exposes
+somewm-client eval "return awesome.startup_errors"
 ```
 
 ### Eval for Scripting
 
+Two constraints decide how these get written, and neither announces itself:
+
+- **One line only.** The protocol is one command per line. In a multi-line string only the first line runs and the rest is silently dropped; a string starting with a newline fails with `Missing Lua code to evaluate`. Use semicolons.
+- **Only capi globals are in scope.** `client`, `screen`, `tag`, `mouse`, `awesome`, `root`, and `require`. `awful`, `gears`, `beautiful`, `naughty`, `wibox`, and `ruled` are `nil` until you require them.
+
 ```bash
-# Get client list as JSON-ish format
-somewm-client eval "
-local result = {}
-for _, c in ipairs(client.get()) do
-    table.insert(result, c.window .. ' ' .. c.name)
-end
-return table.concat(result, '\n')
-"
+# Windows that are floating right now, one per line
+somewm-client eval "local r = {}; for _, c in ipairs(client.get()) do if c.floating then table.insert(r, c.id .. ' ' .. (c.name or '')) end end; return table.concat(r, '\n')"
+
+# Anything from the Lua libraries needs a require first
+somewm-client eval "local awful = require('awful'); return awful.screen.focused().index"
 ```
+
+Two more things that bite in scripts:
+
+- Use `c.id`, not `c.window`. `c.window` is an X11 window ID, so it is `0` for native Wayland clients and only meaningful for XWayland ones. `c.id` is what `client list` prints and what every `somewm-client client ...` command accepts.
+- Replies begin with an `OK` line and end with a blank line. Filter on the payload (`grep '^id='`) rather than capturing the reply whole.
 
 ## Exit Codes in Scripts
 
@@ -122,8 +139,8 @@ fi
 #!/bin/bash
 # window-switcher.sh
 
-# Get window list
-windows=$(somewm-client client list)
+# Get window list, dropping the OK line and the trailing blank
+windows=$(somewm-client client list | grep '^id=')
 
 # Show in rofi (display full line, return selected)
 selected=$(echo "$windows" | rofi -dmenu -p "Window")
@@ -170,17 +187,13 @@ click-left = somewm-client input xkb_layout "$([ $(somewm-client input xkb_layou
 class="$1"
 command="$2"
 
-# Check if window with class exists, return its ID
-window_id=$(somewm-client eval "
-for _, c in ipairs(client.get()) do
-    if c.class == '$class' then
-        return c.id
-    end
-end
-return nil
-")
+# Check if a window with this class exists, return its ID
+window_id=$(somewm-client client list \
+    | grep "class=\"$class\"" \
+    | head -1 \
+    | sed 's/^id=\([0-9]*\).*/\1/')
 
-if [ "$window_id" != "nil" ] && [ -n "$window_id" ]; then
+if [ -n "$window_id" ]; then
     somewm-client client focus "$window_id"
 else
     $command &
@@ -200,16 +213,7 @@ Usage:
 #!/bin/bash
 # Get current tag info for status bar
 
-somewm-client eval "
-local s = awful.screen.focused()
-local tags = {}
-for _, t in ipairs(s.tags) do
-    local prefix = t.selected and '*' or ''
-    local suffix = #t:clients() > 0 and '+' or ''
-    table.insert(tags, prefix .. t.name .. suffix)
-end
-return table.concat(tags, ' ')
-"
+somewm-client eval "local awful = require('awful'); local s = awful.screen.focused(); local t = {}; for _, tag in ipairs(s.tags) do table.insert(t, (tag.selected and '*' or '') .. tag.name .. (#tag:clients() > 0 and '+' or '')) end; return table.concat(t, ' ')" | tail -n +2
 ```
 
 ## Troubleshooting
@@ -218,39 +222,46 @@ return table.concat(tags, ' ')
 
 ```bash
 somewm-client ping
-# Error: Connection failed
+# Error: Failed to connect to /run/user/1000/somewm-socket
+# Is somewm running?
+# connect: No such file or directory
 ```
 
-Check that:
+Exit code 2. Check that:
 1. SomeWM is actually running
 2. The socket exists: `ls /run/user/$(id -u)/somewm-*`
 3. You're running as the same user as SomeWM
+4. `SOMEWM_SOCKET` is unset, or points at the instance you meant
 
 ### Command Not Found
 
 ```bash
 somewm-client foobar
-# Error: Unknown command
+# ERROR Unknown command: foobar
 ```
 
-Check available commands:
+Exit code 1. The compositor validates command names, not the binary, so a typo reaches the socket before it is rejected. Check the list:
 
 ```bash
-somewm-client help
+somewm-client commands
 ```
+
+Two-word commands map to one name, so `client foo` is reported as `client.foo`.
 
 ### Eval Syntax Errors
 
 ```bash
 somewm-client eval "return client.focus.name"
-# Error: attempt to index a nil value
+# ERROR ./lua/awful/ipc.lua:1845: [string "return client.focus.name"]:1: attempt to index a nil value
 ```
 
-Always check for nil:
+Nothing was focused, so `client.focus` was nil. Guard it:
 
 ```bash
 somewm-client eval "return client.focus and client.focus.name or 'none'"
 ```
+
+Or skip the guard entirely and let the command report it: `client info focused` errors with `No focused client`.
 
 ## See Also
 

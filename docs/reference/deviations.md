@@ -122,15 +122,16 @@ Implementation: `some_set_numlock()` in `somewm_api.c` toggles the Mod2 lock mas
 
 ### `somewm-client` - IPC CLI
 
-Over 90 commands for external control (run `somewm-client commands` for the full list in your build). Replaces ad-hoc `awesome-client` use.
+More than 100 commands for external control (run `somewm-client commands` for the full list in your build). Replaces ad-hoc `awesome-client` use.
 
 ```bash
 somewm-client ping
 somewm-client client list
+somewm-client client info focused
 somewm-client client focus <id>
 somewm-client input tap_to_click 1
+somewm-client screenshot save ~/shot.png
 somewm-client eval "return 1+1"
-somewm-client screenshot
 ```
 
 See [`somewm-client`](/docs/reference/somewm-client) for the full command set.
