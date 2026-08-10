@@ -12,6 +12,8 @@ Build a complete desktop configuration from the stock config to a finished envir
 
 **100% native.** No rofi, no polybar, no conky. Everything in this series is built from the widget system the window manager already ships.
 
+**Targets AwesomeWM and SomeWM 1.4.** The checkpoint branches are written and tested against AwesomeWM 4.3 or later (current master included) and the SomeWM 1.4 series. SomeWM 2.0 is unreleased and ships a different default config; chapter 00 covers what that means if you are running a 2.0 development build.
+
 **Read it in order.** This is a course, not a collection of recipes. Every chapter starts from the config the previous one finished, so chapter 10 opens `launcher/init.lua` expecting the theme from chapter 01, the wrapper helpers from chapter 03, and the modal pattern you extract in chapter 07. Jumping straight to a chapter that looks interesting means editing files that do not exist yet. If you want one feature bolted onto a config you already have, the [short standalone tutorials](../basics.md) are the right tool.
 
 ![The finished desktop: tiled terminals under a themed bar, with the dashboard and launcher open](/img/from-scratch/intro-final-desktop.png)

@@ -129,7 +129,7 @@ Browse the branch for the full set; every row follows this same shape.
 
 A one-row-per-binding table only stays readable if the callbacks stay short. Anything longer than a one-liner gets hoisted into one of three helper tables above `global_keys`: `global_helpers`, `client_helpers`, and `media_helpers`. The row then references the helper by name, which doubles as documentation.
 
-`client_helpers` holds the multi-line client callbacks from the stock config:
+`client_helpers` holds the multi-line client callbacks, most of them lifted from the stock config:
 
 ```lua
 -- keybindings.lua
@@ -144,6 +144,8 @@ local client_helpers = {
     c.minimized = true
   end,
 ```
+
+Two of them are not lifted, but rewritten. The stock config toggles floating with `awful.client.floating.toggle` and finds the master with `awful.client.getmaster()`. Both have been deprecated since AwesomeWM 4.0, and the SomeWM 2.0 development line has since deleted them outright. Since we are touching every binding in this chapter anyway, `toggle_floating` sets the `c.floating` property directly and `move_to_master` takes the first entry from `awful.client.visible(c.screen)`. Same behavior, and it keeps working on every version this series supports.
 
 `media_helpers` is where something new appears:
 
@@ -182,11 +184,11 @@ The `client_keys` table itself reads just like the global one:
 -- keybindings.lua
 local client_keys = {
   -- modkey only modifier
-  {{ modkey },            "f",      client_helpers.toggle_fullscreen,                  "toggle fullscreen",         "client" },
-  {{ modkey },            "m",      client_helpers.toggle_maximized,                   "(un)maximize",              "client" },
-  {{ modkey },            "n",      client_helpers.minimize,                           "minimize",                  "client" },
-  {{ modkey },            "o",      function (c) c:move_to_screen() end,               "move to screen",            "client" },
-  {{ modkey },            "q",      function (c) c:kill() end,                         "close",                     "client" },
+  {{ modkey },            "f",      client_helpers.toggle_fullscreen,       "toggle fullscreen",         "client" },
+  {{ modkey },            "m",      client_helpers.toggle_maximized,        "(un)maximize",              "client" },
+  {{ modkey },            "n",      client_helpers.minimize,                "minimize",                  "client" },
+  {{ modkey },            "o",      function (c) c:move_to_screen() end,    "move to screen",            "client" },
+  {{ modkey },            "q",      function (c) c:kill() end,              "close",                     "client" },
 ```
 
 The stock mouse bindings moved along with the keys: the `request::default_mousebindings` handler with its click-to-focus, Mod+drag-to-move, and Mod+right-drag-to-resize `awful.button` entries sits at the bottom of the file, unchanged.

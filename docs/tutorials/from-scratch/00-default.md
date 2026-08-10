@@ -36,10 +36,10 @@ git checkout 00-default
 
 The branch contains two files: a README and a 693-line `rc.lua`. That rc.lua is the SomeWM 1.4 stock configuration, unchanged apart from running it through this repository's `stylua` formatting. Every later branch is exactly one commit on top of the branch before it, so `git diff` between neighboring branches always shows you one chapter's worth of change.
 
-## Heads Up: Your 2.0 Default Is a Different File
+## What This Series Targets
 
 :::caution Read this before you compare notes
-The `somewmrc.lua` that ships with SomeWM 2.0 is **not** the file this series starts from. It was rewritten after 1.4 to showcase the compositor, and it is about 1,100 lines against this baseline's 693. If you open `~/.config/somewm/rc.lua` and try to follow along there, nothing will line up.
+This series targets **AwesomeWM** (4.3 and current master) and the **SomeWM 1.4** series. Those are what the checkpoint branches are written and tested against. If you are on a SomeWM 2.0 development build, the `somewmrc.lua` it ships is **not** the file this series starts from: it was rewritten after 1.4 to showcase the compositor, and it is about 1,100 lines against this baseline's 693. Open `~/.config/somewm/rc.lua` and try to follow along there and nothing will line up.
 :::
 
 The series builds on the 1.4-lineage config because it is the smaller, more conventional starting point: it is essentially the AwesomeWM default with SomeWM's additions folded in, so it reads the same on both compositors and it leaves you something to build. The 2.0 default already hands you several of the things you are about to write.
@@ -56,10 +56,11 @@ The series builds on the 1.4-lineage config because it is the smaller, more conv
 | Media, brightness, screenshot keys | none | `wpctl`, `brightnessctl`, `grim`/`slurp`, and `awful.screenshot` |
 | Commented-out extras | none | `awful.input` pointer and xkb, fractional scaling, autostart, idle auto-lock, layout animation, `awful.ipc.register` |
 
-Two practical consequences:
+Three practical consequences:
 
 1. **Run the checkout, not your installed config.** `somewm-client test start --config "$PWD/rc.lua"` points the nested session at the baseline in the git checkout. The public Lua API is the same in both releases, so the baseline runs correctly under 2.0.
 2. **Several rows above are chapters.** The theme is chapter 01, media keys are chapter 02, the styled clock is chapter 03, named tags and a centered bar are chapter 04, do-not-disturb is chapter 06, and locking is chapter 12. The 2.0 default gives them to you already configured. This series has you write them, which is what makes them yours to change.
+3. **Two keybindings are dead on 2.0, in this chapter and the next one only.** The stock 1.4 config uses `awful.client.floating.toggle` and `awful.client.getmaster`, both long deprecated and both removed on the 2.0 development line. On a 2.0 build, `Mod+Ctrl+Space` and `Mod+Ctrl+Return` therefore do nothing on the `00-default` and `01-theme` branches. That is not a mistake to fix here: those branches carry the stock file verbatim, which is the whole point of this chapter. Chapter 02 rewrites the keybindings from scratch and uses the `c.floating` property and `awful.client.visible` instead, which work everywhere, so the problem disappears for good at the next checkpoint.
 
 If you are on SomeWM 1.4, or on AwesomeWM, none of this applies: the baseline is your stock config.
 
