@@ -2,6 +2,7 @@
 title: "Lock Screen"
 description: Build a native lock screen with SomeWM's session-lock API, a masked password prompt with real UTF-8 handling, PAM authentication, and multi-monitor covers, then wire the Lock action into the exit screen and main menu.
 sidebar_label: "12 · Lock Screen"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

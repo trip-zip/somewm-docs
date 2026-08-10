@@ -17,10 +17,6 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 </YouWillLearn>
 
-:::tip Building a full config?
-This page retrofits one feature into an existing config. If you would rather build a complete desktop from the ground up, the [Awesome From Scratch](from-scratch/index.md) series covers this topic as part of a thirteen-chapter course.
-:::
-
 ## How Theming Works
 
 All visual styling in SomeWM flows through the `beautiful` module. When you call `beautiful.init()` with a theme file, it loads variables like `beautiful.bg_normal`, `beautiful.font`, etc. that widgets and other components read to style themselves.

@@ -2,6 +2,7 @@
 title: "Widgets: Wrappers, Clock, Volume, Battery, WiFi"
 description: "Build the widget system: the wibox widget tree, shared wrapper helpers, timers, async shell reads, and custom signals."
 sidebar_label: "03 · Widgets"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

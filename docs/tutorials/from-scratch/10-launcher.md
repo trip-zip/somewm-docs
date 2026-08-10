@@ -2,6 +2,7 @@
 title: "Launcher: A Menubar Replacement"
 description: "Build a native fuzzy-search application launcher: parse .desktop files, scan asynchronously, score matches, and cache icon lookups on disk."
 sidebar_label: "10 · Launcher"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

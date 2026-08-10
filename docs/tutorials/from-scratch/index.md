@@ -2,6 +2,7 @@
 title: Awesome From Scratch
 description: Build a complete AwesomeWM/SomeWM desktop in thirteen chapters, one feature at a time.
 sidebar_label: Overview
+unlisted: true
 ---
 
 import ChapterList from '@site/src/components/FromScratch/ChapterList';

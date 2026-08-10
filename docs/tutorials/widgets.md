@@ -17,10 +17,6 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 </YouWillLearn>
 
-:::tip Building a full config?
-This page retrofits one feature into an existing config. If you would rather build a complete desktop from the ground up, the [Awesome From Scratch](from-scratch/index.md) series covers this topic as part of a thirteen-chapter course.
-:::
-
 :::note
 The examples in this tutorial read theme variables through `beautiful` (colors, fonts). Theming is set up in the [Theme tutorial](/docs/tutorials/theme). The one rule that matters here: your `rc.lua` must call `beautiful.init()` **before** it requires any widget module. Step 3 below shows the correct order.
 :::

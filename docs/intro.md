@@ -51,10 +51,6 @@ Step-by-step lessons. The first five are short and standalone: read any one on i
 | [Wibar](tutorials/wibar.md) | Configure the status bar |
 | [Theme](tutorials/theme.md) | Customize colors and appearance |
 
-### Awesome From Scratch
-
-[**Awesome From Scratch**](tutorials/from-scratch/index.md) is the long one: a thirteen-chapter course, read in order, that builds a complete desktop from the stock config. Theme, keybindings, widgets, bar, rules and titlebars, notifications, exit screen, menu, window switcher, launcher, dashboard, lockscreen. Each chapter starts from the config the previous one finished and has a checkpoint branch holding the finished code.
-
 ## How-To Guides
 
 Practical recipes for specific tasks.

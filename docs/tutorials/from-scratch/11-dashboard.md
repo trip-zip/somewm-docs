@@ -2,6 +2,7 @@
 title: "Dashboard: The Control Center"
 description: Compose profile, sliders, toggles, and calendar modules into one popup, bind sliders two ways to the system without feedback loops, and make toggle buttons tell the truth.
 sidebar_label: "11 · Dashboard"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

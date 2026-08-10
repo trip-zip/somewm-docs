@@ -2,6 +2,7 @@
 title: "Main Menu"
 description: Replace awful.menu with a data-driven, fully themed main menu built on the modal pattern.
 sidebar_label: "08 · Main Menu"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

@@ -2,6 +2,7 @@
 title: "Keybindings: A Table You Can Read"
 description: Extract every keybinding into its own module, flatten the awful.key boilerplate into a scannable table, and learn how global, client, and tag bindings differ.
 sidebar_label: "02 · Keybindings"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

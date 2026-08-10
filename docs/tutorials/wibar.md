@@ -17,10 +17,6 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 </YouWillLearn>
 
-:::tip Building a full config?
-This page retrofits one feature into an existing config. If you would rather build a complete desktop from the ground up, the [Awesome From Scratch](from-scratch/index.md) series covers this topic as part of a thirteen-chapter course.
-:::
-
 ## How Wibars Work
 
 A wibar is created with `awful.wibar` and attached to a screen. The default setup creates one wibar per screen inside the `request::desktop_decoration` signal:

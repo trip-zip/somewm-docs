@@ -2,6 +2,7 @@
 title: "Theme: Palettes, Shapes, Recolored Assets"
 description: "Build a theme system from scratch: named palettes, semantic color roles, a one-line font rule, DPI-aware sizing, a global shape switch, and SVG assets recolored at load time."
 sidebar_label: "01 · Theme"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

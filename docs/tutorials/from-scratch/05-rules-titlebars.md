@@ -2,6 +2,7 @@
 title: "Client Rules and Titlebars"
 description: "Route apps to tags, float the right windows, and draw titlebars with ruled.client and awful.titlebar."
 sidebar_label: "05 · Rules and Titlebars"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

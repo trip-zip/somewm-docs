@@ -2,6 +2,7 @@
 title: "Window Switcher"
 description: "Build Alt-Tab: clients ordered most-recently-used, and hold-and-release input that deliberately does not fit the modal pattern."
 sidebar_label: "09 · Window Switcher"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

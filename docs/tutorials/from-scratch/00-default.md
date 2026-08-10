@@ -2,6 +2,7 @@
 title: "The Default Config"
 description: "A guided tour of the baseline rc.lua: how the compositor loads it, what each section does, how it differs from the config SomeWM 2.0 ships, and how to test changes in a nested session without breaking your desktop."
 sidebar_label: "00 · The Default Config"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

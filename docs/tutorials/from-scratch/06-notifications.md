@@ -2,6 +2,7 @@
 title: "Notifications: Routing, History, Center"
 description: "Replace the notification defaults with a system of your own: rule-based routing and styling, a history store with unread tracking, a notification center popup, and do-not-disturb."
 sidebar_label: "06 · Notifications"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

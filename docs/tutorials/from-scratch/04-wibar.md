@@ -2,6 +2,7 @@
 title: "Wibar: Our Own Bar"
 description: "Replace the stock bar with a wibar factory: named tags with icons, a custom taglist, a centered clock, and a styled systray."
 sidebar_label: "04 · Wibar"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';

@@ -2,6 +2,7 @@
 title: "Exit Screen: The Modal Pattern"
 description: "Extract the modal pattern into modal.lua, refactor the notification center onto it, and build a full-screen power menu as its first consumer."
 sidebar_label: "07 · Exit Screen"
+unlisted: true
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
