@@ -228,6 +228,22 @@ AwesomeWM had no equivalent because X11 fullscreen is server-side. On Wayland th
 assert(c.xdg_fullscreen == c.fullscreen)
 ```
 
+### `client.xdg_maximized` - Protocol-level maximized state
+
+Read-only, same idea as `client.xdg_fullscreen`. For XDG shell clients reads `xdg_toplevel.scheduled.maximized`; for X11 and others falls back to `c.maximized`.
+
+GTK and Chromium draw their own titlebars, so they need the maximized state over the protocol to draw the right button. This property is how you tell "Lua thinks the client is maximized" apart from "the client was told".
+
+```lua
+assert(c.xdg_maximized == c.maximized)
+```
+
+### Client-drawn titlebar buttons
+
+Clients that draw their own decorations drive window state with `xdg_toplevel.set_maximized`, `unset_maximized` and `set_minimized`. somewm honors all three and routes them into `c.maximized` and `c.minimized`, the same properties a keybinding or a tasklist click would set. `awful.permissions` governs the resulting geometry request exactly as it does for any other source, so a rule that blocks maximizing blocks the titlebar button too.
+
+X11 had no equivalent: the server drew the frame, and applications asked through `_NET_WM_STATE`.
+
 ### Idle management
 
 Wayland-native idle detection and inhibition. AwesomeWM relied on external screensavers and power managers for this on X11.
