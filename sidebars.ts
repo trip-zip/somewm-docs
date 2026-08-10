@@ -24,6 +24,29 @@ const sidebars: SidebarsConfig = {
         'tutorials/keybindings',
         'tutorials/wibar',
         'tutorials/carousel',
+        {
+          // A course, not a menu: every chapter assumes the code from the ones
+          // above it, so the labels carry their chapter numbers and the order
+          // here is the reading order.
+          type: 'category',
+          label: 'From Scratch',
+          items: [
+            'tutorials/from-scratch/index',
+            'tutorials/from-scratch/00-default',
+            'tutorials/from-scratch/01-theme',
+            'tutorials/from-scratch/02-keybindings',
+            'tutorials/from-scratch/03-widgets',
+            'tutorials/from-scratch/04-wibar',
+            'tutorials/from-scratch/05-rules-titlebars',
+            'tutorials/from-scratch/06-notifications',
+            'tutorials/from-scratch/07-exitscreen',
+            'tutorials/from-scratch/08-mainmenu',
+            'tutorials/from-scratch/09-switcher',
+            'tutorials/from-scratch/10-launcher',
+            'tutorials/from-scratch/11-dashboard',
+            'tutorials/from-scratch/12-lockscreen',
+          ],
+        },
       ],
     },
     {

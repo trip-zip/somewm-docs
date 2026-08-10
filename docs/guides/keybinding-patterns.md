@@ -226,7 +226,7 @@ local client_keys = {
     { { modkey },           "m",      function(c) c.maximized = not c.maximized; c:raise() end,   "maximize",   "client" },
     { { modkey },           "n",      function(c) c.minimized = true end,                          "minimize",   "client" },
     { { modkey, "Shift" },  "c",      function(c) c:kill() end,                                    "close",      "client" },
-    { { modkey, "Control"}, "space",  awful.client.floating.toggle,                                "float",      "client" },
+    { { modkey, "Control"}, "space",  function(c) c.floating = not c.floating end,                 "float",      "client" },
 }
 
 -- Apply global keybindings

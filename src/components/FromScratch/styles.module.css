@@ -1,0 +1,179 @@
+/* Shared styling for the From Scratch course furniture: the per-chapter
+   position strip, the next-chapter card, and the overview chapter list. */
+
+/* ---------- ChapterNav: the "you are here" strip ---------- */
+
+.nav {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.navHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.series {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.series:hover {
+  color: var(--ifm-color-primary);
+}
+
+.counter {
+  color: var(--ifm-color-primary);
+  font-weight: 700;
+}
+
+.track {
+  background-color: var(--ifm-color-emphasis-200);
+  border-radius: 999px;
+  height: 4px;
+  margin: 0.6rem 0;
+  overflow: hidden;
+}
+
+.trackFill {
+  background-color: var(--ifm-color-primary);
+  border-radius: 999px;
+  height: 100%;
+}
+
+.navLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.navStart {
+  white-space: nowrap;
+}
+
+/* ---------- NextChapter: the forward pointer ---------- */
+
+.next {
+  background-color: var(--ifm-color-primary-lightest);
+  border-left: 4px solid var(--ifm-color-primary);
+  border-radius: 0 var(--ifm-global-radius) var(--ifm-global-radius) 0;
+  padding: 1rem 1.5rem;
+  margin-top: 2rem;
+}
+
+[data-theme='dark'] .next {
+  background-color: rgba(var(--ifm-color-primary-rgb), 0.1);
+}
+
+.nextLabel {
+  color: var(--ifm-color-primary-darker);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+[data-theme='dark'] .nextLabel {
+  color: var(--ifm-color-primary-light);
+}
+
+.nextTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.nextBlurb {
+  color: var(--ifm-color-emphasis-800);
+  margin: 0.35rem 0 0 0;
+}
+
+.done .nextBlurb {
+  margin-bottom: 0.75rem;
+}
+
+/* ---------- ChapterList: the ladder on the overview page ---------- */
+
+.list {
+  margin-bottom: 1.5rem;
+}
+
+.group + .group {
+  margin-top: 1.75rem;
+}
+
+.groupTitle {
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.groupSummary {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.9375rem;
+  margin-bottom: 0.75rem;
+}
+
+.chapters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: none;
+}
+
+.chapter + .chapter {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.chapterLink {
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  padding: 0.6rem 0.5rem;
+  border-radius: var(--ifm-global-radius);
+  color: inherit;
+}
+
+.chapterLink:hover {
+  background-color: var(--ifm-color-emphasis-100);
+  text-decoration: none;
+}
+
+.chapterNum {
+  color: var(--ifm-color-primary);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 1rem;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.chapterText {
+  display: flex;
+  flex-direction: column;
+}
+
+.chapterLabel {
+  color: var(--ifm-link-color);
+  font-weight: 600;
+}
+
+.chapterLink:hover .chapterLabel {
+  text-decoration: underline;
+}
+
+.chapterBlurb {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.9375rem;
+}

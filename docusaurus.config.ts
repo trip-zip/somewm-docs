@@ -43,6 +43,10 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          // The From Scratch chapters are 00-default.md .. 12-lockscreen.md
+          // and their URLs keep the numeric prefix (checkpoint branch READMEs
+          // link to them); no other docs use numbered filenames.
+          numberPrefixParser: false,
           editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
           routeBasePath: '/docs',
           lastVersion: '1.4',
@@ -135,6 +139,7 @@ const config: Config = {
           items: [
             {label: 'Getting Started', to: '/docs/getting-started/installation'},
             {label: 'Tutorials', to: '/docs/tutorials/basics'},
+            {label: 'From Scratch', to: '/docs/tutorials/from-scratch/'},
             {label: 'Reference', to: '/docs/reference/lua-libraries'},
             {label: 'Blog', to: '/blog'},
           ],

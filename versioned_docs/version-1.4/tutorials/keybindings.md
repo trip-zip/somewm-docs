@@ -17,6 +17,10 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 </YouWillLearn>
 
+:::tip Building a full config?
+This page retrofits one feature into an existing config. If you would rather build a complete desktop from the ground up, the [Awesome From Scratch](from-scratch/index.md) series covers this topic as part of a thirteen-chapter course.
+:::
+
 ## Keybinding Anatomy
 
 Every keybinding in SomeWM has four parts:
