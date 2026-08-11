@@ -355,7 +355,7 @@ editor_cmd = "ghostty -e " .. editor
 filemanager = "thunar"
 ```
 
-Set those to what you actually have installed. In the `request::default_layouts` list, `awful.layout.suit.tile` moves ahead of `awful.layout.suit.floating`, because a new tag takes the first layout in that list; the swap is the whole difference between starting tiled and starting floating. And sloppy focus goes away, commented rather than deleted so it is one uncomment from coming back:
+Set those to what you actually have installed. In the `request::default_layouts` list, `awful.layout.suit.tile` moves ahead of `awful.layout.suit.floating`, because a new tag takes the first layout in that list; the swap is the whole difference between starting tiled and starting floating. And sloppy focus goes away(my personal preference is no sloppy-focus, you keep it if you like it), commented rather than deleted so it is one uncomment from coming back:
 
 ```lua
 -- rc.lua
