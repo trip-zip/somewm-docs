@@ -343,9 +343,31 @@ end)
 
 `screen.scale` is fractional output scaling, a Wayland capability with no X11 equivalent, so this is somewm-only. On AwesomeWM the table ships empty and the block never assigns anything, so it is harmless; X11 users scale via `dpi()` (which we are already using everywhere) or xrandr instead.
 
-## Odds and Ends
+## The Rest of the rc.lua Diff
 
-A few quality-of-life edits round out the diff: the terminal becomes `ghostty` and the editor `nvim`, a `filemanager` variable appears, the tile layout moves ahead of floating so new sessions start tiled, and sloppy focus (focus follows mouse) is commented out in favor of click-to-focus. A `.stylua.toml` lands too, so `stylua .` formats the whole config consistently from here on.
+What is left of the diff is `rc.lua` housekeeping. The default applications become ones that exist on this machine, plus a `filemanager` variable that chapter 02 binds a key to:
+
+```lua
+-- rc.lua
+terminal = "ghostty"
+editor = os.getenv("EDITOR") or "nvim"
+editor_cmd = "ghostty -e " .. editor
+filemanager = "thunar"
+```
+
+Set those to what you actually have installed. In the `request::default_layouts` list, `awful.layout.suit.tile` moves ahead of `awful.layout.suit.floating`, because a new tag takes the first layout in that list; the swap is the whole difference between starting tiled and starting floating. And sloppy focus goes away, commented rather than deleted so it is one uncomment from coming back:
+
+```lua
+-- rc.lua
+-- Enable sloppy focus, so that focus follows mouse.
+-- client.connect_signal("mouse::enter", function(c)
+--     c:activate { context = "mouse_enter", raise = false }
+-- end)
+```
+
+Two somewm-only blocks also come out of `rc.lua` here: the startup notice for configs rejected as X11-specific, and `require("lockscreen").init()`. The notice is inert on AwesomeWM, but the `lockscreen` module ships only with somewm, so that require fails there and takes the whole config down with it. Removing it is what lets these branches start on AwesomeWM at all. Chapter 12 comes back to locking, which is the one part of the series that genuinely differs between the two.
+
+A `.stylua.toml` lands too, so `stylua .` formats the whole config consistently from here on.
 
 ## Try It
 
