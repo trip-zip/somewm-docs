@@ -24,10 +24,10 @@ const sidebars: SidebarsConfig = {
         'tutorials/keybindings',
         'tutorials/wibar',
         'tutorials/carousel',
-        // From Scratch is hidden on 2.0: the series is built on the 1.4
-        // default config and 2.0's has moved on. The pages still exist under
-        // docs/tutorials/from-scratch/, marked `unlisted: true`, until the
-        // series is rebuilt for 2.0. The 1.4 sidebar still carries it.
+        // From Scratch is 1.4-only. The series is built on the 1.4 default
+        // config and 2.0's has moved on, so the 2.0 copy was deleted rather
+        // than left to rot. It will be redesigned against the 2.0 default.
+        // The 1.4 sidebar carries the series; see versioned_docs/version-1.4/.
       ],
     },
     {

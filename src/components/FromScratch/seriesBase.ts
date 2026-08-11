@@ -1,11 +1,10 @@
 import {useLocation} from '@docusaurus/router';
 
 /**
- * The docs are versioned, so the series lives at two prefixes at once:
- * `/docs/tutorials/from-scratch` (1.4, the default) and
- * `/docs/next/tutorials/from-scratch` (2.0 dev). These components are shared by
- * both, so they cannot hardcode either one: a hardcoded link would throw the
- * reader out of the version they are reading.
+ * The series currently ships for 1.4 only, at `/docs/tutorials/from-scratch`,
+ * but the docs are versioned and the prefix moves: a 2.0 rebuild would live at
+ * `/docs/next/tutorials/from-scratch`, and today's prefix becomes
+ * `/docs/1.4/...` the moment another version is added.
  *
  * Deriving the prefix from the current URL keeps every link inside the version
  * the reader is already in, and survives a baseUrl change too.
