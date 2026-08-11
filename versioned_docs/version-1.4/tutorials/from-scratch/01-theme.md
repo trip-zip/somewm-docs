@@ -53,6 +53,56 @@ package.path = config_dir .. "?.lua;" .. config_dir .. "?/init.lua;" .. package.
 
 `gears.filesystem.get_configuration_dir()` asks the running compositor where the `rc.lua` it actually loaded lives, rather than guessing at a hard-coded path. Both somewm and AwesomeWM implement it identically, so the same config works from `~/.config/somewm`, `~/.config/awesome`, or a git checkout you pointed a nested test session at. The returned path always ends in a slash, which is why we concatenate `"theme/theme.lua"` without one. The `package.path` line makes `require("wibar")` and friends resolve to files sitting next to `rc.lua`, which becomes essential once we start splitting the config into modules.
 
+## Where This File Comes From
+
+`theme/theme.lua` started as a copy of the default theme your window manager ships, the same file chapter 00's `beautiful.init` line was loading. Run one of these from the root of the checkout.
+
+On SomeWM:
+
+```bash
+mkdir -p theme
+cp /usr/share/somewm/themes/default/theme.lua theme/theme.lua
+cp /usr/share/somewm/themes/default/submenu.png theme/
+cp -r /usr/share/somewm/themes/default/layouts theme/layouts
+```
+
+On AwesomeWM:
+
+```bash
+mkdir -p theme
+cp /usr/share/awesome/themes/default/theme.lua theme/theme.lua
+cp /usr/share/awesome/themes/default/submenu.png theme/
+cp -r /usr/share/awesome/themes/default/layouts theme/layouts
+```
+
+Both are packaged-install paths. A source build lands under `/usr/local` instead (`/usr/local/share/somewm/themes/`, `/usr/local/share/awesome/themes/`). If neither exists, ask the running window manager, which is the same call `beautiful` uses internally:
+
+```bash
+somewm-client eval 'return require("gears.filesystem").get_themes_dir()'  # SomeWM
+awesome-client 'return require("gears.filesystem").get_themes_dir()'      # AwesomeWM
+```
+
+The two default themes are the same file: 133 lines on SomeWM, 139 on AwesomeWM, differing only in where a few long calls wrap. Their assets are byte-identical, so the rest of this chapter reads the same either way.
+
+What you now have is the requires block, every built-in variable name in a working order (font, `bg_*` and `fg_*`, `useless_gap`, borders, taglist, menu, titlebar buttons, the sixteen layout icons, `return theme`), and images that already load. `theme/submenu.png` and the sixteen layout icons on this branch came out of that directory unchanged; only `theme/titlebar/square.svg` and `rounded_square.svg` are new artwork. Some lines survive untouched, `theme.awesome_icon = theme_assets.awesome_icon(...)` among them.
+
+The branch keeps only the sixteen white layout icons (`*w.png`), the ones the theme recolors. The black variants and the default's `taglist/` and `titlebar/` PNGs go unused, so `cp -r` bringing extra files along is harmless.
+
+The rest of this chapter is edits to that copy:
+
+| The default theme | What we turn it into |
+| --- | --- |
+| Hex codes inline (`theme.bg_normal = "#222222"`) | Named palettes plus semantic roles |
+| `themes_path = get_themes_dir()`, assets read from the install | `theme_path = config_dir .. "theme"`, assets vendored beside `rc.lua` |
+| Image paths used as-is | Every image passed through `recolor()` |
+| `theme.font = "sans 8"` | One `font_family` and a `theme.font_size()` builder |
+| `theme.wallpaper` pointing at a shipped PNG | A per-screen wallpaper list in `rc.lua` |
+| `theme.icon_theme = nil` | `"Papirus"` |
+| Taglist square markers from `theme_assets` | Dropped. The chapter 04 taglist renders icons instead |
+| An urgent-notification `ruled.notification` rule | Dropped. Chapter 06 rebuilds notifications from scratch |
+
+Point `beautiful.init` at your copy and reload before changing anything, so you know the copy itself is sound.
+
 The theme file itself starts by grabbing the same tools:
 
 ```lua
@@ -134,7 +184,7 @@ theme.bg_systray = color.bg
 
 ## One Font Family, One Builder
 
-Fonts in AwesomeWM are plain strings like `"JetBrainsMono Nerd Font Bold 14"`, which makes it painfully easy to scatter slightly different family names across twenty widget files. This theme forbids that with a rule: the family is written once, and everything else builds on it.
+Fonts in AwesomeWM are plain strings like `"JetBrainsMono Nerd Font Bold 14"`, which makes it easy to scatter slightly different family names across twenty widget files. This theme forbids that with a rule: the family is written once, and everything else builds on it.
 
 ```lua
 -- theme/theme.lua
@@ -145,7 +195,7 @@ end
 theme.font = theme.font_size(10)
 ```
 
-Yes, the theme table can hold functions. `beautiful` does not care what type a value is, so `beautiful.font_size(24, "Bold")` is callable from any widget and returns `"JetBrainsMono Nerd Font Bold 24"`. Every font string in the remaining twelve chapters goes through this builder. The payoff: changing the font for the entire desktop, clock, launcher, notifications, lock screen, all of it, is a one-line edit to `theme.font_family`.
+Notice the theme table can hold functions. `beautiful` does not care what type a value is, so `beautiful.font_size(24, "Bold")` is callable from any widget and returns `"JetBrainsMono Nerd Font Bold 24"`. Every font string in the remaining twelve chapters goes through this builder. This way, changing the font for the entire desktop, clock, launcher, notifications, lock screen, all of it, is a one-line edit to `theme.font_family`.
 
 ## DPI-Aware Sizing
 
@@ -160,7 +210,7 @@ theme.border_color_active = color.soft_orange
 theme.border_color_marked = color.red
 ```
 
-`useless_gap` is AwesomeWM's name for the empty space between tiled windows ("useless" because it serves no function except looking good, which is very much a function). Note that this theme also derives other sizes from it: near the bottom of the file, `theme.wibar_height = theme.useless_gap * 5` and the wibar margins are `theme.useless_gap * 2`. One knob controls the whole spacing rhythm. The rule for the rest of the series: every size in the config goes through `dpi()`, no bare pixel numbers.
+`useless_gap` is AwesomeWM's name for the empty space between tiled windows ("useless" because it serves no function except looking good). Note that this theme also derives other sizes from it: near the bottom of the file, `theme.wibar_height = theme.useless_gap * 5` and the wibar margins are `theme.useless_gap * 2`. One knob controls the whole spacing rhythm. The rule for the rest of the series: every size in the config goes through `dpi()`, no bare pixel numbers.
 
 ## The Shape System
 
@@ -226,7 +276,7 @@ Around a third of this file's 834 lines look like this:
 -- theme.arcchart_color = nil
 ```
 
-This is the complete list of built-in theme variables AwesomeWM knows about, copied from the official appearance documentation and interleaved with our real settings, so the file doubles as a browsable reference: want to style tooltips? Scroll to the `tooltip_` block, uncomment a line, give it a value.
+This is the complete list of built-in theme variables AwesomeWM knows about, copied from the official appearance documentation and interleaved with our real settings, so the file doubles as a browsable reference: want to style tooltips? Scroll to the `tooltip_` block, uncomment a line, give it a value. It is also most of the distance between the 133-line default we copied and the 834 lines we ended up with. The theme itself is not that big.
 
 They are commented out on purpose, and the comment above the block explains why in words this config earned the hard way. An early version of this file left some of these as live `theme.foo = nil` assignments, on the theory that assigning `nil` is harmless. It is not. The reference lines sit *after* many of the real settings, and in Lua, `theme.taglist_bg_focus = nil` deletes the key you carefully set two hundred lines earlier. The symptom was maddening: settings that visibly worked, then silently reverted after an unrelated cleanup reordered the file. If you keep a reference block like this in your own theme, keep it commented.
 
