@@ -68,7 +68,25 @@ end)
 This is your first **signal**. Signals are the compositor's event system: objects emit named events, and `connect_signal` registers a callback for one. Here, whenever an error needs displaying, `naughty` (the notification library) pops up a critical notification with the message. The entire config is wired together this way, and you will connect dozens of signals before the series is done.
 
 :::note
-The SomeWM build of this file carries a few extras the AwesomeWM original does not: a startup notice if your config was skipped for containing X11-only code, tag persistence across monitor hotplug, and a hook into the built-in lockscreen (`require("lockscreen").init()`, plus a `Mod4+Shift+Escape` binding to `awesome.lock()`). On AwesomeWM these pieces do not apply; chapter 12 covers locking on both.
+The SomeWM build of this file carries a few extras the AwesomeWM original does not: a startup notice if your config was skipped for containing X11-only code, tag persistence across monitor hotplug, and a hook into the built-in lockscreen (`require("lockscreen").init()`, plus a `Mod4+Shift+Escape` binding to `awesome.lock()`).
+:::
+
+:::warning AwesomeWM: comment out the lockscreen lines before you run this
+`lockscreen` is a SomeWM module. AwesomeWM has nothing to resolve it to, so the require raises while the config is loading:
+
+```
+error: rc.lua:72: module 'lockscreen' not found
+```
+
+An error in the main chunk stops it dead, so every keybinding, rule, and bar defined below that line never gets set up. Comment out both lines before running this branch on AwesomeWM:
+
+```lua
+-- rc.lua
+-- Initialize lockscreen (must be after beautiful.init)
+-- require("lockscreen").init()
+```
+
+The `Mod4+Shift+Escape` binding calls `awesome.lock()`, which AwesomeWM also lacks, but that one only errors if you press it, so it can stay. Chapter 01 removes the require, so this edit is only needed on this branch; the lock binding survives until chapter 02 rewrites the bindings. Chapter 12 covers locking on each.
 :::
 
 ### Theme and Variables
