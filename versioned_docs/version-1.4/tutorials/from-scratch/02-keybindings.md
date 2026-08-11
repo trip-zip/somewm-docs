@@ -69,11 +69,9 @@ Before flattening anything, look at what one stock binding costs. This is from r
 `awful.key` takes four things:
 
 1. **A modifiers table.** `{ modkey }` means Mod4 (the Super key). `{ modkey, "Shift" }` means both held together. An empty table `{}` means the key fires bare, which is what hardware media keys want.
-2. **A key string.** A letter like `"j"`, a named key like `"Return"` or `"Escape"`, or a keysym like `"XF86AudioRaiseVolume"`.
-3. **A callback.** Runs when the combo is pressed. For client bindings it receives the focused client as its argument.
+2. **A key string.** A letter like `"j"`, a named key like `"Return"` or `"Escape"`, or a keysym like `"XF86AudioRaiseVolume"`. Names are case-insensitive, so `"Return"` and `"return"` bind the same key. When you do not know the name for a key, look it up in [Key Names](../../reference/key-names.md), or run `wev`, press the key, and read the `sym:` field it prints. That is the fastest way to catch the ones whose name is not what the keycap says: `,` is `"comma"`, Page Up is `"Prior"`.
+3. **A callback.** Runs when the combo is pressed. For client bindings it receives the focused client as its argument. What goes here is a function, not a call to one: either a name that already refers to a function, like `media_helpers.lower_volume` with no parentheses, or a wrapper like `function() awful.spawn("brightnessctl s 5%-") end`. 
 4. **A description table.** `description` and `group` are not decoration: they are the data behind the hotkeys popup. Press Mod+S in a running session and every binding appears in a searchable overlay, organized by `group` ("client", "layout", "media"), each labeled with its `description`. Write these well and your config documents itself.
-
-Four lines per binding, times roughly fifty bindings. That is the boilerplate we are about to delete.
 
 ## One Row Per Binding
 
@@ -97,7 +95,6 @@ Here is what the rows look like. This is the top of `global_keys`:
 ```lua
 -- keybindings.lua
 --{modifier(s) table, key string,          function function,                     description string,    group string}
--- stylua: ignore start
 local global_keys = {
   -- no modifiers
   {{},         "XF86AudioLowerVolume",  media_helpers.lower_volume,                               "decrease volume",                       "media"    },
@@ -109,7 +106,7 @@ local global_keys = {
 
 Two deliberate choices are visible here.
 
-**The `-- stylua: ignore start` marker.** We format this repo with stylua, and stylua would collapse all that column alignment into one binding per five lines, undoing exactly what we built. The `ignore start` / `ignore end` pair fences off the two tables so the formatter leaves them alone. Inside the fence, the alignment is maintained by hand, and it is worth it: modifiers line up under modifiers, keys under keys, and a glance down the second column answers "what is bound to what" faster than any grep.
+**The columns are aligned by hand.** Modifiers sit under modifiers, keys under keys, descriptions under descriptions. Nothing enforces the alignment, and keeping it is worth the small effort: a glance down the second column answers "what is bound to what."
 
 **Media keys bind with no modifier.** The `XF86Audio*` and `XF86MonBrightness*` strings are the keysym names your keyboard's volume and brightness keys actually send. They are real keys like any other, so binding them is just a row with an empty modifiers table. The `playerctl` rows for next/play/previous track follow the same pattern a few lines further down.
 

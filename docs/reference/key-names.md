@@ -12,6 +12,22 @@ Names you can pass to `awful.key` and `awful.button`. For the full enumeration o
 SomeWM resolves keys via `xkb_keysym_from_name()` with the case-insensitive flag set. `"Return"`, `"return"`, and `"RETURN"` all resolve to the same keysym.
 :::
 
+## Finding a Key's Name
+
+When a key is not in the tables below, ask the keyboard instead of guessing. `wev` prints the keysym for every key you press:
+
+```
+$ wev
+[        14:     wl_keyboard] key: serial: 84; time: 9302175; key: 115; state: 1 (pressed)
+                      sym: XF86AudioRaiseVolume (269025043), utf8: ''
+```
+
+The `sym:` field is the string to pass to `awful.key`. Press the key you care about, read the name, ignore the rest of the output.
+
+This matters most where the name is not what is printed on the keycap. `,` reports `comma`, `;` reports `semicolon`, and Page Up reports `Prior`.
+
+`wev` is a Wayland client, so run it from inside your SomeWM session. Install it from your distribution's `wev` package. On X11 under AwesomeWM the equivalent is `xev -event keyboard`, whose `KeyPress` lines end with `keycode 123 (keysym 0x1008ff13, XF86AudioRaiseVolume)`; the name after the comma is the same string.
+
 ## Modifier Keys
 
 Passed as a Lua table — the first argument to `awful.key`.
