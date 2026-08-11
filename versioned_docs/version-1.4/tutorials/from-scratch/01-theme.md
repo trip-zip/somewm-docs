@@ -24,7 +24,7 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 ## Where We Are
 
-In [chapter 00](./00-default.md) we toured the baseline `rc.lua` and got it running in a nested test session. It works, but it looks like 2008: the default theme, the default xterm, the default everything. This chapter replaces the built-in theme with our own `theme/theme.lua`, an 830-line file that will style every single widget we build for the rest of the series. To catch up: `git checkout 00-default`.
+In [chapter 00](./00-default.md) we toured the baseline `rc.lua` and got it running in a nested test session. It works, but it looks like 2008: the default theme, the default xterm, the default everything. This chapter replaces the built-in theme with our own `theme/theme.lua`, an 834-line file that will style every single widget we build for the rest of the series. To catch up: `git checkout 00-default`.
 
 ## What Beautiful Actually Is
 
@@ -33,8 +33,10 @@ Every visual thing in AwesomeWM, from the bar to notification popups to window b
 The contract is simple and worth internalizing now, because we lean on it in every remaining chapter:
 
 - Anything you assign as `theme.foo` in the theme file can be read as `beautiful.foo` from anywhere in the config.
-- Built-in components look up well-known keys (`beautiful.bg_normal`, `beautiful.border_width`, `beautiful.font`, and a few hundred more) and fall back to defaults when a key is missing.
-- You can invent your own keys freely. Later chapters read `beautiful.primary_color`, `beautiful.shape`, and `beautiful.font_size` as if they were built in. They are not; we define them today.
+- **Built-in keys are read by the window manager's own Lua.** `bg_normal`, `border_width`, `font`, and a few hundred more are looked up by the shipped widgets and libraries, so setting one changes how something draws without you writing a line to connect it. Leave one unset and that component falls back to its own default.
+- **Keys you invent are read by your code and nothing else.** `theme.primary_color` is a perfectly good theme entry, readable as `beautiful.primary_color` from any module you write, but no code in SomeWM or AwesomeWM will ever go looking for it. It changes nothing until one of your own widgets asks for it.
+
+That second distinction is worth holding onto, because most of this file is invented keys. `beautiful.primary_color`, `beautiful.shape`, and `beautiful.font_size` get used in later chapters as if they were built in. They are not. They are ours, defined today, and they work only because we also write the widgets that read them.
 
 In `rc.lua`, the stock config loaded the theme shipped with AwesomeWM. We point it at ours instead:
 
@@ -264,7 +266,7 @@ theme.layout_floating = recolor(theme_path .. "/layouts/floatingw.png", color.fg
 
 Switch the palette and the icons re-tint automatically on the next reload. No image editor involved, ever. We reuse `recolor` heavily in the widget chapters, where a single set of white SVG icons serves every color the theme needs.
 
-## The Commented Reference Block, and a Real Bug
+## The Commented Reference Block
 
 Around a third of this file's 834 lines look like this:
 
@@ -276,12 +278,10 @@ Around a third of this file's 834 lines look like this:
 -- theme.arcchart_color = nil
 ```
 
-This is the complete list of built-in theme variables AwesomeWM knows about, copied from the official appearance documentation and interleaved with our real settings, so the file doubles as a browsable reference: want to style tooltips? Scroll to the `tooltip_` block, uncomment a line, give it a value. It is also most of the distance between the 133-line default we copied and the 834 lines we ended up with. The theme itself is not that big.
-
-They are commented out on purpose, and the comment above the block explains why in words this config earned the hard way. An early version of this file left some of these as live `theme.foo = nil` assignments, on the theory that assigning `nil` is harmless. It is not. The reference lines sit *after* many of the real settings, and in Lua, `theme.taglist_bg_focus = nil` deletes the key you carefully set two hundred lines earlier. The symptom was maddening: settings that visibly worked, then silently reverted after an unrelated cleanup reordered the file. If you keep a reference block like this in your own theme, keep it commented.
+That is every name the window manager's own code looks up, copied from the appearance documentation and interleaved with our real settings, so the file doubles as a browsable reference: to style tooltips, find the `tooltip_` block, uncomment a line, give it a value. It also accounts for most of the distance between the 133-line default and this file.
 
 :::warning
-`theme.foo = nil` is not a no-op. It erases `theme.foo`. Reference lines in a theme file must stay comments.
+`theme.foo = nil` is not a no-op, it erases `theme.foo`. These lines sit after the real settings, so uncommenting one and leaving it `nil` deletes the value set two hundred lines earlier.
 :::
 
 ## The Rest of the File
