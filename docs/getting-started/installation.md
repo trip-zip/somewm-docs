@@ -109,6 +109,9 @@ sudo apt install \
 
 # Optional: lock screen authentication
 sudo apt install libpam0g-dev
+
+# Optional: systemd session integration (somewm-session, login manager entry)
+sudo apt install systemd-dev
 ```
 
 ### Fedora
