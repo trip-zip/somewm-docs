@@ -140,6 +140,26 @@ sudo dnf install \
     xcb-util-renderutil-devel
 ```
 
+### Gentoo
+
+:::note
+SomeWM is not currently part of the official Gentoo Portage tree or the [GURU](https://wiki.gentoo.org/wiki/Project:GURU) project overlay. Use the third-party overlay below instead.
+:::
+
+SomeWM is packaged in the [somewm-gentoo-overlay](https://github.com/shuber2/somewm-gentoo-overlay):
+
+```bash
+eselect repository add somewm git https://github.com/shuber2/somewm-gentoo-overlay.git
+emaint sync -r somewm
+
+echo 'gui-wm/somewm ~amd64' >> /etc/portage/package.accept_keywords/somewm
+emerge -av gui-wm/somewm
+```
+
+This installs somewm and all dependencies, building it from source via the ebuild. After installation, skip directly to [Launch](/docs/getting-started/first-launch).
+
+A live `9999` ebuild (tracking `main`) and a `1.4.9999` ebuild (tracking the `release/1.4` branch) are also provided for those who want the latest changes.
+
 ### NixOS
 
 A `default.nix` is provided for building on NixOS:
