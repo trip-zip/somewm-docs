@@ -112,6 +112,9 @@ sudo apt install libpam0g-dev
 
 # Optional: systemd session integration (somewm-session, login manager entry)
 sudo apt install systemd-dev
+
+# Optional: SVG icon rendering
+sudo apt install gir1.2-rsvg-2.0
 ```
 
 ### Fedora
