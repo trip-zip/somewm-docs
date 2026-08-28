@@ -42,7 +42,7 @@ Monitor disconnects        Monitor reconnects
                             ▼           ▼
                         Found:       Not found:
                         Restore      Create default
-                        saved tags   tags ("1"-"9")
+                        saved tags   tags (dev..media)
 ```
 
 ### What Gets Saved
