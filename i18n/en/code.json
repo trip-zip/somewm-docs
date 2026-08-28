@@ -1,0 +1,10 @@
+{
+  "theme.docs.versions.unmaintainedVersionLabel": {
+    "message": "This is documentation for {siteTitle} {versionLabel}, the AwesomeWM-compatible line. It is actively maintained and tracks AwesomeWM master.",
+    "description": "Banner label for versions older than the latest release"
+  },
+  "theme.docs.versions.latestVersionSuggestionLabel": {
+    "message": "For the newest release, see the {latestVersionLink} ({versionLabel}).",
+    "description": "Banner line pointing to the latest release docs"
+  }
+}

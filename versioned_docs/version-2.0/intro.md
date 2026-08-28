@@ -94,6 +94,6 @@ Background knowledge and architectural understanding.
 
 ## Versioning
 
-The default docs match SomeWM 1.4, the current stable release, which tracks the AwesomeWM master branch. Use the version switcher in the navigation bar to view the 2.0 (dev) docs — SomeWM 2.0 is a Wayland-native rework that is not yet released.
+The default docs match SomeWM 2.0, the newest release and a Wayland-native rework. SomeWM 1.4, the AwesomeWM-compatible line, tracks the AwesomeWM master branch and stays actively maintained. Use the version switcher in the navigation bar to move between versions.
 
 The [AwesomeWM apidoc](https://awesomewm.org/apidoc/) remains a useful upstream reference for topics that are not yet self-sufficient here.

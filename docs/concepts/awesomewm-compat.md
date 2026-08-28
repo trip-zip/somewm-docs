@@ -24,8 +24,9 @@ We are not self-sufficient on every topic yet. Gaps are tracked internally; if y
 
 | SomeWM version | Tracks AwesomeWM | Status |
 |----------------|-------------------|--------|
-| 1.4 (current stable) | master (working toward 4.4) | Default docs |
-| 2.0 (dev) | (Wayland-native rework) | Behind the version switcher; not released |
+| 1.4 | master (working toward 4.4) | Stable, actively maintained as the AwesomeWM-compatible line |
+| 2.0 | (Wayland-native rework) | Newest release, default docs |
+| 2.1 (dev) | (Wayland-native rework) | In development |
 | 1.5 (future) | 4.5 (after upstream ships) | Planned |
 
 ## Philosophy
