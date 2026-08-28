@@ -127,7 +127,7 @@ end)
 - Branch on `s.index` for per-screen wallpapers
 - Replace the inner `imagebox` with a custom widget for procedural backgrounds
 
-See [Wallpaper Caching](/docs/concepts/wallpaper-caching) for how SomeWM handles wallpaper memory.
+See [Wallpaper Caching](./wallpaper-caching.md) for how SomeWM handles wallpaper memory.
 
 ```lua
 screen.connect_signal("request::wallpaper", function(s)

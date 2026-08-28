@@ -264,6 +264,6 @@ The cache doesn't detect when files change on disk. If you modify a wallpaper fi
 
 ## See Also
 
-- [Wallpaper Caching Guide](/docs/guides/wallpaper-caching) - Practical configuration
+- [Wallpaper Caching Guide](../guides/wallpaper-caching.md) - Practical configuration
 - [Wayland vs X11](/docs/concepts/wayland-vs-x11) - Platform differences
 - [Scene Graph](/docs/concepts/scene-graph) - How wlroots renders
