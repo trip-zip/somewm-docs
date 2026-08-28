@@ -169,7 +169,7 @@ Point the `wallpaper` variable at an image:
 theme.wallpaper = "/home/user/wallpapers/mountain.jpg"
 ```
 
-Reload, and the default `request::wallpaper` handler in your rc.lua draws it filling each screen. (Fit, tile, and solid-color modes exist too; see [gears.wallpaper](https://awesomewm.org/apidoc/theme_related_libraries/gears.wallpaper.html). For a different wallpaper on each monitor, see the [Multi-Monitor guide](/docs/guides/multi-monitor).)
+Reload, and the default `request::wallpaper` handler in your rc.lua draws it filling each screen. (The handler builds the wallpaper with [awful.wallpaper](https://awesomewm.org/apidoc/popups_and_bars/awful.wallpaper.html), which composes any widget tree: images, tiling, gradients, solid colors. For a different wallpaper on each monitor, see the [Multi-Monitor guide](/docs/guides/multi-monitor).)
 
 ## Recoloring Icons
 

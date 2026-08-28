@@ -129,14 +129,25 @@ screen[1]:swap(screen[2])
 
 ### Virtual Screens
 
+:::warning Not functional
+
+`screen.fake_add` creates a real screen object: `screen.count()` goes up, `added`
+fires, and tags and wibars get created for it. But the screen does not work as a
+screen. Clients moved to it are hidden, wibars cannot attach to it, and layouts
+never run in its region, because window management is keyed to physical monitors
+([#561](https://github.com/trip-zip/somewm/issues/561)). Making a carved-out
+monitor region behave as a screen is planned as part of the 2.2 layout work.
+
+:::
+
 ```lua
--- Create a virtual screen
+-- Create a virtual screen object
 local fake = screen.fake_add(0, 0, 1920, 1080)
 
--- Resize a virtual screen
+-- Resize it
 fake:fake_resize(0, 0, 2560, 1440)
 
--- Remove a virtual screen
+-- Remove it
 fake:fake_remove()
 ```
 

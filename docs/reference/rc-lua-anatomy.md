@@ -210,8 +210,6 @@ end)
 - Branch on `s.index` for per-screen wallpapers
 - Replace the inner `imagebox` with a custom widget (animation, slideshow, procedural)
 
-See [Wallpaper Caching](/docs/concepts/wallpaper-caching) for SomeWM's wallpaper memory handling.
-
 ```lua
 screen.connect_signal("request::wallpaper", function(s)
     local colors = beautiful.wallpaper_colors

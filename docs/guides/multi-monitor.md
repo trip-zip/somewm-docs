@@ -261,7 +261,21 @@ local wallpapers = {
 }
 
 screen.connect_signal("request::wallpaper", function(s)
-    gears.wallpaper.maximized(wallpapers[s.index] or wallpapers[1], s, true)
+    awful.wallpaper {
+        screen = s,
+        widget = {
+            {
+                image     = wallpapers[s.index] or wallpapers[1],
+                upscale   = true,
+                downscale = true,
+                widget    = wibox.widget.imagebox,
+            },
+            valign = "center",
+            halign = "center",
+            tiled  = false,
+            widget = wibox.container.tile,
+        }
+    }
 end)
 ```
 

@@ -144,9 +144,8 @@ See [Defer startup with `request::rules`](../guides/defer-startup-with-request-r
 
 A few rules of thumb:
 
-- **In `manage`, the client is fully tagged and placed.** Reading `c.screen`, `c:tags()`, `c.geometry` is safe.
-- **In `request::manage`, default handlers may not have run yet.** If you connect after `awful.permissions` and `ruled.client`, you'll see the post-rule state. If you connect before, you won't.
-- **In `unmanage`, the client is gone.** Don't read geometry or screen; they may already be invalid. Save what you need by stashing it on `manage`.
+- **In `request::manage`, default handlers may not have run yet.** If you connect after `awful.permissions` and `ruled.client`, you'll see the post-rule state (the client fully tagged and placed). If you connect before, you won't.
+- **In `request::unmanage`, the client is gone.** Don't read geometry or screen; they may already be invalid. Save what you need by stashing it on `request::manage`.
 - **In `refresh`, do as little as possible.** It fires often (every redraw). Anything heavy will visibly slow the compositor.
 - **Errors in handlers are caught.** The default `debug::error` handler logs them to stderr. Add your own `debug::error` handler if you want to surface them somewhere visible.
 
