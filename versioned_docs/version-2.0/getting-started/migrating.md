@@ -1,0 +1,282 @@
+---
+sidebar_position: 3
+title: Migrating from AwesomeWM
+description: Adapting your AwesomeWM config for Wayland
+---
+
+# Migrating from AwesomeWM
+
+## Quick Compatibility Check
+
+Before migrating, scan your config for potential issues:
+
+```bash
+somewm --check ~/.config/awesome/rc.lua
+```
+
+To only fail on issues that would actually hang the compositor (ignoring warnings):
+
+```bash
+somewm --check ~/.config/awesome/rc.lua --check-level=critical
+```
+
+This checks for:
+- **Lua syntax errors** - Caught before execution
+- **X11-specific APIs** - Functions like `awesome.get_xproperty()` that don't exist on Wayland
+- **Blocking X11 tools** - Calls to `xrandr`, `xdotool`, `xprop` via `io.popen()` that would hang
+- **Missing local modules** - `require()` statements for files that can't be found
+- **Luacheck issues** - Code quality warnings (if luacheck is installed)
+
+### Severity Levels
+
+Issues are categorized by severity:
+- **CRITICAL** - Will fail or hang on Wayland (must fix)
+- **WARNING** - Needs a Wayland alternative
+- **INFO** - May not work but won't break config
+
+Example output:
+```
+somewm config compatibility report
+====================================
+Config: /home/user/.config/awesome/rc.lua
+
+X CRITICAL:
+  rc.lua:45 - io.popen with xrandr (blocks)
+    → Use screen:geometry() or screen.outputs instead
+
+! WARNING:
+  rc.lua:112 - maim screenshot tool
+    → Use awful.screenshot or grim instead
+
+Summary: 1 critical, 1 warning
+```
+
+### Suppressing False Positives
+
+If `--check` flags a pattern you've already handled (e.g. behind a runtime guard), add `-- somewm:ignore` to that line:
+
+```lua
+awful.spawn("flameshot gui") -- somewm:ignore using XDG portal on Wayland
+```
+
+The suppression also works at runtime, not just in `--check` mode. SomeWM's startup prescan will skip suppressed lines too.
+
+## X11 Pattern Replacements
+
+### Screen/Display Information
+
+| X11 Pattern | Wayland Alternative |
+|-------------|---------------------|
+| `io.popen("xrandr")` | `screen:geometry()` or `screen.outputs` |
+| `xdpyinfo` | `screen.geometry` properties |
+
+```lua
+-- X11 (don't do this)
+local handle = io.popen("xrandr | grep ' connected'")
+
+-- Wayland
+for s in screen do
+    print(s.geometry.width .. "x" .. s.geometry.height)
+    for name, output in pairs(s.outputs) do
+        print("  Output: " .. name)
+    end
+end
+```
+
+### Window/Client Information
+
+| X11 Pattern | Wayland Alternative |
+|-------------|---------------------|
+| `io.popen("xdotool")` | `awful.spawn()` or `client:send_key()` |
+| `io.popen("xprop")` | `client.class`, `client.instance` |
+| `awesome.register_xproperty()` | Not needed on Wayland |
+
+```lua
+-- X11 (don't do this)
+local handle = io.popen("xprop -id " .. c.window)
+
+-- Wayland
+local class = c.class      -- e.g., "firefox"
+local instance = c.instance  -- e.g., "Navigator"
+```
+
+### Screenshots
+
+| X11 Pattern | Wayland Alternative |
+|-------------|---------------------|
+| `scrot` | `awful.screenshot` or `grim` |
+| `maim` | `awful.screenshot` or `grim` |
+| `import` (ImageMagick) | `grim` |
+
+```lua
+-- X11 (don't do this)
+awful.spawn("scrot ~/screenshot.png")
+
+-- Wayland
+awful.screenshot({ directory = "~" })
+-- or
+awful.spawn("grim ~/screenshot.png")
+```
+
+### Input Simulation
+
+| X11 Pattern | Wayland Alternative |
+|-------------|---------------------|
+| `xdotool key` | `root.fake_input("key_press", ...)` / `("key_release", ...)` |
+| `xdotool mousemove` | `root.fake_input("motion_notify", ...)` |
+
+### GTK/GDK via LGI
+
+| Pattern | Severity | Notes |
+|---------|----------|-------|
+| `lgi.require("Gtk")` | WARNING | SomeWM preloads an empty override to prevent deadlock, but display-dependent GTK features won't work |
+| `lgi.require("Gdk")` | CRITICAL | No mitigation. GDK init connects to the display server and will deadlock during config load |
+
+If you need GTK for icon lookup or similar, load it lazily after startup:
+
+```lua
+-- Don't load at the top level
+-- local Gtk = lgi.require("Gtk")
+
+-- Load lazily inside a callback instead
+awful.spawn.easy_async("true", function()
+    local Gtk = lgi.require("Gtk")
+    -- safe to use here, event loop is running
+end)
+```
+
+## What Works Unchanged
+
+Most of your config will work without changes:
+
+- **All gears.* modules** - timers, shapes, filesystem, etc.
+- **All wibox.* widgets** - text, image, progressbar, etc.
+- **Theming** - beautiful.* properties
+- **Client rules** - `ruled.client`
+- **Notifications** - `naughty`, including D-Bus notifications from applications
+- **Signals** - `client.connect_signal()`, `screen.connect_signal()`, etc.
+
+The modern API surface is intact. What SomeWM 2.0 dropped is the *deprecated* API that
+AwesomeWM still carries for backward compatibility. If your config predates AwesomeWM 4.0,
+read the next section.
+
+## Deprecated APIs Removed in SomeWM 2.0
+
+AwesomeWM still ships these for backward compatibility. SomeWM 2.0 deleted them, so a config
+that uses them fails with `attempt to call field '...' (a nil value)` or a `require` error.
+SomeWM 1.4 still has all of them.
+
+### Notifications
+
+| AwesomeWM | SomeWM 2.0 |
+|-----------|------------|
+| `naughty.notify(args)` | `naughty.notification(args)` |
+| `naughty.suspend()` / `naughty.resume()` / `naughty.toggle()` | `naughty.suspended = true` / `false` / `not naughty.suspended` |
+| `naughty.is_suspended()` | `naughty.suspended` |
+| `naughty.destroy(n, reason)` | `n:destroy(reason)` |
+| `naughty.getById(id)` | `naughty.get_by_id(id)` |
+| `naughty.reset_timeout(n, t)` | `n:reset_timeout(t)` |
+| `naughty.replace_text(n, title, text)` | `n.title = title; n.message = text` |
+
+### Client lifecycle signals
+
+The bare `manage` and `unmanage` signals are gone. Handlers connected to them never fire.
+SomeWM logs a warning at startup when it sees one.
+
+| AwesomeWM | SomeWM 2.0 |
+|-----------|------------|
+| `client.connect_signal("manage", function(c) ...` | `client.connect_signal("request::manage", function(c, context, hints) ...` |
+| `client.connect_signal("unmanage", function(c) ...` | `client.connect_signal("request::unmanage", function(c, context, hints) ...` |
+
+See [React to client lifecycle](../guides/react-to-client-lifecycle.md).
+
+### Renamed modules
+
+The 3.x-to-4.x redirect shims were deleted. `require` the real module instead.
+
+| Removed | Use instead |
+|---------|-------------|
+| `awful.rules` | `ruled.client` |
+| `awful.util` | `gears.filesystem`, `gears.table`, `gears.string`, `gears.math`, `gears.color`, `gears.debug`, `gears.geometry` |
+| `awful.wibox` | `awful.wibar` |
+| `awful.ewmh` | `awful.permissions` |
+| `awful.widget.graph` / `progressbar` / `textclock` | `wibox.widget.*` |
+| `wibox.widget.background` | `wibox.container.background` |
+| `wibox.layout.margin` / `constraint` / `scroll` / `mirror` / `rotate` | `wibox.container.*` |
+
+### Functional wrappers on `awful.tag` and `awful.client`
+
+26 `awful.tag.*` wrappers (`tag.setmwfact`, `tag.getgap`, `tag.viewonly`, and friends) and 5
+`awful.client.*` wrappers (`getmaster`, `setmaster`, `setslave`, `getmarked`,
+`floating.toggle`) were removed. All were replaced by object properties and methods in
+AwesomeWM 4.0, so use `t.master_width_factor`, `t.gap`, `t:view_only()`, and so on.
+
+## Automatic Detection
+
+SomeWM will automatically detect and skip configs that contain X11-specific code. If your config is skipped, SomeWM will show a notification explaining which X11 pattern was detected and suggest alternatives.
+
+If you share a config between AwesomeWM and SomeWM, you can detect which compositor is running:
+
+```lua
+local is_somewm = awesome.release == "somewm"
+
+if is_somewm then
+    awful.spawn("grim ~/screenshot.png")
+else
+    awful.spawn("scrot ~/screenshot.png")
+end
+```
+
+## Testing Your Config
+
+1. **Run the compatibility check first:**
+   ```bash
+   somewm --check ~/.config/awesome/rc.lua
+   ```
+
+2. **Fix any CRITICAL issues**
+
+3. **Try loading the config:**
+   ```bash
+   somewm -c ~/.config/awesome/rc.lua
+   ```
+
+4. **Check debug output if needed:**
+   ```bash
+   somewm -d -c ~/.config/awesome/rc.lua 2>&1 | tee migration.log
+   ```
+
+## Common Migration Scenarios
+
+### Autostart Scripts
+
+If you're spawning X11 tools on startup:
+
+```lua
+-- X11 (problematic)
+awful.spawn.once("xset r rate 200 30")  -- Keyboard repeat
+
+-- Wayland (use awful.input)
+awful.input.keyboard_repeat_delay = 200
+awful.input.keyboard_repeat_rate = 30
+```
+
+### Status Bar with X11 Tools
+
+```lua
+-- X11 (won't work)
+awful.widget.watch("xbacklight -get", 5, function(widget, stdout)
+    widget:set_text(stdout)
+end)
+
+-- Wayland (use brightnessctl or similar)
+awful.widget.watch("brightnessctl -m | cut -d',' -f4", 5, function(widget, stdout)
+    widget:set_text(stdout)
+end)
+```
+
+## Next Steps
+
+- See [Wayland vs X11](/docs/concepts/wayland-vs-x11) for a deeper understanding of the differences
+- Check [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) for the full compatibility matrix
+- Explore [SomeWM-only features](/docs/reference/awful/input) like `awful.input`

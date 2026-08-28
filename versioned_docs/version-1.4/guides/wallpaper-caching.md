@@ -187,5 +187,5 @@ If GPU memory is a concern:
 
 ## See Also
 
-- [Wallpaper Caching Concepts](/docs/concepts/wallpaper-caching) - How caching works under the hood
+- [Wallpaper Caching Concepts](../concepts/wallpaper-caching.md) - How caching works under the hood
 - [Wayland vs X11](/docs/concepts/wayland-vs-x11) - Why caching is needed on Wayland

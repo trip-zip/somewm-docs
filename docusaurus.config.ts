@@ -49,11 +49,14 @@ const config: Config = {
           numberPrefixParser: false,
           editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
           routeBasePath: '/docs',
-          lastVersion: '1.4',
+          lastVersion: '2.0',
           versions: {
             current: {
-              label: '2.0 (dev)',
+              label: '2.1 (dev)',
               banner: 'unreleased',
+            },
+            '2.0': {
+              label: '2.0',
             },
             '1.4': {
               label: '1.4',
@@ -139,7 +142,7 @@ const config: Config = {
           items: [
             {label: 'Getting Started', to: '/docs/getting-started/installation'},
             {label: 'Tutorials', to: '/docs/tutorials/basics'},
-            {label: 'From Scratch', to: '/docs/tutorials/from-scratch/'},
+            {label: 'From Scratch', to: '/docs/1.4/tutorials/from-scratch/'},
             {label: 'Reference', to: '/docs/reference/lua-libraries'},
             {label: 'Blog', to: '/blog'},
           ],

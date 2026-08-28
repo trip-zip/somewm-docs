@@ -165,7 +165,7 @@ Key internal fields available in signal handlers:
 | `self._private.imagebox` | wibox.widget.imagebox | The screenshot background widget |
 | `self._private.selection_widget` | wibox.widget.separator | The selection rectangle |
 
-These are used for the [HiDPI performance optimization](/docs/guides/screenshots#smooth-interactive-mode-on-hidpi) where the imagebox is hidden in `snipping::start`.
+These are used for the HiDPI performance optimization where the imagebox is hidden in `snipping::start`. See the [Screenshots guide](../../guides/screenshots.md).
 
 ## Examples
 

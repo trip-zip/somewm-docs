@@ -1,0 +1,99 @@
+---
+sidebar_position: 2
+title: Launch
+description: Running SomeWM and essential configuration
+---
+
+# Launch
+
+## Starting SomeWM
+
+### From a Display Manager
+
+`sudo make install` installs a Wayland session file, so you can select **"SomeWM"** from your display manager's session list (GDM, SDDM, etc.).
+
+### From a TTY
+
+```bash
+dbus-run-session somewm
+```
+
+With a startup command (e.g., to launch a terminal):
+```bash
+dbus-run-session somewm -s 'alacritty'
+```
+
+:::tip D-Bus Session
+`dbus-run-session` ensures D-Bus services (notifications, media keys, etc.) work correctly. If you're already in a D-Bus session (e.g., from a display manager), you can run `somewm` directly.
+:::
+
+## Configuration Locations
+
+SomeWM searches for configuration files in this order:
+
+1. `~/.config/somewm/rc.lua` - Your personal config
+2. `~/.config/awesome/rc.lua` - AwesomeWM compatibility (use your existing config!)
+3. System fallback - Default config installed with SomeWM
+
+### First Time Setup
+
+If you don't have a config yet, SomeWM will use the default configuration. To customize:
+
+```bash
+# Create config directory
+mkdir -p ~/.config/somewm
+
+# Copy default config to customize
+cp /etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
+# Or for local install:
+# cp ~/.local/etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
+```
+
+:::note NixOS
+The `nix-build` approach installs only binaries. Get the default config from the [source repository](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua).
+:::
+
+## Essential Keybindings
+
+Enough to survive your first session (**Mod4** is usually the Super/Windows key):
+
+| Keybinding | Action |
+|------------|--------|
+| `Mod4 + Return` | Open terminal |
+| `Mod4 + Shift + c` | Close focused client |
+| `Mod4 + 1-5` | View tag 1-5 (the default config creates five tags) |
+| `Mod4 + Ctrl + r` | Reload configuration |
+| `Mod4 + Shift + q` | Quit SomeWM |
+
+Press `Mod4 + s` for the built-in cheat sheet with every binding, or see the [Default Keybindings reference](/docs/reference/default-keybindings).
+
+## Troubleshooting
+
+### "No config found" error
+
+Make sure you ran `sudo make install`. Running SomeWM directly from the build directory won't work because Lua libraries aren't in the expected paths.
+
+### Config loads but crashes immediately
+
+Enable debug logging to see what's happening:
+
+```bash
+somewm -d 2>&1 | tee somewm.log
+```
+
+Or with full wlroots debug output:
+```bash
+WLR_DEBUG=1 somewm 2>&1 | tee somewm.log
+```
+
+Look for lines containing `error loading` or `error executing` in the log.
+
+### Widgets not rendering
+
+This usually means LGI isn't found or is the wrong version. See [Installation - LGI Troubleshooting](/docs/getting-started/installation#lgi-troubleshooting).
+
+## Next Steps
+
+- **Have an existing AwesomeWM config?** See [Migrating from AwesomeWM](/docs/getting-started/migrating)
+- **Starting fresh?** Try the [Basics](/docs/tutorials/basics) tutorial
+- **Want to customize input?** See [Input Device Configuration](/docs/guides/input-devices)

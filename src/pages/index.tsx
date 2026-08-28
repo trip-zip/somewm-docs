@@ -91,7 +91,7 @@ function FromScratch() {
           code. The result runs on both SomeWM and AwesomeWM.
         </p>
         <div className={styles.kilnLinks}>
-          <Link className={styles.btnSecondary} to="/docs/tutorials/from-scratch/">
+          <Link className={styles.btnSecondary} to="/docs/1.4/tutorials/from-scratch/">
             Start the series
           </Link>
         </div>
