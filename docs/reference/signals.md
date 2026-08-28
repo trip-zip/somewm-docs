@@ -22,25 +22,29 @@ Currently queued:
 - Focus: `focus`, `unfocus`, `client::focus`, `client::unfocus`
 - Mouse: `mouse::enter`, `mouse::leave`, `mouse::move` (coalesced per object)
 - Lifecycle: `list`, `swapped`
-- Request: `request::activate`, `request::urgent`, `request::tag`, `request::select`
+- Request: `request::activate`, `request::urgent`
 - Systray: `request::secondary_activate`, `request::context_menu`, `request::scroll`
 - Output: `property::enabled`, `property::scale`, `property::transform`, `property::mode`, `property::adaptive_sync`, `property::screen` (screen attached), and the output class `added`
 - Screen: `property::scale`, `property::geometry`, `property::workarea`, `primary_changed`, and the screen class `property::_viewports`
 - Layer shell: `property::layer`, `property::anchor`, `property::exclusive_zone`, `property::keyboard_interactive`, `property::margin`
-- Globals: `xkb::map_changed`, `xkb::group_changed`, `idle::stop`, `dpms::on`, `spawn::timeout`, `spawn::completed`, `switch::toggle`, `screen::focus`, `client::map`, `client::unmap`
+- Globals: `xkb::map_changed`, `xkb::group_changed`, `idle::stop`, `dpms::on`, `spawn::timeout`, `spawn::completed`, `switch::toggle`, `screen::focus`, `client::map`, `client::unmap`, `client::property::geometry`
 
 The output and screen entries cover changes the compositor makes on its own: a monitor being
 plugged or unplugged, or an external tool like `wlr-randr` or `kanshi` changing output state.
 The equivalent changes made from Lua stay synchronous, so `screen.fake_add`, `screen.fake_remove`
-and `s:swap(...)` still deliver `list` inline, `screen.primary = s` still delivers
-`primary_changed` inline, and `awesome.dpms_on()` still delivers `dpms::on` inline.
+and `s:swap(...)` still deliver `list` inline (`s:swap` delivers `swapped` inline too),
+`screen.primary = s` still delivers `primary_changed` inline, and `awesome.dpms_on()` still
+delivers `dpms::on` inline. `property::workarea` splits differently: the emitter driven by wibar
+and client struts stays inline, so a wibar appearing notifies Lua immediately; only the
+screen-geometry path queues, so it arrives after the `property::geometry` it follows.
 
 `property::geometry` appears on both `client` and `screen`. The screen version carries the
 previous geometry as a second argument; the client version carries none.
 
 Everything else C emits, and every Lua-emitted signal, dispatches synchronously. The notable
-synchronous survivors are `request::manage` and `request::unmanage`, screen and output `added`
-and `removed`, `request::geometry`, and the client scalar properties such as `property::name`
+synchronous survivors are `request::manage` and `request::unmanage`, screen `added` and
+`removed`, output `removed` (and output `property::screen` when the screen is detached),
+`request::geometry`, and the client scalar properties such as `property::name`
 and `property::fullscreen`.
 
 Two signals stay synchronous because a queued one would arrive too late to be useful.

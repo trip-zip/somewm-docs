@@ -20,7 +20,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 ## Prerequisites
 
 - You are logged into a running SomeWM session ([First Launch](/docs/getting-started/first-launch) gets you there)
-- A terminal emulator installed (the default config uses `xterm`, but any terminal works)
+- A terminal emulator installed (the default config uses `foot`, but any terminal works)
 
 :::tip
 Don't want to log out of your current desktop? The [nested compositor tutorial](/docs/tutorials/try-somewm-without-installing) runs SomeWM in a window, and everything below works the same there.
@@ -49,12 +49,11 @@ The bar at the top of your screen is called a **wibar** (widget bar). From left 
 | Component | Description |
 |-----------|-------------|
 | **Launcher icon** | Click to open the main menu |
-| **Tags (1-9)** | Virtual desktops - click to switch |
+| **Tags** | Virtual desktops (`dev`, `web`, `chat`, `files`, `media`) - click to switch |
 | **Prompt area** | Shows the run prompt when activated |
 | **Tasklist** | Shows windows on current tag (middle section) |
-| **Keyboard layout** | Current keyboard layout |
+| **Clock** | Current time, centered over the bar |
 | **System tray** | App indicators (volume, network, etc.) |
-| **Clock** | Current time |
 | **Layout indicator** | Shows current window layout (rightmost) |
 
 ### Tags vs Workspaces
@@ -63,7 +62,7 @@ SomeWM uses **tags** instead of fixed workspaces:
 
 - A window can be on **multiple tags at once** (not just one)
 - You can **view multiple tags simultaneously**
-- Tags are numbered 1-9 by default
+- The default config creates five named tags: `dev`, `web`, `chat`, `files`, `media`
 
 Think of tags as labels you attach to windows, rather than containers that hold windows.
 
@@ -128,19 +127,19 @@ Press any key to dismiss the help popup.
 
 ## Working with Tags
 
-Tags are how you organize your windows. By default, you have 9 tags (numbered 1-9).
+Tags are how you organize your windows. The default config creates five: `dev`, `web`, `chat`, `files`, `media`. The number keys address them by position, so **Mod4 + 1** is `dev`, **Mod4 + 2** is `web`, and so on.
 
 ### Switching Tags
 
 | Keybinding | Action |
 |------------|--------|
-| **Mod4 + 1-9** | Switch to tag 1-9 |
+| **Mod4 + 1-5** | Switch to that tag |
 | **Mod4 + Left** | Switch to previous tag |
 | **Mod4 + Right** | Switch to next tag |
 
-Try it: Open a terminal, then press **Mod4 + 2** to switch to tag 2. Open another terminal here.
+Try it: Open a terminal, then press **Mod4 + 2** to switch to `web`. Open another terminal here.
 
-Now press **Mod4 + 1** to go back to tag 1. The first terminal is still there.
+Now press **Mod4 + 1** to go back to `dev`. The first terminal is still there.
 
 ### Moving Windows Between Tags
 
@@ -148,17 +147,17 @@ To move the focused window to another tag:
 
 | Keybinding | Action |
 |------------|--------|
-| **Mod4 + Shift + 1-9** | Move window to tag 1-9 |
+| **Mod4 + Shift + 1-5** | Move window to that tag |
 
-Try it: with a terminal focused, press **Mod4 + Shift + 3**. The window vanishes from this tag. Press **Mod4 + 3** and there it is, alone on tag 3.
+Try it: with a terminal focused, press **Mod4 + Shift + 3**. The window vanishes from this tag. Press **Mod4 + 3** and there it is, alone on `chat`.
 
 ### Viewing Multiple Tags
 
 | Keybinding | Action |
 |------------|--------|
-| **Mod4 + Ctrl + 1-9** | Toggle viewing tag 1-9 |
+| **Mod4 + Ctrl + 1-5** | Toggle viewing that tag |
 
-Press **Mod4 + Ctrl + 2** while on tag 1. Windows from both tags now tile together on screen, and both tag numbers are highlighted in the taglist. Press **Mod4 + Ctrl + 2** again to go back to just tag 1.
+Press **Mod4 + Ctrl + 2** while on `dev`. Windows from both tags now tile together on screen, and both tags are highlighted in the taglist. Press **Mod4 + Ctrl + 2** again to go back to just `dev`.
 
 ## Understanding Layouts
 
@@ -225,13 +224,13 @@ cp /etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
 Open `~/.config/somewm/rc.lua` in your editor and find this line near the top:
 
 ```lua
-terminal = "xterm"
+local terminal = "foot"
 ```
 
 Change it to your preferred terminal:
 
 ```lua
-terminal = "alacritty"  -- or "kitty", "foot", "wezterm", etc.
+local terminal = "alacritty"  -- or "kitty", "wezterm", etc.
 ```
 
 Save the file.
@@ -240,7 +239,7 @@ Save the file.
 
 Press **Mod4 + Ctrl + r** to reload your configuration. The wibar rebuilds, and your open windows stay exactly where they were: a reload replaces the Lua state, not your session.
 
-Now press **Mod4 + Enter**. Your new terminal opens instead of xterm. You have made and verified your first configuration change.
+Now press **Mod4 + Enter**. Your new terminal opens instead of foot. You have made and verified your first configuration change.
 
 :::caution
 If there's an error in your config, SomeWM will show a notification and continue with the old config. Check the notification for details about what went wrong.
@@ -259,12 +258,12 @@ Forgot a shortcut? Press `Mod4 + s` anytime for the built-in cheat sheet, or see
 
 ### Nothing happens when I press keys
 
-Make sure you're pressing the correct modifier. By default, `Mod4` is the Super/Windows key. On some keyboards, you may need to check your BIOS settings or use `xmodmap` to configure the modifier keys.
+Make sure you're pressing the correct modifier. By default, `Mod4` is the Super/Windows key. If your keyboard maps it elsewhere, adjust the XKB options with `awful.input` or change `modkey` in your config.
 
 ### Terminal won't open
 
-The default config uses `xterm`. If it's not installed, either:
-- Install xterm: `sudo apt install xterm` (Debian/Ubuntu) or `sudo pacman -S xterm` (Arch)
+The default config uses `foot`. If it's not installed, either:
+- Install foot: `sudo apt install foot` (Debian/Ubuntu) or `sudo pacman -S foot` (Arch)
 - Change the terminal in your config as shown above
 
 ### Config changes don't work

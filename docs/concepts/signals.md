@@ -49,11 +49,13 @@ This is the same pattern LOVE and Bitsquid use: the engine (C) runs the loop and
 
 ### What's queued
 
-C-emitted signals are queued, wired incrementally by group: property changes, focus, mouse motion, lifecycle, and a set of `request::*` signals so far. Conversion is ongoing, so the exact membership lives in one place: the [Signals Reference dispatch section](../reference/signals.md#dispatch) is the current list.
+C-emitted signals are queued, wired incrementally by group: property changes, focus, mouse motion, lifecycle, a set of `request::*` signals, the output and screen changes driven by monitor hotplug, layer-shell properties, and most global signals. Conversion is ongoing, so the exact membership lives in one place: the [Signals Reference dispatch section](../reference/signals.md#dispatch) is the current list.
 
-Other C-emitted signals (`request::manage`, `request::unmanage`, `request::titlebars`, and the rest) still dispatch synchronously.
+Other C-emitted signals (`request::manage`, `request::unmanage`, `request::geometry`, screen `added` and `removed`, and the client scalar `property::*` signals) still dispatch synchronously.
 
-Where a signal has both a compositor-driven and a Lua-driven path, only the compositor-driven one is queued. Monitor hotplug queues the screen and output signals it causes; `screen.fake_add`, `screen.primary = s` and `awesome.dpms_on()` deliver theirs inline. This keeps a change you make from Lua visible to the next line of your own code.
+Where a signal has both a compositor-driven and a Lua-driven path, only the compositor-driven one is queued. Monitor hotplug queues most of the screen and output signals it causes, but screen `added` and `removed` stay synchronous even there, because the compositor acts on their handlers' results immediately. The Lua-initiated paths all deliver inline: `screen.fake_add`, `screen.fake_remove`, `s:swap(...)`, `screen.primary = s` and `awesome.dpms_on()`. This keeps a change you make from Lua visible to the next line of your own code.
+
+The one signal that splits differently is `property::workarea`: the emitter driven by wibar and client struts stays inline, so a wibar appearing notifies Lua immediately, while the geometry-driven emitter queues so it cannot overtake the queued `property::geometry` it follows.
 
 ### What stays synchronous
 
@@ -132,7 +134,7 @@ Signal ordering matters most at startup. The sequence is:
 4. `ruled.client` (and `ruled.notification`) emit `request::rules` from inside `scanning`. This is the moment for modules to add rules.
 5. `awful.layout` has already wired itself to the first `tag.new` and will emit `request::default_layouts` from there.
 6. `awful.keyboard` and `awful.mouse` emit `request::default_keybindings` and `request::default_mousebindings` from the same scanning window.
-7. Existing clients are managed (`request::manage` → `manage`).
+7. Existing clients are managed (`request::manage`).
 8. `client.scanned` fires.
 9. `awesome.startup` fires.
 

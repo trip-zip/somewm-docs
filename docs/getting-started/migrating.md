@@ -122,12 +122,8 @@ awful.spawn("grim ~/screenshot.png")
 
 | X11 Pattern | Wayland Alternative |
 |-------------|---------------------|
-| `xdotool key` | Keybindings, or wait for `root.fake_input()` |
-| `xdotool mousemove` | Not yet implemented |
-
-:::note
-`root.fake_input()` is currently a stub in SomeWM. Virtual input requires wlroots virtual pointer/keyboard protocols which are planned for a future release.
-:::
+| `xdotool key` | `root.fake_input("key_press", ...)` / `("key_release", ...)` |
+| `xdotool mousemove` | `root.fake_input("motion_notify", ...)` |
 
 ### GTK/GDK via LGI
 

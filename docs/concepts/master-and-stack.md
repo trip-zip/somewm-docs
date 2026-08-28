@@ -57,8 +57,8 @@ How many clients belong in the master section. The rest go to the stack.
 
 ```lua
 -- Set on a tag
-awful.tag.incnmaster(1)   -- Add one master slot (Mod4+Shift+l)
-awful.tag.incnmaster(-1)  -- Remove one master slot (Mod4+Shift+h)
+awful.tag.incnmaster(1)   -- Add one master slot (Mod4+Shift+h)
+awful.tag.incnmaster(-1)  -- Remove one master slot (Mod4+Shift+l)
 
 -- Or set directly
 t.master_count = 2
@@ -88,8 +88,8 @@ Controls what happens when there are no stack clients. With `"expand"` (the defa
 How many columns to use in the stack section. With `column_count = 2` and 4 stack clients, they form a 2x2 grid in the stack area.
 
 ```lua
-awful.tag.incncol(1)   -- Add a stack column (Mod4+Ctrl+l)
-awful.tag.incncol(-1)  -- Remove a stack column (Mod4+Ctrl+h)
+awful.tag.incncol(1)   -- Add a stack column (Mod4+Ctrl+h)
+awful.tag.incncol(-1)  -- Remove a stack column (Mod4+Ctrl+l)
 ```
 
 ## Moving Clients Between Sections
@@ -120,12 +120,16 @@ ruled.client.append_rule {
 
 ### Swap Master with Focused Client
 
-The default keybinding **Mod4+Return** (with Shift, if using the default `rc.lua`) swaps the focused client with the current master:
+The default keybinding **Mod4+Ctrl+Return** swaps the focused client with the current master:
 
 ```lua
-awful.key({ modkey, "Shift" }, "Return", function(c)
-    c:swap(awful.client.visible(c.screen)[1])
-end)
+awful.key {
+    modifiers   = { modkey, "Control" },
+    key         = "Return",
+    on_press    = function(c) c:swap(awful.client.visible(c.screen)[1]) end,
+    description = "move to master",
+    group       = "client",
+}
 ```
 
 ## Which Layouts Use Master and Stack

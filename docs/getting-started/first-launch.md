@@ -61,7 +61,7 @@ Enough to survive your first session (**Mod4** is usually the Super/Windows key)
 |------------|--------|
 | `Mod4 + Return` | Open terminal |
 | `Mod4 + Shift + c` | Close focused client |
-| `Mod4 + 1-9` | View tag 1-9 |
+| `Mod4 + 1-5` | View tag 1-5 (the default config creates five tags) |
 | `Mod4 + Ctrl + r` | Reload configuration |
 | `Mod4 + Shift + q` | Quit SomeWM |
 
