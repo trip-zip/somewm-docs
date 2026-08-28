@@ -112,7 +112,7 @@ Each `property::*` fires after the property changes. Read the new value off the 
 | `added` | `s` | New output connected. |
 | `removed` | `s` | Output disconnected. Tags on this screen will get `request::screen` next. |
 | `request::desktop_decoration` | `s` | Screen needs tags and wibars. Your handler creates them. See [Tag Persistence](/docs/reference/tag-persistence). |
-| `request::wallpaper` | `s` | Screen wants its wallpaper drawn. Default consumers in `gears.wallpaper`. |
+| `request::wallpaper` | `s` | Screen wants its wallpaper drawn. The default handler builds it with `awful.wallpaper`. |
 | `request::focus_restore` | `s` | Something that had focus went away (client closed, layer surface dismissed, session unlocked, monitor disconnected). Default handler: `awful.permissions.focus_restore`, which activates the most recent visible client from focus history. If no handler focuses a client, C focuses the topmost client on the monitor. <SomewmOnly /> |
 | `property::geometry` | `s` | Screen geometry changed (resolution or layout). |
 | `property::workarea` | `s` | Workarea (geometry minus struts) changed. Fires when wibars appear or resize. |

@@ -24,7 +24,9 @@ The `gears` library provides utility functions used throughout AwesomeWM/SomeWM.
 | `gears.string` | String manipulation |
 | `gears.table` | Table utilities |
 | `gears.math` | Math helpers |
-| `gears.wallpaper` | Wallpaper setting |
+
+`gears.wallpaper` was removed in SomeWM 2.0. Set wallpapers with
+[`awful.wallpaper`](https://awesomewm.org/apidoc/popups_and_bars/awful.wallpaper.html).
 
 ## Common Patterns
 

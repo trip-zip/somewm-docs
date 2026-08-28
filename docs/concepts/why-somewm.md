@@ -33,7 +33,7 @@ If your config does any of these, somewm guarantees it keeps working:
 
 - Calls into the AwesomeWM Lua libraries by name (e.g., `awful.layout.suit.tile`, `wibox.widget.textclock`)
 - Sets properties on `client`, `screen`, `tag`, `drawin`
-- Connects to documented signals (`manage`, `unmanage`, `focus`, `request::*`, `property::*`, ...)
+- Connects to documented signals (`focus`, `request::*`, `property::*`, ...)
 - Uses theme variables in `beautiful`
 - Reads or writes `awesome.*` properties documented for AwesomeWM (e.g., `awesome.conffile`, `awesome.version`, `awesome.startup`)
 
