@@ -30,9 +30,14 @@ These control shadows for application windows (clients):
 | `shadow_radius` | integer | `12` | Blur radius in pixels |
 | `shadow_offset_x` | integer | `-15` | Horizontal offset (negative = left/behind window) |
 | `shadow_offset_y` | integer | `-15` | Vertical offset (negative = up/behind window) |
+| `shadow_spread` | integer | `0` | Grow the shadow by this many pixels on every side before the blur |
+| `shadow_corner_radius` | integer | `0` | Round the shadow's corners by this many pixels |
 | `shadow_opacity` | number | `0.75` | Shadow opacity (0.0 = invisible, 1.0 = solid) |
-| `shadow_color` | string | `"#000000"` | Shadow color as hex string |
-| `shadow_clip` | boolean/string | `true` | Only show shadow on offset side (`true`, `false`, or `"directional"`) |
+| `shadow_color` | string | `"#000000"` | Shadow color as `"#RRGGBB"` or `"#RRGGBBAA"` (alpha multiplies opacity) |
+
+:::note
+`shadow_clip` from 2.0 is still accepted but has no effect since 2.1. The shadow is drawn at its offset and fades out on every side; sides fully covered by the window are simply not visible.
+:::
 
 ### Drawin/Wibox Shadow Variables
 
@@ -44,6 +49,8 @@ These control shadows for drawins and wiboxes (panels, popups, notifications). I
 | `shadow_drawin_radius` | integer | (inherits from `shadow_radius`) | Blur radius for drawins |
 | `shadow_drawin_offset_x` | integer | (inherits from `shadow_offset_x`) | Horizontal offset for drawins |
 | `shadow_drawin_offset_y` | integer | (inherits from `shadow_offset_y`) | Vertical offset for drawins |
+| `shadow_drawin_spread` | integer | (inherits from `shadow_spread`) | Spread for drawins |
+| `shadow_drawin_corner_radius` | integer | (inherits from `shadow_corner_radius`) | Corner radius for drawins |
 | `shadow_drawin_opacity` | number | (inherits from `shadow_opacity`) | Opacity for drawins |
 | `shadow_drawin_color` | string | (inherits from `shadow_color`) | Color for drawins |
 
@@ -86,9 +93,10 @@ When set to a table, you can override individual shadow parameters:
 | `radius` | integer | Blur radius in pixels |
 | `offset_x` | integer | Horizontal offset |
 | `offset_y` | integer | Vertical offset |
+| `spread` | integer | Grow the shadow by this many pixels on every side before the blur |
+| `corner_radius` | integer | Round the shadow's corners by this many pixels |
 | `opacity` | number | Shadow opacity (0.0-1.0) |
-| `color` | string or table | Color as `"#RRGGBB"` string or `{r, g, b, a}` table (values 0.0-1.0) |
-| `clip_directional` | boolean | Only show shadow on the offset side (default: `true`) |
+| `color` | string or table | Color as `"#RRGGBB"`/`"#RRGGBBAA"` string or `{r, g, b, a}` table (values 0.0-1.0); alpha multiplies opacity |
 
 **Examples:**
 
@@ -213,8 +221,9 @@ The [Shadows guide](/docs/guides/shadows) has tested recipes (drop shadows, halo
 
 ## Technical Notes
 
-- Shadows are rendered using a 9-slice technique: 4 corners and 4 edges, allowing efficient resizing
-- Each shadow renders its own gradient textures (4 corners + 2 edges + 1 fill pixel, ~2.5KB total)
+- The shadow is the window's frame grown by `spread`, moved by the offset, rounded by `corner_radius`, fading out over `radius` pixels on every side
+- It is rendered as a nine-patch (4 corner patches, 4 stretched edge strips, solid interior), so resizing never re-renders textures
+- Each shadow renders its own tiny gradient textures (a few KB total)
 - The falloff uses a smoothstep function that visually approximates Gaussian blur
 - Shadow nodes are placed below content in the wlroots scene graph
 

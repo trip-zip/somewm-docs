@@ -67,20 +67,22 @@ theme.shadow_offset_x = 10
 theme.shadow_offset_y = 10
 ```
 
-By default, shadows are clipped to only appear on the offset side (`shadow_clip = true`). This prevents shadows from showing on both sides of the window. To show a full shadow on all sides, disable clipping:
+The shadow fades out on every side; the parts covered by the window itself are simply not visible. So a large offset gives a one-sided drop shadow, and a zero offset gives an even halo around the window.
+
+### Spread
+
+`spread` grows the shadow beyond the window's edges before the blur, so it peeks out on every side even with an offset. This is what makes windows read as raised:
 
 ```lua
-theme.shadow_clip = false
+theme.shadow_spread = 4
 ```
 
-Or control it per-window:
+### Rounded Corners
+
+`corner_radius` rounds the shadow's corners. Match it to your window corner styling:
 
 ```lua
-c.shadow = {
-    offset_x = -15,
-    offset_y = -15,
-    clip_directional = false  -- Show shadow on all sides
-}
+theme.shadow_corner_radius = 12
 ```
 
 ## Using Colored Shadows
@@ -98,6 +100,9 @@ theme.shadow_radius = 24
 
 -- Warm amber
 theme.shadow_color = "#FFB347"
+
+-- Translucent red: the alpha byte multiplies shadow_opacity
+theme.shadow_color = "#FF000080"
 ```
 
 ### Dynamic Color Effects
@@ -288,9 +293,23 @@ c.shadow = {
     radius = 12,
     offset_x = 8,
     offset_y = 8,
-    opacity = 0.6,
-    clip_directional = true
+    opacity = 0.6
 }
+```
+
+### Raised Card
+
+A modern elevation look: small downward offset, a little spread so the shadow peeks out on every side, rounded corners:
+
+```lua
+-- In theme.lua
+theme.shadow_enabled = true
+theme.shadow_radius = 16
+theme.shadow_offset_x = 0
+theme.shadow_offset_y = 8
+theme.shadow_spread = 4
+theme.shadow_corner_radius = 16
+theme.shadow_opacity = 0.6
 ```
 
 ### Soft Halo
@@ -304,15 +323,13 @@ theme.shadow_radius = 24
 theme.shadow_offset_x = 0
 theme.shadow_offset_y = 0
 theme.shadow_opacity = 0.5
-theme.shadow_clip = false
 
 -- Or per-window
 c.shadow = {
     radius = 24,
     offset_x = 0,
     offset_y = 0,
-    opacity = 0.5,
-    clip_directional = false
+    opacity = 0.5
 }
 ```
 
@@ -327,8 +344,7 @@ c.shadow = {
     radius = 20,
     offset_x = 0,
     offset_y = 0,
-    opacity = 0.6,
-    clip_directional = false
+    opacity = 0.6
 }
 ```
 
@@ -349,8 +365,7 @@ c.shadow = {
     radius = 4,
     offset_x = 3,
     offset_y = 3,
-    opacity = 0.9,
-    clip_directional = true
+    opacity = 0.9
 }
 ```
 
@@ -364,8 +379,7 @@ s.mywibox.shadow = {
     radius = 12,
     offset_x = 0,
     offset_y = 4,
-    opacity = 0.7,
-    clip_directional = true
+    opacity = 0.7
 }
 ```
 
