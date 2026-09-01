@@ -332,7 +332,9 @@ AwesomeWM 4.0, so use `t.master_width_factor`, `t.gap`, `t:view_only()`, and so 
 
 ## Automatic Detection
 
-SomeWM will automatically detect and skip configs that contain X11-specific code. If your config is skipped, SomeWM will show a notification explaining which X11 pattern was detected and suggest alternatives.
+Before loading, SomeWM scans your `rc.lua` and every file it requires, and reports the X11-specific code it finds. It loads the config either way: a report is a warning, not a refusal.
+
+A config that genuinely hangs is caught by a ten second alarm on the load, after which SomeWM falls back to its own config. Run `somewm --check` to read the same report without starting the compositor.
 
 If you share a config between AwesomeWM and SomeWM, you can detect which compositor is running:
 

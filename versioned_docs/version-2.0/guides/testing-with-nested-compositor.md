@@ -40,6 +40,31 @@ test 'work': pid 12345 on wayland-3 (host: wayland), config /home/you/dev/somewm
 
 Each instance gets its own directory at `$XDG_RUNTIME_DIR/somewm-test/<name>/` with an isolated `XDG_RUNTIME_DIR`, IPC socket, pid file, log, and an `info` key-value snapshot for scripts. See [State directory layout](../reference/somewm-client.md#test-state-dir) for the file-by-file breakdown.
 
+## Choosing a host
+
+`--host` decides what the nested compositor runs inside. It defaults to `wayland` and does not guess, so on an X11 session you have to say so.
+
+| Value | Use it when |
+|-------|-------------|
+| `wayland` (default) | Your current session is Wayland |
+| `x11` | Your current session is X11, including AwesomeWM under Xorg |
+| `headless` | There is no graphical session, such as in CI |
+
+```bash
+# From an AwesomeWM session on Xorg
+somewm-client test start --name work --config ~/.config/awesome/rc.lua --host x11
+```
+
+Leaving it out on an X11 session gives you:
+
+```
+Error: WAYLAND_DISPLAY not set; cannot use --host wayland.
+       Use --host x11 if you are on an X11 session,
+       or --host headless for a non-graphical test instance.
+```
+
+`--config` takes a file, not a directory. Point it at the `rc.lua` itself.
+
 ## Drive commands into the nested instance
 
 The other `test` verbs accept the same `--name` flag and route through the named instance's IPC socket.
