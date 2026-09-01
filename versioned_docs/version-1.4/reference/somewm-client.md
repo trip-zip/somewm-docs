@@ -394,7 +394,6 @@ Read by `somewm-client test`:
 | Variable | Purpose |
 |----------|---------|
 | `SOMEWM_BINARY` | Path to the somewm binary to launch. Defaults to `somewm` on `$PATH`. Use this to nest a local build (`SOMEWM_BINARY=./build/somewm somewm-client test start ...`) without `make install`. |
-| `SOMEWM_TEST_KEEP_FAILED` | If set to any value, the orchestrator preserves the state directory after a failed start instead of cleaning it up. The log at `<state-dir>/log` survives so you can read it. |
 
 ### State directory layout {#test-state-dir}
 
@@ -409,7 +408,7 @@ Each instance owns `$XDG_RUNTIME_DIR/somewm-test/<name>/`:
 | `info` | Key-value snapshot for scripts. Keys: `name`, `pid`, `host`, `display`, `config`, `started_at`, `keybinds_mode`, `keybinds_status`, `wl_socket_name`, `no_marker`. |
 | `keybinds_status` | Single line written by the nested compositor: `active`, `unavailable`, or `not-applicable`. |
 
-`test stop` and the failed-start path both remove the directory unless `SOMEWM_TEST_KEEP_FAILED` is set.
+`test stop` removes the directory. A failed start leaves it in place so the log survives, and the next start under that name clears it.
 
 ### Exit codes {#test-exit-codes}
 

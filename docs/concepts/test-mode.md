@@ -48,7 +48,7 @@ A third backend, `--host headless`, runs the compositor with no display output. 
 
 The orchestrator is a thin process supervisor around the nested somewm.
 
-On startup: `somewm-client test start` validates the flags, creates the state directory, forks, and execs the somewm binary with the test environment variables set. The parent then polls the per-instance IPC socket every 50 ms and sends a `ping` once it can connect. If the socket responds within 30 seconds, the orchestrator prints the status block and exits. If the child exits first, or the deadline elapses, or the orchestrator finds a `FATAL:` line in the log while waiting, it reports the failure and removes the state directory (unless `SOMEWM_TEST_KEEP_FAILED` is set).
+On startup: `somewm-client test start` validates the flags, creates the state directory, forks, and execs the somewm binary with the test environment variables set. The parent then polls the per-instance IPC socket every 50 ms and sends a `ping` once it can connect. If the socket responds within 30 seconds, the orchestrator prints the status block and exits. If the child exits first, or the deadline elapses, or the orchestrator finds a `FATAL:` line in the log while waiting, it reports the failure and leaves the state directory in place, so the log survives.
 
 On shutdown: `test stop` sends `SIGTERM`, waits up to 5 seconds for the process to exit, and escalates to `SIGKILL` if it does not. Either way, the state directory is removed at the end.
 

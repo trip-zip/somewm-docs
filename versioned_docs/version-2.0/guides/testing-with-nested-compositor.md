@@ -281,13 +281,15 @@ somewm-client test stop --name work
 
 `test stop` sends `SIGTERM`, waits up to five seconds for the IPC socket to disappear, then escalates to `SIGKILL` if needed. The state directory is removed on the way out.
 
-If `test start` fails before the IPC socket comes up (broken `rc.lua`, missing Lua module, backend init error), the orchestrator removes the state directory by default. Pass `SOMEWM_TEST_KEEP_FAILED=1` in the environment to keep it around for forensics; the log at `<state-dir>/log` will still be there.
+If `test start` fails before the IPC socket comes up (broken `rc.lua`, missing Lua module, backend init error), the state directory stays where it is, so the log at `<state-dir>/log` is there to read. The error names the path.
 
 ```bash
-SOMEWM_TEST_KEEP_FAILED=1 somewm-client test start --name broken --config /tmp/intentionally-broken-rc.lua
+somewm-client test start --name broken --config /tmp/intentionally-broken-rc.lua
 # After it fails, read the log:
 cat "$XDG_RUNTIME_DIR/somewm-test/broken/log"
 ```
+
+The next `test start` under the same name clears it.
 
 `somewm-client test list` connects to each instance's IPC socket with a short timeout and reports `(stale)` for entries whose socket is gone. Stop any stale entries by name.
 
