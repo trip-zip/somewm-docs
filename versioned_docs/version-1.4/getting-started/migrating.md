@@ -268,6 +268,54 @@ supplies, but there is no live database behind it. Terminal colours belong in
 the terminal's own config file, which every Wayland terminal has.
 
 
+### X11 properties {#x11-properties}
+
+| Pattern | Severity | Notes |
+|---------|----------|-------|
+| `awesome.get_xproperty` | CRITICAL | Not defined. Calling it aborts the config |
+| `awesome.set_xproperty` | CRITICAL | Not defined. Calling it aborts the config |
+| `awesome.register_xproperty` | WARNING | Defined, but does nothing |
+
+X11 properties are values attached to a window by the X server. Wayland has no
+equivalent, so SomeWM does not implement them.
+
+Only `register_xproperty` exists, as a stub that accepts its arguments and does
+nothing. `get_xproperty` and `set_xproperty` are not bound at all, so calling
+either raises `attempt to call field 'get_xproperty' (a nil value)`. That error
+escapes `rc.lua`, and SomeWM falls back to its own config. Your whole desktop is
+missing, from one line.
+
+The usual reason a config calls these is to work out whether this is a fresh
+start or a restart:
+
+```lua
+-- AwesomeWM
+local function restarted()
+    awesome.register_xproperty("restarted", "boolean")
+    local detected = awesome.get_xproperty("restarted") ~= nil
+    awesome.set_xproperty("restarted", true)
+    return detected
+end
+
+if not restarted() then
+    -- run autostart
+end
+```
+
+`awesome.startup` answers the same question and needs no property:
+
+```lua
+if awesome.startup then
+    -- run autostart
+end
+```
+
+Read it while your config is loading. It is computed from the compositor's main
+loop rather than stored, so it is true only during a fresh start's config load,
+and false during a reload's and at every point afterwards. Reading it from a
+signal handler or a timer always gives false.
+
+
 ## What Works Unchanged
 
 Most of your config will work without changes:
