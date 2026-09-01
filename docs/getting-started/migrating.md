@@ -125,25 +125,144 @@ awful.spawn("grim ~/screenshot.png")
 | `xdotool key` | `root.fake_input("key_press", ...)` / `("key_release", ...)` |
 | `xdotool mousemove` | `root.fake_input("motion_notify", ...)` |
 
-### GTK/GDK via LGI
+### GTK/GDK via LGI {#gtkgdk-via-lgi}
 
 | Pattern | Severity | Notes |
 |---------|----------|-------|
-| `lgi.require("Gtk")` | WARNING | SomeWM preloads an empty override to prevent deadlock, but display-dependent GTK features won't work |
-| `lgi.require("Gdk")` | CRITICAL | No mitigation. GDK init connects to the display server and will deadlock during config load |
+| `lgi.require("Gtk")` | WARNING | Importing it is safe, but anything needing a display returns nil |
+| `lgi.require("Gdk")` | CRITICAL | Freezes the compositor the moment the import runs |
 
-If you need GTK for icon lookup or similar, load it lazily after startup:
+Your `rc.lua` runs *inside* the compositor process. GTK and GDK are written to
+be Wayland clients: on startup they connect to the display server and wait for
+it to answer. That display server is SomeWM, which is busy running your config
+and cannot answer until your config returns. It waits for itself, forever.
+
+SomeWM defuses half of this by preloading an empty `lgi.override.Gtk`, so
+importing Gtk never calls `gtk_init_check()`. There is no equivalent for Gdk:
+`lgi/override/Gdk.lua` calls `Gdk.threads_init()` at import, which connects to
+the display and hangs. Recovering means a hard power cycle.
+
+Loading it later does not help. A callback, a signal handler and a timer all
+run on the compositor's own thread inside its event loop, so deferring the
+import only changes *when* it hangs:
 
 ```lua
--- Don't load at the top level
--- local Gtk = lgi.require("Gtk")
-
--- Load lazily inside a callback instead
-awful.spawn.easy_async("true", function()
-    local Gtk = lgi.require("Gtk")
-    -- safe to use here, event loop is running
+-- Still freezes: the handler runs inside the compositor
+awesome.connect_signal("my::signal", function()
+    local Gdk = lgi.require("Gdk", "3.0")
 end)
 ```
+
+What does work is anything that never touches the display. `GdkPixbuf` decodes
+images and is safe. Gtk's non-display types are safe. See
+[Icon theme lookups](#icon-theme-lookups) for the common case.
+
+### Running a GTK app {#running-a-gtk-app}
+
+| Pattern | Severity |
+|---------|----------|
+| `Gtk.Application(...)`, `Gtk.Application.new`, `Gtk.main()` | CRITICAL |
+
+A settings window or a preferences dialog written with GTK runs its own main
+loop. Started from your config, that loop runs *inside* the compositor and
+never returns, so SomeWM stops drawing, stops handling input, and stops
+responding to `somewm-client`. There is no keybinding out of it.
+
+```lua
+-- Freezes the session the moment the handler runs
+local app = Gtk.Application({ application_id = "com.example.settings" })
+function app:on_activate() ... end
+return app:run()
+```
+
+A GTK app has to be its own process, the same as any other Wayland client.
+Move the code into a standalone script and spawn it:
+
+```lua
+-- settings.lua is a normal Lua script with a #! line, run outside SomeWM
+awful.spawn("/usr/share/mywm/settings.lua")
+```
+
+The script is usually the file you already have. If it ends in `app:run()` it
+is already a complete program; it only needed to stop being `require`d into the
+compositor.
+
+### Icon theme lookups {#icon-theme-lookups}
+
+| Pattern | Severity |
+|---------|----------|
+| `Gtk.IconTheme.get_default()` | WARNING |
+
+`get_default()` returns the icon theme belonging to the default display, so it
+needs `gtk_init` to have run. SomeWM skips `gtk_init` on purpose (see
+[GTK/GDK via LGI](#gtkgdk-via-lgi)), so `get_default()` returns **nil** and the
+next line fails with `attempt to index a nil value`.
+
+Dock, launcher and desktop-icon widgets are the usual casualties, and the error
+surfaces far from the cause.
+
+`Gtk.IconTheme.new()` needs no display. It reads the XDG icon directories
+directly and works normally:
+
+```lua
+local icontheme = Gtk.IconTheme.new()
+icontheme:set_custom_theme(beautiful.icons)   -- e.g. "Papirus-Light"
+
+local info = icontheme:lookup_icon("firefox", 64, 0)
+local path = info and info:get_filename()
+```
+
+`menubar.utils.lookup_icon_uncached(name)` is a pure-Lua fallback when the
+theme has no match.
+
+### Client icons {#client-icons}
+
+| Pattern | Severity |
+|---------|----------|
+| `c.icon`, `awful.widget.clienticon` | INFO |
+
+On X11 a window carries its own icon in the `_NET_WM_ICON` property, so
+`c.icon` is almost always set and a tasklist just draws it. Wayland has no
+equivalent that SomeWM implements, so `c.icon` is **nil** for native Wayland
+clients.
+
+Nothing errors. Every client simply gets whatever fallback your config draws
+when the icon is missing, so a dock or tasklist shows the same generic image
+for every window.
+
+Resolve the icon from the class instead, which is set for both Wayland and
+XWayland clients:
+
+```lua
+local icontheme = Gtk.IconTheme.new()
+icontheme:set_custom_theme(beautiful.icons)
+
+local function icon_for(class)
+    if not class then return nil end
+    -- Reverse-DNS classes are common: try "com.mitchellh.ghostty", then "ghostty"
+    for _, name in ipairs({ class:lower(), class:lower():match("([^.]+)$") }) do
+        local info = icontheme:lookup_icon(name, 64, 0)
+        if info and info:get_filename() then return info:get_filename() end
+    end
+    return menubar.utils.lookup_icon_uncached(class:lower())
+end
+```
+
+### Xresources and xrdb {#xresources-and-xrdb}
+
+| Pattern | Severity |
+|---------|----------|
+| `xrdb` | WARNING |
+
+The X resource database belongs to the X server. Without one, `xrdb` has
+nothing to write to and nothing reads what it writes. Configs hit this by
+generating an `Xresources` file for terminal colours and then calling
+`os.execute("xrdb ...")`.
+
+`beautiful.xresources` still works for DPI and for reading values a config
+supplies, but there is no live database behind it. Terminal colours belong in
+the terminal's own config file, which every Wayland terminal has.
+
 
 ## What Works Unchanged
 
