@@ -95,6 +95,49 @@ screen.connect_signal("request::desktop_decoration", function(s)
 end)
 ```
 
+## Across a Hot-Reload
+
+`awesome.restart()` re-runs `rc.lua` in the same process, so every tag is built from scratch. SomeWM records each client's tags and each screen's selected tags first, then puts them back on the tags the new config created. Matching goes: same position and same name, then the first tag with that name, then whatever sits at that position. So renaming your tags keeps clients where they were, and reordering them follows the names.
+
+Each client with a match gets `request::tag` before the rules run, with hints of:
+
+```lua
+{
+    reason = "restart",
+    tags   = { <every matched tag object> },
+    saved  = { { name = "3", index = 3 }, ... },
+}
+```
+
+`awful.permissions.tag` applies `hints.tags`. A rule with an explicit `tag` still overrides it, and a client whose tags all fail to match is placed by the rules as if it were new.
+
+To restore by name only, so a client on a tag that was renamed lands on the rules' choice instead of on position:
+
+```lua
+client.disconnect_signal("request::tag", awful.permissions.tag)
+
+client.connect_signal("request::tag", function(c, t, hints)
+    if hints and hints.reason == "restart" then
+        local tags = {}
+        for _, saved in ipairs(hints.saved) do
+            local found = awful.tag.find_by_name(c.screen, saved.name)
+            if found then
+                table.insert(tags, found)
+            end
+        end
+        if #tags > 0 then
+            c:tags(tags)
+            return
+        end
+    end
+    awful.permissions.tag(c, t, hints)
+end)
+```
+
+`saved[i].index` is the tag's 1-based position on its screen before the reload, so a handler can prefer position, prefer name, or mix the two.
+
+Floating state and per-tag layout are not restored across a reload.
+
 ## Disable Tag Persistence
 
 To opt out entirely, disconnect the default save handler and use a plain `request::desktop_decoration` that always creates fresh tags:
@@ -221,7 +264,7 @@ Not all monitors report make, model, or serial. Virtual outputs and some older d
 
 ### State Lost on Compositor Restart
 
-Tag persistence is in-memory only. Restarting SomeWM clears saved state. This is by design: compositor restart is a full reset.
+`awful.permissions.saved_tags` is in-memory only, so a cold restart (`awesome.quit(1)`) drops whatever a disconnected monitor had saved. A hot-reload (`awesome.restart()`) keeps the process alive, and client tags and the selected tags come back with it. See [Across a Hot-Reload](#across-a-hot-reload).
 
 ## See Also
 

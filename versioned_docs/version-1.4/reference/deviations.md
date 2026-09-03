@@ -40,7 +40,7 @@ Wayland's design forces these to differ from AwesomeWM. The Lua API stays the sa
 
 **Window visibility timing** (`objects/drawin.c`). The scene node stays disabled until `drawin_refresh_drawable()` signals content ready. Prevents visual smearing during initial render.
 
-**Restart model.** `awesome.restart()` rebuilds the Lua state in process while wlroots keeps running. Clients survive. Use `awesome.quit(1)` for a cold restart via `somewm-session`; that is needed only when DRM state has gone bad.
+**Restart model.** `awesome.restart()` rebuilds the Lua state in process while wlroots keeps running. Clients survive, and so do their tags and each screen's selected tags, which the compositor re-applies onto the tags the reloaded config created (see [Tag Persistence](../guides/tag-persistence.md#across-a-hot-reload)). Use `awesome.quit(1)` for a cold restart via `somewm-session`; that is needed only when DRM state has gone bad.
 
 ## Stubbed APIs
 
