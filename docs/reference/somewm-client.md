@@ -239,12 +239,23 @@ See [Fractional Scaling](../guides/fractional-scaling.md) for `screen scale` in 
 |---------|-------------|
 | `clay tree [screen]` | Dump the last solved Clay tree for every output, or only the numbered screen |
 
-Each output starts with its last command, mutation, retained-node, raster-byte, and buffer counters, followed by the declare, solve, and reconcile durations. Nodes follow in draw order with their solved and realized boxes and the client, border, drawin, layer-shell namespace, widget class, or raster leaf they represent. `[solved!=realized]` marks clipping. `[tree!=scene]` reports that a retained scene node disagrees with its realized box.
+Every output has a desktop band, and a second one while the session is locked. Each band starts with its last command, mutation, retained-node, raster-byte, and buffer counters, followed by the declare, solve, and reconcile durations. Nodes follow in draw order with their solved and realized boxes and the client, border, drawin, layer-shell namespace, widget class, or raster leaf they represent. `[solved!=realized]` marks clipping. `[tree!=scene]` reports that a retained scene node disagrees with its realized box.
 
 ```bash
 somewm-client clay tree
 somewm-client clay tree 2
 ```
+
+```
+output DP-1 band desktop scale 1.00
+  commands 6 mutations 0 nodes 6 raster_bytes 122880 buffers 0 declare 42us solve 14us reconcile 3us
+  4bf820d0 BORDER        z=-    box 0,0 208x208 rbox 0,0 208x208 client kitty
+  360c5f60 CUSTOM        z=-    box 0,0 208x208 rbox 0,0 208x208 client kitty
+  c802045e RECTANGLE     z=100  box 0,0 1280x24 rbox 0,0 1280x24 drawin screen 1 1280x24+0+0
+  a53fd76b IMAGE         z=-    box 0,0 16x24 rbox 0,0 16x24 widget wibox.widget.textbox raster raster=1536
+```
+
+Only `RECTANGLE` commands carry a z, so every other line reads `z=-`. Draw order is the line order.
 
 ## Input Commands {#input-commands}
 
