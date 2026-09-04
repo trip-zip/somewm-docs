@@ -241,6 +241,10 @@ See [Fractional Scaling](../guides/fractional-scaling.md) for `screen scale` in 
 
 Every output has a desktop band, and a second one while the session is locked. Each band starts with its last command, mutation, retained-node, raster-byte, and buffer counters, followed by the declare, solve, and reconcile durations. Nodes follow in draw order with their solved and realized boxes and the client, border, drawin, layer-shell namespace, widget class, or raster leaf they represent. `[solved!=realized]` marks clipping. `[tree!=scene]` reports that a retained scene node disagrees with its realized box.
 
+After the nodes, each band lists the drawins it draws. A drawin whose widget tree was converted prints that tree, one line per widget, indented by depth: the element id, the class, the size the tree asked for on each axis, and the box Clay solved. A container that paints no color is in this tree and in none of the node lines above, because a solved element only becomes a render command when it has something to draw. That is why the tree is printed separately from the commands.
+
+A drawin that paints all of its own pixels with cairo instead says `whole:` and names why. The reasons are `shape_bounding`, `shape_clip` and `shape_input` for the three shape masks, `opacity` for a translucent drawin, `systray` for the host of the legacy tray, `nothing converted` when no widget in the tree could be expressed, and `over the output's element budget` for a tree too large to declare.
+
 ```bash
 somewm-client clay tree
 somewm-client clay tree 2
@@ -253,9 +257,17 @@ output DP-1 band desktop scale 1.00
   360c5f60 CUSTOM        z=-    box 0,0 208x208 rbox 0,0 208x208 client kitty
   c802045e RECTANGLE     z=100  box 0,0 1280x24 rbox 0,0 1280x24 drawin screen 1 1280x24+0+0
   a53fd76b IMAGE         z=-    box 0,0 16x24 rbox 0,0 16x24 widget wibox.widget.textbox raster raster=1536
+  drawin screen 1 1280x24+0+0 converted: 4 nodes, 1 raster
+    c802045e drawable w=1280 h=24 box 0,0 1280x24
+    2a357d36   wibox.layout.align w=grow h=grow box 0,0 1280x24
+    5158c523     wibox.layout.fixed w=16 h=grow box 0,0 16x24
+    a53fd76b       wibox.widget.textbox raster w=16 h=grow box 0,0 16x24
+  drawin screen 1 400x32+0+100 whole: shape_bounding shape_clip
 ```
 
 Only `RECTANGLE` commands carry a z, so every other line reads `z=-`. Draw order is the line order.
+
+In the tree, `raster` marks a widget that draws itself with cairo into a surface of its own, and `spacer` marks an element that stands for no widget, which a layout asked for to hold space. A size reads as a number when the tree fixed it, `grow` when the element takes what its parent gives it, and `grow<=N` when it grows up to a ceiling.
 
 ## Input Commands {#input-commands}
 
