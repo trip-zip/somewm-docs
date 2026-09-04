@@ -233,6 +233,19 @@ screen=2 geometry=3840x2160+1920+0 tags=1 layout="tile" focused=true
 
 See [Fractional Scaling](../guides/fractional-scaling.md) for `screen scale` in context.
 
+## Clay Tree
+
+| Command | Description |
+|---------|-------------|
+| `clay tree [screen]` | Dump the last solved Clay tree for every output, or only the numbered screen |
+
+Each output starts with its last command, mutation, retained-node, raster-byte, and buffer counters, followed by the declare, solve, and reconcile durations. Nodes follow in draw order with their solved and realized boxes and the client, border, drawin, layer-shell namespace, widget class, or raster leaf they represent. `[solved!=realized]` marks clipping. `[tree!=scene]` reports that a retained scene node disagrees with its realized box.
+
+```bash
+somewm-client clay tree
+somewm-client clay tree 2
+```
+
 ## Input Commands {#input-commands}
 
 Commands for input device configuration.
