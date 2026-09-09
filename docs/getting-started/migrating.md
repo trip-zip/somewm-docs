@@ -217,36 +217,17 @@ theme has no match.
 
 ### Client icons {#client-icons}
 
-| Pattern | Severity |
-|---------|----------|
-| `c.icon`, `awful.widget.clienticon` | INFO |
+On X11 a window carries its own icon in the `_NET_WM_ICON` property. Wayland
+has no equivalent, so SomeWM resolves the icon itself when a client is
+managed and stores it in `c.icon`:
 
-On X11 a window carries its own icon in the `_NET_WM_ICON` property, so
-`c.icon` is almost always set and a tasklist just draws it. Wayland has no
-equivalent that SomeWM implements, so `c.icon` is **nil** for native Wayland
-clients.
+- the icon theme is searched for the client's class, as given and lowercased
+- if that misses, desktop entries are searched for one whose filename or
+  `StartupWMClass` matches the class, and its `Icon` field is used
 
-Nothing errors. Every client simply gets whatever fallback your config draws
-when the icon is missing, so a dock or tasklist shows the same generic image
-for every window.
-
-Resolve the icon from the class instead, which is set for both Wayland and
-XWayland clients:
-
-```lua
-local icontheme = Gtk.IconTheme.new()
-icontheme:set_custom_theme(beautiful.icons)
-
-local function icon_for(class)
-    if not class then return nil end
-    -- Reverse-DNS classes are common: try "com.mitchellh.ghostty", then "ghostty"
-    for _, name in ipairs({ class:lower(), class:lower():match("([^.]+)$") }) do
-        local info = icontheme:lookup_icon(name, 64, 0)
-        if info and info:get_filename() then return info:get_filename() end
-    end
-    return menubar.utils.lookup_icon_uncached(class:lower())
-end
-```
+`c.icon` and `awful.widget.clienticon` therefore work as they do on
+AwesomeWM. A client whose class matches neither an icon nor a desktop entry
+gets no icon, so keep whatever fallback your tasklist draws for a nil icon.
 
 ### Xresources and xrdb {#xresources-and-xrdb}
 
