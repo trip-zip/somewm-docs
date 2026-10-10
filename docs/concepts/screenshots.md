@@ -1,105 +1,27 @@
 ---
 sidebar_position: 9
 title: Screenshots
-description: How the screenshot capture pipeline works
+description: root.content() composes a capture by walking the scene in draw order, at logical resolution. The interactive selection is a wibox over that capture, and the crop lands on the capture, not the overlay.
 ---
 
 # Screenshots
 
-This page explains how SomeWM captures screenshots through `root.content()` and how the interactive selection mode works.
+Every screenshot goes through `root.content()`. On Wayland the compositor owns every buffer, so SomeWM composes the capture itself: it walks [the scene](./scene-graph.md) once in draw order, paints each rectangle, copies each text and image raster, and reads each client buffer back from the GPU or shared memory. Nothing is read from a widget or a wibox, because no widget holds a surface; what the renderer holds for it is what the capture copies.
 
-## The Capture Pipeline
+The result is a cairo image surface at logical resolution, the size of `root.size()`. `root.content(true)` leaves the wallpaper out and the ground transparent, so a transparent window keeps its alpha.
 
-All screenshots flow through the same C function: `root.content()`. This is the Wayland equivalent of reading the X11 root window pixmap.
+## HiDPI
 
-### X11 (AwesomeWM)
+On a scaled output a client at logical 800 by 600 has a 1600 by 1200 buffer at scale 2. The capture reads each buffer at its physical size and scales it to its logical box while painting, so one pixel of the result is one logical pixel, which is what `awful.screenshot` crops in. Text and image rasters are already at the output's scale and are copied the same way.
 
-On X11, the root window is a composited pixmap managed by the X Server:
+## Interactive selection
 
-```
-root.content() → cairo_xcb_surface_create() → Done
-```
+`awful.screenshot { interactive = true }`:
 
-One function call. The X Server already has a composited framebuffer.
+1. **Capture.** `root.content()` runs before anything is shown, so the overlay is never in the picture.
+2. **Overlay.** A fullscreen wibox holds an imagebox with the capture, one image element the size of the screen, and a second widget for the selection, placed and sized by a manual layout at the drag's coordinates. The capture's content never changes, so it is rastered once; a pointer move resizes the selection's box and rasters nothing else.
+3. **Crop.** On release, the capture is cropped at the selection, not the overlay.
 
-### Wayland (SomeWM)
+`root.size()`, the capture, mousegrabber coordinates, the overlay and the crop are all in logical pixels, which is why the crop lands on the right ones.
 
-On Wayland, the compositor owns all buffers. There is no pre-composited root pixmap to read from. SomeWM must manually composite every visible element onto a new Cairo surface:
-
-```
-root.content()
-  ├─ Create Cairo surface at layout dimensions
-  ├─ Paint wallpaper
-  ├─ For each scene buffer (client windows):
-  │   ├─ Read pixels from GPU texture (or SHM buffer)
-  │   └─ Composite at logical position with scaling
-  ├─ Composite widgets (drawins, titlebars)
-  └─ Return surface as lightuserdata
-```
-
-The result is a Cairo image surface at **logical resolution** (matching `root.size()`). This is the coordinate system Lua operates in.
-
-## HiDPI and Buffer Scaling
-
-On HiDPI displays, client windows render at physical resolution but occupy logical space. A client at logical size 800x600 might have a 1600x1200 pixel buffer (at 2x scale).
-
-The scene buffer compositor handles this by:
-
-1. Reading the full `buffer->width x buffer->height` texture (physical pixels)
-2. Scaling down to `dst_width x dst_height` (logical pixels) when painting
-
-This produces a screenshot where every pixel corresponds 1:1 to a logical coordinate, which is what `awful.screenshot` expects for cropping.
-
-### Widget Surfaces
-
-Widget drawable surfaces (drawins, titlebars) use a different mechanism. Their Cairo surfaces have `cairo_surface_set_device_scale()` applied, so Cairo handles the physical-to-logical scaling automatically during compositing. No explicit scaling is needed.
-
-## Interactive Selection Mode
-
-`awful.screenshot({ interactive = true })` uses a three-phase pipeline:
-
-### Phase 1: Capture
-
-When `refresh()` is called, `root.content()` captures the entire desktop into a Cairo surface. This happens **before** the overlay is shown, so the overlay itself is not captured.
-
-### Phase 2: Overlay
-
-`start_snipping()` creates a fullscreen wibox (the "frame") containing:
-
-- An **imagebox** showing the captured surface as a background
-- A **selection widget** (red rectangle) that follows the mouse
-
-The user sees the captured image and draws a selection rectangle on top of it. Mouse coordinates from the mousegrabber are in logical space, matching the captured surface.
-
-### Phase 3: Crop
-
-When the user releases the mouse button, `accept()` crops the pre-captured surface using the selection coordinates:
-
-```lua
--- Inside accept()
-crop_shot(selected_geometry.surface, selected_geometry)
--- selected_geometry = {x, y, width, height} from mouse coordinates
-```
-
-The crop operates on the original high-quality capture. The overlay was only for visual feedback.
-
-## Coordinate Spaces
-
-Everything in the screenshot pipeline uses **logical coordinates**:
-
-| Component | Coordinate Space |
-|-----------|-----------------|
-| `root.size()` | Logical (layout bounding box) |
-| `root.content()` surface | Logical pixels |
-| Mouse position (mousegrabber) | Logical (Wayland compositor coords) |
-| Frame wibox dimensions | Logical |
-| Selection rectangle | Logical |
-| `crop_shot()` source and target | Logical |
-
-This consistency is what makes the crop coordinates match the captured content.
-
-## See Also
-
-- [Interactive Screenshots Guide](/docs/guides/screenshots) - Practical setup
-- [Display Scaling](/docs/concepts/display-scaling) - How logical vs physical pixels work
-- [awful.screenshot Reference](/docs/reference/awful/screenshot) - Full API documentation
+[Screenshots guide](/docs/guides/screenshots) has the setup; [awful.screenshot](/docs/reference/awful/screenshot) is the API.

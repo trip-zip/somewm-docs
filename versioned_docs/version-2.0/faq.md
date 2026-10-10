@@ -10,15 +10,15 @@ description: Frequently asked questions about SomeWM
 
 ### What is SomeWM?
 
-SomeWM is AwesomeWM ported to Wayland. It aims for 100% Lua API compatibility with AwesomeWM, letting you use your existing `rc.lua` configuration.
+SomeWM is a Wayland compositor built on AwesomeWM's Lua configuration model. SomeWM 2.x develops its APIs independently; 1.4 focuses on upstream AwesomeWM compatibility. See [AwesomeWM Compatibility](concepts/awesomewm-compat.md) for the release-line policy.
 
 ### Why "SomeWM"?
 
-It's a play on "AwesomeWM" - if Awesome is great, Some is... adequate? The name reflects that it's a port, not a reimagining.
+It's a play on "AwesomeWM" - if Awesome is great, Some is... adequate? The name reflects its AwesomeWM origins.
 
 ### Can I use my existing AwesomeWM config?
 
-Yes! Most configs work with minimal changes. See [Migrating from AwesomeWM](/docs/getting-started/migrating) for details.
+You can adapt an existing AwesomeWM configuration. Check for removed APIs as well as X11-specific dependencies; the changes needed depend on your configuration. See [Migrating from AwesomeWM](getting-started/migrating.md) for details.
 
 ### Is SomeWM stable?
 
@@ -42,11 +42,11 @@ Yes. `awesome.restart()` works: it hot-reloads the Lua state in process, and cli
 
 ### Will all AwesomeWM widgets work?
 
-Yes, all wibox widgets work because the Lua libraries are identical to AwesomeWM.
+SomeWM provides the `wibox` widget system, but existing widget code may depend on APIs that changed or were removed. Check the [wibox reference](reference/wibox/index.md) and the [removed API replacements](getting-started/migrating.md#deprecated-apis-removed-in-somewm-20). The system tray uses SNI rather than XEmbed.
 
 ### What about third-party libraries like bling?
 
-Most work without changes. Some may need adjustments if they use X11-specific features.
+Compatibility depends on the library version and the APIs it uses. Libraries may need adjustments for removed APIs, changed behaviour, or X11-specific dependencies. Test the library with your SomeWM version and configuration.
 
 ### Why don't X11 tools work?
 

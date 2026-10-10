@@ -13,7 +13,7 @@ SomeWM provides built-in compositor-level shadows for windows and wiboxes. This 
 Shadows are rendered using a smoothstep gradient falloff, displayed via the wlroots scene graph. They support full customization including color, blur radius, offset, and opacity.
 
 :::note What gets shadows?
-This feature applies to **clients** (application windows) and **drawins/wiboxes** (containers like panels and popups). Individual widgets inside a wibox do not get separate shadows. For widget-level shadow effects, use Lua/Cairo drawing techniques.
+This feature applies to **clients** (application windows) and **drawins/wiboxes** (containers like panels and popups). Individual widgets inside a wibox do not get separate shadows. A widget cannot draw one itself either: a widget that paints with cairo is left out of the tree ([AwesomeWM widgets in that model](../concepts/widgets-in-the-tree.md)). Widget-level depth is composed from stock widgets: a `wibox.container.background` with a darker `bg`, a `border_width` and a `shape` behind another.
 :::
 
 ## Theme Variables

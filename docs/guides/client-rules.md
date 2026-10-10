@@ -1,323 +1,86 @@
 ---
 sidebar_position: 2
 title: Client Rules
-description: Control where windows appear and how they behave
+description: "ruled.client rules set properties on windows as they open: match on class, instance, name or type, place on a tag or screen, float, size, and run a callback. Order matters; later rules win."
 ---
 
 # Client Rules
 
-Client rules let you automatically set properties on windows when they open. Use them to place apps on specific tags, force windows to float, set opacity, and more. For the full API, see [AwesomeWM ruled.client docs](https://awesomewm.org/doc/api/libraries/ruled.client.html).
-
-## How Rules Work
-
-A rule has two parts: a **condition** that matches windows, and **properties** to apply:
+A rule pairs a match against a client's properties with properties to set when it opens. Every rule is checked in order; when several match, the later one wins for each property. [ruled.client upstream](https://awesomewm.org/doc/api/libraries/ruled.client.html) has the full API.
 
 ```lua
 local ruled = require("ruled")
 
 ruled.client.append_rule {
-    rule = { class = "firefox" },   -- Match condition
-    properties = {                   -- What to set
-        tag = "web",
-    },
+    rule = { class = "firefox" },
+    properties = { tag = "web" },
 }
 ```
 
-When a window opens, SomeWM checks every rule in order. If the window matches, the properties are applied. Multiple rules can match the same window. Later rules override earlier ones.
-
-## Find a Window's Identity
-
-Before writing rules, you need to know how to identify windows. Every window has properties like `class`, `instance`, `name`, and `type` that you can match against.
-
-### Using somewm-client
-
-The quickest way to see what a window reports:
+## Find a window's class
 
 ```bash
-# List all open windows with their properties
 somewm-client client list
 ```
 
-This shows `class`, `instance`, `name`, and other properties for each window.
-
-### Using a Lua Snippet
-
-To see properties as windows open, add this temporarily to your `rc.lua`:
+prints `class`, `instance`, `name` and `type` for every window. Or notify as windows open:
 
 ```lua
 client.connect_signal("request::manage", function(c)
     naughty.notification {
         title = "New window",
-        message = string.format(
-            "class: %s\ninstance: %s\nname: %s\ntype: %s",
-            c.class or "nil",
-            c.instance or "nil",
-            c.name or "nil",
-            c.type or "nil"
-        ),
+        message = string.format("class: %s\ninstance: %s\nname: %s\ntype: %s",
+            c.class or "nil", c.instance or "nil", c.name or "nil", c.type or "nil"),
     }
 end)
 ```
 
-Open the app you want to target, note its `class` value, then remove the snippet.
+Classes are case-sensitive: `firefox` and `Firefox` are different.
 
-### Common Class Values
+## Matching
 
-| App | Class |
-|-----|-------|
-| Firefox | `firefox` |
-| Chromium | `Chromium-browser` |
-| Alacritty | `Alacritty` |
-| Kitty | `kitty` |
-| Thunar | `Thunar` |
-| Spotify | `Spotify` |
-| Discord | `discord` |
-| Steam | `Steam` |
-| mpv | `mpv` |
-| VLC | `vlc` |
+| Key | Matches when |
+| --- | --- |
+| `rule = { class = "firefox", type = "dialog" }` | every field matches |
+| `rule_any = { class = { "Pavucontrol", "Blueman-manager" } }` | any value of any field matches |
+| `except = { fullscreen = true }` | excludes clients where every field matches |
+| `except_any = { class = { "firefox", "Chromium-browser" } }` | excludes clients where any matches |
+| `rule = {}` | every client; put it first so later rules override it |
 
-:::tip
-Class values are case-sensitive. `"firefox"` is not the same as `"Firefox"`. Always check the actual value using the methods above.
-:::
-
-## Place a Window on a Specific Tag
-
-The most common use case. Open Firefox on the "web" tag:
-
-```lua
-ruled.client.append_rule {
-    rule = { class = "firefox" },
-    properties = {
-        tag = "web",
-    },
-}
-```
-
-Place Spotify on the "music" tag on a specific screen:
-
-```lua
-ruled.client.append_rule {
-    rule = { class = "Spotify" },
-    properties = {
-        screen = 1,
-        tag = "music",
-    },
-}
-```
-
-:::note
-The `tag` value must match an existing tag name. If the tag doesn't exist, the property is ignored and the window opens on the current tag.
-:::
-
-## Make a Window Float
-
-Some windows work better floating: dialogs, media players, settings windows.
-
-```lua
--- Float specific apps
-ruled.client.append_rule {
-    rule = { class = "Pavucontrol" },
-    properties = {
-        floating = true,
-        width = 600,
-        height = 400,
-        placement = awful.placement.centered,
-    },
-}
-```
-
-Float all dialog windows:
-
-```lua
-ruled.client.append_rule {
-    rule = { type = "dialog" },
-    properties = {
-        floating = true,
-        placement = awful.placement.centered,
-    },
-}
-```
-
-## Set Window Properties
-
-Rules can set any client property. Here are the most useful ones:
+## Properties
 
 ```lua
 ruled.client.append_rule {
     rule = { class = "MyApp" },
     properties = {
-        -- Placement
-        floating = true,
-        maximized = false,
-        fullscreen = false,
-        sticky = false,          -- Show on all tags
-        ontop = false,           -- Stay above other windows
-
-        -- Appearance
-        opacity = 0.9,           -- 0.0 (transparent) to 1.0 (opaque)
-        border_width = 2,
-        border_color = "#ff0000",
-
-        -- Size and position
-        width = 800,
-        height = 600,
+        floating = true, maximized = false, fullscreen = false,
+        sticky = false,                      -- on every tag
+        ontop = false,
+        opacity = 0.9,
+        border_width = 2, border_color = "#ff0000",
+        width = 800, height = 600,
         placement = awful.placement.centered,
-
-        -- Tag and screen
-        tag = "dev",
-        screen = awful.screen.preferred,
-
-        -- Titlebars
+        tag = "dev",                         -- an existing tag name, else ignored
+        screen = awful.screen.preferred,     -- or an index, or screen.primary
         titlebars_enabled = true,
+        shadow = false,                      -- see Shadows
     },
 }
 ```
 
-## Match Multiple Conditions
-
-### Match Any of Several Values
-
-Use `rule_any` to match if any condition is true:
+A `callback = function(c) ... end` runs after the properties for logic a table cannot express. The common one sends new windows to the stack instead of making them master ([Master and Stack](/docs/concepts/master-and-stack)):
 
 ```lua
--- Float any of these apps
-ruled.client.append_rule {
-    rule_any = {
-        class = { "Pavucontrol", "Blueman-manager", "Nm-connection-editor" },
-    },
-    properties = {
-        floating = true,
-        placement = awful.placement.centered,
-    },
-}
+callback = function(c) c:to_secondary_section() end,
 ```
 
-### Match Multiple Properties
-
-Fields inside `rule` must all match (AND logic):
-
-```lua
--- Match only the Firefox "About" dialog
-ruled.client.append_rule {
-    rule = {
-        class = "firefox",
-        type = "dialog",
-    },
-    properties = {
-        floating = true,
-    },
-}
-```
-
-### Exclude Windows
-
-Use `except` or `except_any` to exclude windows from a rule:
-
-```lua
--- All windows get borders, except fullscreen ones
-ruled.client.append_rule {
-    rule = {},
-    except = { fullscreen = true },
-    properties = {
-        border_width = 2,
-    },
-}
-
--- Float all dialogs except ones from these apps
-ruled.client.append_rule {
-    rule = { type = "dialog" },
-    except_any = {
-        class = { "firefox", "Chromium-browser" },
-    },
-    properties = {
-        floating = true,
-    },
-}
-```
-
-## Set Defaults for All Windows
-
-A rule with an empty `rule = {}` matches every window. Place it early so later rules can override it:
-
-```lua
--- Default properties for all windows
-ruled.client.append_rule {
-    rule = {},
-    properties = {
-        focus = awful.client.focus.filter,
-        raise = true,
-        screen = awful.screen.preferred,
-        placement = awful.placement.no_overlap + awful.placement.no_offscreen,
-    },
-}
-```
-
-This is how the default `rc.lua` sets baseline behavior.
-
-## Order and Precedence
-
-Rules are checked in the order they were added. When multiple rules match, later rules override earlier ones for the same property:
-
-```lua
--- Rule 1: all windows get 2px border
-ruled.client.append_rule {
-    rule = {},
-    properties = { border_width = 2 },
-}
-
--- Rule 2: floating windows get 3px border (overrides rule 1)
-ruled.client.append_rule {
-    rule_any = { floating = true },
-    properties = { border_width = 3 },
-}
-```
-
-**Structure your rules from general to specific**: defaults first, then category rules (all dialogs, all floating windows), then per-app rules last.
-
-## Using Callbacks
-
-If you need logic beyond static properties, use a `callback`:
-
-```lua
-ruled.client.append_rule {
-    rule = { class = "Steam" },
-    callback = function(c)
-        -- Center the main window, but not popups
-        if c.name and c.name:match("^Steam$") then
-            awful.placement.centered(c)
-        end
-    end,
-}
-```
-
-### Send New Windows to the Stack
-
-By default, new windows become the master window, pushing everything else down. Most people expect the opposite. Add a callback to your default rule so new windows go to the stack instead:
-
-```lua
-ruled.client.append_rule {
-    rule = {},
-    properties = {
-        -- your existing default properties
-    },
-    callback = function(c)
-        c:to_secondary_section()
-    end,
-}
-```
-
-See [Master and Stack](/docs/concepts/master-and-stack) for the full explanation of how client list order determines layout position.
-
-## Complete Example
-
-A realistic set of rules for a development setup:
+## A complete set
 
 ```lua
 local awful = require("awful")
 local ruled = require("ruled")
 
 ruled.client.connect_signal("request::rules", function()
-    -- Default properties for all windows
     ruled.client.append_rule {
         rule = {},
         properties = {
@@ -327,76 +90,40 @@ ruled.client.connect_signal("request::rules", function()
             placement = awful.placement.no_overlap + awful.placement.no_offscreen,
             border_width = 2,
         },
-        -- New windows go to the stack instead of becoming master
         callback = function(c) c:to_secondary_section() end,
     }
-
-    -- Float all dialogs
     ruled.client.append_rule {
         rule = { type = "dialog" },
-        properties = {
-            floating = true,
-            placement = awful.placement.centered,
-        },
+        properties = { floating = true, placement = awful.placement.centered },
     }
-
-    -- Browser on tag "web"
     ruled.client.append_rule {
-        rule_any = {
-            class = { "firefox", "Chromium-browser" },
-        },
+        rule_any = { class = { "firefox", "Chromium-browser" } },
         properties = { tag = "web" },
     }
-
-    -- Chat apps on tag "chat"
     ruled.client.append_rule {
-        rule_any = {
-            class = { "discord", "Slack", "TelegramDesktop" },
-        },
+        rule_any = { class = { "discord", "Slack", "TelegramDesktop" } },
         properties = { tag = "chat" },
     }
-
-    -- Float settings and control panels
     ruled.client.append_rule {
-        rule_any = {
-            class = {
-                "Pavucontrol",
-                "Blueman-manager",
-                "Nm-connection-editor",
-            },
-        },
-        properties = {
-            floating = true,
-            placement = awful.placement.centered,
-        },
+        rule_any = { class = { "Pavucontrol", "Blueman-manager", "Nm-connection-editor" } },
+        properties = { floating = true, placement = awful.placement.centered },
     }
-
-    -- Spotify: slightly transparent, on "music" tag
     ruled.client.append_rule {
         rule = { class = "Spotify" },
-        properties = {
-            tag = "music",
-            opacity = 0.95,
-        },
+        properties = { tag = "music", opacity = 0.95 },
     }
 end)
 ```
 
-## Troubleshooting
+Defaults first, then category rules (dialogs, floating), then per-app rules.
 
-### Rule Isn't Matching
+## When a rule does not match
 
-Check the class name. It's case-sensitive and might not be what you expect:
-
-```bash
-somewm-client client list
-```
-
-Some apps (notably Spotify) set their class late. If `class` is `nil` at rule evaluation time, the rule won't match. Use a `request::manage` handler as a workaround:
+- Check the class with `somewm-client client list`.
+- Some apps, Spotify among them, set their class after mapping, so it is nil when rules run. React to `property::class` instead:
 
 ```lua
 client.connect_signal("request::manage", function(c)
-    -- Wait for class to be set
     if c.class == nil then
         c:connect_signal("property::class", function()
             if c.class == "Spotify" then
@@ -407,32 +134,7 @@ client.connect_signal("request::manage", function(c)
 end)
 ```
 
-### Rule Applies to Wrong Windows
+- A rule that hits too much needs a narrower match: `{ class = "firefox", type = "normal" }` skips Firefox's popups.
+- A property that keeps reverting is set again by a later, broader rule. Move the specific rule after it.
 
-Your match condition might be too broad. Use more specific conditions:
-
-```lua
--- Too broad: matches all Firefox windows including popups
-ruled.client.append_rule {
-    rule = { class = "firefox" },
-    properties = { tag = "web" },
-}
-
--- More specific: only the main Firefox window
-ruled.client.append_rule {
-    rule = { class = "firefox", type = "normal" },
-    properties = { tag = "web" },
-}
-```
-
-### Properties Being Overridden
-
-Rules are applied in order. If a later rule sets the same property, it wins. Check if a broader rule is overriding your specific one. Move specific rules after general ones.
-
-## See Also
-
-- **[Master and Stack](/docs/concepts/master-and-stack)** - How layout order and master/stack sections work
-- **[Notifications](/docs/guides/notifications)** - Uses `ruled.notification` with the same pattern
-- **[Multi-Monitor](/docs/guides/multi-monitor)** - Screen-specific placement rules
-- **[Shadows](/docs/guides/shadows)** - Per-app shadow rules
-- **[AwesomeWM ruled.client docs](https://awesomewm.org/doc/api/libraries/ruled.client.html)** - Full API reference
+[Notifications](/docs/guides/notifications) uses `ruled.notification` the same way; [Shadows](/docs/guides/shadows) has per-app shadow rules.

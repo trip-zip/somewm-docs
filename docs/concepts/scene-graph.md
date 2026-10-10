@@ -1,212 +1,78 @@
 ---
 sidebar_position: 3
 title: Scene Graph
-description: Understanding layers and stacking order
+description: The scene is what wlroots draws, in the order the tree declares. Every floating root carries a band, Clay's zIndex, from the wallpaper at -4 to the pointer at 32767.
 ---
 
 # Scene Graph
 
-The scene graph determines what appears above or below everything else on your screen. Understanding it helps you control layer ordering for panels, notifications, and windows.
+The scene is what wlroots draws. It holds nothing of its own: each frame, SomeWM [declares the output as one Clay tree, solves it, and reconciles the result into the scene](./how-somewm-draws.md). What is above what is a number on each floating root, its band, which is the Clay floating element's `zIndex`. Clay sorts floating roots by it, and the renderer keeps that order in the scene.
 
-## What is a Scene Graph?
+## Bands
 
-A scene graph is a tree structure containing all visual elements. The tree hierarchy determines:
+The scene draws roots from the lowest band to the highest, and roots in the same band in declaration order, so a later popup is above an earlier one. The numbers are the `Z_*` enum in `declare.c`:
 
-- **Stacking order** - children are drawn after (on top of) earlier siblings
-- **Visibility** - hiding a parent hides all children
-- **Damage tracking** - only redraw what changed
+| Band | What is there |
+| --- | --- |
+| -8 | a layer-shell surface in the background layer |
+| -6 | a client of type desktop |
+| -4 | the wallpaper wibox, and a wibox of type `desktop` or `splash` |
+| -2 | a layer-shell surface in the bottom layer |
+| 10 | a client marked below |
+| 20 | a normal client |
+| 25 | a wibox placed by its geometry, and a wibar that is not ontop and reserves no space |
+| 30 | a client marked above |
+| 38 | the backdrop behind a fullscreen client |
+| 40 | a fullscreen client |
+| 50 | a client marked ontop |
+| 60 | an ontop wibar |
+| 70 | a layer-shell surface in the top layer |
+| 80 | an ontop wibox: popups, menus, tooltips, and an xdg popup over its owner |
+| 90 | a notification |
+| 100 | a layer-shell surface in the overlay layer |
+| 110 | an override-redirect X11 window: a menu, a tooltip, a drag icon |
+| 120 | a drag icon |
+| 200, 210, 220 | the lock screen: backdrop, cover, surfaces |
+| 32765, 32766 | Clay's inspector panel |
+| 32767 | the pointer |
 
-You don't interact with the scene graph directly. Instead, you control which **layer** your windows and wibars belong to.
+A wibar in the flow has no band: it is part of the output's column with the workarea. A tiled client has none either; its frame is a cell of the workarea and only its surface floats, at the client's band, attached to its slot. The dump prints the band after `band` on a root line, and the inspector shows it as the floating element's z-index.
 
-## The Six Layers
+## Where things go
 
-SomeWM organizes everything into six layers, rendered bottom-to-top:
-
-```
-┌─────────────────────────────────┐ ← Overlay (fullscreen)
-│ ┌─────────────────────────────┐ │
-│ │ ┌─────────────────────────┐ │ │ ← Top (wibars, notifications)
-│ │ │ ┌─────────────────────┐ │ │ │
-│ │ │ │ Floating windows    │ │ │ │ ← Floating
-│ │ │ │ ┌─────────────────┐ │ │ │ │
-│ │ │ │ │ Tiled windows   │ │ │ │ │ ← Tiled
-│ │ │ │ │ ┌─────────────┐ │ │ │ │ │
-│ │ │ │ │ │ Bottom      │ │ │ │ │ │ ← Bottom (background panels)
-│ │ │ │ │ │ Background  │ │ │ │ │ │ ← Background (wallpaper)
-└─┴─┴─┴─┴─┴─────────────┴─┴─┴─┴─┴─┘
-```
-
-| Layer | Z-Order | Contents | Examples |
-|-------|---------|----------|----------|
-| **Background** | 1 (bottom) | Wallpaper, desktop icons | `feh --bg-fill`, desktop widgets |
-| **Bottom** | 2 | Panels that sit behind windows | Conky, background docks |
-| **Tiled** | 3 | Normal tiled windows | Firefox, terminal, editor |
-| **Floating** | 4 | Floating windows, dialogs | File dialogs, pop-ups |
-| **Top** | 5 | Panels, notifications | Wibars, naughty notifications |
-| **Overlay** | 6 (top) | Fullscreen content | Fullscreen video, lock screen |
-
-## Where Things Go by Default
-
-### Windows (Clients)
-
-Normal clients go to the **Tiled** or **Floating** layer based on their state:
+A client's band follows its state:
 
 ```lua
--- Tiled windows go to the Tiled layer
-c.floating = false
-
--- Floating windows go to the Floating layer
-c.floating = true
-
--- ontop puts floating windows above other floating windows
-c.ontop = true
-
--- Fullscreen goes to Overlay
-c.fullscreen = true
+c.floating = true    -- still 20, as a root at its own box
+c.below = true       -- 10
+c.above = true       -- 30
+c.fullscreen = true  -- 40, over a backdrop at 38
+c.ontop = true       -- 50
 ```
 
-### Wibars and Wiboxes
+A wibox's band follows its `type` and `ontop`:
 
-Wibars (panels) default to the **Top** layer. You can change this with the `type` property:
+| You write | Band |
+| --- | --- |
+| `wibox { ... }` placed by its geometry | 25 |
+| `awful.wibar { position = "top" }` | in the flow; the workarea moves down |
+| `awful.wibar { ontop = true }` | 60, over the clients; reserves no space |
+| `wibox { type = "desktop" }` | -4, with the wallpaper |
+| `awful.menu`, a tooltip, an `awful.popup` with `ontop = true` | 80 |
+| a `naughty` notification | 90 |
 
-```lua
--- Default: Top layer (above windows)
-s.mywibar = awful.wibar {
-    position = "top",
-    screen = s,
-}
+So a wibar stays above a maximized client because the client's cell is inside the workarea the bar leaves; a fullscreen client at 40 covers a bar in the flow and a wibox at 25; an ontop bar at 60 stays above it; a notification at 90 is above both.
 
--- Desktop layer: Background (behind windows)
-local desktop_widget = wibox {
-    type = "desktop",
-    visible = true,
-    -- Goes to Background layer
-}
+## Struts and the workarea
 
--- Dock layer: Top (like a dock/taskbar)
-local dock = wibox {
-    type = "dock",
-    visible = true,
-    -- Goes to Top layer, reserves strut space
-}
-```
-
-Wibox types and their layers:
-
-| `type` value | Layer | Reserves strut? |
-|-------------|-------|-----------------|
-| `"desktop"` | Background | No |
-| `"dock"` | Top | Yes |
-| `"toolbar"` | Top | No |
-| `"notification"` | Top | No |
-| `"normal"` (default) | Top | No |
-
-### Notifications
-
-Naughty notifications appear in the **Top** layer, above wibars and windows but below fullscreen content.
-
-## Client Stacking Within Layers
-
-The Scene Graph determines which *type* of element appears above others (wibars above windows, notifications above wibars). But what about multiple windows in the same layer?
-
-Within the Tiled, Floating, and other client layers, windows have a **stacking order** controlled by `c:raise()` and `c:lower()`. This is separate from the layer system.
-
-See [Client Stacking](/docs/concepts/client-stack) for details on:
-- The global client stack
-- How raise/lower works
-- Why focus and stack are independent
-
-## Practical Implications
-
-### Why your wibar stays above windows
-
-Wibars are in the Top layer (5), while tiled windows are in layer 3. This is why your panel is always visible, even when windows are maximized.
-
-### Why fullscreen hides your wibar
-
-Fullscreen clients go to the Overlay layer (6), which is above the Top layer. This is intentional - fullscreen should be truly full-screen.
-
-### Making a window stay on top
-
-Use the `ontop` property to keep a floating window above other floating windows:
-
-```lua
--- Keep a window on top of other floating windows
-c.ontop = true
-
--- Toggle with a keybinding
-awful.key({ modkey }, "t", function(c)
-    c.ontop = not c.ontop
-end)
-```
-
-### Creating a desktop widget
-
-Use `type = "desktop"` for widgets that should sit behind windows:
-
-```lua
-local conky_like = wibox {
-    type = "desktop",
-    x = 100,
-    y = 100,
-    width = 200,
-    height = 400,
-    visible = true,
-    bg = "#00000080",  -- Transparent background
-}
-```
-
-### Creating a dropdown terminal
-
-A dropdown terminal should be in the Top layer and marked `ontop`:
-
-```lua
-local dropdown = awful.popup {
-    widget = { ... },
-    ontop = true,
-    visible = false,
-    placement = awful.placement.top,
-}
-```
-
-## Struts and Workarea
-
-Panels in the **Top** layer can reserve space (struts) that windows avoid:
-
-```lua
--- This wibar reserves space at the top
-s.mywibar = awful.wibar {
-    position = "top",
-    screen = s,
-    height = 24,
-    -- Windows tile below this bar
-}
-```
-
-The reserved space is subtracted from `screen.workarea`:
+Nobody subtracts a wibar from the screen. The output is a column: top bar, workarea, bottom bar, and Clay gives the workarea what is left. `screen.workarea` is that element's solved box.
 
 ```lua
 local s = screen.primary
-print(s.geometry.height)   -- Full screen height: 1080
-print(s.workarea.height)   -- Minus wibar: 1056
+print(s.geometry.height)   -- 720
+print(s.workarea.height)   -- 688 under a 32 pixel bar
 ```
 
-## Layer Diagram by Use Case
+## Stacking within a band
 
-```
-Layer     | What Goes Here
-----------+--------------------------------------------------
-Overlay   | Fullscreen videos, games, lock screens
-Top       | Wibars, taskbars, notifications, dropdown menus
-Floating  | Dialog boxes, floating terminals, pop-up windows
-Tiled     | Normal application windows (browser, editor, etc.)
-Bottom    | Background panels (Conky-style system monitors)
-Background| Wallpaper, desktop icons
-```
-
-## See Also
-
-- [Client Stacking](/docs/concepts/client-stack) - How windows order within layers
-- [The Object Model](/docs/concepts/object-model) - Understanding clients and wibars
-- [Architecture](/docs/concepts/architecture) - How the compositor is structured
-- [Wibar](/docs/tutorials/wibar) - Create your own panel
+Two clients in the same band are ordered by the client stack, which `c:raise()` and `c:lower()` change ([Client Stacking](./client-stack.md)). Under `max` and `magnifier`, a floating client is above the layout's clients whatever the raise order, and a transient of such a client is above every client of that layout.

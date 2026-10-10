@@ -30,18 +30,18 @@ This matters most where the name is not what is printed on the keycap. `,` repor
 
 ## Modifier Keys
 
-Passed as a Lua table — the first argument to `awful.key`.
+Passed as a Lua table, the first argument to `awful.key`.
 
 | Name | Common Name | Notes |
 | --- | --- | --- |
 | `"Mod4"` | Super / Windows / Meta | The key with the Windows logo |
-| `"Super"` | alias for `"Mod4"` | Convenience alias |
+| `"Super"` | alias for `"Mod4"` | Accepted by `awful.button` only; `awful.key` takes `"Mod4"` |
 | `"Mod1"` | Alt | Left or Right Alt |
-| `"Alt"` | alias for `"Mod1"` | Convenience alias |
+| `"Alt"` | alias for `"Mod1"` | Accepted by `awful.button` only; `awful.key` takes `"Mod1"` |
 | `"Shift"` | Shift | Either Shift key |
 | `"Control"` | Ctrl | Either Control key |
 | `"Ctrl"` | alias for `"Control"` | Convenience alias |
-| `"Lock"` | Caps Lock / Num Lock | Toggleable lock state |
+| `"Lock"` | Caps Lock | Num Lock is `"Mod2"` |
 | `"Mod2"` | Mod2 | Often Num Lock on common layouts |
 | `"Mod3"` | Mod3 | Layout-dependent |
 | `"Mod5"` | Mod5 | Often AltGr / ISO Level 3 |

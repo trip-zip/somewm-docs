@@ -81,4 +81,4 @@ Behavior worth knowing:
 
 ## Behavioral Notes
 
-SomeWM's `gears` implementation is fully compatible with AwesomeWM.
+SomeWM 2.0 removed `gears.wallpaper`; use `awful.wallpaper` instead. Use the SomeWM reference for supported modules rather than assuming every module in the upstream reference is available.

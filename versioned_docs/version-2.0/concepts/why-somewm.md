@@ -8,36 +8,21 @@ description: What somewm is, what it commits to, and what's open.
 
 ## What somewm is
 
-somewm is a Wayland compositor that runs AwesomeWM Lua configurations unchanged. If your `rc.lua` works in AwesomeWM, it works in somewm. The shape of the API is the same: `awful.*`, `gears.*`, `wibox.*`, `naughty.*`, `beautiful.*`, `ruled.*`, `menubar.*`. Same function signatures, same signal names, same property model, same default values.
+SomeWM 2.x builds on AwesomeWM's Lua configuration model and develops its APIs independently. Existing configurations may require changes. SomeWM 1.4 remains the line focused on upstream AwesomeWM compatibility.
 
-The compositor underneath is new. Built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots), it speaks Wayland, uses the wlroots scene graph, and routes input through a Wayland-native pipeline. Wayland exposes things X11 didn't (real per-output scaling, hotplug as a first-class event, idle inhibition protocols), so somewm adds APIs for those without changing what already worked.
+Built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots), SomeWM speaks Wayland, uses the wlroots scene graph, and routes input through a Wayland-native pipeline. Its Lua configuration uses familiar libraries such as `awful`, `gears`, `wibox`, `naughty`, `beautiful`, and `ruled`.
 
-## The Prime Directive
+## API direction {#the-prime-directive}
 
-> Preserve the public Lua API. Internals are fair game.
+SomeWM 2.x can change its public Lua APIs as well as its implementation. Changes may reflect Wayland requirements or independent design decisions, including removing deprecated APIs.
 
-The public API is whatever your `rc.lua` touches:
+The shared configuration model includes client and tag properties, signal handlers, widgets, and theme variables. Shared names and ancestry do not guarantee identical behaviour, defaults, or signal timing across SomeWM and AwesomeWM.
 
-- Function signatures in `awful.*`, `gears.*`, `wibox.*`, `naughty.*`, `beautiful.*`, `ruled.*`, `menubar.*`
-- Signal names and the arguments they carry
-- Property names on `client`, `screen`, `tag`, `drawin`
-- Documented behavior existing configs rely on
+## Using the API {#what-this-commits-to}
 
-Everything else is open. The C compositor, the Lua library internals, the build system, the file layout: all ours to rewrite. That's how somewm makes Wayland-grade decisions (different signal timing, scene-graph rendering, in-process restart, fractional scaling, hotplug-aware tags) without breaking anyone's config.
+Use the SomeWM documentation for your release to check supported APIs and behaviour. The [AwesomeWM API docs](https://awesomewm.org/apidoc/) provide background on inherited APIs, but may also describe APIs that SomeWM has changed or removed.
 
-The litmus test: if a change could break an existing `rc.lua` without the user editing it, that change goes through the deviations process and lands documented. Otherwise, it doesn't need to be a deviation; it's just internal evolution.
-
-## What this commits to
-
-If your config does any of these, somewm guarantees it keeps working:
-
-- Calls into the AwesomeWM Lua libraries by name (e.g., `awful.layout.suit.tile`, `wibox.widget.textclock`)
-- Sets properties on `client`, `screen`, `tag`, `drawin`
-- Connects to documented signals (`focus`, `request::*`, `property::*`, ...)
-- Uses theme variables in `beautiful`
-- Reads or writes `awesome.*` properties documented for AwesomeWM (e.g., `awesome.conffile`, `awesome.version`, `awesome.startup`)
-
-If a method or property is documented in the [AwesomeWM API docs](https://awesomewm.org/apidoc/), assume it works in somewm unless [Deviations](../reference/deviations.md) says otherwise.
+For example, SomeWM 2.0 removed `naughty.notify()` and the bare `manage` and `unmanage` signals. The [migration guide](../getting-started/migrating.md#deprecated-apis-removed-in-somewm-20) lists replacements for removed APIs. [AwesomeWM Compatibility](awesomewm-compat.md) explains the relationship between the release lines.
 
 ## What's open
 
@@ -60,11 +45,11 @@ Wayland is not X11. A few places force a behavioral difference no matter what:
 - **Restart**: somewm rebuilds the Lua state in process while wlroots keeps running. An X11 `execvp`-style restart isn't possible because GPU state can't survive
 - **Per-output scale**: Wayland has fractional scaling per output, so `screen.scale` is now a writable property
 
-Every deviation is recorded in [Deviations](../reference/deviations.md) with the reason. If something there bites your config, that's the page to send a bug report against.
+The [Deviations reference](../reference/deviations.md) describes differences from AwesomeWM, including Wayland-specific behaviour. Consult the affected API reference for SomeWM behaviour in this release.
 
 ## See also
 
-- [Deviations](../reference/deviations.md) - full reference of API and behavioral differences
+- [Deviations](../reference/deviations.md) - API and behavioural differences from AwesomeWM
 - [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) - compatibility status and stubs
 - [Wayland vs X11](/docs/concepts/wayland-vs-x11) - protocol-level background
 - [Migrating from AwesomeWM](/docs/getting-started/migrating) - step-by-step migration

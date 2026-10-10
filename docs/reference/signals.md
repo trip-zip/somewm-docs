@@ -10,11 +10,11 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 SomeWM is event-driven. The compositor and the AwesomeWM Lua libraries emit signals at lifecycle points; your `rc.lua` connects handlers to react. For the model behind signals (what they are, when C fires them, the `request::*` pattern, default handlers, ordering), see [Signals (concepts)](../concepts/signals.md).
 
-This page is the lookup reference. Signals are grouped by the class or module that emits them.
+Signals are grouped by the class or module that emits them.
 
 ## Dispatch
 
-C-emitted signals are queued and drained at `some_refresh()` in 2.0, not run inline with the Wayland event that triggered them. See [Signals (concepts): Dispatch model](../concepts/signals.md#dispatch-model) for the model and the implications.
+C-emitted signals are queued and drained at `some_refresh()` in 2.0, not run inline with the Wayland event that triggered them. See [Signals (concepts): Dispatch model](../concepts/signals.md#dispatch) for the model and the implications.
 
 Currently queued:
 

@@ -1,93 +1,30 @@
 ---
 sidebar_position: 2.8
 title: "Carousel: Gestures"
-description: Set up touchpad gesture scrolling for the carousel layout
+description: "make_gesture_binding() pans the viewport with a three-finger swipe and snaps to the nearest column on release. The vertical variant, animation speed, and removing the binding."
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly';
-import YouWillLearn from '@site/src/components/YouWillLearn';
 
 # Carousel: Gestures <SomewmOnly />
 
-<YouWillLearn>
-
-- How to enable 3-finger swipe viewport panning
-- How the gesture tracking and snap behavior works
-- How to set up gestures for the vertical variant
-- How to adjust scroll animation speed
-- How to remove a gesture binding
-
-</YouWillLearn>
-
-## Enable 3-Finger Swipe
-
-One line in your `rc.lua` enables touchpad gesture scrolling:
-
 ```lua
 awful.layout.suit.carousel.make_gesture_binding()
+awful.layout.suit.carousel.vertical.make_gesture_binding()   -- vertical swipes for the vertical variant; both can be active
 ```
 
-This creates a 3-finger swipe binding that pans the carousel viewport horizontally. Place it after your keybinding setup.
+A three-finger swipe on a screen in the carousel layout records the scroll position, pans the viewport with the fingers one to one (fingers left reveals columns on the right), and on release centres the column nearest the viewport's centre and focuses its first client.
 
-## How It Works
-
-The gesture has three phases:
-
-1. **Trigger.** When a 3-finger swipe begins on a screen using the carousel layout, the current animation is stopped and the starting scroll position is recorded.
-2. **Track.** During the swipe, the viewport follows your fingers 1:1. Moving three fingers left scrolls the strip to the right (revealing columns on the right).
-3. **Snap.** On release, the viewport animates to center the column nearest to the viewport's center and focuses that column's first client.
-
-The snap animation uses the same `scroll_duration` and easing curve as keyboard-driven scrolling.
-
-## Vertical Variant
-
-For the vertical carousel, use the vertical gesture binding:
+The snap animates through `somewm.layout_animation` like every layout change, so its speed is that module's:
 
 ```lua
-awful.layout.suit.carousel.vertical.make_gesture_binding()
+local layout_anim = require("somewm.layout_animation")
+layout_anim.duration = 0.1      -- seconds
+layout_anim.enabled = false     -- snap instantly
 ```
 
-This responds to vertical 3-finger swipes (dy axis) instead of horizontal.
+`carousel.scroll_duration` is gone and does nothing.
 
-You can enable both if you use both carousel orientations:
+`make_gesture_binding()` returns the binding; `binding:remove()` unbinds it.
 
-```lua
-local carousel = awful.layout.suit.carousel
-carousel.make_gesture_binding()
-carousel.vertical.make_gesture_binding()
-```
-
-## Adjust Animation Speed
-
-The snap animation on release uses `carousel.scroll_duration`. To make it faster or slower:
-
-```lua
--- Snappy 100ms snap
-awful.layout.suit.carousel.scroll_duration = 0.1
-
--- Slower 400ms snap
-awful.layout.suit.carousel.scroll_duration = 0.4
-
--- Instant snap (no animation)
-awful.layout.suit.carousel.scroll_duration = 0
-```
-
-This also affects keyboard-driven scroll animations.
-
-## Remove a Gesture Binding
-
-`make_gesture_binding()` returns a gesture binding object. Store it and call `:remove()` to unbind:
-
-```lua
-local carousel = awful.layout.suit.carousel
-local binding = carousel.make_gesture_binding()
-
--- Later, to remove it:
-binding:remove()
-```
-
-## See Also
-
-- **[Carousel API Reference](/docs/reference/awful/carousel)** - Full property and function documentation
-- **[Centering Modes Guide](/docs/guides/carousel-centering)** - Control how the viewport follows focus
-- **[Scrollable Tiling](/docs/concepts/scrollable-tiling)** - How the animation system works
+[Carousel reference](/docs/reference/awful/carousel), [Centering](/docs/guides/carousel-centering), [Scrollable Tiling](/docs/concepts/scrollable-tiling).

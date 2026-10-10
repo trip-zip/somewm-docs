@@ -6,11 +6,11 @@ description: Media keys, keygroups, mouse bindings, and organizing bindings as d
 
 # Keybinding patterns
 
-Recipes for common keybinding work beyond one-off `awful.key` calls: hardware media keys, binding a whole key row at once, mouse buttons, and keeping a growing set of bindings organized. If `awful.key` itself is new to you, start with the [Keybindings tutorial](/docs/tutorials/keybindings); for key and modifier names, see the [Key Names Reference](/docs/reference/key-names).
+Media keys, a whole key row in one binding, mouse buttons, and bindings kept as data or in a module. [Keybindings](/docs/tutorials/keybindings) is the tutorial; [Key Names](/docs/reference/key-names) lists every key and modifier.
 
 ## Bind media keys
 
-Media keys work without modifiers; pass an empty modifier table. Adjust the commands to your audio and backlight tools:
+An empty modifier table binds a key on its own:
 
 ```lua
 awful.keyboard.append_global_keybindings({
@@ -40,7 +40,7 @@ awful.keyboard.append_global_keybindings({
 
 ## Bind a whole key row at once
 
-For per-tag bindings (1-9), one declarative `awful.key` with `keygroup = "numrow"` replaces nine copies. The callback receives the index:
+`keygroup = "numrow"` binds 1 to 9 in one declaration and passes the index to the callback; `"fkeys"` does the same for F1 to F12:
 
 ```lua
 awful.keyboard.append_global_keybindings({
@@ -74,11 +74,9 @@ awful.keyboard.append_global_keybindings({
 })
 ```
 
-Other keygroups exist (`"fkeys"` for F1-F12, for example); the pattern is the same.
-
 ## Add mouse bindings
 
-Mouse bindings use `awful.button` and register through the same signal pattern as client keybindings:
+`awful.button` registers through the same signal as client keybindings. Buttons are 1 left, 2 middle, 3 right, 4 and 5 scroll:
 
 ```lua
 client.connect_signal("request::default_mousebindings", function()
@@ -101,11 +99,9 @@ client.connect_signal("request::default_mousebindings", function()
 end)
 ```
 
-Button numbers: `1` left, `2` middle, `3` right, `4` scroll up, `5` scroll down.
-
 ## Define bindings as data
 
-Once you have more than a handful of launcher bindings, a table plus a small converter is easier to scan and edit than repeated `awful.key` calls:
+Past a handful of bindings, a table and a converter are easier to scan than repeated calls:
 
 ```lua
 -- Define keybindings as data
@@ -136,7 +132,7 @@ awful.keyboard.append_global_keybindings(make_keybindings(my_global_keys))
 
 ## Factor out repeated callbacks
 
-If several bindings share a shape (toggle a property, spawn a command), helper functions keep the table readable:
+Bindings that share a shape take a helper:
 
 ```lua
 local helpers = {
@@ -172,7 +168,7 @@ awful.keyboard.append_global_keybindings({
 
 ## Move bindings into their own module
 
-A complete keybindings module you could save as `keybindings.lua` next to your `rc.lua`. Note the locals at the top: `modkey` and `terminal` are locals in `rc.lua`, so a separate module must define its own (or receive them as arguments); referencing them bare would silently give you an empty modifier table.
+A complete `keybindings.lua` next to `rc.lua`. `modkey` and `terminal` are locals in `rc.lua`, so the module defines its own; a bare `modkey` here would silently be an empty modifier table.
 
 ```lua
 -- keybindings.lua
@@ -270,9 +266,4 @@ Then in your `rc.lua`:
 require("keybindings")
 ```
 
-## See Also
-
-- [Keybindings tutorial](/docs/tutorials/keybindings) - The `awful.key` basics, step by step
-- [Key Names Reference](/docs/reference/key-names) - Key names, modifiers, and mouse buttons
-- [Default Keybindings](/docs/reference/default-keybindings) - What is already bound
-- [awful.key (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/awful.key.html) - Upstream API reference
+[Default Keybindings](/docs/reference/default-keybindings) lists what is already bound; [awful.key upstream](https://awesomewm.org/apidoc/libraries/awful.key.html) is the API.

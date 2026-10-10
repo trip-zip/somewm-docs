@@ -6,18 +6,16 @@ description: Build and install SomeWM on your system
 
 # Installation
 
-:::tip Want to try first?
-You can run a sandboxed nested SomeWM inside your current Wayland or X11 session without logging out. Install the binary, then follow the [Try SomeWM Without Logging Out](../tutorials/try-somewm-without-installing.md) tutorial. Your daily-driver desktop is untouched.
+:::tip
+SomeWM runs nested in a window on your current session, so you can try it without logging out: [Try SomeWM without installing](../tutorials/try-somewm-without-installing.md).
 :::
 
 ## Dependencies
 
 :::note wlroots
-SomeWM builds against wlroots 0.20, or 0.19 if your system is too old for 0.20. If wlroots is not installed, Meson fetches the matching version as a subproject during the build.
+The build downloads wlroots 0.20.2 and builds it into SomeWM, so no wlroots package is needed and an installed one is not used. wlroots needs wayland 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0, pixman 0.46.0 and wayland-protocols 1.47 or newer. If your system has those, nothing else is built. Each one that is older is downloaded at a fixed version and built alongside wlroots; Debian 13 builds all five this way, Ubuntu 24.04 builds those five and libdisplay-info. The first build needs network access for the downloads.
 
-wlroots 0.20 needs wayland-server 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0, wayland-protocols 1.47 and pixman 0.46.0. Debian 13 and Ubuntu 24.04 ship older versions, so they get 0.19. An already-installed wlroots 0.20 is used regardless. Force a version with `-Dwlroots_version=0.19` or `-Dwlroots_version=0.20`.
-
-The 0.19 path exists for these older distributions and will be dropped once they ship wlroots 0.20 or the dependency versions it needs.
+XWayland support is always built in, so xcb, xcb-icccm and Xwayland are required to build, and X11 applications need the Xwayland binary at runtime.
 :::
 
 ### Arch Linux
@@ -30,11 +28,9 @@ yay -S somewm-git
 paru -S somewm-git
 ```
 
-This installs somewm and all dependencies. After installation, skip directly to [Launch](/docs/getting-started/first-launch).
+Then go to [Launch](/docs/getting-started/first-launch).
 
 #### Manual Build
-
-If you prefer to build from source:
 
 ```bash
 # Required dependencies
@@ -49,13 +45,15 @@ sudo pacman -S \
     libinput \
     libxkbcommon
 
-# Optional: XWayland support
-sudo pacman -S xorg-xwayland libxcb
+# XWayland, required
+sudo pacman -S xorg-xwayland libxcb xcb-util-wm
 ```
+
+The wlroots build inside SomeWM needs wlroots' own build dependencies too: the packages Arch's `wlroots0.20` depends on, among them `pixman`, `libdrm`, `seatd`, `libdisplay-info`, `libliftoff`, `hwdata` and `mesa`.
 
 ### Debian/Ubuntu
 
-If your release does not package wlroots 0.19 or 0.20, Meson builds wlroots from source. That needs wlroots' own build dependencies as well as SomeWM's.
+The build always builds wlroots from source, and on Debian 13 and Ubuntu 24.04 also wayland, libdrm, xkbcommon, pixman and wayland-protocols at the versions wlroots needs. That needs wlroots' own build dependencies as well as SomeWM's.
 
 ```bash
 # Required dependencies
@@ -80,7 +78,7 @@ sudo apt install \
     libxkbcommon-dev \
     libxcb-util-dev
 
-# wlroots build dependencies
+# wlroots build dependencies, required
 sudo apt install \
     libgbm-dev \
     libegl-dev \
@@ -93,7 +91,7 @@ sudo apt install \
     libliftoff-dev \
     hwdata
 
-# Optional: XWayland support
+# XWayland, required
 sudo apt install \
     xwayland \
     libxcb1-dev \
@@ -137,7 +135,7 @@ sudo dnf install \
     libinput-devel \
     libxkbcommon-devel
 
-# Optional: XWayland support
+# XWayland, required
 sudo dnf install \
     xorg-x11-server-Xwayland \
     xorg-x11-server-Xwayland-devel \
@@ -162,9 +160,7 @@ echo 'gui-wm/somewm ~amd64' >> /etc/portage/package.accept_keywords/somewm
 emerge -av gui-wm/somewm
 ```
 
-This installs somewm and all dependencies, building it from source via the ebuild. After installation, skip directly to [Launch](/docs/getting-started/first-launch).
-
-A live `9999` ebuild (tracking `main`) and a `1.4.9999` ebuild (tracking the `release/1.4` branch) are also provided for those who want the latest changes.
+A `9999` ebuild tracks `main` and `1.4.9999` tracks `release/1.4`. Then go to [Launch](/docs/getting-started/first-launch).
 
 ### NixOS
 
@@ -175,7 +171,7 @@ nix-build
 ./result/bin/somewm
 ```
 
-The included derivation sets up LGI and `GI_TYPELIB_PATH` automatically. For custom configurations or third-party Lua libraries, see the [NixOS section](#nixos-details) below.
+The derivation sets up LGI and `GI_TYPELIB_PATH`; third-party Lua libraries may need more, see [NixOS details](#nixos-details).
 
 ## Build and Install
 
@@ -186,23 +182,14 @@ make
 sudo make install
 ```
 
-The build will verify that LGI is correctly installed for your Lua version. If the check fails, you'll see instructions for which package to install.
-
-## LGI Troubleshooting
-
-SomeWM requires LGI (Lua GObject Introspection bindings) for widget rendering. **The LGI package must match your Lua version.**
+The build checks that LGI, the Lua GObject Introspection bindings the libraries use for cairo, Pango and GLib, is installed for your Lua version, and names the package to install if not. The package must match the Lua version:
 
 | Lua Version | Arch Linux | Debian/Ubuntu | Fedora |
 |-------------|------------|---------------|--------|
 | LuaJIT (default) | `lua51-lgi` | `lua-lgi` | `lua-lgi` |
 | Lua 5.4 | `lua-lgi` | `lua-lgi` | `lua-lgi` |
 
-If you have the wrong package, you'll see:
-```
-module 'lgi' not found
-```
-
-For custom LGI locations, use the `-L` (or `--search`) flag:
+The wrong package fails with `module 'lgi' not found`. For an LGI installed elsewhere:
 ```bash
 somewm -L /usr/lib/lua/5.1
 ```
@@ -211,11 +198,7 @@ somewm -L /usr/lib/lua/5.1
 
 ### GI_TYPELIB_PATH and Third-Party Libraries
 
-On NixOS, GObject Introspection typelibs are isolated in `/nix/store` rather than system paths. The `default.nix` sets up `GI_TYPELIB_PATH` with common typelibs (pango, gdk-pixbuf, glib, gtk3).
-
-**If you use third-party Lua libraries** (like [bling](https://github.com/BlingCorp/bling)), they may require additional typelibs. For example, bling's `app_launcher` widget requires GTK3 for icon theme lookups.
-
-To add additional typelibs when packaging SomeWM, extend the wrapper:
+Typelibs live in `/nix/store`, and `default.nix` puts pango, gdk-pixbuf, glib and gtk3 on `GI_TYPELIB_PATH`. A third-party library such as [bling](https://github.com/BlingCorp/bling) may need more (its `app_launcher` needs GTK3 for icon lookups). Extend the wrapper:
 
 ```nix
 postFixup = ''
@@ -228,7 +211,7 @@ postFixup = ''
 
 ### Extra Lua Modules
 
-To add additional Lua modules (like `luafilesystem`):
+For extra Lua modules such as `luafilesystem`:
 
 ```nix
 let
@@ -243,13 +226,6 @@ in
 ## Uninstallation
 
 ```bash
-# Remove installed files
 sudo make uninstall
-
-# Remove build directory
 make clean
 ```
-
-## Next Steps
-
-Once installed, proceed to [Launch](/docs/getting-started/first-launch) to run SomeWM for the first time.

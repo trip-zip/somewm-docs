@@ -1,7 +1,7 @@
 ---
 sidebar_position: 0
 title: Try SomeWM Without Logging Out
-description: Run a nested SomeWM in a window from your current desktop. No reboot, no logout.
+description: Start a nested SomeWM in a window on your current desktop with somewm-client test, spawn a terminal into it, reload a config, and stop it cleanly.
 ---
 
 import YouWillLearn from '@site/src/components/YouWillLearn';
@@ -9,31 +9,23 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Try SomeWM Without Logging Out <SomewmOnly />
 
-If you want to kick the tires on SomeWM without committing your daily-driver desktop to it, run a nested instance in a window. wlroots handles the nesting; `somewm-client` handles the rest. Your real session stays untouched.
-
 <YouWillLearn>
 
-- Launch a nested SomeWM in a window from any Wayland or X11 session
-- Spawn a terminal inside it and use a real SomeWM keybinding
-- Edit `rc.lua` and reload without restarting the nested instance
-- Stop the nested instance cleanly and leave no debris
+- Starting a nested SomeWM in a window from any Wayland or X11 session
+- Spawning a terminal into it and using a keybinding
+- Reloading an `rc.lua` and stopping the instance
 
 </YouWillLearn>
 
-## Prerequisites
+You need the SomeWM binary [installed](/docs/getting-started/installation) and a graphical session of any kind. You do not need to log into SomeWM.
 
-- SomeWM [installed](/docs/getting-started/installation) (the binary needs to be on `$PATH`, but you don't need to log into it)
-- You are in a graphical session right now (any Wayland compositor, or X11)
-
-## Start a nested instance
-
-You don't need to write a config first. SomeWM ships a fallback `rc.lua` that's enough to play with. Open a terminal and run:
+## Start
 
 ```bash
 somewm-client test start
 ```
 
-The status block tells you what happened:
+A window opens with SomeWM running the bundled config inside it, titled `somewm:test:test`, and the terminal prints:
 
 ```
 test 'test': pid 12345 on wayland-3 (host: wayland), config (default)
@@ -45,36 +37,23 @@ test 'test': pid 12345 on wayland-3 (host: wayland), config (default)
             somewm-client test stop --name test
 ```
 
-A new window opens with the nested SomeWM rendering inside it. The window title says `somewm:test:test`.
-
-## Try a keybinding
-
-The nested instance is empty until you spawn something into it. Drop a terminal in:
+## Use it
 
 ```bash
-somewm-client test run -- alacritty
+somewm-client test run -- alacritty      # any terminal you have
 ```
 
-(Replace `alacritty` with whatever terminal you have installed.)
+Click into the window and press Mod4 + Return: the bundled config spawns another terminal inside. If nothing happens, read the `keybinds:` line. A host that does not forward shortcuts (GNOME, X11) gets `Mod4` remapped to `Mod1`, so press Alt + Return.
 
-Click into the nested window, then press `Mod4 + Return` (Super + Return). The default rc.lua spawns another terminal inside the nested instance. If `Mod4` doesn't work, look at the `keybinds:` line in the start block: on hosts that don't forward shortcuts (GNOME, X11), the nested instance auto-remaps `Mod4` to `Mod1` (Alt). Try `Alt + Return` instead.
-
-## Reload after editing
-
-If you want to try your own `rc.lua`, stop the current instance and start a new one pointed at it:
+## Your own config
 
 ```bash
 somewm-client test stop
 somewm-client test start --config ~/dev/somewmrc.lua
+somewm-client test reload                # after editing, without restarting
 ```
 
-After editing the file, reload without restarting:
-
-```bash
-somewm-client test reload
-```
-
-## Clean up
+## Stop
 
 ```bash
 somewm-client test stop
@@ -82,11 +61,9 @@ somewm-client test stop
 
 The state directory and log are removed.
 
-## What next?
+## Next
 
-You've got the loop. From here:
-
-- **Keep iterating.** Point a test instance at your real `rc.lua` and use the [iterative widget development recipe](../guides/testing-with-nested-compositor.md#iterative-dev) for the edit / reload cycle.
-- **Understand what just happened.** [Test Mode](../concepts/test-mode.md) covers what nesting is, what it isn't (not a VM, not a sandbox), and how the keybind handoff works.
-- **Commit to it.** [Install SomeWM as your daily driver](/docs/getting-started/installation) when you're ready to log in.
-- **Learn the desktop.** [Basics tutorial](/docs/tutorials/basics) walks through keybindings, tags, and layouts.
+- [Testing with a nested compositor](../guides/testing-with-nested-compositor.md#iterative-dev): the edit and reload loop against your real `rc.lua`
+- [Test Mode](../concepts/test-mode.md): what nesting is and is not, and the keybind handoff
+- [Installation](/docs/getting-started/installation) when you want it as your session
+- [Basics](/docs/tutorials/basics): the desktop, tags and layouts

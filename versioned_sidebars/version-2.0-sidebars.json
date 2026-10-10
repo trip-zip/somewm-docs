@@ -8,7 +8,8 @@
       "items": [
         "getting-started/installation",
         "getting-started/first-launch",
-        "getting-started/migrating"
+        "getting-started/migrating",
+        "getting-started/upgrading-from-1.4"
       ]
     },
     {

@@ -1,147 +1,53 @@
 ---
 sidebar_position: 4
 title: Autostart Applications
-description: Start apps automatically when SomeWM launches
+description: "awful.spawn.once runs a command once per session, spawn.single_instance once per running process, spawn.with_shell when a shell is needed. When to use a systemd user service instead."
 ---
 
 # Autostart Applications
 
-Most setups need background services started automatically: clipboard managers, notification daemons, authentication agents. SomeWM provides several ways to autostart applications.
+A plain `awful.spawn("nm-applet")` at the end of `rc.lua` runs again on every reload and leaves duplicates. Three variants fix that:
 
-## Basic Autostart
+| Call | Runs | Use for |
+| --- | --- | --- |
+| `awful.spawn.once(cmd)` | once per session, by command string; a reload skips it | tray applets, agents |
+| `awful.spawn.single_instance(cmd)` | only if no client of that command is running | apps you restart by hand or that may crash |
+| `awful.spawn.with_shell(cmd)` | through `sh -c`, every time | pipes, `&&`, redirects, `sleep` |
 
-Add spawn calls at the end of your `rc.lua`:
+`once` and `single_instance` match the spawned client through startup notification, which a shell does not pass on, so a shell command guards itself:
 
 ```lua
--- Start applications when SomeWM launches
-awful.spawn("nm-applet")
-awful.spawn("blueman-applet")
-awful.spawn("pasystray")
+awful.spawn.with_shell("pgrep -x swaybg > /dev/null || swaybg -i ~/.wallpaper.jpg -m fill")
 ```
 
-**Problem:** These run every time you reload your config, spawning duplicates.
-
-## Run Something Once Per Session (`spawn.once`)
-
-Use `awful.spawn.once` to only run on initial startup, not on config reload:
+A command that needs the session fully up waits a moment:
 
 ```lua
--- Only starts once, ignores config reloads
+awful.spawn.with_shell("sleep 2 && waybar")
+gears.timer.start_new(2, function() awful.spawn.once("waybar"); return false end)
+```
+
+## A typical block
+
+```lua
 awful.spawn.once("nm-applet")
 awful.spawn.once("blueman-applet")
-awful.spawn.once("pasystray")
+awful.spawn.once("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")   -- or lxpolkit, polkit-kde
+awful.spawn.once("gnome-keyring-daemon --start --components=secrets")
+awful.spawn.once("wl-paste --watch cliphist store")
+awful.spawn.single_instance("swaybg -i " .. os.getenv("HOME") .. "/.wallpaper.jpg -m fill")
 ```
 
-`spawn.once` tracks commands by their command string. If you reload config, it won't spawn duplicates.
+Notifications need no daemon: `naughty` is one. Running dunst or mako alongside it takes the D-Bus name away.
 
-## Avoid Duplicates Across Restarts (`spawn.single_instance`)
+Environment variables for a spawned app go in the command, `awful.spawn.with_shell("GTK_THEME=Adwaita:dark my-gtk-app")`. `os.execute("export ...")` sets nothing: it runs in a child shell that exits. Session-wide variables belong in `~/.profile` or `environment.d`.
 
-`spawn.single_instance` checks if the process is already running:
+## systemd user services
 
-```lua
--- Checks if already running before spawning
-awful.spawn.single_instance("picom")
-awful.spawn.single_instance("dunst")
-```
-
-The difference from `spawn.once`:
-- `spawn.once` - tracks what was spawned this session
-- `spawn.single_instance` - checks actual running processes
-
-Use `single_instance` for apps you might restart manually, or that might crash and need re-launching.
-
-## Run Commands That Need a Shell (`spawn.with_shell`)
-
-Some commands need shell features (pipes, redirects, `&&`, `||`):
-
-```lua
--- Commands that need shell interpretation
-awful.spawn.with_shell("sleep 2 && picom")
-awful.spawn.with_shell("xdg-user-dirs-update && nitrogen --restore")
-
--- Redirect output to a log file
-awful.spawn.with_shell("my-app > ~/.cache/my-app.log 2>&1")
-```
-
-`spawn.once` and `spawn.single_instance` don't work with shell commands: they match clients by startup notification, which the shell doesn't propagate. To make a shell command run only once, put the guard in the command itself:
-
-```lua
--- Skip if it's already running
-awful.spawn.with_shell("pgrep -x nitrogen > /dev/null || (sleep 3 && nitrogen --restore)")
-```
-
-## Delayed Startup
-
-Some apps need the compositor fully running before they start:
-
-```lua
--- Wait for SomeWM to be ready
-gears.timer.start_new(2, function()
-    awful.spawn.once("polybar")
-    return false  -- Don't repeat
-end)
-
--- Or use spawn.with_shell with sleep
-awful.spawn.with_shell("sleep 2 && polybar")
-```
-
-## Complete Autostart Pattern
-
-Here's a robust autostart section for your `rc.lua`:
-
-```lua
--- Autostart applications
--- Place this at the end of rc.lua
-
--- Immediate starts (no shell needed)
-awful.spawn.once("nm-applet")
-awful.spawn.once("blueman-applet")
-awful.spawn.once("dunst")  -- Or let naughty handle notifications
-
--- Apps that need shell or delay
-awful.spawn.with_shell("sleep 1 && nitrogen --restore")
-
--- Single-instance apps (restart-friendly)
-awful.spawn.single_instance("picom", { silent = true })
-
--- Authentication agent (one of these)
-awful.spawn.once("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
--- or: awful.spawn.once("lxpolkit")
-
--- SSH/GPG agent (if not started by your session)
-awful.spawn.with_shell("eval $(ssh-agent) && ssh-add")
-```
-
-## Environment Variables
-
-Set environment variables before spawning apps:
-
-```lua
--- Set environment variable
-os.execute("export MY_VAR=value")
-
--- Or use spawn.with_shell
-awful.spawn.with_shell("export GTK_THEME=Adwaita:dark && my-gtk-app")
-```
-
-For system-wide variables, use `~/.profile` or `~/.pam_environment` instead.
-
-## Systemd User Services Alternative
-
-For more complex scenarios, consider systemd user services:
-
-### When to Use systemd
-
-- Apps that need restart-on-crash
-- Apps with dependencies on other services
-- Apps that should start before or after SomeWM
-- When you want `systemctl` control
-
-### Creating a User Service
-
-Create `~/.config/systemd/user/my-app.service`:
+For restart on crash, ordering between services, or `systemctl` control, a user unit beats a spawn:
 
 ```ini
+# ~/.config/systemd/user/my-app.service
 [Unit]
 Description=My Application
 After=graphical-session.target
@@ -155,111 +61,14 @@ RestartSec=5
 WantedBy=graphical-session.target
 ```
 
-Enable and start:
-
 ```bash
-systemctl --user enable my-app.service
-systemctl --user start my-app.service
+systemctl --user enable --now my-app.service
 ```
 
-### Controlling Services from rc.lua
+`awful.spawn("systemctl --user restart my-app.service")` from `rc.lua` restarts it on reload.
 
-```lua
--- Start a systemd user service
-awful.spawn("systemctl --user start my-app.service")
+## When an app does not start
 
--- Restart on config reload
-awful.spawn("systemctl --user restart my-app.service")
-```
+`which my-app` and running it from a terminal come first. The compositor's log, `journalctl --user -u somewm.service` under `somewm-session`, has the spawn error. An X11 app runs through XWayland and needs no `DISPLAY` set by you; a Wayland app needs `WAYLAND_DISPLAY`, which every spawned process inherits.
 
-## Common Autostart Apps
-
-### System Tray Apps
-
-```lua
-awful.spawn.once("nm-applet")           -- Network
-awful.spawn.once("blueman-applet")      -- Bluetooth
-awful.spawn.once("pasystray")           -- PulseAudio/PipeWire
-awful.spawn.once("cbatticon")           -- Battery
-```
-
-### Desktop Utilities
-
-```lua
-awful.spawn.once("dunst")               -- Notifications (if not using naughty)
-awful.spawn.once("clipit")              -- Clipboard manager
-awful.spawn.once("flameshot")           -- Screenshots
-awful.spawn.single_instance("picom")    -- Compositor effects
-```
-
-### Authentication
-
-```lua
--- Polkit agent (pick one)
-awful.spawn.once("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
-awful.spawn.once("/usr/lib/polkit-kde-authentication-agent-1")
-awful.spawn.once("lxpolkit")
-
--- Keyring
-awful.spawn.once("gnome-keyring-daemon --start --components=secrets")
-```
-
-### Wallpaper
-
-```lua
--- Using nitrogen
-awful.spawn.with_shell("sleep 1 && nitrogen --restore")
-
--- Using feh
-awful.spawn.with_shell("feh --bg-fill ~/.wallpaper.jpg")
-
--- Using swaybg (Wayland-native)
-awful.spawn.once("swaybg -i ~/.wallpaper.jpg -m fill")
-```
-
-## Troubleshooting
-
-### App Starts Multiple Times
-
-Use `spawn.once` or `spawn.single_instance` instead of plain `spawn`:
-
-```lua
--- Wrong: starts on every reload
-awful.spawn("my-app")
-
--- Right: only once per session
-awful.spawn.once("my-app")
-```
-
-### App Doesn't Start
-
-Check if the binary exists and is executable:
-
-```bash
-which my-app
-my-app  # Try running manually
-```
-
-Check SomeWM logs:
-
-```bash
-journalctl --user -f
-# Or check: ~/.local/share/somewm/somewm.log
-```
-
-### Spawned App Can't Find Display
-
-Ensure the app supports Wayland or is running through XWayland:
-
-```lua
--- For X11 apps that need DISPLAY
-awful.spawn.with_shell("export DISPLAY=:0 && my-x11-app")
-
--- For Wayland-native apps
-awful.spawn.once("my-wayland-app")
-```
-
-## See Also
-
-- **[CLI Control](/docs/guides/cli-control)** - Control SomeWM from scripts
-- **[AwesomeWM Spawn Docs](https://awesomewm.org/doc/api/libraries/awful.spawn.html)** - Full spawn API
+[awful.spawn upstream](https://awesomewm.org/doc/api/libraries/awful.spawn.html) has the full API.

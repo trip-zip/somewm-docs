@@ -6,6 +6,8 @@ description: Adapting your AwesomeWM config for Wayland
 
 # Migrating from AwesomeWM
 
+Already running SomeWM 1.4? Follow [Upgrade from 1.4 to 2.0](upgrading-from-1.4.md) for the release-specific changes and testing workflow.
+
 ## Quick Compatibility Check
 
 Before migrating, scan your config for potential issues:
@@ -312,20 +314,11 @@ and false during a reload's and at every point afterwards. Reading it from a
 signal handler or a timer always gives false.
 
 
-## What Works Unchanged
+## The Shared Configuration Model {#what-works-unchanged}
 
-Most of your config will work without changes:
+SomeWM retains AwesomeWM's Lua configuration model: widgets use `wibox`, themes use `beautiful`, client rules use `ruled.client`, and configuration code connects signal handlers to objects such as clients and screens.
 
-- **All gears.* modules** - timers, shapes, filesystem, etc.
-- **All wibox.* widgets** - text, image, progressbar, etc.
-- **Theming** - beautiful.* properties
-- **Client rules** - `ruled.client`
-- **Notifications** - `naughty`, including D-Bus notifications from applications
-- **Signals** - `client.connect_signal()`, `screen.connect_signal()`, etc.
-
-The modern API surface is intact. What SomeWM 2.0 dropped is the *deprecated* API that
-AwesomeWM still carries for backward compatibility. If your config predates AwesomeWM 4.0,
-read the next section.
+That shared model does not guarantee that every API is available or behaves identically. Review the removed APIs below regardless of your configuration's age, including calls made by third-party widgets and libraries. Also check the relevant SomeWM API reference for behaviour in your release.
 
 ## Deprecated APIs Removed in SomeWM 2.0
 

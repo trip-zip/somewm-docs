@@ -81,4 +81,4 @@ Wayland protocols somewm advertises in its registry. Versions are the maximum an
 
 ## XWayland
 
-Included by default, started on demand for the first X11 client. Disable with `meson setup -Dxwayland=disabled`.
+Always built in and started on demand for the first X11 client. There is no build option to leave it out: building needs xcb, xcb-icccm and Xwayland installed, and X11 applications need the Xwayland binary at runtime.

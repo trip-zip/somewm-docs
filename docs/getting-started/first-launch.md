@@ -1,99 +1,61 @@
 ---
 sidebar_position: 2
 title: Launch
-description: Running SomeWM and essential configuration
+description: Start SomeWM from a display manager or a TTY, where it looks for rc.lua, the five keybindings that get you through the first session, and what to read when it does not start.
 ---
 
 # Launch
 
-## Starting SomeWM
-
-### From a Display Manager
-
-`sudo make install` installs a Wayland session file, so you can select **"SomeWM"** from your display manager's session list (GDM, SDDM, etc.).
-
-### From a TTY
+`sudo make install` adds a Wayland session, so SomeWM appears in GDM, SDDM and the like. From a TTY:
 
 ```bash
 dbus-run-session somewm
+dbus-run-session somewm -s 'alacritty'   # with a startup command
 ```
 
-With a startup command (e.g., to launch a terminal):
-```bash
-dbus-run-session somewm -s 'alacritty'
-```
+`dbus-run-session` gives notifications and media keys a session bus; inside a display manager's session, plain `somewm` is enough.
 
-:::tip D-Bus Session
-`dbus-run-session` ensures D-Bus services (notifications, media keys, etc.) work correctly. If you're already in a D-Bus session (e.g., from a display manager), you can run `somewm` directly.
-:::
+## Configuration
 
-## Configuration Locations
+SomeWM loads the first of:
 
-SomeWM searches for configuration files in this order:
+1. `~/.config/somewm/rc.lua`
+2. `~/.config/awesome/rc.lua`, so an existing AwesomeWM config is used as is
+3. the bundled default
 
-1. `~/.config/somewm/rc.lua` - Your personal config
-2. `~/.config/awesome/rc.lua` - AwesomeWM compatibility (use your existing config!)
-3. System fallback - Default config installed with SomeWM
-
-### First Time Setup
-
-If you don't have a config yet, SomeWM will use the default configuration. To customize:
+To start from the default:
 
 ```bash
-# Create config directory
 mkdir -p ~/.config/somewm
-
-# Copy default config to customize
-cp /etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
-# Or for local install:
-# cp ~/.local/etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
+cp /etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua    # ~/.local/etc/xdg/somewm/rc.lua for a local install
 ```
 
-:::note NixOS
-The `nix-build` approach installs only binaries. Get the default config from the [source repository](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua).
-:::
+On NixOS `nix-build` installs only binaries; take the default from [the repository](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua).
 
-## Essential Keybindings
+## Keybindings
 
-Enough to survive your first session (**Mod4** is usually the Super/Windows key):
+Mod4 is the Super key.
 
-| Keybinding | Action |
-|------------|--------|
-| `Mod4 + Return` | Open terminal |
-| `Mod4 + Shift + c` | Close focused client |
-| `Mod4 + 1-5` | View tag 1-5 (the default config creates five tags) |
-| `Mod4 + Ctrl + r` | Reload configuration |
-| `Mod4 + Shift + q` | Quit SomeWM |
+| Keys | Action |
+| --- | --- |
+| Mod4 + Return | terminal |
+| Mod4 + Shift + c | close the focused client |
+| Mod4 + 1 to 5 | view a tag; the default config makes five |
+| Mod4 + Ctrl + r | reload the config |
+| Mod4 + Shift + q | quit |
 
-Press `Mod4 + s` for the built-in cheat sheet with every binding, or see the [Default Keybindings reference](/docs/reference/default-keybindings).
+Mod4 + s shows every binding; [Default Keybindings](/docs/reference/default-keybindings) lists them.
 
-## Troubleshooting
+## If it does not start
 
-### "No config found" error
+| Symptom | Cause and fix |
+| --- | --- |
+| `No config found` | the Lua libraries are not installed; run `sudo make install`, the build directory alone does not work |
+| the config loads and it crashes | `somewm -d 2>&1 \| tee somewm.log`, or `WLR_DEBUG=1 somewm` for wlroots output; look for `error loading` or `error executing` |
+| a widget is missing | a widget with its own `draw` or `fit` method is left out of the tree; the log has `wibox.clay: <class> draws itself (...) and is left out of the tree`, `somewm-client clay tree` prints what was drawn, and [Upgrading from 2.0 to 2.1](./upgrading-from-2.0.md#what-you-will-see) has the cases |
 
-Make sure you ran `sudo make install`. Running SomeWM directly from the build directory won't work because Lua libraries aren't in the expected paths.
+## Next
 
-### Config loads but crashes immediately
-
-Enable debug logging to see what's happening:
-
-```bash
-somewm -d 2>&1 | tee somewm.log
-```
-
-Or with full wlroots debug output:
-```bash
-WLR_DEBUG=1 somewm 2>&1 | tee somewm.log
-```
-
-Look for lines containing `error loading` or `error executing` in the log.
-
-### Widgets not rendering
-
-This usually means LGI isn't found or is the wrong version. See [Installation - LGI Troubleshooting](/docs/getting-started/installation#lgi-troubleshooting).
-
-## Next Steps
-
-- **Have an existing AwesomeWM config?** See [Migrating from AwesomeWM](/docs/getting-started/migrating)
-- **Starting fresh?** Try the [Basics](/docs/tutorials/basics) tutorial
-- **Want to customize input?** See [Input Device Configuration](/docs/guides/input-devices)
+- an AwesomeWM config: [Migrating from AwesomeWM](/docs/getting-started/migrating)
+- a SomeWM 2.0 config: [Upgrading from 2.0 to 2.1](./upgrading-from-2.0.md)
+- from scratch: [Basics](/docs/tutorials/basics)

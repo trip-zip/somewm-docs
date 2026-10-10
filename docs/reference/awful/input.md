@@ -97,7 +97,7 @@ The `scroll_button` setting specifies which button activates scroll-on-button mo
 | `keyboard_repeat_delay` | number | 600 | Delay before repeat starts (milliseconds) |
 
 :::note Repeat timing vs. the keymap
-`keyboard_repeat_rate` and `keyboard_repeat_delay` are sent to clients, which perform the repeating themselves. The keymap carries a separate per-key flag deciding whether a key may repeat at all, and a key that defines an explicit action has that flag off. These two properties do not override it. See [Key Repeat Is Client-Side](../../concepts/wayland-vs-x11.md#key-repeat-is-client-side).
+`keyboard_repeat_rate` and `keyboard_repeat_delay` are sent to clients, which perform the repeating themselves. The keymap carries a separate per-key flag deciding whether a key may repeat at all, and a key that defines an explicit action has that flag off. These two properties do not override it. See [Key Repeat Is Client-Side](../../concepts/wayland-vs-x11.md#what-changes-in-somewm).
 :::
 
 ### Common XKB Options

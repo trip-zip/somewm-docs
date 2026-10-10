@@ -165,7 +165,7 @@ Key internal fields available in signal handlers:
 | `self._private.imagebox` | wibox.widget.imagebox | The screenshot background widget |
 | `self._private.selection_widget` | wibox.widget.separator | The selection rectangle |
 
-These are used for the HiDPI performance optimization where the imagebox is hidden in `snipping::start`. See the [Screenshots guide](../../guides/screenshots.md).
+The frame is a wibox like any other: its imagebox is one image element the renderer rasters once, and the selection widget is placed and sized by the frame's manual layout at the drag's coordinates, so there is nothing to tune for HiDPI. See the [Screenshots guide](../../guides/screenshots.md).
 
 ## Examples
 
