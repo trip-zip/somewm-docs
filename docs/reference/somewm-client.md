@@ -18,7 +18,7 @@ somewm-client [--json] <command> [arguments...]
 
 `somewm-client` is a thin passthrough. It joins its arguments into one line, writes that to the compositor's Unix socket, and prints the reply. Command names are validated by the compositor, not the binary, so an unknown command comes back as `ERROR Unknown command: ...` rather than a usage error.
 
-More than 100 commands are registered. This page documents them by family. Run `somewm-client commands` for the authoritative list in your build. Last synced against the SomeWM source: `07feca28f`.
+More than 100 commands are registered. This page documents them by family. Run `somewm-client commands` for the authoritative list in your build. Last synced against the SomeWM source: `d053da19d`.
 
 ### Global flags
 
@@ -303,6 +303,12 @@ These commands set **global** input defaults. Per-device rules configured via `a
 | `screenshot screen <path> [<id>]` | Capture one screen |
 | `screenshot interactive <path>` | Capture an interactively selected region |
 
+## Clay Commands
+
+| Command | Description |
+|---------|-------------|
+| `clay tree [screen]` | Print the solved tree of every output, or of one screen by index: the header counters, one line per element with its sizing, its source word and its box, then the list of what the renderer holds. [Reading the tree](../concepts/reading-the-tree.md) explains every line |
+
 ## Session Commands {#session-commands}
 
 | Command | Description |
@@ -426,7 +432,7 @@ The `test` subcommands use a richer exit-code set than the generic codes at the 
 
 These let scripts and CI tell "already running" from "not found" from "the compositor crashed on startup" without parsing stderr.
 
-**See also:** [Test Mode (concepts)](../concepts/test-mode.md) for the why and when, and [Workflows](../guides/testing-with-nested-compositor.md#workflows) for the full set of recipes.
+**See also:** [Test Mode (concepts)](../concepts/test-mode.md) for the why and when, and [Workflows](../guides/testing-with-nested-compositor.md#recipes) for the full set of recipes.
 
 Test mode is inspired by [AWMTT](https://github.com/serialoverflow/awmtt), a similar nested-compositor testing tool for AwesomeWM.
 

@@ -1,99 +1,45 @@
 ---
 sidebar_position: 1
 title: Documentation
-description: SomeWM documentation index - tutorials, guides, reference, and concepts
+description: SomeWM is a wlroots compositor that runs AwesomeWM's Lua API on Wayland. Tutorials, how-to guides, reference and concepts for the 2.1 development version.
 ---
 
 # SomeWM Documentation
 
-A Wayland compositor that brings AwesomeWM's Lua API to Wayland, built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots). These docs cover everything from getting started to the full API reference.
+SomeWM is a Wayland compositor built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots) that runs AwesomeWM's Lua configuration model. These docs follow [Diátaxis](https://diataxis.fr/): tutorials teach, guides solve one task, reference lists, concepts explain. Where SomeWM differs from AwesomeWM, the affected page says so and [Deviations](reference/deviations.md) indexes it. A gap is a [discussion](https://github.com/trip-zip/somewm/discussions) away from being filled.
 
-## What These Docs Aim to Be
+## Start here
 
-SomeWM's documentation aims to be **self-sufficient**: a complete reference for SomeWM users, organized so you can find what you need without leaving.
-
-- **Comprehensive.** Every API surface AwesomeWM documents is, or will be, documented here.
-- **Organized by task.** We use the [Diátaxis framework](https://diataxis.fr/): tutorials (learning), how-to guides (doing), reference (looking up), and concepts (understanding), each kept separate. AwesomeWM's docs are LDoc-generated and do not draw these distinctions.
-- **Honest about Wayland.** Architectural differences from AwesomeWM, stubs, and SomeWM-only extensions are inline on the affected pages and indexed in [Deviations](reference/deviations.md).
-
-We are not self-sufficient on every topic yet. If you hit a gap, file a [discussion](https://github.com/trip-zip/somewm/discussions) and we will prioritize it. See [#532](https://github.com/trip-zip/somewm/discussions/532) for the conversation that started this work.
-
-## How to Use These Docs
-
-This documentation attempts to follow the [Diátaxis framework](https://diataxis.fr/), organizing content into four distinct types:
-
-| Type | Purpose | When to use |
-|------|---------|-------------|
-| **Tutorials** | Learning through doing | You're new and want to learn step-by-step |
-| **How-To Guides** | Solving specific problems | You need to accomplish a particular task |
-| **Reference** | Technical specifications | You need exact details about an API or feature |
-| **Concepts** | Understanding the "why" | You want deeper knowledge of how things work |
-
-Each section serves a different need. Pick the one that matches what you're trying to do.
-
-## Getting Started
-
-| Module | Description |
-|--------|-------------|
-| [Installation](getting-started/installation.md) | Build and install SomeWM |
-| [First Launch](getting-started/first-launch.md) | Run SomeWM for the first time |
-| [Migrating](getting-started/migrating.md) | Coming from AwesomeWM? Start here |
+| Page | For |
+| --- | --- |
+| [Installation](getting-started/installation.md) | build and install |
+| [Launch](getting-started/first-launch.md) | first session, config location, the five keys |
+| [Migrating from AwesomeWM](getting-started/migrating.md) | an existing `rc.lua` |
+| [Upgrading from 2.0 to 2.1](getting-started/upgrading-from-2.0.md) | a 2.0 config |
+| [Try SomeWM without logging out](tutorials/try-somewm-without-installing.md) | a nested instance in a window |
 
 ## Tutorials
 
-Step-by-step lessons. The first five are short and standalone: read any one on its own to retrofit a single feature into a config you already have.
+[Basics](tutorials/basics.md), [Keybindings](tutorials/keybindings.md), [Widgets](tutorials/widgets.md), [Wibar](tutorials/wibar.md), [Theme](tutorials/theme.md), [Carousel](tutorials/carousel.md). Each stands alone.
 
-| Module | Description |
-|--------|-------------|
-| [Basics](tutorials/basics.md) | Core concepts and configuration |
-| [Keybindings](tutorials/keybindings.md) | Set up keyboard shortcuts |
-| [Widgets](tutorials/widgets.md) | Build custom widgets |
-| [Wibar](tutorials/wibar.md) | Configure the status bar |
-| [Theme](tutorials/theme.md) | Customize colors and appearance |
+## Guides
 
-## How-To Guides
-
-Practical recipes for specific tasks.
-
-| Module | Description |
-|--------|-------------|
-| [Input Devices](guides/input-devices.md) | Configure touchpad, mouse, and keyboard settings |
-| [CLI Control](guides/cli-control.md) | Control SomeWM from external scripts |
-| [Multi-Monitor](guides/multi-monitor.md) | Set up multiple displays |
-| [Autostart](guides/autostart.md) | Launch applications on startup |
-| [Notifications](guides/notifications.md) | Configure the notification system |
-| [Screenshots](guides/screenshots.md) | Capture screen content |
-| [Fractional Scaling](guides/fractional-scaling.md) | HiDPI and fractional display scaling |
+Input devices, CLI control, multi-monitor, autostart, notifications, screenshots, scaling, shadows, lockscreen, client rules, custom layouts, testing in a nested compositor, and the carousel set. The sidebar lists them all.
 
 ## Reference
 
-Technical specifications and API details. Organized by Lua library, with links to upstream AwesomeWM docs.
-
-| Module | Description |
-|--------|-------------|
-| [Lua Libraries](reference/lua-libraries.md) | Overview of all libraries with upstream links |
-| [awful](reference/awful/index.md) | Window management, keybindings, layouts |
-| [beautiful](reference/beautiful/index.md) | Theming and theme variables |
-| [wibox](reference/wibox/index.md) | Widgets and the wibar |
-| [naughty](reference/naughty/index.md) | Notifications |
-| [gears](reference/gears/index.md) | Utilities (timers, shapes, colors) |
-| [Key Names](reference/key-names.md) | Modifier keys and key name reference |
-| [somewm-client](reference/somewm-client.md) | IPC CLI tool (SomeWM-only) |
+| Page | Covers |
+| --- | --- |
+| [Lua Libraries](reference/lua-libraries.md) | every library, with upstream links |
+| [awful](reference/awful/index.md), [wibox](reference/wibox/index.md), [beautiful](reference/beautiful/index.md), [naughty](reference/naughty/index.md), [gears](reference/gears/index.md) | the libraries |
+| [somewm-client](reference/somewm-client.md) | the IPC command line |
+| [Key Names](reference/key-names.md) | keys and modifiers |
+| [Deviations](reference/deviations.md) | every difference from AwesomeWM |
 
 ## Concepts
 
-Background knowledge and architectural understanding.
+[How SomeWM draws](concepts/how-somewm-draws.md) and [Reading the tree](concepts/reading-the-tree.md) are the 2.1 model; [The Object Model](concepts/object-model.md), [Architecture](concepts/architecture.md) and [Signals](concepts/signals.md) the Lua side; [Why SomeWM](concepts/why-somewm.md), [AwesomeWM Compatibility](concepts/awesomewm-compat.md) and [Wayland vs X11](concepts/wayland-vs-x11.md) the relationship to AwesomeWM.
 
-| Module | Description |
-|--------|-------------|
-| [Why SomeWM](concepts/why-somewm.md) | What this project commits to and what is open |
-| [Architecture](concepts/architecture.md) | How SomeWM is structured |
-| [Object Model](concepts/object-model.md) | Understanding the Lua object system |
-| [Wayland vs X11](concepts/wayland-vs-x11.md) | Key differences from X11 |
-| [AwesomeWM Compatibility](concepts/awesomewm-compat.md) | What works and what differs |
+## Versions
 
-## Versioning
-
-These docs track SomeWM 2.1 (dev), the unreleased development version. Use the version switcher in the navigation bar for 2.0, the newest release, or 1.4, the AwesomeWM-compatible line that tracks the AwesomeWM master branch and stays actively maintained.
-
-The [AwesomeWM apidoc](https://awesomewm.org/apidoc/) remains a useful upstream reference for topics that are not yet self-sufficient here.
+These pages track 2.1, in development. The version switcher has 2.0, the current release, and 1.4, which mirrors AwesomeWM master and is maintained indefinitely. The [AwesomeWM apidoc](https://awesomewm.org/apidoc/) covers inherited APIs not yet documented here.

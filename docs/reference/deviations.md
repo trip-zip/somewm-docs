@@ -8,9 +8,9 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Deviations from AwesomeWM
 
-This page is the dense reference for every place somewm's behavior or API surface differs from AwesomeWM. Architectural differences come from Wayland vs X11; stubs exist so configs don't error; somewm-only APIs add what AwesomeWM has no equivalent for.
+Every place SomeWM's behaviour or API differs from AwesomeWM. Architectural differences come from Wayland; stubs exist so configs do not error; SomeWM-only APIs add what AwesomeWM has no equivalent for.
 
-This is the canonical status list: other pages (FAQ, troubleshooting, compatibility concepts) link here rather than keeping their own copies. Last synced against the SomeWM source: `6de5e1ef3`.
+This is the canonical status list: other pages (FAQ, troubleshooting, compatibility concepts) link here rather than keeping their own copies. Last synced against the SomeWM source: `d053da19d`.
 
 ## Looking for...
 
@@ -19,6 +19,7 @@ This is the canonical status list: other pages (FAQ, troubleshooting, compatibil
 | The why and the philosophy | [Why somewm](../concepts/why-somewm.md), [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) |
 | Background on the X11 vs Wayland split | [Wayland vs X11](/docs/concepts/wayland-vs-x11) |
 | Step-by-step migration help | [Migrating from AwesomeWM](/docs/getting-started/migrating) |
+| What 2.1 changed for a 2.0 config | [Upgrading from 2.0 to 2.1](../getting-started/upgrading-from-2.0.md) |
 
 ## Architectural Differences
 
@@ -27,8 +28,8 @@ Wayland's design forces these to differ from AwesomeWM. The Lua API stays the sa
 | Feature | AwesomeWM (X11) | somewm (Wayland) | Reason |
 |---|---|---|---|
 | Systray | X11 `_NET_SYSTEMTRAY` embed | StatusNotifierItem D-Bus (SNI) | X11 tray protocol doesn't exist on Wayland |
-| Titlebar borders | Outside frame (X server draws) | Inset by `border_width` | Scene graph positioning differs |
-| Window visibility | `xcb_map_window()` shows immediately | Content must exist before showing | Prevents smearing artifacts |
+| Titlebar borders | Outside frame (X server draws) | Inset by `border_width` | The border is the client frame's padding in the one tree |
+| Drawing | Each widget paints itself with cairo | Every widget is a description; one tree per output is solved and drawn by the compositor | No widget holds a surface; see [How SomeWM draws](../concepts/how-somewm-draws.md) |
 | Map-time geometry | WM sends `ConfigureNotify` before map | Client commits first, then receives configure | Deferred arrange must flush before scene node enables |
 | WM restart | `execvp` replaces process; X server keeps clients | In-process Lua state rebuild via `awesome.restart()`; wlroots keeps clients. `awesome.quit(1)` does a cold restart via `somewm-session` | DRM/GPU state can't survive `exec`; the Lua VM can be rebuilt in place |
 
@@ -36,11 +37,11 @@ Wayland's design forces these to differ from AwesomeWM. The Lua API stays the sa
 
 **SNI systray.** AwesomeWM uses X11's `_NET_SYSTEMTRAY` to embed tray windows. somewm uses StatusNotifierItem D-Bus. Most modern apps (NetworkManager, Discord, Bluetooth applet) speak SNI. Legacy XEmbed-only apps won't appear. Implementation: `objects/systray.c` (D-Bus watcher), `lua/awful/statusnotifierwatcher.lua`, `wibox.widget.systray`.
 
-**Titlebar border positioning** (`objects/client.c`). On X11 borders sit outside the frame. On Wayland borders are scene rects at geometry edges, so titlebars start `border_width` inside.
+**Titlebar border positioning** (`lua/awful/client/clay.lua`). On X11 borders sit outside the frame. On Wayland the client's frame is a box whose padding is the border width, so titlebars and the surface start `border_width` inside, and the border is drawn as a scene rect around the frame.
 
 **Map-time geometry** (`somewm.c:mapnotify`). On X11 the WM sends a configure with the tiled geometry before the window maps, so the client never renders at the wrong size. On Wayland the client commits its preferred size first, so `awful.layout.arrange()` (deferred via `timer.delayed_call`) must flush before the configure goes out. `luaA_emit_refresh()` after manage signals forces the deferred arrange so `c->geometry` holds the tiled dimensions before the configure flushes.
 
-**Window visibility timing** (`objects/drawin.c`). The scene node stays disabled until `drawin_refresh_drawable()` signals content ready. Prevents visual smearing during initial render.
+**Drawing** (`declare.c`, `render.c`, `lua/wibox/clay.lua`). A wibox has no surface and no widget paints. Each frame, every drawin, client and widget on an output is declared into one tree, the solver sizes it, and the renderer draws the result; a widget with its own `draw`, `fit` or `layout` method is left out with a warning. [How SomeWM draws](../concepts/how-somewm-draws.md) is the full account, and the section below lists what a config notices.
 
 **Restart model.** `awesome.restart()` rebuilds the Lua state in process while wlroots keeps running. Clients survive. Use `awesome.quit(1)` for a cold restart via `somewm-session`; that is needed only when DRM state has gone bad.
 
@@ -88,7 +89,7 @@ These extend the AwesomeWM API with capabilities AwesomeWM has no equivalent for
 
 ### `awful.input` - Input device configuration
 
-18 properties for pointer (libinput) and keyboard settings. AwesomeWM delegated this to `xinput`, `xset`, and `setxkbmap` on X11.
+25 properties for pointer (libinput) and keyboard settings. AwesomeWM delegated this to `xinput`, `xset`, and `setxkbmap` on X11.
 
 ```lua
 local awful = require("awful")
@@ -175,24 +176,6 @@ somewm-client screen scale 1 1.5
 
 Apps that support `wp_fractional_scale_v1` render at native resolution. Struts and workarea recompute on scale change.
 
-### `drawin.surface_scale` - HiDPI surface override
-
-Override the drawable surface scale for individual drawins. At HiDPI scales (e.g. 1.5), drawable surfaces are created at physical resolution, which forces CPU-intensive upscaling for large `imagebox` content like screenshot overlays. Setting `surface_scale = 1.0` forces logical resolution and lets the GPU do the upscale.
-
-```lua
-local ss = awful.screenshot { interactive = true }
-ss:connect_signal("snipping::start", function(self)
-    if self._private.frame then
-        self._private.frame.surface_scale = 1.0
-    end
-end)
-```
-
-- `0` (default): auto, use output scale for HiDPI
-- `> 0`: force this scale factor
-
-Implementation: `drawin_t.scale_override` in `drawable_get_scale()` and `drawin_get_effective_scale()`. The setter recreates the drawable surface.
-
 ### Tag persistence across monitor hotplug
 
 The default `somewmrc.lua` saves and restores tag state when monitors disconnect and reconnect. Tags are keyed by connector name (`eDP-1`, `HDMI-A-1`, ...).
@@ -256,6 +239,27 @@ Wayland-native idle detection and inhibition. AwesomeWM relied on external scree
 | `idle::start` / `idle::stop` | Signals |
 
 Inhibition combines: protocol inhibitors (e.g., media players using `zwp_idle_inhibitor_v1`) and `awesome.idle_inhibit` are OR-ed together. Both must be inactive for idle to resume. Implementation: `some_recompute_idle_inhibit()` in `somewm.c`.
+
+## What 2.1 changed <SomewmOnly />
+
+SomeWM 2.1 draws every output from one tree. The Lua API stays AwesomeWM's; these are the differences a 2.0 config can notice. [Upgrading from 2.0 to 2.1](../getting-started/upgrading-from-2.0.md) has the full list with replacements.
+
+| Behaviour | 2.1 | Reason |
+|---|---|---|
+| A widget with its own `fit`, `draw` or `layout` | Left out of the tree with its subtree, one warning per class | A widget is a description; nothing paints or measures itself |
+| A wibox with `opacity` below 1 | Each fill blends at that opacity, so overlapping fills add up | The renderer draws each fill as its own rectangle; nothing blends a finished wibox |
+| A `bgimage` function | Not drawn, with a warning; a surface or path draws once at its own size | No surface to paint into |
+| A `shape` function | Only the path it traces is used; a rounded rectangle is read as a radius and drawn as a scene rect | Shapes are declarations, not painters |
+| A wibox tree above 4096 nodes | Shows nothing, with one warning | One fixed solver arena per output |
+| Text under `rotate` or `mirror` | One line; a multi-line textbox, a scroll container, or a rotate inside a rotate is left out with a warning | A rotated run is one text element |
+| `wibox.layout.grid` | Columns no longer agree across rows in a non-homogeneous grid; a widget over another is refused; a row span takes its first row | The grid is rows of cells the solver sizes |
+| A client's protocol minimum larger than its cell | The client overhangs the cell; the workarea and neighbours keep their size | A size the client asks for is on the surface, not the cell |
+| A client that draws a size it was not given | Drawn at the drawn size and cut at its cell | The surface shows the client's pixels; the frame holds the cell |
+| `ontop`, `above`, `below` under a layout | Tile into their slot, as in AwesomeWM | The slot is in the tree; only the surface floats at the band |
+| A textbox's `wrap` | Not read; every textbox wraps at words | The solver measures text, at words |
+| `wibox.container.tile` | Draws one copy of its widget | No tiling primitive in the tree |
+
+A property the tree cannot hold warns once naming the class, the property and what happens instead; the warning forms are listed on the upgrade page.
 
 ## Testing implications
 

@@ -1,85 +1,35 @@
 ---
 sidebar_position: 100
 title: FAQ
-description: Frequently asked questions about SomeWM
+description: Short answers on what SomeWM is, config location and reload, restart, AwesomeWM configs and libraries, the systray, screenshots and missing widgets.
 ---
 
-# Frequently Asked Questions
+# FAQ
 
-## General
+**What is SomeWM?** A Wayland compositor on wlroots running AwesomeWM's Lua configuration model. 2.x develops the API on its own; 1.4 mirrors AwesomeWM master ([AwesomeWM Compatibility](concepts/awesomewm-compat.md)).
 
-### What is SomeWM?
+**Why the name?** If Awesome is great, Some is adequate.
 
-SomeWM is AwesomeWM ported to Wayland. It aims for 100% Lua API compatibility with AwesomeWM, letting you use your existing `rc.lua` configuration.
+**Is it stable?** In active development. [Deviations](reference/deviations.md) is the status list.
 
-### Why "SomeWM"?
+**Where is the config?** `~/.config/somewm/rc.lua`, then `~/.config/awesome/rc.lua`, then the bundled default ([Launch](getting-started/first-launch.md)).
 
-It's a play on "AwesomeWM" - if Awesome is great, Some is... adequate? The name reflects that it's a port, not a reimagining.
+**How do I reload?** Mod4 + Ctrl + r, which calls `awesome.restart()`: the Lua state is rebuilt in process and every client survives. The X11-style exec-self restart is the one thing it cannot do ([Why SomeWM](concepts/why-somewm.md)).
 
-### Can I use my existing AwesomeWM config?
+**Does my AwesomeWM config work?** Usually, after removing X11 tools and the deprecated APIs 2.0 dropped. `somewm --check rc.lua` reports both ([Migrating](getting-started/migrating.md)).
 
-Yes! Most configs work with minimal changes. See [Migrating from AwesomeWM](/docs/getting-started/migrating) for details.
+**Do AwesomeWM widgets and libraries like bling work?** Those that use current APIs and do not paint with cairo. A widget with its own `draw` method is left out of the tree with a warning ([Upgrading from 2.0 to 2.1](getting-started/upgrading-from-2.0.md#what-you-will-see)); a library needs its own update for that. Removed APIs are listed in [Migrating](getting-started/migrating.md#deprecated-apis-removed-in-somewm-20).
 
-### Is SomeWM stable?
+**Why do xdotool, xrandr and xprop do nothing?** They are X11 ([Wayland vs X11](concepts/wayland-vs-x11.md) has the replacements).
 
-SomeWM is in active development. Most AwesomeWM functionality works, but some features are still being implemented. See [Current Limitations](/docs/troubleshooting#current-limitations).
+**Does the systray work?** Through StatusNotifierItem over D-Bus. XEmbed-only apps show no icon.
 
-## Configuration
+**Screenshots?** `awful.screenshot`, `somewm-client screenshot`, or grim and slurp ([Screenshots](guides/screenshots.md)).
 
-### Where is my config file?
+**Multi-monitor?** Each monitor is a screen with its own tags and bar ([Multi-Monitor](guides/multi-monitor.md)).
 
-`~/.config/somewm/rc.lua` (with `~/.config/awesome/rc.lua` as an AwesomeWM-compatibility fallback). The [Troubleshooting guide](./troubleshooting.md) has the full search order including the system paths.
+**A widget is missing.** Read the log for `wibox.clay: <class> ... is left out of the tree`, then `somewm-client clay tree` shows what was drawn ([Reading the tree](concepts/reading-the-tree.md)).
 
-### How do I reload my config?
+**A widget ignores the theme.** Its module was required before `beautiful.init()` ([Troubleshooting](troubleshooting.md#widget-shows-no-theming-unstyled-wrong-font)).
 
-Press `Mod4 + Ctrl + r` to reload your Lua configuration without restarting.
-
-### Can I restart SomeWM like AwesomeWM?
-
-Yes. `awesome.restart()` works: it hot-reloads the Lua state in process, and clients survive. What SomeWM can't do is the X11-style exec-self restart, which would disconnect every client. See [Why SomeWM](/docs/next/concepts/why-somewm) for the mechanism.
-
-## Compatibility
-
-### Will all AwesomeWM widgets work?
-
-Yes, all wibox widgets work because the Lua libraries are identical to AwesomeWM.
-
-### What about third-party libraries like bling?
-
-Most work without changes. Some may need adjustments if they use X11-specific features.
-
-### Why don't X11 tools work?
-
-Tools like `xdotool`, `xrandr`, `xprop` are X11-specific. See [Wayland vs X11](/docs/concepts/wayland-vs-x11) for alternatives.
-
-## Features
-
-### Does the systray work?
-
-Yes, but differently. SomeWM uses the SNI D-Bus protocol instead of X11 embed. Most modern apps support this.
-
-### Can I take screenshots?
-
-Yes! Use `awful.screenshot` or external tools like `grim` and `slurp`. See [Screenshots](/docs/guides/screenshots).
-
-### Does multi-monitor work?
-
-Yes. Screens are detected automatically and you can configure them per-screen in your `rc.lua`.
-
-## Troubleshooting
-
-### SomeWM won't start
-
-See [Troubleshooting](/docs/troubleshooting) for common issues.
-
-### My config isn't loading
-
-Run `somewm --check ~/.config/somewm/rc.lua` to check for errors.
-
-### Widgets aren't rendering
-
-Usually means LGI isn't found. See [Installation - LGI Troubleshooting](/docs/getting-started/installation#lgi-troubleshooting).
-
-### My widget ignores my theme
-
-The widget module was required before `beautiful.init()`. See [Troubleshooting](/docs/troubleshooting#widget-shows-no-theming-unstyled-wrong-font).
+**It will not start.** [Troubleshooting](troubleshooting.md).

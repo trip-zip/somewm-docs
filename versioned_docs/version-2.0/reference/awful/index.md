@@ -38,4 +38,4 @@ Client rules live in `ruled.client`, not `awful`. SomeWM 2.0 deleted the `awful.
 
 ## Behavioral Notes
 
-SomeWM's `awful` implementation is fully compatible with AwesomeWM. See [Wayland vs X11](/docs/concepts/wayland-vs-x11) for platform-specific differences that may affect some operations.
+SomeWM 2.0 removed legacy module aliases and functional helpers, including `awful.rules` and several `awful.tag` and `awful.client` wrappers. See [removed API replacements](../../getting-started/migrating.md#deprecated-apis-removed-in-somewm-20). [Wayland vs X11](../../concepts/wayland-vs-x11.md) explains platform differences that also affect some operations.

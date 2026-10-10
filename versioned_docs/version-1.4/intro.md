@@ -31,6 +31,10 @@ This documentation attempts to follow the [Diátaxis framework](https://diataxis
 
 Each section serves a different need. Pick the one that matches what you're trying to do.
 
+:::tip Moving to SomeWM 2.0?
+See [Upgrade from 1.4 to 2.0](/docs/getting-started/upgrading-from-1.4) for configuration changes, testing, and switching sessions.
+:::
+
 ## Getting Started
 
 | Module | Description |

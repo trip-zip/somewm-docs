@@ -36,6 +36,7 @@ Each section serves a different need. Pick the one that matches what you're tryi
 | Module | Description |
 |--------|-------------|
 | [Installation](getting-started/installation.md) | Build and install SomeWM |
+| [Upgrade from 1.4](getting-started/upgrading-from-1.4.md) | Adapt and test an existing SomeWM configuration for 2.0 |
 | [First Launch](getting-started/first-launch.md) | Run SomeWM for the first time |
 | [Migrating](getting-started/migrating.md) | Coming from AwesomeWM? Start here |
 

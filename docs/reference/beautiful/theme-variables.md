@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Theme Variables
 
-Generated from `@beautiful` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `b66d3cf685`. **443 documented**, 79 used-but-undocumented.
+Generated from `@beautiful` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `d053da19d7`. **446 documented**, 80 used-but-undocumented.
 
 See the [Theme Tutorial](/docs/tutorials/theme) for how to apply these in a custom theme.
 
@@ -63,12 +63,15 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 
 ## awful
 
-278 entries.
+281 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
-| `calendar_style` | `cell_properties` | The generic calendar style table. Each table property can also be defined by `beautiful.calendar_[flag]_[property]=val`. | [awful/widget/calendar_popup.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L42) |
-| `carousel_default_column_width` | `number` | Default column width fraction for new columns. | [awful/layout/suit/carousel.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L45) |
+| `calendar_popup_width` | `number` | The calendar width, when the popup is created without a `width`. With neither, the popup follows the calendar's content. | [awful/widget/calendar_popup.lua:49](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L49) |
+| `calendar_style` | `cell_properties` | The generic calendar style table. Each table property can also be defined by `beautiful.calendar_[flag]_[property]=val`. | [awful/widget/calendar_popup.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L43) |
+| `carousel_center_mode` | `string` | Viewport centering mode. | [awful/layout/suit/carousel.lua:56](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L56) |
+| `carousel_default_column_width` | `number` | Default column width fraction for new columns. | [awful/layout/suit/carousel.lua:44](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L44) |
+| `carousel_dynamic_peek` | `number` | Dynamic peek width in pixels. Columns at the edges of the strip will have this applied as their peek width. Negative values are ignored and cause edge columns to use peek_width instead. | [awful/layout/suit/carousel.lua:72](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L72) |
 | `carousel_peek_width` | `number` | Peek width in pixels for showing adjacent column edges. | [awful/layout/suit/carousel.lua:67](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L67) |
 | `column_count` | `integer` | The default number of columns. | [awful/tag.lua:1182](https://github.com/trip-zip/somewm/blob/main/lua/awful/tag.lua#L1182) |
 | `cursor_mouse_move` | `string` | The move cursor name. | [awful/mouse/init.lua:82](https://github.com/trip-zip/somewm/blob/main/lua/awful/mouse/init.lua#L82) |
@@ -87,24 +90,25 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `hotkeys_label_fg` | `color` | Foreground color used for hotkey groups and other labels. | [awful/hotkeys_popup/widget.lua:289](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L289) |
 | `hotkeys_modifiers_fg` | `color` | Foreground color used for hotkey modifiers (Ctrl, Alt, Super, etc). | [awful/hotkeys_popup/widget.lua:281](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L281) |
 | `hotkeys_override_label_bgs` | `boolean` | Override label background colors instead of cycling through xresources colors. | [awful/hotkeys_popup/widget.lua:293](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L293) |
+| `hotkeys_rows` | `int` | Rows in one column; a longer group continues in the next column. | [awful/hotkeys_popup/widget.lua:309](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L309) |
 | `hotkeys_shape` | `gears.shape` | Hotkeys widget shape. | [awful/hotkeys_popup/widget.lua:276](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L276) |
-| `layout_carousel` | `surface` | The carousel layout layoutbox icon. | [awful/layout/suit/carousel.lua:40](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L40) |
-| `layout_cornerne` | `surface` | The cornerne layout layoutbox icon. | [awful/layout/suit/corner.lua:20](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L20) |
-| `layout_cornernw` | `surface` | The cornernw layout layoutbox icon. | [awful/layout/suit/corner.lua:15](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L15) |
-| `layout_cornerse` | `surface` | The cornerse layout layoutbox icon. | [awful/layout/suit/corner.lua:30](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L30) |
-| `layout_cornersw` | `surface` | The cornersw layout layoutbox icon. | [awful/layout/suit/corner.lua:25](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L25) |
-| `layout_dwindle` | `surface` | The dwindle layout layoutbox icon. | [awful/layout/suit/spiral.lua:21](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/spiral.lua#L21) |
-| `layout_fairh` | `surface` | The fairh layout layoutbox icon. | [awful/layout/suit/fair.lua:13](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/fair.lua#L13) |
-| `layout_fairv` | `surface` | The fairv layout layoutbox icon. | [awful/layout/suit/fair.lua:18](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/fair.lua#L18) |
+| `layout_carousel` | `surface` | The carousel layout layoutbox icon. | [awful/layout/suit/carousel.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L39) |
+| `layout_cornerne` | `surface` | The cornerne layout layoutbox icon. | [awful/layout/suit/corner.lua:18](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L18) |
+| `layout_cornernw` | `surface` | The cornernw layout layoutbox icon. | [awful/layout/suit/corner.lua:13](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L13) |
+| `layout_cornerse` | `surface` | The cornerse layout layoutbox icon. | [awful/layout/suit/corner.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L28) |
+| `layout_cornersw` | `surface` | The cornersw layout layoutbox icon. | [awful/layout/suit/corner.lua:23](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L23) |
+| `layout_dwindle` | `surface` | The dwindle layout layoutbox icon. | [awful/layout/suit/spiral.lua:20](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/spiral.lua#L20) |
+| `layout_fairh` | `surface` | The fairh layout layoutbox icon. | [awful/layout/suit/fair.lua:14](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/fair.lua#L14) |
+| `layout_fairv` | `surface` | The fairv layout layoutbox icon. | [awful/layout/suit/fair.lua:19](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/fair.lua#L19) |
 | `layout_floating` | `surface` | The floating layout layoutbox icon. | [awful/layout/suit/floating.lua:16](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/floating.lua#L16) |
-| `layout_fullscreen` | `surface` | The fullscreen layout layoutbox icon. | [awful/layout/suit/max.lua:19](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/max.lua#L19) |
-| `layout_magnifier` | `surface` | The magnifier layout layoutbox icon. | [awful/layout/suit/magnifier.lua:19](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/magnifier.lua#L19) |
-| `layout_max` | `surface` | The max layout layoutbox icon. | [awful/layout/suit/max.lua:14](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/max.lua#L14) |
-| `layout_spiral` | `surface` | The spiral layout layoutbox icon. | [awful/layout/suit/spiral.lua:16](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/spiral.lua#L16) |
-| `layout_tile` | `surface` | The tile layout layoutbox icon. | [awful/layout/suit/tile.lua:24](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/tile.lua#L24) |
-| `layout_tilebottom` | `surface` | The tile bottom layout layoutbox icon. | [awful/layout/suit/tile.lua:34](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/tile.lua#L34) |
-| `layout_tileleft` | `surface` | The tile left layout layoutbox icon. | [awful/layout/suit/tile.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/tile.lua#L39) |
-| `layout_tiletop` | `surface` | The tile top layout layoutbox icon. | [awful/layout/suit/tile.lua:29](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/tile.lua#L29) |
+| `layout_fullscreen` | `surface` | The fullscreen layout layoutbox icon. | [awful/layout/suit/max.lua:21](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/max.lua#L21) |
+| `layout_magnifier` | `surface` | The magnifier layout layoutbox icon. | [awful/layout/suit/magnifier.lua:20](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/magnifier.lua#L20) |
+| `layout_max` | `surface` | The max layout layoutbox icon. | [awful/layout/suit/max.lua:16](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/max.lua#L16) |
+| `layout_spiral` | `surface` | The spiral layout layoutbox icon. | [awful/layout/suit/spiral.lua:15](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/spiral.lua#L15) |
+| `layout_tile` | `surface` | The tile layout layoutbox icon. | [awful/layout/suit/tile.lua:23](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/tile.lua#L23) |
+| `layout_tilebottom` | `surface` | The tile bottom layout layoutbox icon. | [awful/layout/suit/tile.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/tile.lua#L33) |
+| `layout_tileleft` | `surface` | The tile left layout layoutbox icon. | [awful/layout/suit/tile.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/tile.lua#L38) |
+| `layout_tiletop` | `surface` | The tile top layout layoutbox icon. | [awful/layout/suit/tile.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/tile.lua#L28) |
 | `layoutlist_align` | `string` | The selected layout alignment. | [awful/widget/layoutlist.lua:243](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/layoutlist.lua#L243) |
 | `layoutlist_bg_normal` | `string\|pattern` | The default background color. | [awful/widget/layoutlist.lua:216](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/layoutlist.lua#L216) |
 | `layoutlist_bg_selected` | `string\|pattern` | The selected layout background color. | [awful/widget/layoutlist.lua:226](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/layoutlist.lua#L226) |
@@ -317,37 +321,36 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `titlebar_tooltip_messages_sticky_active` | `string` | The message in the sticky button tooltip when the client is sticky. | [awful/titlebar.lua:585](https://github.com/trip-zip/somewm/blob/main/lua/awful/titlebar.lua#L585) |
 | `titlebar_tooltip_messages_sticky_inactive` | `string` | The message in the sticky button tooltip when the client isn't sticky. | [awful/titlebar.lua:590](https://github.com/trip-zip/somewm/blob/main/lua/awful/titlebar.lua#L590) |
 | `titlebar_tooltip_timeout` | `number` | The time in second before invoking the `timer_function` callback. It is used as the `timeout` parameter passed to the `awful.tooltip` constructor function. | [awful/titlebar.lua:613](https://github.com/trip-zip/somewm/blob/main/lua/awful/titlebar.lua#L613) |
-| `tooltip_align` | `string` | The default tooltip alignment. | [awful/tooltip.lua:276](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L276) |
-| `tooltip_bg` | `color` | The tooltip background color. | [awful/tooltip.lua:92](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L92) |
-| `tooltip_border_color` | `color` | The tooltip border color. | [awful/tooltip.lua:88](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L88) |
-| `tooltip_border_width` | `number` | The tooltip border width. | [awful/tooltip.lua:104](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L104) |
-| `tooltip_fg` | `color` | The tooltip foregound (text) color. | [awful/tooltip.lua:96](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L96) |
-| `tooltip_font` | `string` | The tooltip font. | [awful/tooltip.lua:100](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L100) |
-| `tooltip_gaps` | `table` | The tooltip margins. | [awful/tooltip.lua:112](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L112) |
-| `tooltip_opacity` | `number` | The tooltip opacity. | [awful/tooltip.lua:108](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L108) |
-| `tooltip_shape` | `gears.shape` | The default tooltip shape. The default shape for all tooltips is a rectangle. However, by setting this variable they can default to rounded rectangle or stretched octagons. | [awful/tooltip.lua:116](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L116) |
+| `tooltip_align` | `string` | The default tooltip alignment. | [awful/tooltip.lua:258](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L258) |
+| `tooltip_bg` | `color` | The tooltip background color. | [awful/tooltip.lua:77](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L77) |
+| `tooltip_border_color` | `color` | The tooltip border color. | [awful/tooltip.lua:73](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L73) |
+| `tooltip_border_width` | `number` | The tooltip border width. | [awful/tooltip.lua:89](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L89) |
+| `tooltip_fg` | `color` | The tooltip foregound (text) color. | [awful/tooltip.lua:81](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L81) |
+| `tooltip_font` | `string` | The tooltip font. | [awful/tooltip.lua:85](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L85) |
+| `tooltip_gaps` | `table` | The tooltip margins. | [awful/tooltip.lua:97](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L97) |
+| `tooltip_opacity` | `number` | The tooltip opacity. | [awful/tooltip.lua:93](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L93) |
+| `tooltip_shape` | `gears.shape` | The default tooltip shape. The default shape for all tooltips is a rectangle. However, by setting this variable they can default to rounded rectangle or stretched octagons. | [awful/tooltip.lua:101](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L101) |
 | `useless_gap` | `number` | The default gap. | [awful/tag.lua:957](https://github.com/trip-zip/somewm/blob/main/lua/awful/tag.lua#L957) |
-| `wallpaper_bg` | `color` | The default wallpaper background color. | [awful/wallpaper.lua:494](https://github.com/trip-zip/somewm/blob/main/lua/awful/wallpaper.lua#L494) |
-| `wallpaper_fg` | `gears.color` | The default wallpaper foreground color. This is useful when using widgets or text in the wallpaper. A wallpaper created from a single image wont use this. | [awful/wallpaper.lua:500](https://github.com/trip-zip/somewm/blob/main/lua/awful/wallpaper.lua#L500) |
-| `wibar_align` | `string` | The wibar's alignments. | [awful/wibar.lua:190](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L190) |
-| `wibar_bg` | `color` | The wibar's background color. | [awful/wibar.lua:170](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L170) |
-| `wibar_bgimage` | `surface` | The wibar's background image. | [awful/wibar.lua:174](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L174) |
-| `wibar_border_color` | `string` | The wibar border color. | [awful/wibar.lua:142](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L142) |
-| `wibar_border_width` | `integer` | The wibar border width. | [awful/wibar.lua:138](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L138) |
-| `wibar_cursor` | `string` | The wibar's mouse cursor. | [awful/wibar.lua:150](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L150) |
-| `wibar_favor_vertical` | `boolean` | If there is both vertical and horizontal wibar, give more space to vertical ones. By default, if multiple wibars risk overlapping, it will be resolved by giving more space to the horizontal one: [image: wibar position] If this variable is to to `true`, it will behave like: | [awful/wibar.lua:124](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L124) |
-| `wibar_fg` | `color` | The wibar's foreground (text) color. | [awful/wibar.lua:178](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L178) |
-| `wibar_height` | `integer` | The wibar's height. | [awful/wibar.lua:166](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L166) |
-| `wibar_margins` | `number\|table` | The wibar's margins. | [awful/wibar.lua:186](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L186) |
-| `wibar_ontop` | `boolean` | If the wibar is to be on top of other windows. | [awful/wibar.lua:146](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L146) |
-| `wibar_opacity` | `number` | The wibar opacity, between 0 and 1. | [awful/wibar.lua:154](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L154) |
-| `wibar_shape` | `gears.shape` | The wibar's shape. | [awful/wibar.lua:182](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L182) |
-| `wibar_stretch` | `boolean` | If the wibar needs to be stretched to fill the screen. | [awful/wibar.lua:105](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L105) |
-| `wibar_type` | `string` | The window type (desktop, normal, dock, …). | [awful/wibar.lua:158](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L158) |
-| `wibar_width` | `integer` | The wibar's width. | [awful/wibar.lua:162](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L162) |
+| `wallpaper_bg` | `color` | The default wallpaper background color. | [awful/wallpaper.lua:315](https://github.com/trip-zip/somewm/blob/main/lua/awful/wallpaper.lua#L315) |
+| `wallpaper_fg` | `gears.color` | The default wallpaper foreground color. This is useful when using widgets or text in the wallpaper. A wallpaper created from a single image wont use this. | [awful/wallpaper.lua:321](https://github.com/trip-zip/somewm/blob/main/lua/awful/wallpaper.lua#L321) |
+| `wibar_align` | `string` | The wibar's alignments. | [awful/wibar.lua:168](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L168) |
+| `wibar_bg` | `color` | The wibar's background color. | [awful/wibar.lua:148](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L148) |
+| `wibar_bgimage` | `surface` | The wibar's background image. | [awful/wibar.lua:152](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L152) |
+| `wibar_border_color` | `string` | The wibar border color. | [awful/wibar.lua:120](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L120) |
+| `wibar_border_width` | `integer` | The wibar border width. | [awful/wibar.lua:116](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L116) |
+| `wibar_cursor` | `string` | The wibar's mouse cursor. | [awful/wibar.lua:128](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L128) |
+| `wibar_fg` | `color` | The wibar's foreground (text) color. | [awful/wibar.lua:156](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L156) |
+| `wibar_height` | `integer` | The wibar's height. | [awful/wibar.lua:144](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L144) |
+| `wibar_margins` | `number\|table` | The wibar's margins. | [awful/wibar.lua:164](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L164) |
+| `wibar_ontop` | `boolean` | If the wibar is to be on top of other windows. | [awful/wibar.lua:124](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L124) |
+| `wibar_opacity` | `number` | The wibar opacity, between 0 and 1. | [awful/wibar.lua:132](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L132) |
+| `wibar_shape` | `gears.shape` | The wibar's shape. | [awful/wibar.lua:160](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L160) |
+| `wibar_stretch` | `boolean` | If the wibar needs to be stretched to fill the screen. | [awful/wibar.lua:97](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L97) |
+| `wibar_type` | `string` | The window type (desktop, normal, dock, …). | [awful/wibar.lua:136](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L136) |
+| `wibar_width` | `integer` | The wibar's width. | [awful/wibar.lua:140](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L140) |
 ## wibox
 
-66 entries.
+58 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
@@ -359,64 +362,56 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `arcchart_rounded_edge` | `boolean` | If the chart has rounded edges. | [wibox/container/arcchart.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/wibox/container/arcchart.lua#L47) |
 | `arcchart_start_angle` | `number` | The (radiant) angle where the first value start. | [wibox/container/arcchart.lua:55](https://github.com/trip-zip/somewm/blob/main/lua/wibox/container/arcchart.lua#L55) |
 | `arcchart_thickness` | `number` | The arc thickness. | [wibox/container/arcchart.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/wibox/container/arcchart.lua#L43) |
-| `bg_systray` | `string` | The systray background color. | [wibox/widget/systray.lua:35](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L35) |
-| `calendar_empty_color` | `color` | Set the color for the empty space where there are no date widgets. This happens when the month doesn't start on a Sunday or stop on a Saturday. | [wibox/widget/calendar.lua:70](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L70) |
-| `calendar_font` | `string` | The calendar font. | [wibox/widget/calendar.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L45) |
-| `calendar_long_weekdays` | `boolean` | Format the weekdays with three characters instead of two | [wibox/widget/calendar.lua:61](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L61) |
-| `calendar_spacing` | `number` | The calendar spacing. | [wibox/widget/calendar.lua:49](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L49) |
-| `calendar_start_sunday` | `boolean` | Start the week on Sunday. | [wibox/widget/calendar.lua:57](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L57) |
-| `calendar_week_numbers` | `boolean` | Display the calendar week numbers. | [wibox/widget/calendar.lua:53](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L53) |
-| `checkbox_bg` | `color` | The outer (unchecked area) background color, pattern or gradient. | [wibox/widget/checkbox.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L28) |
-| `checkbox_border_color` | `color` | The outer (unchecked area) border color. | [wibox/widget/checkbox.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L33) |
-| `checkbox_border_width` | `number` | The outer (unchecked area) border width. | [wibox/widget/checkbox.lua:23](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L23) |
-| `checkbox_check_border_color` | `color` | The checked part border color. | [wibox/widget/checkbox.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L38) |
-| `checkbox_check_border_width` | `number` | The checked part border width. | [wibox/widget/checkbox.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L43) |
-| `checkbox_check_color` | `number` | The checked part filling color. | [wibox/widget/checkbox.lua:48](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L48) |
-| `checkbox_check_shape` | `gears.shape\|function` | The checked part shape. If none is set, then the `shape` property will be used. | [wibox/widget/checkbox.lua:59](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L59) |
-| `checkbox_color` | `color` | The checkbox color. This will be used for the unchecked part border color and the checked part filling color. Note that `check_color` and `border_color` have priority over this property. | [wibox/widget/checkbox.lua:75](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L75) |
-| `checkbox_paddings` | `table\|number` | The padding between the outline and the progressbar. | [wibox/widget/checkbox.lua:66](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L66) |
-| `checkbox_shape` | `gears.shape\|function` | The outer (unchecked area) shape. | [wibox/widget/checkbox.lua:53](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L53) |
-| `flex_height` | `boolean` | Allow cells to have flexible height. Flexible height allow cells to adapt their height to fill the empty space at the bottom of the widget. | [wibox/widget/calendar.lua:65](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L65) |
-| `graph_bg` | `color` | The graph background color. Used, when the `background_color` property isn't set. | [wibox/widget/graph.lua:238](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/graph.lua#L238) |
-| `graph_border_color` | `color` | The graph border color. Used, when the `border_color` property isn't set. | [wibox/widget/graph.lua:244](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/graph.lua#L244) |
-| `graph_fg` | `color` | The graph foreground color Used, when the `color` property isn't set. | [wibox/widget/graph.lua:232](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/graph.lua#L232) |
-| `piechart_border_color` | `color` | The border color. If none is set, it will use current foreground (text) color. | [wibox/widget/piechart.lua:193](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/piechart.lua#L193) |
-| `piechart_border_width` | `number` | The pie elements border width. | [wibox/widget/piechart.lua:207](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/piechart.lua#L207) |
-| `piechart_colors` | `table` | The pie chart colors. If no color is set, only the border will be drawn. If less colors than required are set, colors will be re-used in order. | [wibox/widget/piechart.lua:212](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/piechart.lua#L212) |
-| `progressbar_bar_border_color` | `color` | The progressbar bar border color. | [wibox/widget/progressbar.lua:240](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L240) |
-| `progressbar_bar_border_width` | `number` | The progressbar bar border width. | [wibox/widget/progressbar.lua:235](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L235) |
-| `progressbar_bar_shape` | `gears.shape` | The progressbar inner shape. | [wibox/widget/progressbar.lua:229](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L229) |
-| `progressbar_bg` | `color` | The progressbar background color. | [wibox/widget/progressbar.lua:203](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L203) |
-| `progressbar_border_color` | `color` | The progressbar border color. | [wibox/widget/progressbar.lua:219](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L219) |
-| `progressbar_border_width` | `number` | The progressbar outer border width. | [wibox/widget/progressbar.lua:224](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L224) |
-| `progressbar_fg` | `color` | The progressbar foreground color. | [wibox/widget/progressbar.lua:208](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L208) |
-| `progressbar_margins` | `(table\|number\|nil)` | The progressbar margins. Note that if the `clip` is disabled, this allows the background to be smaller than the bar. | [wibox/widget/progressbar.lua:304](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L304) |
-| `progressbar_paddings` | `(table\|number\|nil)` | The progressbar padding. Note that if the `clip` is disabled, this allows the bar to be taller than the background. | [wibox/widget/progressbar.lua:318](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L318) |
-| `progressbar_shape` | `shape` | The progressbar shape. | [wibox/widget/progressbar.lua:213](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L213) |
+| `bg_systray` | `string` | The systray background color. | [wibox/widget/systray.lua:32](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L32) |
+| `calendar_font` | `string` | The calendar font. | [wibox/widget/calendar.lua:46](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L46) |
+| `calendar_long_weekdays` | `boolean` | Format the weekdays with three characters instead of two | [wibox/widget/calendar.lua:62](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L62) |
+| `calendar_spacing` | `number` | The calendar spacing. | [wibox/widget/calendar.lua:50](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L50) |
+| `calendar_start_sunday` | `boolean` | Start the week on Sunday. | [wibox/widget/calendar.lua:58](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L58) |
+| `calendar_week_numbers` | `boolean` | Display the calendar week numbers. | [wibox/widget/calendar.lua:54](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L54) |
+| `checkbox_bg` | `color` | The outer (unchecked area) background color, pattern or gradient. | [wibox/widget/checkbox.lua:29](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L29) |
+| `checkbox_border_color` | `color` | The outer (unchecked area) border color. | [wibox/widget/checkbox.lua:34](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L34) |
+| `checkbox_border_width` | `number` | The outer (unchecked area) border width. | [wibox/widget/checkbox.lua:24](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L24) |
+| `checkbox_check_color` | `number` | The checked part filling color. | [wibox/widget/checkbox.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L39) |
+| `checkbox_color` | `color` | The checkbox color. This will be used for the unchecked part border color and the checked part filling color. Note that `check_color` and `border_color` have priority over this property. | [wibox/widget/checkbox.lua:59](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L59) |
+| `checkbox_paddings` | `table\|number` | The padding between the outline and the progressbar. | [wibox/widget/checkbox.lua:50](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L50) |
+| `checkbox_shape` | `gears.shape\|function` | The outer (unchecked area) shape. | [wibox/widget/checkbox.lua:44](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/checkbox.lua#L44) |
+| `flex_height` | `boolean` | Allow cells to have flexible height. Flexible height allow cells to adapt their height to fill the empty space at the bottom of the widget. | [wibox/widget/calendar.lua:66](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L66) |
+| `graph_bg` | `color` | The graph background color. Used, when the `background_color` property isn't set. | [wibox/widget/graph.lua:239](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/graph.lua#L239) |
+| `graph_border_color` | `color` | The graph border color. Used, when the `border_color` property isn't set. | [wibox/widget/graph.lua:245](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/graph.lua#L245) |
+| `graph_fg` | `color` | The graph foreground color Used, when the `color` property isn't set. | [wibox/widget/graph.lua:233](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/graph.lua#L233) |
+| `piechart_border_color` | `color` | The border color. If none is set, it will use current foreground (text) color. | [wibox/widget/piechart.lua:115](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/piechart.lua#L115) |
+| `piechart_border_width` | `number` | The pie elements border width. | [wibox/widget/piechart.lua:129](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/piechart.lua#L129) |
+| `piechart_colors` | `table` | The pie chart colors. If no color is set, only the border will be drawn. If less colors than required are set, colors will be re-used in order. | [wibox/widget/piechart.lua:134](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/piechart.lua#L134) |
+| `progressbar_bar_border_color` | `color` | The progressbar bar border color. | [wibox/widget/progressbar.lua:226](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L226) |
+| `progressbar_bar_border_width` | `number` | The progressbar bar border width. | [wibox/widget/progressbar.lua:221](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L221) |
+| `progressbar_bar_shape` | `gears.shape` | The progressbar inner shape. | [wibox/widget/progressbar.lua:215](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L215) |
+| `progressbar_bg` | `color` | The progressbar background color. | [wibox/widget/progressbar.lua:189](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L189) |
+| `progressbar_border_color` | `color` | The progressbar border color. | [wibox/widget/progressbar.lua:205](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L205) |
+| `progressbar_border_width` | `number` | The progressbar outer border width. | [wibox/widget/progressbar.lua:210](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L210) |
+| `progressbar_fg` | `color` | The progressbar foreground color. | [wibox/widget/progressbar.lua:194](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L194) |
+| `progressbar_margins` | `(table\|number\|nil)` | The progressbar margins. Note that if the `clip` is disabled, this allows the background to be smaller than the bar. | [wibox/widget/progressbar.lua:290](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L290) |
+| `progressbar_paddings` | `(table\|number\|nil)` | The progressbar padding. Note that if the `clip` is disabled, this allows the bar to be taller than the background. | [wibox/widget/progressbar.lua:304](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L304) |
+| `progressbar_shape` | `shape` | The progressbar shape. | [wibox/widget/progressbar.lua:199](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L199) |
 | `radialprogressbar_border_color` | `color` | The progressbar border background color. | [wibox/container/radialprogressbar.lua:25](https://github.com/trip-zip/somewm/blob/main/lua/wibox/container/radialprogressbar.lua#L25) |
 | `radialprogressbar_border_width` | `number` | The progressbar border width. | [wibox/container/radialprogressbar.lua:35](https://github.com/trip-zip/somewm/blob/main/lua/wibox/container/radialprogressbar.lua#L35) |
 | `radialprogressbar_color` | `color` | The progressbar foreground color. | [wibox/container/radialprogressbar.lua:30](https://github.com/trip-zip/somewm/blob/main/lua/wibox/container/radialprogressbar.lua#L30) |
-| `radialprogressbar_paddings` | `table\|number` | The padding between the outline and the progressbar. | [wibox/container/radialprogressbar.lua:40](https://github.com/trip-zip/somewm/blob/main/lua/wibox/container/radialprogressbar.lua#L40) |
-| `separator_border_color` | `color` | The separator border color. | [wibox/widget/separator.lua:107](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L107) |
-| `separator_border_width` | `number` | The separator border width. | [wibox/widget/separator.lua:112](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L112) |
-| `separator_color` | `color` | The separator's color. | [wibox/widget/separator.lua:121](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L121) |
-| `separator_shape` | `shape` | The separator's shape. | [wibox/widget/separator.lua:126](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L126) |
-| `separator_span_ratio` | `number` | The relative percentage covered by the bar. | [wibox/widget/separator.lua:117](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L117) |
-| `separator_thickness` | `number` | The separator thickness. | [wibox/widget/separator.lua:102](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L102) |
-| `slider_bar_active_color` | `color` | The bar (active) color. Only works when both `beautiful.slider_bar_color` and `beautiful.slider_bar_active_color` are hex color strings | [wibox/widget/slider.lua:278](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L278) |
-| `slider_bar_border_color` | `color` | The bar (background) border color. | [wibox/widget/slider.lua:204](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L204) |
-| `slider_bar_border_width` | `number` | The bar (background) border width. | [wibox/widget/slider.lua:199](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L199) |
-| `slider_bar_color` | `color` | The bar (background) color. | [wibox/widget/slider.lua:273](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L273) |
-| `slider_bar_height` | `number` | The bar (background) height. | [wibox/widget/slider.lua:250](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L250) |
-| `slider_bar_margins` | `table` | The bar (background) margins. | [wibox/widget/slider.lua:255](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L255) |
-| `slider_bar_shape` | `gears.shape` | The bar (background) shape. | [wibox/widget/slider.lua:244](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L244) |
-| `slider_handle_border_color` | `color` | The handle border_color. | [wibox/widget/slider.lua:209](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L209) |
-| `slider_handle_border_width` | `number` | The handle border width. | [wibox/widget/slider.lua:214](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L214) |
-| `slider_handle_color` | `color` | The handle color. | [wibox/widget/slider.lua:224](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L224) |
-| `slider_handle_cursor` | `string` | The cursor icon while grabbing the handle. The available cursor names are: | [wibox/widget/slider.lua:235](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L235) |
-| `slider_handle_margins` | `table` | The slider handle margins. | [wibox/widget/slider.lua:264](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L264) |
-| `slider_handle_shape` | `gears.shape` | The handle shape. | [wibox/widget/slider.lua:229](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L229) |
-| `slider_handle_width` | `number` | The handle width. | [wibox/widget/slider.lua:219](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L219) |
+| `separator_border_color` | `color` | The separator border color. | [wibox/widget/separator.lua:109](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L109) |
+| `separator_border_width` | `number` | The separator border width. | [wibox/widget/separator.lua:114](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L114) |
+| `separator_color` | `color` | The separator's color. | [wibox/widget/separator.lua:123](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L123) |
+| `separator_shape` | `shape` | The separator's shape. | [wibox/widget/separator.lua:128](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L128) |
+| `separator_span_ratio` | `number` | The relative percentage covered by the bar. | [wibox/widget/separator.lua:119](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L119) |
+| `separator_thickness` | `number` | The separator thickness. | [wibox/widget/separator.lua:104](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L104) |
+| `slider_bar_active_color` | `color` | The bar (active) color. Only works when both `beautiful.slider_bar_color` and `beautiful.slider_bar_active_color` are hex color strings | [wibox/widget/slider.lua:226](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L226) |
+| `slider_bar_color` | `color` | The bar (background) color. | [wibox/widget/slider.lua:221](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L221) |
+| `slider_bar_height` | `number` | The bar (background) height. | [wibox/widget/slider.lua:207](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L207) |
+| `slider_bar_margins` | `table` | The bar (background) margins. | [wibox/widget/slider.lua:212](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L212) |
+| `slider_bar_shape` | `gears.shape` | The bar (background) shape. | [wibox/widget/slider.lua:201](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L201) |
+| `slider_handle_border_color` | `color` | The handle border_color. | [wibox/widget/slider.lua:166](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L166) |
+| `slider_handle_border_width` | `number` | The handle border width. | [wibox/widget/slider.lua:171](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L171) |
+| `slider_handle_color` | `color` | The handle color. | [wibox/widget/slider.lua:181](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L181) |
+| `slider_handle_cursor` | `string` | The cursor icon while grabbing the handle. The available cursor names are: | [wibox/widget/slider.lua:192](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L192) |
+| `slider_handle_shape` | `gears.shape` | The handle shape. | [wibox/widget/slider.lua:186](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L186) |
+| `slider_handle_width` | `number` | The handle width. | [wibox/widget/slider.lua:176](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L176) |
 ## naughty {#notifications}
 
 47 entries.
@@ -454,13 +449,13 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `notification_font` | `string\|lgi.Pango.FontDescription` | Notifications font. | [naughty/notification.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L33) |
 | `notification_height` | `int` | Notifications height. | [naughty/notification.lua:70](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L70) |
 | `notification_icon_resize_strategy` | `number` | The default way to resize the icon. | [naughty/widget/icon.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/naughty/widget/icon.lua#L28) |
-| `notification_icon_size` | `number` | The default notification icon size. | [naughty/widget/icon.lua:135](https://github.com/trip-zip/somewm/blob/main/lua/naughty/widget/icon.lua#L135) |
+| `notification_icon_size` | `number` | The default notification icon size. | [naughty/widget/icon.lua:83](https://github.com/trip-zip/somewm/blob/main/lua/naughty/widget/icon.lua#L83) |
 | `notification_icon_size_normal` | `number` | The notification icon size. | [naughty/list/notifications.lua:53](https://github.com/trip-zip/somewm/blob/main/lua/naughty/list/notifications.lua#L53) |
 | `notification_icon_size_selected` | `number` | The selected notification icon size. | [naughty/list/notifications.lua:57](https://github.com/trip-zip/somewm/blob/main/lua/naughty/list/notifications.lua#L57) |
 | `notification_margin` | `int` | The margins inside of the notification widget (or popup). | [naughty/notification.lua:62](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L62) |
-| `notification_max_width` | `number` | The maximum notification width. | [naughty/layout/box.lua:149](https://github.com/trip-zip/somewm/blob/main/lua/naughty/layout/box.lua#L149) |
+| `notification_max_width` | `number` | The maximum notification width. | [naughty/layout/box.lua:114](https://github.com/trip-zip/somewm/blob/main/lua/naughty/layout/box.lua#L114) |
 | `notification_opacity` | `int` | Notifications opacity. | [naughty/notification.lua:58](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L58) |
-| `notification_position` | `string` | The maximum notification position. Valid values are: * top_left * top_middle * top_right * bottom_left * bottom_middle * bottom_right | [naughty/layout/box.lua:153](https://github.com/trip-zip/somewm/blob/main/lua/naughty/layout/box.lua#L153) |
+| `notification_position` | `string` | The maximum notification position. Valid values are: * top_left * top_middle * top_right * bottom_left * bottom_middle * bottom_right | [naughty/layout/box.lua:118](https://github.com/trip-zip/somewm/blob/main/lua/naughty/layout/box.lua#L118) |
 | `notification_shape` | `gears.shape` | Notifications shape. | [naughty/notification.lua:53](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L53) |
 | `notification_shape_border_color_normal` | `color` | The shape border color for normal notifications. | [naughty/list/notifications.lua:35](https://github.com/trip-zip/somewm/blob/main/lua/naughty/list/notifications.lua#L35) |
 | `notification_shape_border_color_selected` | `color` | The shape border color for selected notifications. | [naughty/list/notifications.lua:40](https://github.com/trip-zip/somewm/blob/main/lua/naughty/list/notifications.lua#L40) |
@@ -485,7 +480,7 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `menubar_font` | `font` | Menubar font. | [menubar/init.lua:73](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L73) |
 ## root
 
-12 entries.
+20 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
@@ -500,6 +495,14 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `fg_urgent` | `color` | The default urgent element foreground (text) color. | [beautiful/init.lua:125](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L125) |
 | `font` | `string` | The default font. | [beautiful/init.lua:90](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L90) |
 | `icon_theme` | `string` | The icon theme name. It has to be a directory in `/usr/share/icons` or an XDG icon folder. | [beautiful/init.lua:137](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L137) |
+| `inspector_bg` | `color` | The panel body and its odd rows. | [somewm/inspector.lua:29](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L29) |
+| `inspector_bg_alt` | `color` | The header, the even rows, and the info and warnings panes. | [somewm/inspector.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L33) |
+| `inspector_bg_selected` | `color` | The selected tree row. | [somewm/inspector.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L45) |
+| `inspector_border` | `color` | Dividers, row borders and dim text (ids, the Offscreen tag). | [somewm/inspector.lua:37](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L37) |
+| `inspector_fg` | `color` | Text and swatch borders. | [somewm/inspector.lua:41](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L41) |
+| `inspector_font` | `string` | The panel font. A size, absolute (`"Monospace 14px"`) or in points (`"Monospace 10"`), sizes the panel's text; without one Clay's 16px stands. Rows are 30px, so sizes past about 20px overflow them. | [somewm/inspector.lua:58](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L58) |
+| `inspector_highlight` | `color` | The overlay drawn over the hovered element out on the desktop. Its alpha shows the element through. | [somewm/inspector.lua:49](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L49) |
+| `inspector_width` | `number` | The panel width in logical pixels. | [somewm/inspector.lua:54](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L54) |
 | `wallpaper` | `string\|gears.surface` | The wallpaper path. | [beautiful/init.lua:133](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L133) |
 ## SomeWM Extensions
 
@@ -509,122 +512,123 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | --- | --- | --- | --- |
 | `screenshot_frame_color` | `color` | The screenshot interactive frame color. | [awful/screenshot.lua:78](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L78) |
 | `screenshot_frame_shape` | `shape` | The screenshot interactive frame shape. | [awful/screenshot.lua:82](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L82) |
-| `systray_hover_bg` | `string` | The hover background color. | [wibox/widget/systray_icon.lua:50](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L50) |
-| `systray_hover_scale` | `number` | The hover scale factor. | [wibox/widget/systray_icon.lua:46](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L46) |
-| `systray_icon_change_triggers_urgent` | `boolean` | Whether icon changes trigger urgent styling. When an app changes its icon (e.g., Slack adding a notification badge), this triggers urgent styling instead. Best used with icon_override to show a clean icon while still getting notification indicators. | [wibox/widget/systray_icon.lua:157](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L157) |
-| `systray_icon_spacing` | `integer` | The systray icon spacing. | [wibox/widget/systray.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L45) |
-| `systray_icon_style` | `function\|table` | Per-icon style overrides. Can be a function that receives the systray_item and returns a style table, or a table mapping item.id or item.app_name to style tables. Style tables can contain: - `icon_override`: path to custom icon - `hover_scale`: scale on hover - `hover_bg`: background color on hover - `urgent_bg`: background color when urgent - `urgent_color`: urgent indicator color - `urgent_outline_color`: urgent indicator outline - `urgent_style`: "dot", "ring", "glow", or "none" - `urgent_position`: "top_right", "top_left", "bottom_right", "bottom_left" - `urgent_size`: number, ratio if &lt;= 1, pixels if &gt; 1 - `urgent_shape`: gears.shape function (default: gears.shape.circle) - `icon_change_triggers_urgent`: boolean, icon changes trigger urgent - `overlay_triggers_urgent`: boolean, overlay presence triggers urgent styling - `overlay_position`: "bottom_right", "bottom_left", "top_right", "top_left" - `overlay_size`: number, ratio if &lt;= 1, pixels if &gt; 1 - `overlay_bg`: background color for overlay - `overlay_shape`: "circle", "rounded_rect", "rect" - `overlay_padding`: padding around overlay within background | [wibox/widget/systray_icon.lua:54](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L54) |
-| `systray_max_rows` | `integer` | The maximum number of rows for systray icons. | [wibox/widget/systray.lua:40](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L40) |
-| `systray_menu_bg_focus` | `string` | Context menu focused background color. | [wibox/widget/systray_icon.lua:92](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L92) |
-| `systray_menu_bg_normal` | `string` | Context menu background color. | [wibox/widget/systray_icon.lua:84](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L84) |
-| `systray_menu_border_color` | `string` | Context menu border color. | [wibox/widget/systray_icon.lua:96](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L96) |
-| `systray_menu_border_width` | `number` | Context menu border width. | [wibox/widget/systray_icon.lua:100](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L100) |
-| `systray_menu_callback` | `function` | Context menu callback for customization. Called with (item, menu_items) before showing menu. Can modify menu_items. | [wibox/widget/systray_icon.lua:116](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L116) |
-| `systray_menu_fg_focus` | `string` | Context menu focused foreground color. | [wibox/widget/systray_icon.lua:88](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L88) |
-| `systray_menu_fg_normal` | `string` | Context menu foreground color. | [wibox/widget/systray_icon.lua:80](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L80) |
-| `systray_menu_font` | `string` | Context menu font. | [wibox/widget/systray_icon.lua:104](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L104) |
-| `systray_menu_height` | `number` | Context menu height. | [wibox/widget/systray_icon.lua:112](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L112) |
-| `systray_menu_width` | `number` | Context menu width. | [wibox/widget/systray_icon.lua:108](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L108) |
-| `systray_overlay_bg` | `string` | Background color for overlay icons. Draws a background shape behind the overlay icon for better visibility. | [wibox/widget/systray_icon.lua:144](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L144) |
-| `systray_overlay_padding` | `number` | Padding around overlay icon within its background. | [wibox/widget/systray_icon.lua:153](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L153) |
-| `systray_overlay_position` | `string` | The position of overlay icons on systray items. | [wibox/widget/systray_icon.lua:133](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L133) |
-| `systray_overlay_shape` | `string` | Shape for overlay background. | [wibox/widget/systray_icon.lua:149](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L149) |
-| `systray_overlay_size` | `number` | The size of overlay icons relative to the main icon. If value is &lt;= 1, treated as a ratio (e.g., 0.33 = 33% of icon size). If value is &gt; 1, treated as absolute pixels. | [wibox/widget/systray_icon.lua:138](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L138) |
-| `systray_overlay_triggers_urgent` | `boolean` | Whether overlay presence triggers urgent styling. When true, icons with an overlay will be rendered with urgent styling even if their status is not "NeedsAttention". | [wibox/widget/systray_icon.lua:127](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L127) |
-| `systray_paddings` | `integer` | The systray paddings (space around icons). | [wibox/widget/systray.lua:50](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L50) |
-| `systray_show_overlay` | `boolean` | Whether to show overlay icons. Overlay icons are small badges displayed on top of the main icon, typically used to show status (like number of notifications). | [wibox/widget/systray_icon.lua:121](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L121) |
-| `systray_urgent_bg` | `string` | The urgent background color. Shown when the systray item status is "NeedsAttention". Similar to AwesomeWM's bg_urgent for clients/tags. | [wibox/widget/systray_icon.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L28) |
-| `systray_urgent_color` | `string` | The urgent indicator color. | [wibox/widget/systray_icon.lua:34](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L34) |
-| `systray_urgent_outline_color` | `string` | The urgent indicator outline color. | [wibox/widget/systray_icon.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L38) |
-| `systray_urgent_position` | `string` | Position of urgent indicators (dot style). | [wibox/widget/systray_icon.lua:164](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L164) |
-| `systray_urgent_shape` | `function` | Shape function for urgent indicators. Used with "dot" and "ring" styles. Receives (cr, width, height). | [wibox/widget/systray_icon.lua:175](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L175) |
-| `systray_urgent_size` | `number` | Size of urgent indicator dot. If value is &lt;= 1, treated as a ratio of icon size. If value is &gt; 1, treated as absolute pixels. | [wibox/widget/systray_icon.lua:169](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L169) |
-| `systray_urgent_style` | `string` | The urgent indicator style. | [wibox/widget/systray_icon.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L42) |
+| `systray_hover_bg` | `string` | The hover background color. | [wibox/widget/systray_icon.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L43) |
+| `systray_hover_scale` | `number` | The hover scale factor. | [wibox/widget/systray_icon.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L39) |
+| `systray_icon_change_triggers_urgent` | `boolean` | Whether icon changes trigger urgent styling. When an app changes its icon (e.g., Slack adding a notification badge), this triggers urgent styling instead. Best used with icon_override to show a clean icon while still getting notification indicators. | [wibox/widget/systray_icon.lua:150](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L150) |
+| `systray_icon_spacing` | `integer` | The systray icon spacing. | [wibox/widget/systray.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L42) |
+| `systray_icon_style` | `function\|table` | Per-icon style overrides. Can be a function that receives the systray_item and returns a style table, or a table mapping item.id or item.app_name to style tables. Style tables can contain: - `icon_override`: path to custom icon - `hover_scale`: scale on hover - `hover_bg`: background color on hover - `urgent_bg`: background color when urgent - `urgent_color`: urgent indicator color - `urgent_outline_color`: urgent indicator outline - `urgent_style`: "dot", "ring", "glow", or "none" - `urgent_position`: "top_right", "top_left", "bottom_right", "bottom_left" - `urgent_size`: number, ratio if &lt;= 1, pixels if &gt; 1 - `urgent_shape`: gears.shape function (default: gears.shape.circle) - `icon_change_triggers_urgent`: boolean, icon changes trigger urgent - `overlay_triggers_urgent`: boolean, overlay presence triggers urgent styling - `overlay_position`: "bottom_right", "bottom_left", "top_right", "top_left" - `overlay_size`: number, ratio if &lt;= 1, pixels if &gt; 1 - `overlay_bg`: background color for overlay - `overlay_shape`: "circle", "rounded_rect", "rect" - `overlay_padding`: padding around overlay within background | [wibox/widget/systray_icon.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L47) |
+| `systray_max_rows` | `integer` | The maximum number of rows for systray icons. | [wibox/widget/systray.lua:37](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L37) |
+| `systray_menu_bg_focus` | `string` | Context menu focused background color. | [wibox/widget/systray_icon.lua:85](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L85) |
+| `systray_menu_bg_normal` | `string` | Context menu background color. | [wibox/widget/systray_icon.lua:77](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L77) |
+| `systray_menu_border_color` | `string` | Context menu border color. | [wibox/widget/systray_icon.lua:89](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L89) |
+| `systray_menu_border_width` | `number` | Context menu border width. | [wibox/widget/systray_icon.lua:93](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L93) |
+| `systray_menu_callback` | `function` | Context menu callback for customization. Called with (item, menu_items) before showing menu. Can modify menu_items. | [wibox/widget/systray_icon.lua:109](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L109) |
+| `systray_menu_fg_focus` | `string` | Context menu focused foreground color. | [wibox/widget/systray_icon.lua:81](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L81) |
+| `systray_menu_fg_normal` | `string` | Context menu foreground color. | [wibox/widget/systray_icon.lua:73](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L73) |
+| `systray_menu_font` | `string` | Context menu font. | [wibox/widget/systray_icon.lua:97](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L97) |
+| `systray_menu_height` | `number` | Context menu height. | [wibox/widget/systray_icon.lua:105](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L105) |
+| `systray_menu_width` | `number` | Context menu width. | [wibox/widget/systray_icon.lua:101](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L101) |
+| `systray_overlay_bg` | `string` | Background color for overlay icons. Draws a background shape behind the overlay icon for better visibility. | [wibox/widget/systray_icon.lua:137](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L137) |
+| `systray_overlay_padding` | `number` | Padding around overlay icon within its background. | [wibox/widget/systray_icon.lua:146](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L146) |
+| `systray_overlay_position` | `string` | The position of overlay icons on systray items. | [wibox/widget/systray_icon.lua:126](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L126) |
+| `systray_overlay_shape` | `string` | Shape for overlay background. | [wibox/widget/systray_icon.lua:142](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L142) |
+| `systray_overlay_size` | `number` | The size of overlay icons relative to the main icon. If value is &lt;= 1, treated as a ratio (e.g., 0.33 = 33% of icon size). If value is &gt; 1, treated as absolute pixels. | [wibox/widget/systray_icon.lua:131](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L131) |
+| `systray_overlay_triggers_urgent` | `boolean` | Whether overlay presence triggers urgent styling. When true, icons with an overlay will be rendered with urgent styling even if their status is not "NeedsAttention". | [wibox/widget/systray_icon.lua:120](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L120) |
+| `systray_paddings` | `integer` | The systray paddings (space around icons). | [wibox/widget/systray.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L47) |
+| `systray_show_overlay` | `boolean` | Whether to show overlay icons. Overlay icons are small badges displayed on top of the main icon, typically used to show status (like number of notifications). | [wibox/widget/systray_icon.lua:114](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L114) |
+| `systray_urgent_bg` | `string` | The urgent background color. Shown when the systray item status is "NeedsAttention". Similar to AwesomeWM's bg_urgent for clients/tags. | [wibox/widget/systray_icon.lua:21](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L21) |
+| `systray_urgent_color` | `string` | The urgent indicator color. | [wibox/widget/systray_icon.lua:27](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L27) |
+| `systray_urgent_outline_color` | `string` | The urgent indicator outline color. | [wibox/widget/systray_icon.lua:31](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L31) |
+| `systray_urgent_position` | `string` | Position of urgent indicators (dot style). | [wibox/widget/systray_icon.lua:157](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L157) |
+| `systray_urgent_shape` | `function` | Shape function for urgent indicators. Used with "dot" and "ring" styles. Receives (cr, width, height). | [wibox/widget/systray_icon.lua:168](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L168) |
+| `systray_urgent_size` | `number` | Size of urgent indicator dot. If value is &lt;= 1, treated as a ratio of icon size. If value is &gt; 1, treated as absolute pixels. | [wibox/widget/systray_icon.lua:162](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L162) |
+| `systray_urgent_style` | `string` | The urgent indicator style. | [wibox/widget/systray_icon.lua:35](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L35) |
 
 ## Undocumented (Used in Code)
 
-79 theme variables are read in source but lack an `@beautiful` annotation. These work, but their type and intended values are not formally documented. Filing upstream PRs to add LDoc is welcome.
+80 theme variables are read in source but lack an `@beautiful` annotation. These work, but their type and intended values are not formally documented. Filing upstream PRs to add LDoc is welcome.
 
 | Variable | Used at |
 | --- | --- |
-| `border_color` | [awful/permissions/init.lua:733](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L733), [wibox/init.lua:94](https://github.com/trip-zip/somewm/blob/main/lua/wibox/init.lua#L94) |
-| `border_color_active` | [awful/permissions/init.lua:602](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L602), [naughty/core.lua:672](https://github.com/trip-zip/somewm/blob/main/lua/naughty/core.lua#L672), [naughty/notification.lua:918](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L918) |
-| `border_color_floating` | [awful/permissions/init.lua:606](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L606) |
-| `border_color_floating_active` | [awful/permissions/init.lua:607](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L607) |
-| `border_color_floating_new` | [awful/permissions/init.lua:609](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L609) |
-| `border_color_floating_normal` | [awful/permissions/init.lua:608](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L608) |
-| `border_color_floating_urgent` | [awful/permissions/init.lua:610](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L610) |
-| `border_color_fullscreen` | [awful/permissions/init.lua:616](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L616) |
-| `border_color_fullscreen_active` | [awful/permissions/init.lua:617](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L617) |
-| `border_color_fullscreen_new` | [awful/permissions/init.lua:619](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L619) |
-| `border_color_fullscreen_normal` | [awful/permissions/init.lua:618](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L618) |
-| `border_color_fullscreen_urgent` | [awful/permissions/init.lua:620](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L620) |
-| `border_color_marked` | [awful/permissions/init.lua:601](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L601), [awful/permissions/init.lua:706](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L706), [awful/permissions/init.lua:707](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L707) |
-| `border_color_maximized` | [awful/permissions/init.lua:611](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L611) |
-| `border_color_maximized_active` | [awful/permissions/init.lua:612](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L612) |
-| `border_color_maximized_new` | [awful/permissions/init.lua:614](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L614) |
-| `border_color_maximized_normal` | [awful/permissions/init.lua:613](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L613) |
-| `border_color_maximized_urgent` | [awful/permissions/init.lua:615](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L615) |
-| `border_color_new` | [awful/permissions/init.lua:604](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L604) |
-| `border_color_normal` | [awful/permissions/init.lua:603](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L603), [awful/tooltip.lua:512](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L512), [awful/tooltip.lua:748](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L748) _(+1 more)_ |
-| `border_color_urgent` | [awful/permissions/init.lua:605](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L605) |
-| `border_focus` | [awful/permissions/init.lua:728](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L728), [awful/permissions/init.lua:729](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L729) |
-| `border_marked` | [awful/permissions/init.lua:709](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L709), [awful/permissions/init.lua:710](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L710) |
-| `border_normal` | [awful/permissions/init.lua:726](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L726), [awful/permissions/init.lua:727](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L727) |
-| `border_width` | [awful/hotkeys_popup/widget.lua:352](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L352), [awful/hotkeys_popup/widget.lua:399](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L399), [awful/permissions/init.lua:697](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L697) _(+2 more)_ |
-| `border_width_active` | [awful/permissions/init.lua:621](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L621) |
-| `border_width_floating` | [awful/permissions/init.lua:625](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L625) |
-| `border_width_floating_active` | [awful/permissions/init.lua:626](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L626) |
-| `border_width_floating_new` | [awful/permissions/init.lua:628](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L628) |
-| `border_width_floating_normal` | [awful/permissions/init.lua:627](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L627) |
-| `border_width_floating_urgent` | [awful/permissions/init.lua:629](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L629) |
-| `border_width_fullscreen` | [awful/permissions/init.lua:635](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L635) |
-| `border_width_fullscreen_active` | [awful/permissions/init.lua:636](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L636) |
-| `border_width_fullscreen_new` | [awful/permissions/init.lua:638](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L638) |
-| `border_width_fullscreen_normal` | [awful/permissions/init.lua:637](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L637) |
-| `border_width_fullscreen_urgent` | [awful/permissions/init.lua:639](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L639) |
-| `border_width_maximized` | [awful/permissions/init.lua:630](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L630) |
-| `border_width_maximized_active` | [awful/permissions/init.lua:631](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L631) |
-| `border_width_maximized_new` | [awful/permissions/init.lua:633](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L633) |
-| `border_width_maximized_normal` | [awful/permissions/init.lua:632](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L632) |
-| `border_width_maximized_urgent` | [awful/permissions/init.lua:634](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L634) |
-| `border_width_new` | [awful/permissions/init.lua:623](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L623) |
-| `border_width_normal` | [awful/permissions/init.lua:622](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L622) |
-| `border_width_urgent` | [awful/permissions/init.lua:624](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L624) |
-| `calendar_` | [awful/widget/calendar_popup.lua:44](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L44) |
-| `calendar_flex_height` | [wibox/widget/calendar.lua:449](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L449) |
-| `clock_bg` | [somewmrc.lua:298](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L298) |
-| `hotkeys_opacity` | [awful/hotkeys_popup/widget.lua:412](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L412) |
+| `border_color` | [awful/permissions/init.lua:746](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L746) |
+| `border_color_active` | [awful/permissions/init.lua:615](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L615), [naughty/notification.lua:892](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L892) |
+| `border_color_floating` | [awful/permissions/init.lua:619](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L619) |
+| `border_color_floating_active` | [awful/permissions/init.lua:620](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L620) |
+| `border_color_floating_new` | [awful/permissions/init.lua:622](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L622) |
+| `border_color_floating_normal` | [awful/permissions/init.lua:621](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L621) |
+| `border_color_floating_urgent` | [awful/permissions/init.lua:623](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L623) |
+| `border_color_fullscreen` | [awful/permissions/init.lua:629](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L629) |
+| `border_color_fullscreen_active` | [awful/permissions/init.lua:630](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L630) |
+| `border_color_fullscreen_new` | [awful/permissions/init.lua:632](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L632) |
+| `border_color_fullscreen_normal` | [awful/permissions/init.lua:631](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L631) |
+| `border_color_fullscreen_urgent` | [awful/permissions/init.lua:633](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L633) |
+| `border_color_marked` | [awful/permissions/init.lua:614](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L614), [awful/permissions/init.lua:719](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L719), [awful/permissions/init.lua:720](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L720) |
+| `border_color_maximized` | [awful/permissions/init.lua:624](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L624) |
+| `border_color_maximized_active` | [awful/permissions/init.lua:625](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L625) |
+| `border_color_maximized_new` | [awful/permissions/init.lua:627](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L627) |
+| `border_color_maximized_normal` | [awful/permissions/init.lua:626](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L626) |
+| `border_color_maximized_urgent` | [awful/permissions/init.lua:628](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L628) |
+| `border_color_new` | [awful/permissions/init.lua:617](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L617) |
+| `border_color_normal` | [awful/permissions/init.lua:616](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L616), [awful/tooltip.lua:495](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L495), [awful/tooltip.lua:711](https://github.com/trip-zip/somewm/blob/main/lua/awful/tooltip.lua#L711) _(+1 more)_ |
+| `border_color_urgent` | [awful/permissions/init.lua:618](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L618) |
+| `border_focus` | [awful/permissions/init.lua:741](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L741), [awful/permissions/init.lua:742](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L742) |
+| `border_marked` | [awful/permissions/init.lua:722](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L722), [awful/permissions/init.lua:723](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L723) |
+| `border_normal` | [awful/permissions/init.lua:739](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L739), [awful/permissions/init.lua:740](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L740) |
+| `border_width` | [awful/hotkeys_popup/widget.lua:357](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L357), [awful/hotkeys_popup/widget.lua:407](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L407), [awful/permissions/init.lua:710](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L710) _(+1 more)_ |
+| `border_width_active` | [awful/permissions/init.lua:634](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L634) |
+| `border_width_floating` | [awful/permissions/init.lua:638](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L638) |
+| `border_width_floating_active` | [awful/permissions/init.lua:639](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L639) |
+| `border_width_floating_new` | [awful/permissions/init.lua:641](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L641) |
+| `border_width_floating_normal` | [awful/permissions/init.lua:640](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L640) |
+| `border_width_floating_urgent` | [awful/permissions/init.lua:642](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L642) |
+| `border_width_fullscreen` | [awful/permissions/init.lua:648](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L648) |
+| `border_width_fullscreen_active` | [awful/permissions/init.lua:649](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L649) |
+| `border_width_fullscreen_new` | [awful/permissions/init.lua:651](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L651) |
+| `border_width_fullscreen_normal` | [awful/permissions/init.lua:650](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L650) |
+| `border_width_fullscreen_urgent` | [awful/permissions/init.lua:652](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L652) |
+| `border_width_maximized` | [awful/permissions/init.lua:643](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L643) |
+| `border_width_maximized_active` | [awful/permissions/init.lua:644](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L644) |
+| `border_width_maximized_new` | [awful/permissions/init.lua:646](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L646) |
+| `border_width_maximized_normal` | [awful/permissions/init.lua:645](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L645) |
+| `border_width_maximized_urgent` | [awful/permissions/init.lua:647](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L647) |
+| `border_width_new` | [awful/permissions/init.lua:636](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L636) |
+| `border_width_normal` | [awful/permissions/init.lua:635](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L635) |
+| `border_width_urgent` | [awful/permissions/init.lua:637](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L637) |
+| `calendar_` | [awful/widget/calendar_popup.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L45) |
+| `calendar_flex_height` | [wibox/widget/calendar.lua:422](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L422) |
+| `carousel_dynamic_peek_width` | [awful/layout/suit/carousel.lua:324](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L324) |
+| `clock_bg` | [somewmrc.lua:296](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L296) |
+| `hotkeys_opacity` | [awful/hotkeys_popup/widget.lua:420](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L420) |
 | `load_font` | [beautiful/init.lua:183](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L183) |
 | `lockscreen_` | [lockscreen.lua:253](https://github.com/trip-zip/somewm/blob/main/lua/lockscreen.lua#L253) |
 | `lockscreen_font` | [lockscreen.lua:268](https://github.com/trip-zip/somewm/blob/main/lua/lockscreen.lua#L268) |
-| `notification_` | [naughty/notification.lua:878](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L878) |
+| `notification_` | [naughty/notification.lua:852](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L852) |
 | `notification_action` | [naughty/list/actions.lua:209](https://github.com/trip-zip/somewm/blob/main/lua/naughty/list/actions.lua#L209), [naughty/list/notifications.lua:190](https://github.com/trip-zip/somewm/blob/main/lua/naughty/list/notifications.lua#L190) |
-| `opacity_active` | [awful/permissions/init.lua:655](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L655) |
-| `opacity_floating` | [awful/permissions/init.lua:640](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L640) |
-| `opacity_floating_active` | [awful/permissions/init.lua:641](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L641) |
-| `opacity_floating_new` | [awful/permissions/init.lua:643](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L643) |
-| `opacity_floating_normal` | [awful/permissions/init.lua:642](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L642) |
-| `opacity_floating_urgent` | [awful/permissions/init.lua:644](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L644) |
-| `opacity_fullscreen` | [awful/permissions/init.lua:650](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L650) |
-| `opacity_fullscreen_active` | [awful/permissions/init.lua:651](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L651) |
-| `opacity_fullscreen_new` | [awful/permissions/init.lua:653](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L653) |
-| `opacity_fullscreen_normal` | [awful/permissions/init.lua:652](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L652) |
-| `opacity_fullscreen_urgent` | [awful/permissions/init.lua:654](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L654) |
-| `opacity_maximized` | [awful/permissions/init.lua:645](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L645) |
-| `opacity_maximized_active` | [awful/permissions/init.lua:646](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L646) |
-| `opacity_maximized_new` | [awful/permissions/init.lua:648](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L648) |
-| `opacity_maximized_normal` | [awful/permissions/init.lua:647](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L647) |
-| `opacity_maximized_urgent` | [awful/permissions/init.lua:649](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L649) |
-| `opacity_new` | [awful/permissions/init.lua:657](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L657) |
-| `opacity_normal` | [awful/permissions/init.lua:656](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L656) |
-| `opacity_urgent` | [awful/permissions/init.lua:658](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L658) |
-| `progressbar_clip` | [wibox/widget/progressbar.lua:366](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L366) |
-| `separator_draw` | [wibox/widget/separator.lua:171](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/separator.lua#L171) |
+| `notification_padding` | [naughty/layout/box.lua:82](https://github.com/trip-zip/somewm/blob/main/lua/naughty/layout/box.lua#L82) |
+| `opacity_active` | [awful/permissions/init.lua:668](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L668) |
+| `opacity_floating` | [awful/permissions/init.lua:653](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L653) |
+| `opacity_floating_active` | [awful/permissions/init.lua:654](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L654) |
+| `opacity_floating_new` | [awful/permissions/init.lua:656](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L656) |
+| `opacity_floating_normal` | [awful/permissions/init.lua:655](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L655) |
+| `opacity_floating_urgent` | [awful/permissions/init.lua:657](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L657) |
+| `opacity_fullscreen` | [awful/permissions/init.lua:663](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L663) |
+| `opacity_fullscreen_active` | [awful/permissions/init.lua:664](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L664) |
+| `opacity_fullscreen_new` | [awful/permissions/init.lua:666](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L666) |
+| `opacity_fullscreen_normal` | [awful/permissions/init.lua:665](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L665) |
+| `opacity_fullscreen_urgent` | [awful/permissions/init.lua:667](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L667) |
+| `opacity_maximized` | [awful/permissions/init.lua:658](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L658) |
+| `opacity_maximized_active` | [awful/permissions/init.lua:659](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L659) |
+| `opacity_maximized_new` | [awful/permissions/init.lua:661](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L661) |
+| `opacity_maximized_normal` | [awful/permissions/init.lua:660](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L660) |
+| `opacity_maximized_urgent` | [awful/permissions/init.lua:662](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L662) |
+| `opacity_new` | [awful/permissions/init.lua:670](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L670) |
+| `opacity_normal` | [awful/permissions/init.lua:669](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L669) |
+| `opacity_urgent` | [awful/permissions/init.lua:671](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L671) |
+| `progressbar_clip` | [wibox/widget/progressbar.lua:359](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L359) |
 | `theme_path` | [beautiful/init.lua:147](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L147) |
 | `titlebar_font` | [awful/titlebar.lua:785](https://github.com/trip-zip/somewm/blob/main/lua/awful/titlebar.lua#L785) |
 | `wallpaper_colors` | [somewmrc.lua:225](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L225) |
-| `wallpaper_logo_color` | [somewmrc.lua:91](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L91), [somewmrc.lua:229](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L229) |
+| `wallpaper_logo_color` | [somewmrc.lua:91](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L91), [somewmrc.lua:228](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L228) |
 | `xresources_dpi` | [gears/xresources.lua:171](https://github.com/trip-zip/somewm/blob/main/lua/gears/xresources.lua#L171) |
 
 ## See Also
@@ -633,4 +637,4 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 - [Key Names](/docs/reference/key-names) – Common keybinding key names
 - [beautiful (AwesomeWM upstream docs)](https://awesomewm.org/apidoc/libraries/beautiful.html) – Full upstream API
 
-<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ b66d3cf685 | regenerate with `npm run generate:reference` -->
+<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ d053da19d7 | regenerate with `npm run generate:reference` -->

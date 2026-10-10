@@ -1,171 +1,69 @@
 ---
 sidebar_position: 101
 title: Troubleshooting
-description: Common issues and solutions
+description: Known failures and their fixes, grouped by startup, widgets, test mode, input and display, plus the current limitations and what to include in a bug report.
 ---
 
 # Troubleshooting
 
-## Startup Issues
+## Startup
 
-### "No config found" error
+| Symptom | Cause and fix |
+| --- | --- |
+| `No config found` | the Lua libraries are not installed; `sudo make install`. The search order is `~/.config/somewm/rc.lua`, `~/.config/awesome/rc.lua`, then `/etc/xdg/somewm/rc.lua` or `~/.local/etc/xdg/somewm/rc.lua`. |
+| the config loads and it crashes | `somewm --verbose 2>&1 \| tee somewm.log`, `-d` for everything, `WLR_DEBUG=1` for wlroots; look for `error loading` or `error executing` ([Debugging](guides/debugging.md)) |
+| an "X11 pattern detected" notification | the config calls an X11 tool or API; [Migrating](getting-started/migrating.md) has the replacement for each |
+| black screen after login | `journalctl --user -xe \| grep somewm`, or `dbus-run-session somewm -d` from a TTY |
+| wrong resolution | `wlr-randr --output DP-1 --mode 1920x1080@60`, or `output.mode` from Lua ([Multi-Monitor](guides/multi-monitor.md#configure-by-output)) |
 
-Make sure you ran `sudo make install`. Running SomeWM directly from the build directory won't work because Lua libraries aren't in the expected paths.
+## Widgets
 
-After installation, SomeWM searches for configs in this order:
-1. `~/.config/somewm/rc.lua`
-2. `~/.config/awesome/rc.lua`
-3. `/etc/xdg/somewm/rc.lua` (system install) or `~/.local/etc/xdg/somewm/rc.lua` (local install)
+### A widget is not showing
 
-### Config loads but crashes immediately
-
-Enable logging to see what's happening. SomeWM has three log levels:
-
-| Flag | Level | Shows |
-|------|-------|-------|
-| (none) | error | Errors only (default) |
-| `--verbose` | info | Errors + info messages |
-| `-d` | debug | Everything |
-
-```bash
-# Info level (recommended starting point)
-somewm --verbose 2>&1 | tee somewm.log
-
-# Debug level (verbose)
-somewm -d 2>&1 | tee somewm.log
-```
-
-You can also set the log level at runtime from your `rc.lua`:
-
-```lua
-awesome.log_level = "debug"  -- or "info", "error"
-```
-
-For full wlroots debug output, add the environment variable:
-```bash
-WLR_DEBUG=1 somewm -d 2>&1 | tee somewm.log
-```
-
-Look for lines containing `error loading` or `error executing`.
-
-### "X11 pattern detected" notification
-
-Your config contains code that won't work on Wayland. Edit your `rc.lua` to remove or replace X11-specific patterns. See [Migrating from AwesomeWM](/docs/getting-started/migrating).
-
-## Widget Issues
-
-### Widgets not rendering / LGI not found
-
-SomeWM requires LGI for widget rendering. The package must match your Lua version:
-
-| Lua Version | Arch Linux | Debian/Ubuntu | Fedora |
-|-------------|------------|---------------|--------|
-| LuaJIT (default) | `lua51-lgi` | `lua-lgi` | `lua-lgi` |
-| Lua 5.4 | `lua-lgi` | `lua-lgi` | `lua-lgi` |
-
-For custom LGI locations:
-```bash
-somewm -L /usr/lib/lua/5.1
-```
-
-### Widget shows no theming (unstyled, wrong font)
-
-The widget module was required before `beautiful.init()` ran. Theme variables read at require time were `nil`, silently: no error is raised, the widget just renders with no colors and the default `sans 8` font. Move the widget `require` below `beautiful.init()` in your `rc.lua`. See [the widgets tutorial](/docs/tutorials/widgets#step-3-use-it-in-your-config).
-
-### Systray icons not showing
-
-SomeWM uses the SNI D-Bus protocol. Legacy apps that only support X11 `_NET_SYSTEMTRAY` won't show icons.
-
-Most modern apps (NetworkManager, Discord, Bluetooth applets) support SNI.
-
-## Test Mode
-
-### `Mod4` keybindings don't work in a nested test instance
-
-When `somewm-client test start` is running, the nested somewm sits inside another compositor and the host decides whether to forward `Mod4`. If your host (e.g. GNOME) doesn't implement the shortcut inhibitor protocol, the orchestrator auto-remaps your `Mod4` bindings to `Mod1` (Alt) for that instance only. Check the start block:
+A widget with its own `draw`, `fit` or `layout` method, or a class with no describer, is left out of the tree with everything inside it, once per class in the log:
 
 ```
-test 'work': pid 12345 on wayland-3 (host: wayland), config ...
-  keybinds: ! outer compositor did not advertise shortcut inhibitor
-            ! Mod4 combos will be intercepted by the host
+W: awesome: wibox.clay: badge draws itself (:draw, :fit) and is left out of the tree
 ```
 
-When you see this, hit `Alt + <key>` instead of `Mod4 + <key>` for the duration of the test instance. See [Testing with a nested compositor](./guides/testing-with-nested-compositor.md#keybind-behavior-on-each-host) for the per-host compatibility table.
+`somewm-client clay tree` prints what was drawn and `screen.primary.inspector = true` shows it over the desktop; a left-out widget is absent from both. A property the tree cannot hold warns the same way and names what happened instead. [Upgrading from 2.0 to 2.1](getting-started/upgrading-from-2.0.md#what-you-will-see) has the cases; [Reading the tree](concepts/reading-the-tree.md) the output.
 
-### My test instance crashes immediately on start
+### A widget is unstyled, wrong font, no colours {#widget-shows-no-theming-unstyled-wrong-font}
 
-The orchestrator reports `nested compositor exited before IPC was ready`. The crash log is in the state directory:
+Its module was required before `beautiful.init()`, so every theme value it read at require time was nil, silently, and it renders in `sans 8`. Move the `require` below `init` ([Widgets](tutorials/widgets.md#2-put-it-in-the-bar)).
 
-```bash
-somewm-client test logs --name <n>
-```
+**`module 'lgi' not found`.** The LGI package must match the Lua version: `lua51-lgi` for LuaJIT on Arch, `lua-lgi` elsewhere ([Installation](getting-started/installation.md)). `somewm -L /usr/lib/lua/5.1` points at one installed elsewhere.
 
-Look near the end for a Lua traceback or a wlroots error. Common causes:
+**No systray icons.** The tray is StatusNotifierItem over D-Bus; an XEmbed-only app has no icon.
 
-- `rc.lua` requires a module that isn't on the test instance's `LUA_PATH`. The orchestrator's `--config FILE` only sets the rc.lua path, not the Lua search path. If your config does `require("my-widgets.foo")`, that module needs to be where Lua already looks (the rc.lua's directory, or `~/.config/somewm/`).
-- The test instance's nested-Wayland backend can't initialize. Some hosts need `WLR_RENDERER=pixman` instead of GLES2. Try `WLR_RENDERER=pixman somewm-client test start ...`.
-- A widget calls a SomeWM API that doesn't exist in your installed version. The log shows the unknown function name.
+## Test mode
 
-### `test stop` hangs or the state dir won't go away
+| Symptom | Cause and fix |
+| --- | --- |
+| Mod4 keys do nothing in the nested window | the host does not forward shortcuts, and the status block says `! outer compositor did not advertise shortcut inhibitor`; every `Mod4` is remapped to `Mod1`, so press Alt ([per host](guides/testing-with-nested-compositor.md#keybindings-per-host)) |
+| `nested compositor exited before IPC was ready` | `somewm-client test logs --name <n>` shows the traceback. Usual causes: a `require` not on the Lua path (`--config` sets only the `rc.lua`), a nested backend that needs `WLR_RENDERER=pixman`, or an API missing from the installed version. |
+| `test stop` hangs or the state directory stays | SIGTERM, five seconds, SIGKILL. If the pid is already gone, `rm -rf "$XDG_RUNTIME_DIR/somewm-test/<n>"` is safe. |
+| `test list` shows `stale` | the compositor died without cleanup; `test stop --name <n>` removes the entry, or the `rm -rf` above |
 
-The orchestrator sends `SIGTERM` and waits up to five seconds for the IPC socket to disappear, then escalates to `SIGKILL`. If you see the pid file in `$XDG_RUNTIME_DIR/somewm-test/<n>/` but `kill -0 $(cat .../pid)` says the process is gone, the compositor died ungracefully and left its state behind. Manual cleanup is safe at that point:
+## Input
 
-```bash
-rm -rf "$XDG_RUNTIME_DIR/somewm-test/<n>"
-```
+### Keyboard layout does not switch
 
-### `test list` shows a stale entry
-
-The orchestrator's `test list` connects to each instance's IPC socket with a short timeout. If it can't connect, the entry is reported as stale. That usually means the compositor crashed and the cleanup didn't run.
-
-```bash
-somewm-client test list
-# NAME      HOST    PID    STATE
-# work      wayland 12345  stale
-
-# Drop it
-somewm-client test stop --name work
-```
-
-If `test stop` itself errors out (the pid file is unreadable, the dir is partially gone), fall back to `rm -rf "$XDG_RUNTIME_DIR/somewm-test/<n>"`.
-
-## Input Issues
-
-### Keyboard layout not switching
-
-XKB toggle options like `grp:alt_shift_toggle` don't work automatically on Wayland. Use explicit keybindings:
+`grp:*` XKB options need an X server. Bind it:
 
 ```lua
 awful.key({ "Mod1", "Shift" }, "space", function()
-    local current = awesome.xkb_get_layout_group()
-    awesome.xkb_set_layout_group((current + 1) % 2)
+    awesome.xkb_set_layout_group((awesome.xkb_get_layout_group() + 1) % 2)
 end)
 ```
 
-### A key doesn't repeat when held
+### A key does not repeat when held {#a-key-doesnt-repeat-when-held}
 
-If **no** key repeats, check that the rate is not zero:
-
-```lua
-awful.input.keyboard_repeat_rate = 25   -- repeats per second
-awful.input.keyboard_repeat_delay = 600 -- ms before the first repeat
-```
-
-If only **some** keys are affected (often arrows or remapped keys), the keymap has repeat turned off for them. Check for a custom XKB directory:
-
-```bash
-ls ~/.config/xkb
-```
-
-libxkbcommon reads that directory before the system layouts, so a symbols file written for X11 is active under SomeWM even though X11 ignored it.
-
-Compile your keymap and look at the key that misbehaves:
+If no key repeats, the rate is zero: `awful.input.keyboard_repeat_rate = 25`, `keyboard_repeat_delay = 600`. If only some keys are affected, often arrows or remapped keys, the keymap has repeat off for them. A custom `~/.config/xkb` is read before the system layouts, so a symbols file X11 ignored is active here. Compile and look:
 
 ```bash
 xkbcli compile-keymap --layout us | grep -A4 'key <UP>'
 ```
-
-A key that has lost repeat looks like this:
 
 ```
 key <UP> {
@@ -175,69 +73,24 @@ key <UP> {
 };
 ```
 
-The `actions[1]=` line is the cause and `repeat= No` is the result. Any key defining an action skips compat interpretation and falls back to not repeating.
+A key that defines an action skips compat interpretation and stops repeating. Add `repeat= yes` to that key in the symbols file, re-run the command to confirm `repeat= Yes`, and reload.
 
-Add `repeat= yes` to those definitions in your symbols file:
+**Touchpad does nothing.** `awful.input.tap_to_click = 1` and the rest of [Input Device Configuration](guides/input-devices.md).
 
-```
-key <UP> { symbols[Group1]=[ Up ], actions[Group1]=[ ... ], repeat= yes };
-```
+## Current limitations {#current-limitations}
 
-Re-run the `xkbcli` command to confirm `repeat= Yes`, then reload your config.
-
-### Touch input not working
-
-Make sure libinput is properly configured. Check `awful.input` settings:
-
-```lua
-awful.input.tap_to_click = 1
-```
-
-## Display Issues
-
-### Black screen after login
-
-Check logs for errors:
-```bash
-journalctl --user -xe | grep somewm
-```
-
-Try running from TTY with debug output:
-```bash
-dbus-run-session somewm -d
-```
-
-### Wrong resolution
-
-SomeWM uses wlroots for output configuration. You can use `wlr-randr` to configure outputs:
-```bash
-wlr-randr --output DP-1 --mode 1920x1080@60
-```
-
-## Current Limitations {#current-limitations}
-
-The [Deviations reference](/docs/reference/deviations) is the canonical status list. Highlights:
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Systray (XEmbed apps) | Partial | SNI works, XEmbed doesn't |
-| X property APIs | Stub | X11 doesn't exist on Wayland |
-| Keybinding removal | Stub | `root._remove_key()` is no-op |
-
-### Partially Implemented
+[Deviations](reference/deviations.md) is the full list.
 
 | Feature | Status |
-|---------|--------|
-| XKB toggle options | Use keybindings instead |
+| --- | --- |
+| XEmbed tray apps | no icon; SNI works |
+| X property APIs | stubs |
+| `root._remove_key()` | no-op |
+| a widget that paints itself | left out; compose from stock widgets |
+| a wibox tree above 4096 nodes | shows nothing, with one warning; split it |
+| text under `rotate` or `mirror` | one line; a multi-line textbox is left out |
+| `grp:*` XKB toggle options | bind the switch yourself |
 
-## Getting Help
+## Reporting
 
-1. Check [GitHub issues](https://github.com/trip-zip/somewm/issues)
-2. Join [GitHub Discussions](https://github.com/trip-zip/somewm/discussions)
-3. Visit [AwesomeWM community](https://awesomewm.org/community/) (for Lua API questions)
-
-When reporting issues, include:
-- SomeWM version (`somewm --version`)
-- Your `rc.lua` (or relevant snippets)
-- Debug log output (`somewm -d`)
-- Steps to reproduce
+[Issues](https://github.com/trip-zip/somewm/issues) and [Discussions](https://github.com/trip-zip/somewm/discussions) on GitHub; the [AwesomeWM community](https://awesomewm.org/community/) for Lua API questions. Include `somewm --version`, the relevant part of `rc.lua`, the `somewm -d` log, and the steps.

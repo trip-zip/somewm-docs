@@ -39,8 +39,9 @@ These properties are set directly on the layout table. They apply globally to al
 | `carousel.default_column_width` | number | `1.0` | Width fraction for new columns (1.0 = full viewport width) |
 | `carousel.width_presets` | table | `{1/3, 1/2, 2/3, 1.0}` | Preset fractions cycled by `cycle_column_width()` |
 | `carousel.center_mode` | string | `"on-overflow"` | Viewport centering behavior (see [Centering Modes](#centering-modes)) |
-| `carousel.scroll_duration` | number | `0.2` | Scroll animation duration in seconds (0 = instant snap) |
 | `carousel.peek_width` | number | `0` | Pixels of visible content on each side to show adjacent column edges (`useless_gap` is added automatically) |
+
+Scrolling animates through `somewm.layout_animation`, the one animation switch for every layout; `carousel.scroll_duration` is gone. Set `require("somewm.layout_animation").duration` for a faster or slower slide, or leave the module unloaded for an instant snap.
 
 ```lua
 local carousel = awful.layout.suit.carousel
@@ -50,9 +51,6 @@ carousel.default_column_width = 0.5
 
 -- Use wider presets
 carousel.width_presets = { 0.5, 0.75, 1.0 }
-
--- Instant scrolling
-carousel.scroll_duration = 0
 
 -- Show 40px of adjacent columns
 carousel.peek_width = 40

@@ -1,116 +1,55 @@
 ---
 sidebar_position: 9
 title: Put a PNG Texture on Your Wibar
-description: Load an image and use it as a wibar background, tiled or stretched
+description: "bgimage paints an image once, at its own size, in the bar's top-left corner. To cover the bar, prepare an image the bar's size and set that."
 ---
-
-import YouWillLearn from '@site/src/components/YouWillLearn';
 
 # Put a PNG Texture on Your Wibar
 
-<YouWillLearn>
+A wibox's `bgimage` is one image element that fills the bar, and the renderer paints the file at its own pixel size in that element's top-left corner, scaled only by the output. It is not tiled and not stretched. A 20 by 20 texture on a 1280-wide bar covers 20 pixels and the rest shows `bg`, usually under the leftmost widget, so it looks as if nothing happened. A function as `bgimage`, which older configs used to tile, is not drawn and warns `wibox.drawable: bgimage functions are not drawn`.
 
-- How to load a PNG into a cairo surface with `gears.surface`
-- How `bgimage` draws by default, and why a small texture "disappears"
-- How to tile or stretch the image across the whole bar
-
-</YouWillLearn>
-
-## Load the Image Once
-
-Load the file into a cairo surface once, at the top of your config or widget module, and reuse it:
+## Set it
 
 ```lua
 local gsurface = require("gears.surface")
-
 local texture = gsurface.load(os.getenv("HOME") .. "/.config/somewm/theme/bar-texture.png")
-```
 
-`gears.surface.load` caches by path, so repeated loads of the same file are free. If the path is wrong you get **no error**: it prints a message to the log and returns an empty surface, which draws nothing. If your bar looks like the image was ignored, check the log and the path first.
-
-## Set It as the Bar Background
-
-Either pass it when you create the bar:
-
-```lua
 s.mywibox = awful.wibar {
-    position = "top",
-    screen = s,
-    bg = "#222222",   -- shows wherever the image does not cover
+    position = "top", screen = s,
+    bg = "#222222",        -- shows wherever the image does not
     bgimage = texture,
 }
 ```
 
-Or set it for all bars from your theme file:
+Or for every bar, `theme.wibar_bgimage = "/absolute/path.png"`; it is read when each bar is constructed, so a later change needs `s.mywibox.bgimage = ...`. `gears.surface.load` caches by path and does not error on a missing file: it logs and returns an empty surface, which draws nothing.
 
-```lua
--- theme.lua
-theme.wibar_bgimage = os.getenv("HOME") .. "/.config/somewm/theme/bar-texture.png"
+## Cover the bar
+
+Make the image the bar's size, `s.geometry.width` by the bar's height, with any image tool:
+
+```bash
+magick -size 1280x32 tile:bar-texture.png bar-background.png     # tile
+magick bar-texture.png -resize 1280x32! bar-background.png       # or stretch
 ```
 
-The theme variable is read once, when each wibar is constructed. Changing it after the bar exists does nothing; assign `s.mywibox.bgimage = ...` to update a live bar.
-
-## What You Get by Default
-
-The image is painted **once, at its native pixel size, in the top-left corner** of the bar. It is not tiled and not stretched. A 20x20 texture on a 1920-wide bar covers 20 pixels and the rest of the bar shows the plain `bg` color, so it is easy to think nothing happened, especially if a widget sits on top of that corner.
-
-To cover the whole bar, use the function form of `bgimage`. The function runs on every repaint and receives a cairo context plus the bar's current size.
-
-## Tile the Texture
-
-Wrap the surface in a cairo pattern and set its `extend` mode to `REPEAT`:
-
 ```lua
-local cairo = require("lgi").cairo
-local gsurface = require("gears.surface")
-
-local texture = gsurface.load(os.getenv("HOME") .. "/.config/somewm/theme/bar-texture.png")
-
-s.mywibox = awful.wibar {
-    position = "top",
-    screen = s,
-    bgimage = function(_, cr, width, height)
-        local pattern = cairo.Pattern.create_for_surface(texture)
-        pattern.extend = cairo.Extend.REPEAT
-        cr:set_source(pattern)
-        cr:rectangle(0, 0, width, height)
-        cr:fill()
-    end,
-}
+bgimage = gsurface.load(os.getenv("HOME") .. "/.config/somewm/theme/bar-background.png"),
 ```
 
-`cairo.Extend.REFLECT` mirrors every other tile instead of repeating, which hides seams in non-tileable textures.
+The bar's tree then holds one image element the bar's size:
 
-## Stretch the Image
-
-To scale one image across the whole bar, scale the context to the ratio between the bar and the image:
-
-```lua
-s.mywibox = awful.wibar {
-    position = "top",
-    screen = s,
-    bgimage = function(_, cr, width, height)
-        local img_w, img_h = gsurface.get_size(texture)
-        cr:scale(width / img_w, height / img_h)
-        cr:set_source_surface(texture, 0, 0)
-        cr:paint()
-    end,
-}
+```
+WIBAR screen 1 1280x32+0+0 converted: 33 nodes, 4 images, radius 8 clip w=grow h=fixed(32) theme row box 0,0 1280x32
+  3eba84d6     image image 1280x32 natural w=grow h=grow box 0,0 1280x32
 ```
 
-## Troubleshooting
+The image's pixels are logical pixels, so one file covers the bar at any output scale.
 
-### The image only shows in one corner
+## If the bar stays a solid colour
 
-That is the default draw behavior, not a bug. Use the tiled or stretched function form above.
+- The path: absolute, not `~`. The log has the load error.
+- The image is small and under the first widget. Try a bright test image or remove the widgets for a moment.
+- `theme.wibar_bgimage` was set after the bar was created.
+- You set a function. The log says so.
 
-### The bar is just a solid color
-
-- Wrong file path: `gears.surface.load` logs an error and draws nothing. Check the log and use an absolute path (`os.getenv("HOME") .. "/..."`, not `~/...`).
-- The image loaded but is small and hidden under the leftmost widget. Try a bright test image, or temporarily remove the bar's widgets.
-- You set `theme.wibar_bgimage` after the bar was already created. Set it before `awful.wibar` runs, or assign `s.mywibox.bgimage` directly.
-
-## See Also
-
-- [Wibar Properties: Background Image](/docs/reference/wibox/wibar#background-image) - reference for `bgimage` value types and semantics
-- [Theme tutorial](/docs/tutorials/theme) - setting up `theme.lua` and `beautiful.init()`
+[Wibar properties](/docs/reference/wibox/wibar#background-image) lists the value types `bgimage` accepts.

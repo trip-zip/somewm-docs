@@ -1,177 +1,50 @@
 ---
 sidebar_position: 3
 title: Client Stacking
-description: How windows are layered and what controls their visual order
+description: One global stack orders clients within a band. Raise and lower change it; focus, swap and tag switches do not. Layouts use creation order, not the stack.
 ---
 
 # Client Stacking
 
-When windows overlap, which one appears in front?
+There is one client stack for the whole compositor, not one per tag or per screen. Switching tags changes what is visible, not the order: raise a window on tag 2, switch away and back, and it is still on top.
 
-## The Global Stack
+## Stack, focus and layout are separate
 
-There is exactly **one stack** for the entire compositor. Not per-tag, not per-screen. One global stack.
+| Concept | Controls | Ordered by |
+| --- | --- | --- |
+| Stack | which overlapping client is in front | `c:raise()` and `c:lower()` |
+| Focus | which client gets keyboard input | one focused client |
+| Layout | position and size of tiled clients | creation order |
 
-This explains behavior that might otherwise seem odd:
-- Switch to tag 2, raise window A to the top
-- Switch to tag 1, then back to tag 2
-- Window A is still on top because the stack didn't reset
+Layouts read creation order and ignore the stack, so raising a window never makes it master ([Master and Stack](./master-and-stack.md)).
 
-Switching tags changes what's *visible*, not the stacking order.
+The stack orders clients within a band. `c.below`, `c.above`, `c.ontop` and `c.fullscreen` move a client to another band, and no stack position puts a normal client above an ontop one ([the bands](./scene-graph.md#bands)). Two exceptions: under `max` and `magnifier`, a floating client is above the layout's clients whatever the raise order, and a transient of such a client is above every client of that layout.
 
-## Stack, Focus, and Layout: Three Different Things
+## What changes the stack
 
-These three concepts control different aspects of window behavior:
+| Action | Stack changes | Notes |
+| --- | --- | --- |
+| a new client maps | yes | added at the top of its band |
+| a client closes | yes | removed |
+| `c:raise()` | yes | to the top of its band; emits `raised` |
+| `c:lower()` | yes | to the bottom of its band; emits `lowered` |
+| focusing a client | no | add a `focus` handler that calls `c:raise()` if you want auto-raise |
+| `c:swap(other)` | no | swaps positions in the clients array, which layouts read |
+| switching tags | no | |
 
-| Concept | What it controls | How it's ordered |
-|---------|------------------|------------------|
-| **Stack** | Z-order (visual overlap) | Raise/lower operations |
-| **Focus** | Keyboard input destination | Single focused client |
-| **Layout** | Position and size | Creation order |
+Raise and lower carry a client's transients with it.
 
-The key insight: **layout algorithms use creation order, NOT stack order**. Raising a window to the top doesn't make it the "master" in a tiling layout because layouts ignore the stack entirely.
+## Two arrays
 
-## Client Layers
+| Array | Order | Read it |
+| --- | --- | --- |
+| clients | creation | `client.get(s)`, `awful.client.tiled(s)`; what layouts and the tasklist use |
+| stack | back to front | `client.get(s, true)` |
 
-Client properties determine which compositor layer a window belongs to:
-
-| Property | Effect |
-|----------|--------|
-| `c.below` | Renders behind normal windows |
-| `c.above` | Renders above normal windows |
-| `c.ontop` | Renders above most windows |
-| `c.fullscreen` | Renders above everything when focused |
-
-See [Scene Graph](/docs/concepts/scene-graph) for the full layer hierarchy including wibars and notifications.
-
-Within a layer, the **stack** controls which client appears in front. A `normal` client can never appear above an `ontop` client, regardless of stack position.
-
-## Stack Operations
-
-### Methods
-
-| Method | Effect | Signal emitted |
-|--------|--------|----------------|
-| `c:raise()` | Move to top of layer | `raised` |
-| `c:lower()` | Move to bottom of layer | `lowered` |
-
-Both methods handle transients automatically. Dialogs move with their parent window to maintain proper stacking relationships.
-
-### What Changes the Stack?
-
-| Action | Stack changes? | Notes |
-|--------|----------------|-------|
-| Open new window | Yes | Added to top of its layer |
-| Close window | Yes | Removed from stack |
-| `c:raise()` | Yes | Emits `raised` signal |
-| `c:lower()` | Yes | Emits `lowered` signal |
-| Focus a window | **No** | Focus and stack are independent |
-| `c:swap(other)` | **No** | Swaps in clients array, not stack |
-| Change tags | **No** | Tags filter visibility, don't reorder |
-
-## The Two Client Arrays
-
-The compositor maintains two separate arrays for clients:
-
-| Array | Purpose | Order |
-|-------|---------|-------|
-| `clients` | All managed clients | Creation order |
-| `stack` | Visual stacking | Z-order (back to front) |
-
-### Why This Matters
-
-When you query clients in Lua, you can choose which ordering you want:
+## Signals
 
 ```lua
--- Creation order (default) - what layouts use
-local by_creation = client.get(s, false)
-
--- Stacked order - visual z-order
-local by_stack = client.get(s, true)
-
--- client.tiled() also uses creation order
-local tiled = awful.client.tiled(s)
+client.connect_signal("raised", function(c) end)
+client.connect_signal("lowered", function(c) end)
+client.connect_signal("property::ontop", function(c) end)   -- also above, below, fullscreen
 ```
-
-This is why raising a window doesn't move it to the master position. `client.tiled()` returns clients in creation order, which layouts use to decide who gets the master slot.
-
-## When Stack Order Matters
-
-1. **Floating windows** - Which window appears in front when they overlap
-2. **Dialogs over fullscreen** - Transient windows above fullscreen apps
-3. **Querying stacked order** - When you need to iterate windows front-to-back or back-to-front
-
-## When Stack Order Doesn't Matter
-
-- **Tiled layouts** - Windows don't overlap, so z-order is invisible
-- **Layout algorithms** - Use creation order to determine window positions
-
-## Practical Examples
-
-### Basic raise/lower
-
-```lua
--- Open 3 windows in order: firefox, slack, terminal
--- Stack: [firefox, slack, terminal]  (terminal on top)
-
--- Focus firefox (stack doesn't change!)
-client.focus = firefox
--- Stack: [firefox, slack, terminal]  (terminal still on top)
-
--- Raise firefox
-firefox:raise()
--- Stack: [slack, terminal, firefox]  (firefox now on top)
-```
-
-### Keep a window always on top
-
-```lua
--- Use the ontop layer
-c.ontop = true
-
--- To toggle
-c.ontop = not c.ontop
-```
-
-### Reacting to stack changes
-
-```lua
--- Do something when a client is raised
-client.connect_signal("raised", function(c)
-    -- c was just raised to the top of its layer
-end)
-
-client.connect_signal("lowered", function(c)
-    -- c was just lowered to the bottom of its layer
-end)
-
--- React to layer property changes
-client.connect_signal("property::ontop", function(c)
-    -- c.ontop changed
-end)
-
-client.connect_signal("property::above", function(c)
-    -- c.above changed
-end)
-
-client.connect_signal("property::below", function(c)
-    -- c.below changed
-end)
-```
-
-### Auto-raise on focus (optional behavior)
-
-By default, focusing a window doesn't raise it. If you want focus to also raise:
-
-```lua
-client.connect_signal("focus", function(c)
-    c:raise()
-end)
-```
-
-## See Also
-
-- [Master and Stack](/docs/concepts/master-and-stack) - How tiling layouts divide the screen into primary and secondary sections
-- [Scene Graph](/docs/concepts/scene-graph) - Full compositor layer hierarchy
-- [Focus History](/docs/concepts/focus-history) - What determines focus when a client closes
-- [Object Model](/docs/concepts/object-model) - Understanding clients, tags, screens

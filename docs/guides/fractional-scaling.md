@@ -1,266 +1,67 @@
 ---
 sidebar_position: 7
 title: Fractional Scaling
-description: Configure HiDPI displays with fractional scaling
+description: Set screen.scale per screen from rc.lua or somewm-client, keep the theme DPI-aware, and handle apps that render blurry at a fractional scale.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Fractional Scaling <SomewmOnly />
 
-SomeWM supports fractional output scaling for HiDPI displays through the `screen.scale` property.
+`screen.scale` is a writable property, any value above 0; [Display Scaling](/docs/concepts/display-scaling) explains what it does.
 
-## Choosing a Scale
-
-| Scale | Effect | Use Case |
-|-------|--------|----------|
-| 1.0 | Native resolution | Standard 1080p/1440p |
-| 1.25 | 25% larger | 1440p HiDPI |
-| 1.5 | 50% larger | 4K laptop displays |
-| 2.0 | Double size | 4K desktop / Retina |
-
-How scaling works under the hood, and why Wayland's version is crisp where X11's was blurry, is covered in [Display Scaling Concepts](/docs/concepts/display-scaling).
-
-## Setting Scale from Lua
-
-### At Startup
-
-In your rc.lua:
-
-```lua
--- Set scale for all screens
-awful.screen.connect_for_each_screen(function(s)
-    s.scale = 1.5
-end)
-
--- Or just the primary screen
-screen.primary.scale = 1.5
-```
-
-### Per-Screen Configuration
+| Panel | Scale |
+| --- | --- |
+| 1080p or 1440p at 24 to 27 inches | 1.0, 1440p up to 1.25 |
+| 4K at 27 inches | 1.5 to 2.0 |
+| 4K at 32 inches | 1.25 to 1.5 |
+| 2880x1800 laptop | 1.5 to 2.0 |
 
 ```lua
 awful.screen.connect_for_each_screen(function(s)
-    -- Different scale based on screen size
-    if s.geometry.width > 3000 then
-        s.scale = 1.5  -- 4K display
-    elseif s.geometry.width > 2000 then
-        s.scale = 1.25  -- 1440p display
-    else
-        s.scale = 1.0  -- 1080p or smaller
-    end
+    s.scale = s.geometry.width > 3000 and 1.5 or s.geometry.width > 2000 and 1.25 or 1.0
 end)
-```
 
-### Dynamic Adjustment
-
-```lua
--- Keybinding to adjust scale
 awful.keyboard.append_global_keybindings({
-    awful.key({ modkey }, "equal", function()
-        local s = awful.screen.focused()
-        s.scale = s.scale + 0.25
-    end, { description = "increase scale", group = "screen" }),
-
-    awful.key({ modkey }, "minus", function()
-        local s = awful.screen.focused()
-        s.scale = math.max(0.5, s.scale - 0.25)
-    end, { description = "decrease scale", group = "screen" }),
+    awful.key({ modkey }, "equal", function() local s = awful.screen.focused(); s.scale = s.scale + 0.25 end,
+        { description = "increase scale", group = "screen" }),
+    awful.key({ modkey }, "minus", function() local s = awful.screen.focused(); s.scale = math.max(0.5, s.scale - 0.25) end,
+        { description = "decrease scale", group = "screen" }),
 })
 ```
 
-## Setting Scale from CLI
-
-Use `somewm-client` to adjust scale at runtime:
+`connect_for_each_screen` also covers a monitor plugged in later. To set the scale before the screen exists, use the output's `added` signal ([Multi-Monitor](./multi-monitor.md#configure-by-output)).
 
 ```bash
-# Get current scale of focused screen
-somewm-client screen scale
-
-# Set focused screen to 1.5
-somewm-client screen scale 1.5
-
-# Set specific screen (by index)
-somewm-client screen scale 1 1.5
-somewm-client screen scale 2 1.0
+somewm-client screen scale          # read
+somewm-client screen scale 1.5      # the focused screen
+somewm-client screen scale 2 1.0    # screen 2
 ```
 
-## Making Themes DPI-Aware
+After a change, `s.geometry` reports the new logical size and `s.workarea` follows.
 
-Use `beautiful.xresources.apply_dpi()` to scale theme values:
+## Theme sizes
+
+Every size in `theme.lua` goes through `dpi()`:
 
 ```lua
--- theme.lua
-local xresources = require("beautiful.xresources")
-local dpi = xresources.apply_dpi
-
-local theme = {}
-
--- These values scale with DPI
-theme.font = "sans " .. dpi(10)
+local dpi = require("beautiful.xresources").apply_dpi
 theme.useless_gap = dpi(4)
 theme.border_width = dpi(2)
-theme.notification_width = dpi(300)
-
--- Icon sizes
-theme.menu_height = dpi(20)
-theme.menu_width = dpi(150)
-
--- Widget sizes
 theme.wibar_height = dpi(24)
-theme.systray_icon_spacing = dpi(4)
-
-return theme
+theme.notification_width = dpi(300)
+theme.menu_height = dpi(20)
 ```
 
-The `dpi()` function reads the system DPI and scales values accordingly.
+A bare number stays that many logical pixels at every DPI, which is the usual reason widgets look wrong after a scale change.
 
-### Manual DPI Calculation
+## Blurry apps
 
-If you need more control:
+| App | Fix |
+| --- | --- |
+| XWayland | integer scale only; `GDK_SCALE=2` or `QT_SCALE_FACTOR=1.5` per app, or a Wayland-native build |
+| GTK3 | `GDK_BACKEND=wayland` in the environment; renders at the next integer and is downscaled |
+| Qt | `QT_QPA_PLATFORM=wayland`, `QT_SCALE_FACTOR=1.5` |
+| Electron | `ELECTRON_OZONE_PLATFORM_HINT=wayland` |
 
-```lua
-local function scale_value(value)
-    local s = awful.screen.focused()
-    return math.floor(value * (s.scale or 1.0))
-end
-
--- Usage
-local margin = scale_value(8)  -- 8 at 1x, 12 at 1.5x, etc.
-```
-
-## Workarea and Geometry
-
-When you change scale, screen geometry updates:
-
-```lua
-local s = screen.primary
-print("Before:", s.geometry.width, s.geometry.height)
-
-s.scale = 2.0
-
-print("After:", s.geometry.width, s.geometry.height)
--- Width/height are now halved (logical pixels)
-```
-
-The `workarea` also recalculates to account for wibars at the new scale.
-
-## App Compatibility
-
-### Wayland-Native Apps
-
-Apps supporting `wp_fractional_scale_v1` render at native resolution and scale properly. Most modern GTK4 and Qt6 apps support this.
-
-### XWayland Apps
-
-X11 apps through XWayland may appear blurry at fractional scales. Options:
-
-1. **Use integer scaling** (1.0, 2.0) for crisp XWayland apps
-2. **Force per-app scaling** via environment variables:
-
-```lua
--- Force 2x for specific app, let Wayland downscale
-awful.spawn.with_shell("GDK_SCALE=2 my-gtk-app")
-```
-
-### GTK Apps
-
-```bash
-# Force GTK3 to use Wayland
-export GDK_BACKEND=wayland
-
-# Or set in rc.lua autostart
-awful.spawn.with_shell("export GDK_BACKEND=wayland")
-```
-
-### Qt Apps
-
-```bash
-# Enable Qt Wayland
-export QT_QPA_PLATFORM=wayland
-export QT_SCALE_FACTOR=1.5
-```
-
-### Electron Apps
-
-```bash
-# Enable Wayland for Electron
-export ELECTRON_OZONE_PLATFORM_HINT=wayland
-```
-
-## Mixed-DPI Multi-Monitor
-
-For setups with different DPI monitors:
-
-```lua
-awful.screen.connect_for_each_screen(function(s)
-    -- Identify screen by geometry or output name
-    if s.geometry.width == 3840 then
-        s.scale = 1.5  -- 4K monitor
-    else
-        s.scale = 1.0  -- 1080p monitor
-    end
-end)
-```
-
-### Handling Hotplug
-
-```lua
-screen.connect_signal("added", function(s)
-    -- New monitor connected, set appropriate scale
-    if s.geometry.width > 3000 then
-        s.scale = 1.5
-    else
-        s.scale = 1.0
-    end
-end)
-```
-
-## Common Scale Values
-
-| Resolution | Diagonal | Recommended Scale |
-|------------|----------|-------------------|
-| 1920x1080 | 24"+ | 1.0 |
-| 2560x1440 | 27" | 1.0 - 1.25 |
-| 3840x2160 | 27" | 1.5 - 2.0 |
-| 3840x2160 | 32" | 1.25 - 1.5 |
-| 2880x1800 | 15" (laptop) | 1.5 - 2.0 |
-
-## Troubleshooting
-
-### Blurry Text
-
-- Try integer scaling (1.0, 2.0) instead of fractional
-- Ensure app supports Wayland native rendering
-- Check font hinting settings
-
-### Widgets Wrong Size
-
-Make sure you're using `dpi()` for all size values in theme.lua:
-
-```lua
--- Wrong: fixed pixel values
-theme.useless_gap = 4
-
--- Right: DPI-aware values
-theme.useless_gap = dpi(4)
-```
-
-### Scale Not Applying
-
-Check that you're setting scale on the correct screen:
-
-```lua
--- Debug: print all screens and their scales
-for s in screen do
-    print("Screen " .. s.index .. ": scale = " .. (s.scale or "nil"))
-end
-```
-
-## See Also
-
-- **[screen Reference](/docs/reference/screen)** - Full screen API documentation
-- **[Display Scaling Concepts](/docs/concepts/display-scaling)** - How scaling works under the hood
-- **[Multi-Monitor Setup](/docs/guides/multi-monitor)** - Per-screen configuration
-- **[CLI Control](/docs/guides/cli-control)** - somewm-client screen commands
-- **[Theme](/docs/tutorials/theme)** - Creating DPI-aware themes
+GTK4 and Qt6 apps support `wp_fractional_scale_v1` and are crisp at any scale. `for s in screen do print(s.index, s.scale) end` shows which screen got which scale when one looks wrong.
