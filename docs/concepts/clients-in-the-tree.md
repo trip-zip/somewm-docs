@@ -43,6 +43,8 @@ The scene draws roots in band order, lowest first: a below client at 10, a norma
 
 ## Corners, borders, shadows and motion
 
+See [Rounded Corners](../guides/rounded-corners.md) to set a client radius with a rule.
+
 - `client.shape` is nil, a corner radius in pixels, or a `gears.shape` function. `gears.shape.rounded_rect`, or a function that draws its path, is read as that radius. Any other function warns once and the client stays square.
 - A titlebar on an edge takes that edge's corners and the surface takes the rest, each less the border width. The border stays square.
 - A shadow is drawn by the renderer around the frame's solved box. It declares no box and takes no room from the slot.

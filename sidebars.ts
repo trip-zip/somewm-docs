@@ -37,6 +37,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'guides/autostart',
         'guides/client-rules',
+        'guides/rounded-corners',
         'guides/replace-default-handler',
         'guides/react-to-client-lifecycle',
         'guides/focus',

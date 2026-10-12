@@ -49,6 +49,8 @@ Classes are case-sensitive: `firefox` and `Firefox` are different.
 
 ## Properties
 
+For a `shape` rule with no square border, see [Rounded Corners](./rounded-corners.md).
+
 ```lua
 ruled.client.append_rule {
     rule = { class = "MyApp" },
