@@ -16,17 +16,18 @@ Mod4 + Shift + Escape locks; the password and Return unlock. `somewm-client lock
 
 ## Appearance and placement
 
-`theme.lockscreen_*` variables style it: `bg_color`, `fg_color`, `input_bg`, `border_color`, `error_color`, `font`, `font_large`. The `init` table overrides them and adds the formats and the screen:
+`theme.lockscreen_*` variables style it: `bg_color`, `fg_color`, `input_bg`, `border_color`, `error_color`, `font`, `font_large`, `wallpaper`, `wallpaper_overlay`. The `init` table overrides them and adds the formats and the screen:
 
 ```lua
 require("lockscreen").init({
     bg_color = "#1e1e2e", fg_color = "#cdd6f4", error_color = "#f38ba8",
+    wallpaper = "/home/you/wallpapers/spaceman.jpg", wallpaper_overlay = "#00000080",
     clock_format = "%I:%M %p", date_format = "%a, %b %d",
     lock_screen = function() return awful.screen.focused() end,   -- or screen[1]; default screen.primary
 })
 ```
 
-Other screens get a plain cover.
+The image is letterboxed and centred the way `awful.wallpaper` does it, so a 16:9 picture on a 3:2 panel leaves `bg_color` above and below. Other screens get the same image, dimmed, or a plain `bg_color` cover.
 
 ## Idle, DPMS, suspend
 

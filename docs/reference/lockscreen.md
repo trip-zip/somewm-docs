@@ -41,6 +41,8 @@ require("lockscreen").init({
 | `font_large` | string | `"sans bold 48"` | `lockscreen_font_large` | Clock display font |
 | `clock_format` | string | `"%H:%M"` | `lockscreen_clock_format` | Clock format (strftime) |
 | `date_format` | string | `"%A, %B %d"` | `lockscreen_date_format` | Date format (strftime) |
+| `wallpaper` | string/surface/nil | `nil` | `lockscreen_wallpaper` | Image behind the lock UI, letterboxed and centred like the desktop wallpaper. `nil` is a flat `bg_color` |
+| `wallpaper_overlay` | string | `"#000000aa"` | `lockscreen_wallpaper_overlay` | Colour painted over the image. The alpha sets how much it dims; only used when `wallpaper` is set |
 | `lock_screen` | screen/function/nil | `nil` | none | Screen for interactive UI (nil = primary) |
 
 ### Config Resolution Order
@@ -71,7 +73,7 @@ Password characters are displayed as bullets (U+25CF) rather than plaintext.
 The lock screen creates two types of surfaces:
 
 - **Interactive surface** on the primary screen (or the screen specified by `lock_screen`): shows clock, date, password input, and status text.
-- **Cover surfaces** on all other screens: opaque background-only wiboxes that block content.
+- **Cover surfaces** on all other screens: the wallpaper dimmed by the overlay when one is set, otherwise an opaque `bg_color`.
 
 On screen hotplug while locked:
 
