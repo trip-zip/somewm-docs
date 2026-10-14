@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Theme Variables
 
-Generated from `@beautiful` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `d053da19d7`. **446 documented**, 80 used-but-undocumented.
+Generated from `@beautiful` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `9f8e10dd41`. **457 documented**, 80 used-but-undocumented.
 
 See the [Theme Tutorial](/docs/tutorials/theme) for how to apply these in a custom theme.
 
@@ -71,7 +71,7 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `calendar_style` | `cell_properties` | The generic calendar style table. Each table property can also be defined by `beautiful.calendar_[flag]_[property]=val`. | [awful/widget/calendar_popup.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L43) |
 | `carousel_center_mode` | `string` | Viewport centering mode. | [awful/layout/suit/carousel.lua:56](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L56) |
 | `carousel_default_column_width` | `number` | Default column width fraction for new columns. | [awful/layout/suit/carousel.lua:44](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L44) |
-| `carousel_dynamic_peek` | `number` | Dynamic peek width in pixels. Columns at the edges of the strip will have this applied as their peek width. Negative values are ignored and cause edge columns to use peek_width instead. | [awful/layout/suit/carousel.lua:72](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L72) |
+| `carousel_dynamic_peek_width` | `number` | Dynamic peek width in pixels. Columns at the edges of the strip will have this applied as their peek width. Negative values are ignored and cause edge columns to use peek_width instead. | [awful/layout/suit/carousel.lua:72](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L72) |
 | `carousel_peek_width` | `number` | Peek width in pixels for showing adjacent column edges. | [awful/layout/suit/carousel.lua:67](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L67) |
 | `column_count` | `integer` | The default number of columns. | [awful/tag.lua:1182](https://github.com/trip-zip/somewm/blob/main/lua/awful/tag.lua#L1182) |
 | `cursor_mouse_move` | `string` | The move cursor name. | [awful/mouse/init.lua:82](https://github.com/trip-zip/somewm/blob/main/lua/awful/mouse/init.lua#L82) |
@@ -467,10 +467,11 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `notification_width` | `int` | Notifications width. | [naughty/notification.lua:66](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L66) |
 ## menubar
 
-7 entries.
+8 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
+| `launcher_width` | `number` | The launcher's width, ahead of `menubar.geometry.width`. Without either, the launcher spans the workarea. | [menubar/init.lua:77](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L77) |
 | `menubar_bg_focus` | `color` | Menubar selected item background color. | [menubar/init.lua:69](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L69) |
 | `menubar_bg_normal` | `color` | Menubar normal background color. | [menubar/init.lua:53](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L53) |
 | `menubar_border_color` | `color` | Menubar border color. | [menubar/init.lua:61](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L61) |
@@ -506,12 +507,22 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `wallpaper` | `string\|gears.surface` | The wallpaper path. | [beautiful/init.lua:133](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L133) |
 ## SomeWM Extensions
 
-33 entries.
+43 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
-| `screenshot_frame_color` | `color` | The screenshot interactive frame color. | [awful/screenshot.lua:78](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L78) |
-| `screenshot_frame_shape` | `shape` | The screenshot interactive frame shape. | [awful/screenshot.lua:82](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L82) |
+| `animation_appear` | `string` | The entrance every client maps with: `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. | [somewm/animation.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L42) |
+| `animation_appear_duration` | `number` | A client mapping, in seconds; needs an entrance from `animation_appear` or `c.animate.appear`. | [somewm/animation.lua:23](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L23) |
+| `animation_disappear` | `string` | The exit every client closes with, same words as `animation_appear`. | [somewm/animation.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L47) |
+| `animation_disappear_duration` | `number` | A client closing, in seconds; needs an entrance from `animation_disappear` or `c.animate.disappear`. | [somewm/animation.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L28) |
+| `animation_duration` | `number` | The duration for every trigger that has none of its own, in seconds. Unset, nothing animates; 0 snaps. | [somewm/animation.lua:5](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L5) |
+| `animation_floating_duration` | `number` | A client toggling floating, in seconds. | [somewm/animation.lua:19](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L19) |
+| `animation_focus_duration` | `number` | The border colour easing on a focus change, in seconds. | [somewm/animation.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L38) |
+| `animation_layout_duration` | `number` | Tiled clients moving between slots, in seconds; 0 snaps. Requiring `somewm.layout_animation` sets 0.15. | [somewm/animation.lua:10](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L10) |
+| `animation_maximize_duration` | `number` | A client maximizing or going fullscreen, in seconds. | [somewm/animation.lua:15](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L15) |
+| `animation_tag_duration` | `number` | A tag switch, in seconds. Clients grow in and out unless `c.animate.tag` names another entrance. | [somewm/animation.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L33) |
+| `screenshot_frame_color` | `color` | The screenshot interactive frame color. | [awful/screenshot.lua:79](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L79) |
+| `screenshot_frame_shape` | `shape` | The screenshot interactive frame shape. | [awful/screenshot.lua:83](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L83) |
 | `systray_hover_bg` | `string` | The hover background color. | [wibox/widget/systray_icon.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L43) |
 | `systray_hover_scale` | `number` | The hover scale factor. | [wibox/widget/systray_icon.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L39) |
 | `systray_icon_change_triggers_urgent` | `boolean` | Whether icon changes trigger urgent styling. When an app changes its icon (e.g., Slack adding a notification badge), this triggers urgent styling instead. Best used with icon_override to show a clean icon while still getting notification indicators. | [wibox/widget/systray_icon.lua:150](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L150) |
@@ -596,12 +607,12 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `border_width_urgent` | [awful/permissions/init.lua:637](https://github.com/trip-zip/somewm/blob/main/lua/awful/permissions/init.lua#L637) |
 | `calendar_` | [awful/widget/calendar_popup.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L45) |
 | `calendar_flex_height` | [wibox/widget/calendar.lua:422](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/calendar.lua#L422) |
-| `carousel_dynamic_peek_width` | [awful/layout/suit/carousel.lua:324](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L324) |
-| `clock_bg` | [somewmrc.lua:296](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L296) |
+| `clock_bg` | [somewmrc.lua:295](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L295) |
 | `hotkeys_opacity` | [awful/hotkeys_popup/widget.lua:420](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L420) |
 | `load_font` | [beautiful/init.lua:183](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L183) |
-| `lockscreen_` | [lockscreen.lua:253](https://github.com/trip-zip/somewm/blob/main/lua/lockscreen.lua#L253) |
-| `lockscreen_font` | [lockscreen.lua:268](https://github.com/trip-zip/somewm/blob/main/lua/lockscreen.lua#L268) |
+| `lockscreen_` | [lockscreen.lua:282](https://github.com/trip-zip/somewm/blob/main/lua/lockscreen.lua#L282) |
+| `lockscreen_font` | [lockscreen.lua:300](https://github.com/trip-zip/somewm/blob/main/lua/lockscreen.lua#L300) |
+| `lockscreen_wallpaper` | [lockscreen.lua:309](https://github.com/trip-zip/somewm/blob/main/lua/lockscreen.lua#L309) |
 | `notification_` | [naughty/notification.lua:852](https://github.com/trip-zip/somewm/blob/main/lua/naughty/notification.lua#L852) |
 | `notification_action` | [naughty/list/actions.lua:209](https://github.com/trip-zip/somewm/blob/main/lua/naughty/list/actions.lua#L209), [naughty/list/notifications.lua:190](https://github.com/trip-zip/somewm/blob/main/lua/naughty/list/notifications.lua#L190) |
 | `notification_padding` | [naughty/layout/box.lua:82](https://github.com/trip-zip/somewm/blob/main/lua/naughty/layout/box.lua#L82) |
@@ -627,8 +638,8 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `progressbar_clip` | [wibox/widget/progressbar.lua:359](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/progressbar.lua#L359) |
 | `theme_path` | [beautiful/init.lua:147](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L147) |
 | `titlebar_font` | [awful/titlebar.lua:785](https://github.com/trip-zip/somewm/blob/main/lua/awful/titlebar.lua#L785) |
-| `wallpaper_colors` | [somewmrc.lua:225](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L225) |
-| `wallpaper_logo_color` | [somewmrc.lua:91](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L91), [somewmrc.lua:228](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L228) |
+| `wallpaper_colors` | [somewmrc.lua:224](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L224) |
+| `wallpaper_logo_color` | [somewmrc.lua:91](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L91), [somewmrc.lua:227](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua#L227) |
 | `xresources_dpi` | [gears/xresources.lua:171](https://github.com/trip-zip/somewm/blob/main/lua/gears/xresources.lua#L171) |
 
 ## See Also
@@ -637,4 +648,4 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 - [Key Names](/docs/reference/key-names) – Common keybinding key names
 - [beautiful (AwesomeWM upstream docs)](https://awesomewm.org/apidoc/libraries/beautiful.html) – Full upstream API
 
-<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ d053da19d7 | regenerate with `npm run generate:reference` -->
+<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ 9f8e10dd41 | regenerate with `npm run generate:reference` -->

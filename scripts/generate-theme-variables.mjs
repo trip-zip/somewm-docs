@@ -60,7 +60,7 @@ const MODULE_LABELS = {
 // SomeWM-specific groupings: pulled out into their own section since they
 // don't exist in upstream AwesomeWM and deserve visibility. Members are
 // matched by prefix.
-const SOMEWM_PREFIXES = ['systray_', 'screenshot_', 'shadow_', 'lockscreen_'];
+const SOMEWM_PREFIXES = ['systray_', 'screenshot_', 'shadow_', 'lockscreen_', 'animation_'];
 
 function moduleBucket(record) {
   if (SOMEWM_PREFIXES.some((p) => record.name.startsWith(p))) return '_somewm';
