@@ -90,7 +90,7 @@ Without any change to `rc.lua`:
 | Stacking | 2.0 kept six fixed scene layers, background to overlay, and moved each client's and wibox's node between them in C. 2.1 has no layers: order is a band the tree declares ([Scene Graph](../concepts/scene-graph.md#bands)). |
 | Layouts | 2.0's `arrange` computed a rectangle per client in Lua. 2.1 declares the layout as a Clay subtree; an `arrange` layout still works, with its numbers marked `legacy` in the dump. |
 | Widget sizing | 2.0 asked each widget's `fit` for a size and its `layout` for its children's places, so the same question had many answers. 2.1 has one: Clay's solve. |
-| Layout animation | A client frame declares no transition until something configures animation: `c.animate`, any `theme.animation_*_duration` set to a number (0 included), `theme.animation_appear` or `animation_disappear`, or `somewm.animation.layout_duration` above 0. Requiring `somewm.layout_animation` sets that to 0.15 and is deprecated. A client's first frame after that, or after a reload, does not animate. |
+| Layout animation | A client frame declares no transition until something configures animation: `c.animation`, any `theme.animation_*_duration` set to a number (0 included), `theme.animation_appear` or `animation_disappear`, or `somewm.animation.layout_duration` above 0. Requiring `somewm.layout_animation` sets that to 0.15 and is deprecated. A client's first frame after that, or after a reload, does not animate. |
 
 ## Removed names
 

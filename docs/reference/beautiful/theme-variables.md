@@ -512,15 +512,15 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
 | `animation_appear` | `string` | The entrance every client maps with: `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. | [somewm/animation.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L42) |
-| `animation_appear_duration` | `number` | A client mapping, in seconds; needs an entrance from `animation_appear` or `c.animate.appear`. | [somewm/animation.lua:23](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L23) |
+| `animation_appear_duration` | `number` | A client mapping, in seconds; needs an entrance from `animation_appear` or `c.animation.appear`. | [somewm/animation.lua:23](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L23) |
 | `animation_disappear` | `string` | The exit every client closes with, same words as `animation_appear`. | [somewm/animation.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L47) |
-| `animation_disappear_duration` | `number` | A client closing, in seconds; needs an entrance from `animation_disappear` or `c.animate.disappear`. | [somewm/animation.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L28) |
+| `animation_disappear_duration` | `number` | A client closing, in seconds; needs an entrance from `animation_disappear` or `c.animation.disappear`. | [somewm/animation.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L28) |
 | `animation_duration` | `number` | The duration for every trigger that has none of its own, in seconds. Unset, nothing animates; 0 snaps. | [somewm/animation.lua:5](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L5) |
 | `animation_floating_duration` | `number` | A client toggling floating, in seconds. | [somewm/animation.lua:19](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L19) |
 | `animation_focus_duration` | `number` | The border colour easing on a focus change, in seconds. | [somewm/animation.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L38) |
 | `animation_layout_duration` | `number` | Tiled clients moving between slots, in seconds; 0 snaps. Requiring `somewm.layout_animation` sets 0.15. | [somewm/animation.lua:10](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L10) |
 | `animation_maximize_duration` | `number` | A client maximizing or going fullscreen, in seconds. | [somewm/animation.lua:15](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L15) |
-| `animation_tag_duration` | `number` | A tag switch, in seconds. Clients grow in and out unless `c.animate.tag` names another entrance. | [somewm/animation.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L33) |
+| `animation_tag_duration` | `number` | A tag switch, in seconds. Clients grow in and out unless `c.animation.tag` names another entrance. | [somewm/animation.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L33) |
 | `screenshot_frame_color` | `color` | The screenshot interactive frame color. | [awful/screenshot.lua:79](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L79) |
 | `screenshot_frame_shape` | `shape` | The screenshot interactive frame shape. | [awful/screenshot.lua:83](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L83) |
 | `systray_hover_bg` | `string` | The hover background color. | [wibox/widget/systray_icon.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L43) |
