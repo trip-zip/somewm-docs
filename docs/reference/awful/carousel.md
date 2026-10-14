@@ -41,7 +41,7 @@ These properties are set directly on the layout table. They apply globally to al
 | `carousel.center_mode` | string | `"on-overflow"` | Viewport centering behavior (see [Centering Modes](#centering-modes)) |
 | `carousel.peek_width` | number | `0` | Pixels of visible content on each side to show adjacent column edges (`useless_gap` is added automatically) |
 
-Scrolling animates through `somewm.layout_animation`, the one animation switch for every layout; `carousel.scroll_duration` is gone. Set `require("somewm.layout_animation").duration` for a faster or slower slide, or leave the module unloaded for an instant snap.
+Scrolling animates over the layout duration, the one setting for every layout; `carousel.scroll_duration` is gone. Set `theme.animation_layout_duration` for a faster or slower slide, or leave it at 0 for an instant snap. `somewm.layout_animation` is deprecated; requiring it still sets 0.15.
 
 ```lua
 local carousel = awful.layout.suit.carousel

@@ -44,7 +44,7 @@ theme.carousel_peek_width = 40        -- wins
 
 ## Scrolling from code
 
-`scroll_by(tag, n)` moves the viewport by `n` viewport widths without changing focus, clamped to the strip, animated when `somewm.layout_animation` is loaded:
+`scroll_by(tag, n)` moves the viewport by `n` viewport widths without changing focus, clamped to the strip, animated over `theme.animation_layout_duration`:
 
 ```lua
 local t = awful.screen.focused().selected_tag

@@ -15,13 +15,13 @@ awful.layout.suit.carousel.vertical.make_gesture_binding()   -- vertical swipes 
 
 A three-finger swipe on a screen in the carousel layout records the scroll position, pans the viewport with the fingers one to one (fingers left reveals columns on the right), and on release centres the column nearest the viewport's centre and focuses its first client.
 
-The snap animates through `somewm.layout_animation` like every layout change, so its speed is that module's:
+The snap animates like every layout change, over the layout duration:
 
 ```lua
-local layout_anim = require("somewm.layout_animation")
-layout_anim.duration = 0.1      -- seconds
-layout_anim.enabled = false     -- snap instantly
+theme.animation_layout_duration = 0.1   -- seconds; 0 snaps instantly
 ```
+
+`somewm.layout_animation` is deprecated; requiring it still sets the duration to 0.15. [Animation](/docs/next/guides/animation) has the rest.
 
 `carousel.scroll_duration` is gone and does nothing.
 

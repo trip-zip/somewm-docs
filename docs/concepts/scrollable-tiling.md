@@ -45,7 +45,7 @@ When focus moves to a column outside the viewport, the carousel reads the solved
 
 The offset is clamped to the strip. With `peek_width` above zero the viewport is padded by `peek_width + useless_gap` on each side, so that many pixels of the neighbouring columns show.
 
-A scroll moves every client's box. With `somewm.layout_animation` loaded, each client frame carries a Clay transition and slides over its `duration`; without it, a scroll snaps. There is no carousel-specific setting.
+A scroll moves every client's box. With `theme.animation_layout_duration` above 0, each client frame carries a Clay transition and slides over that duration; at 0, a scroll snaps. There is no carousel-specific setting.
 
 `carousel.vertical` is the same layout turned 90 degrees: columns scroll vertically and a column's clients sit side by side.
 

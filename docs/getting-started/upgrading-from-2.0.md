@@ -90,7 +90,7 @@ Without any change to `rc.lua`:
 | Stacking | 2.0 kept six fixed scene layers, background to overlay, and moved each client's and wibox's node between them in C. 2.1 has no layers: order is a band the tree declares ([Scene Graph](../concepts/scene-graph.md#bands)). |
 | Layouts | 2.0's `arrange` computed a rectangle per client in Lua. 2.1 declares the layout as a Clay subtree; an `arrange` layout still works, with its numbers marked `legacy` in the dump. |
 | Widget sizing | 2.0 asked each widget's `fit` for a size and its `layout` for its children's places, so the same question had many answers. 2.1 has one: Clay's solve. |
-| Layout animation | Without `somewm.layout_animation` loaded, a client frame declares no transition. A client's first frame after the module loads, or after a reload, does not animate. |
+| Layout animation | A client frame declares no transition until something configures animation: `c.animate`, any `theme.animation_*_duration` set to a number (0 included), `theme.animation_appear` or `animation_disappear`, or `somewm.animation.layout_duration` above 0. Requiring `somewm.layout_animation` sets that to 0.15 and is deprecated. A client's first frame after that, or after a reload, does not animate. |
 
 ## Removed names
 
@@ -127,7 +127,7 @@ Calling a removed function raises `attempt to call ... (a nil value)`. Setting a
 | `check_border_color`, `check_border_width`, `check_shape` (checkbox) | `shape` draws the check |
 | `awful.wallpaper` `uncovered_areas_color`, `dpi`, `get_dpi` | the root wallpaper shows in uncovered areas; the output scale applies |
 | `awful.client.shape`: `get_transformed`, `update.all`, `update.bounding`, `update.clip`, `update.input` | `client.shape` |
-| `carousel.scroll_duration` | `somewm.layout_animation.duration` |
+| `carousel.scroll_duration` | `theme.animation_layout_duration` |
 | `somewm.layout_animation.easing` | none; the solver's curve |
 | `awesome.systray` | see [Deviations](/docs/reference/deviations) |
 | `ruled.client.completed_with_payload_callback` | `ruled.client.execute` |

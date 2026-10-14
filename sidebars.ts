@@ -60,6 +60,7 @@ const sidebars: SidebarsConfig = {
         'guides/notifications',
         'guides/screenshots',
         'guides/shadows',
+        'guides/animation',
         'guides/wibar-background-image',
         'guides/widget-timers',
       ],

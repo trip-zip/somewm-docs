@@ -48,7 +48,7 @@ See [Rounded Corners](../guides/rounded-corners.md) to set a client radius with 
 - `client.shape` is nil, a corner radius in pixels, or a `gears.shape` function. `gears.shape.rounded_rect`, or a function that draws its path, is read as that radius. Any other function warns once and the client stays square.
 - A titlebar on an edge takes that edge's corners and the surface takes the rest, each less the border width. The border stays square.
 - A shadow is drawn by the renderer around the frame's solved box. It declares no box and takes no room from the slot.
-- With `somewm.layout_animation` loaded, each frame declares a Clay transition on the client's box, and Clay moves it over the animation's duration. Without it, a client snaps to its new box in one frame.
+- With `theme.animation_layout_duration` above 0, each frame declares a Clay transition on the client's box, and Clay moves it over that duration. At 0, a client snaps to its new box in one frame. [Animation](/docs/next/guides/animation) has the client, wibox and widget triggers.
 
 ## See it
 
