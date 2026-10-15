@@ -5,6 +5,7 @@ description: Ease layout changes, client appearance, focus borders, wibox visibi
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly';
+import AnimationDemo from '@site/src/components/AnimationDemo';
 
 # Animation <SomewmOnly />
 
@@ -22,9 +23,15 @@ theme.animation_layout_duration = 0.15   -- seconds
 
 From code, `somewm.animation.layout_duration` sets it; `theme.animation_layout_duration` and `theme.animation_duration` both win over it when set. Requiring `somewm.layout_animation` still sets it to 0.15, as it did in 1.4 and 2.0, and that module is deprecated. A client's first frame after the duration is set, or after a reload, does not animate.
 
+<AnimationDemo name="layout" title="Layout resize and swap">
+  Tiled windows ease into their new geometry when the master width changes and when the windows swap places.
+</AnimationDemo>
+
 ## Clients
 
 A client reads its durations and entrances from `c.animation`, a table with one key per trigger, and falls back to the theme.
+
+<div style={{overflowX: 'auto', marginBottom: '1rem'}} tabIndex={0} role="region" aria-label="Client animation triggers">
 
 | Trigger | When | Theme duration | Theme entrance |
 | --- | --- | --- | --- |
@@ -35,7 +42,13 @@ A client reads its durations and entrances from `c.animation`, a table with one 
 | `maximize` | maximized or fullscreen toggles | `animation_maximize_duration` | |
 | `floating` | floating toggles | `animation_floating_duration` | |
 
+</div>
+
 `theme.animation_duration` is the duration for every trigger that has none of its own, layout included.
+
+<AnimationDemo name="window-states" title="Maximise, restore, float and tile">
+  The same window moves between maximised, tiled and floating states, with a different duration for each transition.
+</AnimationDemo>
 
 An entrance is one of `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. `grow` scales the frame from nothing; the slides come in from that edge of the screen; `fade` blends the frame in from invisible. The same word runs backwards on the way out.
 
@@ -50,6 +63,10 @@ ruled.client.append_rule {
 
 One key holds either an entrance word or a duration. A client that names an entrance takes its duration from the theme, so this rule animates nothing until `theme.animation_appear_duration`, `animation_disappear_duration` and `animation_tag_duration` are set.
 
+<AnimationDemo name="fade" title="Fade">
+  A client fades in and out, followed by a popup using the same entrance and exit style.
+</AnimationDemo>
+
 Or from the theme for every client:
 
 ```lua
@@ -63,6 +80,10 @@ A number in `c.animation` is a duration for that trigger, and `c.animation.focus
 
 With a tag duration above 0, from `theme.animation_tag_duration`, `theme.animation_duration` or a number in `c.animation.tag`, a tag switch grows clients in and out. `c.animation.tag` or `theme.animation_tag` can name another entrance. A client on its way out animates its frame, the border and titlebars; the window's own pixels snap away on the first frame.
 
+<AnimationDemo name="grow-shrink" title="Grow and shrink">
+  Growing entrances and shrinking exits on clients, tag changes and a popup, shown with different durations.
+</AnimationDemo>
+
 ## Wiboxes and popups
 
 A wibox or `awful.popup` animates its visibility:
@@ -75,6 +96,10 @@ local popup = awful.popup {
 ```
 
 `enter` and `exit` take the same words as a client. Setting `visible` then eases the box in or out. A wibox leaving the screen keeps its box and border for the duration, and its shadow goes on the first frame.
+
+<AnimationDemo name="slides" title="Directional slides">
+  A popup enters and exits using `slide_left`, `slide_right`, `slide_up` and `slide_down`.
+</AnimationDemo>
 
 ## Widgets
 
@@ -90,12 +115,16 @@ A widget's first frame never animates, so the change eases only once the widget 
 
 Properties that animate:
 
+<div style={{overflowX: 'auto', marginBottom: '1rem'}} tabIndex={0} role="region" aria-label="Animated widget properties">
+
 | Widget | Properties |
 | --- | --- |
 | `wibox.container.background` | `bg`, `border_color`, `border_width` |
 | any widget | `forced_width`, `forced_height` |
 | `wibox.widget.progressbar` | `value` |
 | `wibox.widget.slider` | `value` |
+
+</div>
 
 Any other property in the table warns once and that property snaps. On a `wibox.container.background` whose shape is not a rounded rectangle, `bg`, `border_color` and `border_width` snap and warn once. A widget's position inside its layout always snaps, so a spacing change moves it in one frame while its own size eases.
 
@@ -106,6 +135,10 @@ box:animate { bg = "#ff0000", duration = 0.3 }
 ```
 
 It sets each named property and eases it once; the next plain assignment snaps again.
+
+<AnimationDemo name="widgets" title="Widget timing and pulse">
+  Three widgets change size and colour at different speeds. The heart then grows and shrinks twice to make a gentle pulse.
+</AnimationDemo>
 
 `widget.animation = false` turns animation off for that widget and everything inside it, including children that set their own `animation`. The `:animate{}` method remains callable and applies its values immediately while animation is disabled.
 
