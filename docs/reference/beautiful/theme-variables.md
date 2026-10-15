@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Theme Variables
 
-Generated from `@beautiful` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `65f3d63b65`. **457 documented**, 80 used-but-undocumented.
+Generated from `@beautiful` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `ee279a0de9`. **458 documented**, 80 used-but-undocumented.
 
 See the [Theme Tutorial](/docs/tutorials/theme) for how to apply these in a custom theme.
 
@@ -514,20 +514,21 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `menubar_font` | `font` | Menubar font. | [menubar/init.lua:73](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L73) |
 ## somewm
 
-18 entries.
+19 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
-| `animation_appear` <SomewmOnly /> | `string` | The entrance every client maps with: `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. | [somewm/animation.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L42) |
-| `animation_appear_duration` <SomewmOnly /> | `number` | A client mapping, in seconds; needs an entrance from `animation_appear` or `c.animation.appear`. | [somewm/animation.lua:23](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L23) |
-| `animation_disappear` <SomewmOnly /> | `string` | The exit every client closes with, same words as `animation_appear`. | [somewm/animation.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L47) |
-| `animation_disappear_duration` <SomewmOnly /> | `number` | A client closing, in seconds; needs an entrance from `animation_disappear` or `c.animation.disappear`. | [somewm/animation.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L28) |
-| `animation_duration` <SomewmOnly /> | `number` | The duration for every trigger that has none of its own, in seconds. Unset, nothing animates; 0 snaps. | [somewm/animation.lua:5](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L5) |
-| `animation_floating_duration` <SomewmOnly /> | `number` | A client toggling floating, in seconds. | [somewm/animation.lua:19](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L19) |
-| `animation_focus_duration` <SomewmOnly /> | `number` | The border colour easing on a focus change, in seconds. | [somewm/animation.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L38) |
-| `animation_layout_duration` <SomewmOnly /> | `number` | Tiled clients moving between slots, in seconds; 0 snaps. Requiring `somewm.layout_animation` sets 0.15. | [somewm/animation.lua:10](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L10) |
-| `animation_maximize_duration` <SomewmOnly /> | `number` | A client maximizing or going fullscreen, in seconds. | [somewm/animation.lua:15](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L15) |
-| `animation_tag_duration` <SomewmOnly /> | `number` | A tag switch, in seconds. Clients grow in and out unless `c.animation.tag` names another entrance. | [somewm/animation.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L33) |
+| `animation_appear` <SomewmOnly /> | `string` | The entrance every client maps with: `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. | [somewm/animation.lua:52](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L52) |
+| `animation_appear_duration` <SomewmOnly /> | `number` | A client mapping, in seconds; needs an entrance from `animation_appear` or `c.animation.appear`. | [somewm/animation.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L33) |
+| `animation_disappear` <SomewmOnly /> | `string` | The exit every client closes with, same words as `animation_appear`. | [somewm/animation.lua:57](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L57) |
+| `animation_disappear_duration` <SomewmOnly /> | `number` | A client closing, in seconds; needs an entrance from `animation_disappear` or `c.animation.disappear`. | [somewm/animation.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L38) |
+| `animation_duration` <SomewmOnly /> | `number` | The duration for every trigger that has none of its own, in seconds. Applies to layout too. With no duration configured, nothing animates; 0 snaps. | [somewm/animation.lua:15](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L15) |
+| `animation_floating_duration` <SomewmOnly /> | `number` | A client toggling floating, in seconds. | [somewm/animation.lua:29](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L29) |
+| `animation_focus_duration` <SomewmOnly /> | `number` | The border colour easing on a focus change, in seconds. | [somewm/animation.lua:48](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L48) |
+| `animation_layout_duration` <SomewmOnly /> | `number` | Tiled clients moving between slots, in seconds; 0 snaps. Requiring the deprecated `somewm.layout_animation` sets 0.15. | [somewm/animation.lua:20](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L20) |
+| `animation_maximize_duration` <SomewmOnly /> | `number` | A client maximizing or going fullscreen, in seconds. | [somewm/animation.lua:25](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L25) |
+| `animation_tag` <SomewmOnly /> | `string` | The entrance and exit on a tag switch, same words as `animation_appear`. Defaults to `grow`; `c.animation.tag` can override it. | [somewm/animation.lua:61](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L61) |
+| `animation_tag_duration` <SomewmOnly /> | `number` | A tag switch, in seconds. Clients grow in and out unless `c.animation.tag` or `animation_tag` names another entrance. | [somewm/animation.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L43) |
 | `inspector_bg` <SomewmOnly /> | `color` | The panel body and its odd rows. | [somewm/inspector.lua:29](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L29) |
 | `inspector_bg_alt` <SomewmOnly /> | `color` | The header, the even rows, and the info and warnings panes. | [somewm/inspector.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L33) |
 | `inspector_bg_selected` <SomewmOnly /> | `color` | The selected tree row. | [somewm/inspector.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L45) |
@@ -648,4 +649,4 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 - [Key Names](/docs/reference/key-names) – Common keybinding key names
 - [beautiful (AwesomeWM upstream docs)](https://awesomewm.org/apidoc/libraries/beautiful.html) – Full upstream API
 
-<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ 65f3d63b65 | regenerate with `npm run generate:reference` -->
+<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ ee279a0de9 | regenerate with `npm run generate:reference` -->
