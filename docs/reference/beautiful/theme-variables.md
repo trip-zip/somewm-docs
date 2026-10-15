@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Theme Variables
 
-Generated from `@beautiful` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `9f8e10dd41`. **457 documented**, 80 used-but-undocumented.
+Generated from `@beautiful` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `65f3d63b65`. **457 documented**, 80 used-but-undocumented.
 
 See the [Theme Tutorial](/docs/tutorials/theme) for how to apply these in a custom theme.
 
@@ -63,16 +63,16 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 
 ## awful
 
-281 entries.
+283 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
-| `calendar_popup_width` | `number` | The calendar width, when the popup is created without a `width`. With neither, the popup follows the calendar's content. | [awful/widget/calendar_popup.lua:49](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L49) |
+| `calendar_popup_width` <SomewmOnly /> | `number` | The calendar width, when the popup is created without a `width`. With neither, the popup follows the calendar's content. | [awful/widget/calendar_popup.lua:49](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L49) |
 | `calendar_style` | `cell_properties` | The generic calendar style table. Each table property can also be defined by `beautiful.calendar_[flag]_[property]=val`. | [awful/widget/calendar_popup.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L43) |
-| `carousel_center_mode` | `string` | Viewport centering mode. | [awful/layout/suit/carousel.lua:56](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L56) |
-| `carousel_default_column_width` | `number` | Default column width fraction for new columns. | [awful/layout/suit/carousel.lua:44](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L44) |
-| `carousel_dynamic_peek_width` | `number` | Dynamic peek width in pixels. Columns at the edges of the strip will have this applied as their peek width. Negative values are ignored and cause edge columns to use peek_width instead. | [awful/layout/suit/carousel.lua:72](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L72) |
-| `carousel_peek_width` | `number` | Peek width in pixels for showing adjacent column edges. | [awful/layout/suit/carousel.lua:67](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L67) |
+| `carousel_center_mode` <SomewmOnly /> | `string` | Viewport centering mode. | [awful/layout/suit/carousel.lua:56](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L56) |
+| `carousel_default_column_width` <SomewmOnly /> | `number` | Default column width fraction for new columns. | [awful/layout/suit/carousel.lua:44](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L44) |
+| `carousel_dynamic_peek_width` <SomewmOnly /> | `number` | Dynamic peek width in pixels. Columns at the edges of the strip will have this applied as their peek width. Negative values are ignored and cause edge columns to use peek_width instead. | [awful/layout/suit/carousel.lua:72](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L72) |
+| `carousel_peek_width` <SomewmOnly /> | `number` | Peek width in pixels for showing adjacent column edges. | [awful/layout/suit/carousel.lua:67](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L67) |
 | `column_count` | `integer` | The default number of columns. | [awful/tag.lua:1182](https://github.com/trip-zip/somewm/blob/main/lua/awful/tag.lua#L1182) |
 | `cursor_mouse_move` | `string` | The move cursor name. | [awful/mouse/init.lua:82](https://github.com/trip-zip/somewm/blob/main/lua/awful/mouse/init.lua#L82) |
 | `cursor_mouse_resize` | `string` | The resize cursor name. | [awful/mouse/init.lua:78](https://github.com/trip-zip/somewm/blob/main/lua/awful/mouse/init.lua#L78) |
@@ -89,10 +89,10 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `hotkeys_label_bg` | `color` | Background color used for miscellaneous labels of hotkeys widget. | [awful/hotkeys_popup/widget.lua:285](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L285) |
 | `hotkeys_label_fg` | `color` | Foreground color used for hotkey groups and other labels. | [awful/hotkeys_popup/widget.lua:289](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L289) |
 | `hotkeys_modifiers_fg` | `color` | Foreground color used for hotkey modifiers (Ctrl, Alt, Super, etc). | [awful/hotkeys_popup/widget.lua:281](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L281) |
-| `hotkeys_override_label_bgs` | `boolean` | Override label background colors instead of cycling through xresources colors. | [awful/hotkeys_popup/widget.lua:293](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L293) |
-| `hotkeys_rows` | `int` | Rows in one column; a longer group continues in the next column. | [awful/hotkeys_popup/widget.lua:309](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L309) |
+| `hotkeys_override_label_bgs` <SomewmOnly /> | `boolean` | Override label background colors instead of cycling through xresources colors. | [awful/hotkeys_popup/widget.lua:293](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L293) |
+| `hotkeys_rows` <SomewmOnly /> | `int` | Rows in one column; a longer group continues in the next column. | [awful/hotkeys_popup/widget.lua:309](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L309) |
 | `hotkeys_shape` | `gears.shape` | Hotkeys widget shape. | [awful/hotkeys_popup/widget.lua:276](https://github.com/trip-zip/somewm/blob/main/lua/awful/hotkeys_popup/widget.lua#L276) |
-| `layout_carousel` | `surface` | The carousel layout layoutbox icon. | [awful/layout/suit/carousel.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L39) |
+| `layout_carousel` <SomewmOnly /> | `surface` | The carousel layout layoutbox icon. | [awful/layout/suit/carousel.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L39) |
 | `layout_cornerne` | `surface` | The cornerne layout layoutbox icon. | [awful/layout/suit/corner.lua:18](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L18) |
 | `layout_cornernw` | `surface` | The cornernw layout layoutbox icon. | [awful/layout/suit/corner.lua:13](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L13) |
 | `layout_cornerse` | `surface` | The cornerse layout layoutbox icon. | [awful/layout/suit/corner.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/corner.lua#L28) |
@@ -146,6 +146,8 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `prompt_fg` | `color` | The prompt foreground color. | [awful/widget/prompt.lua:13](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/prompt.lua#L13) |
 | `prompt_fg_cursor` | `color` | The prompt cursor foreground color. | [awful/prompt.lua:97](https://github.com/trip-zip/somewm/blob/main/lua/awful/prompt.lua#L97) |
 | `prompt_font` | `string` | The prompt text font. | [awful/prompt.lua:107](https://github.com/trip-zip/somewm/blob/main/lua/awful/prompt.lua#L107) |
+| `screenshot_frame_color` | `color` | The screenshot interactive frame color. | [awful/screenshot.lua:79](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L79) |
+| `screenshot_frame_shape` | `shape` | The screenshot interactive frame shape. | [awful/screenshot.lua:83](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L83) |
 | `snap_bg` | `color\|string\|gradient\|pattern` | The snap outline background color. | [awful/mouse/init.lua:62](https://github.com/trip-zip/somewm/blob/main/lua/awful/mouse/init.lua#L62) |
 | `snap_border_width` | `integer` | The snap outline width. | [awful/mouse/init.lua:66](https://github.com/trip-zip/somewm/blob/main/lua/awful/mouse/init.lua#L66) |
 | `snap_shape` | `function` | The snap outline shape. | [awful/mouse/init.lua:70](https://github.com/trip-zip/somewm/blob/main/lua/awful/mouse/init.lua#L70) |
@@ -350,7 +352,7 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `wibar_width` | `integer` | The wibar's width. | [awful/wibar.lua:140](https://github.com/trip-zip/somewm/blob/main/lua/awful/wibar.lua#L140) |
 ## wibox
 
-58 entries.
+89 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
@@ -412,6 +414,37 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `slider_handle_cursor` | `string` | The cursor icon while grabbing the handle. The available cursor names are: | [wibox/widget/slider.lua:192](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L192) |
 | `slider_handle_shape` | `gears.shape` | The handle shape. | [wibox/widget/slider.lua:186](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L186) |
 | `slider_handle_width` | `number` | The handle width. | [wibox/widget/slider.lua:176](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/slider.lua#L176) |
+| `systray_hover_bg` <SomewmOnly /> | `string` | The hover background color. | [wibox/widget/systray_icon.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L43) |
+| `systray_hover_scale` <SomewmOnly /> | `number` | The hover scale factor. | [wibox/widget/systray_icon.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L39) |
+| `systray_icon_change_triggers_urgent` <SomewmOnly /> | `boolean` | Whether icon changes trigger urgent styling. When an app changes its icon (e.g., Slack adding a notification badge), this triggers urgent styling instead. Best used with icon_override to show a clean icon while still getting notification indicators. | [wibox/widget/systray_icon.lua:150](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L150) |
+| `systray_icon_spacing` | `integer` | The systray icon spacing. | [wibox/widget/systray.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L42) |
+| `systray_icon_style` <SomewmOnly /> | `function\|table` | Per-icon style overrides. Can be a function that receives the systray_item and returns a style table, or a table mapping item.id or item.app_name to style tables. Style tables can contain: - `icon_override`: path to custom icon - `hover_scale`: scale on hover - `hover_bg`: background color on hover - `urgent_bg`: background color when urgent - `urgent_color`: urgent indicator color - `urgent_outline_color`: urgent indicator outline - `urgent_style`: "dot", "ring", "glow", or "none" - `urgent_position`: "top_right", "top_left", "bottom_right", "bottom_left" - `urgent_size`: number, ratio if &lt;= 1, pixels if &gt; 1 - `urgent_shape`: gears.shape function (default: gears.shape.circle) - `icon_change_triggers_urgent`: boolean, icon changes trigger urgent - `overlay_triggers_urgent`: boolean, overlay presence triggers urgent styling - `overlay_position`: "bottom_right", "bottom_left", "top_right", "top_left" - `overlay_size`: number, ratio if &lt;= 1, pixels if &gt; 1 - `overlay_bg`: background color for overlay - `overlay_shape`: "circle", "rounded_rect", "rect" - `overlay_padding`: padding around overlay within background | [wibox/widget/systray_icon.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L47) |
+| `systray_max_rows` | `integer` | The maximum number of rows for systray icons. | [wibox/widget/systray.lua:37](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L37) |
+| `systray_menu_bg_focus` <SomewmOnly /> | `string` | Context menu focused background color. | [wibox/widget/systray_icon.lua:85](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L85) |
+| `systray_menu_bg_normal` <SomewmOnly /> | `string` | Context menu background color. | [wibox/widget/systray_icon.lua:77](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L77) |
+| `systray_menu_border_color` <SomewmOnly /> | `string` | Context menu border color. | [wibox/widget/systray_icon.lua:89](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L89) |
+| `systray_menu_border_width` <SomewmOnly /> | `number` | Context menu border width. | [wibox/widget/systray_icon.lua:93](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L93) |
+| `systray_menu_callback` <SomewmOnly /> | `function` | Context menu callback for customization. Called with (item, menu_items) before showing menu. Can modify menu_items. | [wibox/widget/systray_icon.lua:109](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L109) |
+| `systray_menu_fg_focus` <SomewmOnly /> | `string` | Context menu focused foreground color. | [wibox/widget/systray_icon.lua:81](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L81) |
+| `systray_menu_fg_normal` <SomewmOnly /> | `string` | Context menu foreground color. | [wibox/widget/systray_icon.lua:73](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L73) |
+| `systray_menu_font` <SomewmOnly /> | `string` | Context menu font. | [wibox/widget/systray_icon.lua:97](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L97) |
+| `systray_menu_height` <SomewmOnly /> | `number` | Context menu height. | [wibox/widget/systray_icon.lua:105](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L105) |
+| `systray_menu_width` <SomewmOnly /> | `number` | Context menu width. | [wibox/widget/systray_icon.lua:101](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L101) |
+| `systray_overlay_bg` <SomewmOnly /> | `string` | Background color for overlay icons. Draws a background shape behind the overlay icon for better visibility. | [wibox/widget/systray_icon.lua:137](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L137) |
+| `systray_overlay_padding` <SomewmOnly /> | `number` | Padding around overlay icon within its background. | [wibox/widget/systray_icon.lua:146](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L146) |
+| `systray_overlay_position` <SomewmOnly /> | `string` | The position of overlay icons on systray items. | [wibox/widget/systray_icon.lua:126](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L126) |
+| `systray_overlay_shape` <SomewmOnly /> | `string` | Shape for overlay background. | [wibox/widget/systray_icon.lua:142](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L142) |
+| `systray_overlay_size` <SomewmOnly /> | `number` | The size of overlay icons relative to the main icon. If value is &lt;= 1, treated as a ratio (e.g., 0.33 = 33% of icon size). If value is &gt; 1, treated as absolute pixels. | [wibox/widget/systray_icon.lua:131](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L131) |
+| `systray_overlay_triggers_urgent` <SomewmOnly /> | `boolean` | Whether overlay presence triggers urgent styling. When true, icons with an overlay will be rendered with urgent styling even if their status is not "NeedsAttention". | [wibox/widget/systray_icon.lua:120](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L120) |
+| `systray_paddings` <SomewmOnly /> | `integer` | The systray paddings (space around icons). | [wibox/widget/systray.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L47) |
+| `systray_show_overlay` <SomewmOnly /> | `boolean` | Whether to show overlay icons. Overlay icons are small badges displayed on top of the main icon, typically used to show status (like number of notifications). | [wibox/widget/systray_icon.lua:114](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L114) |
+| `systray_urgent_bg` <SomewmOnly /> | `string` | The urgent background color. Shown when the systray item status is "NeedsAttention". Similar to AwesomeWM's bg_urgent for clients/tags. | [wibox/widget/systray_icon.lua:21](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L21) |
+| `systray_urgent_color` <SomewmOnly /> | `string` | The urgent indicator color. | [wibox/widget/systray_icon.lua:27](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L27) |
+| `systray_urgent_outline_color` <SomewmOnly /> | `string` | The urgent indicator outline color. | [wibox/widget/systray_icon.lua:31](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L31) |
+| `systray_urgent_position` <SomewmOnly /> | `string` | Position of urgent indicators (dot style). | [wibox/widget/systray_icon.lua:157](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L157) |
+| `systray_urgent_shape` <SomewmOnly /> | `function` | Shape function for urgent indicators. Used with "dot" and "ring" styles. Receives (cr, width, height). | [wibox/widget/systray_icon.lua:168](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L168) |
+| `systray_urgent_size` <SomewmOnly /> | `number` | Size of urgent indicator dot. If value is &lt;= 1, treated as a ratio of icon size. If value is &gt; 1, treated as absolute pixels. | [wibox/widget/systray_icon.lua:162](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L162) |
+| `systray_urgent_style` <SomewmOnly /> | `string` | The urgent indicator style. | [wibox/widget/systray_icon.lua:35](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L35) |
 ## naughty {#notifications}
 
 47 entries.
@@ -471,7 +504,7 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
-| `launcher_width` | `number` | The launcher's width, ahead of `menubar.geometry.width`. Without either, the launcher spans the workarea. | [menubar/init.lua:77](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L77) |
+| `launcher_width` <SomewmOnly /> | `number` | The launcher's width, ahead of `menubar.geometry.width`. Without either, the launcher spans the workarea. | [menubar/init.lua:77](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L77) |
 | `menubar_bg_focus` | `color` | Menubar selected item background color. | [menubar/init.lua:69](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L69) |
 | `menubar_bg_normal` | `color` | Menubar normal background color. | [menubar/init.lua:53](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L53) |
 | `menubar_border_color` | `color` | Menubar border color. | [menubar/init.lua:61](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L61) |
@@ -479,9 +512,33 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `menubar_fg_focus` | `color` | Menubar selected item text color. | [menubar/init.lua:65](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L65) |
 | `menubar_fg_normal` | `color` | Menubar normal text color. | [menubar/init.lua:49](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L49) |
 | `menubar_font` | `font` | Menubar font. | [menubar/init.lua:73](https://github.com/trip-zip/somewm/blob/main/lua/menubar/init.lua#L73) |
+## somewm
+
+18 entries.
+
+| Variable | Type | Description | Source |
+| --- | --- | --- | --- |
+| `animation_appear` <SomewmOnly /> | `string` | The entrance every client maps with: `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. | [somewm/animation.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L42) |
+| `animation_appear_duration` <SomewmOnly /> | `number` | A client mapping, in seconds; needs an entrance from `animation_appear` or `c.animation.appear`. | [somewm/animation.lua:23](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L23) |
+| `animation_disappear` <SomewmOnly /> | `string` | The exit every client closes with, same words as `animation_appear`. | [somewm/animation.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L47) |
+| `animation_disappear_duration` <SomewmOnly /> | `number` | A client closing, in seconds; needs an entrance from `animation_disappear` or `c.animation.disappear`. | [somewm/animation.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L28) |
+| `animation_duration` <SomewmOnly /> | `number` | The duration for every trigger that has none of its own, in seconds. Unset, nothing animates; 0 snaps. | [somewm/animation.lua:5](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L5) |
+| `animation_floating_duration` <SomewmOnly /> | `number` | A client toggling floating, in seconds. | [somewm/animation.lua:19](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L19) |
+| `animation_focus_duration` <SomewmOnly /> | `number` | The border colour easing on a focus change, in seconds. | [somewm/animation.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L38) |
+| `animation_layout_duration` <SomewmOnly /> | `number` | Tiled clients moving between slots, in seconds; 0 snaps. Requiring `somewm.layout_animation` sets 0.15. | [somewm/animation.lua:10](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L10) |
+| `animation_maximize_duration` <SomewmOnly /> | `number` | A client maximizing or going fullscreen, in seconds. | [somewm/animation.lua:15](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L15) |
+| `animation_tag_duration` <SomewmOnly /> | `number` | A tag switch, in seconds. Clients grow in and out unless `c.animation.tag` names another entrance. | [somewm/animation.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L33) |
+| `inspector_bg` <SomewmOnly /> | `color` | The panel body and its odd rows. | [somewm/inspector.lua:29](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L29) |
+| `inspector_bg_alt` <SomewmOnly /> | `color` | The header, the even rows, and the info and warnings panes. | [somewm/inspector.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L33) |
+| `inspector_bg_selected` <SomewmOnly /> | `color` | The selected tree row. | [somewm/inspector.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L45) |
+| `inspector_border` <SomewmOnly /> | `color` | Dividers, row borders and dim text (ids, the Offscreen tag). | [somewm/inspector.lua:37](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L37) |
+| `inspector_fg` <SomewmOnly /> | `color` | Text and swatch borders. | [somewm/inspector.lua:41](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L41) |
+| `inspector_font` <SomewmOnly /> | `string` | The panel font. A size, absolute (`"Monospace 14px"`) or in points (`"Monospace 10"`), sizes the panel's text; without one Clay's 16px stands. Rows are 30px, so sizes past about 20px overflow them. | [somewm/inspector.lua:58](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L58) |
+| `inspector_highlight` <SomewmOnly /> | `color` | The overlay drawn over the hovered element out on the desktop. Its alpha shows the element through. | [somewm/inspector.lua:49](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L49) |
+| `inspector_width` <SomewmOnly /> | `number` | The panel width in logical pixels. | [somewm/inspector.lua:54](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L54) |
 ## root
 
-20 entries.
+12 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
@@ -496,64 +553,7 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 | `fg_urgent` | `color` | The default urgent element foreground (text) color. | [beautiful/init.lua:125](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L125) |
 | `font` | `string` | The default font. | [beautiful/init.lua:90](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L90) |
 | `icon_theme` | `string` | The icon theme name. It has to be a directory in `/usr/share/icons` or an XDG icon folder. | [beautiful/init.lua:137](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L137) |
-| `inspector_bg` | `color` | The panel body and its odd rows. | [somewm/inspector.lua:29](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L29) |
-| `inspector_bg_alt` | `color` | The header, the even rows, and the info and warnings panes. | [somewm/inspector.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L33) |
-| `inspector_bg_selected` | `color` | The selected tree row. | [somewm/inspector.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L45) |
-| `inspector_border` | `color` | Dividers, row borders and dim text (ids, the Offscreen tag). | [somewm/inspector.lua:37](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L37) |
-| `inspector_fg` | `color` | Text and swatch borders. | [somewm/inspector.lua:41](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L41) |
-| `inspector_font` | `string` | The panel font. A size, absolute (`"Monospace 14px"`) or in points (`"Monospace 10"`), sizes the panel's text; without one Clay's 16px stands. Rows are 30px, so sizes past about 20px overflow them. | [somewm/inspector.lua:58](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L58) |
-| `inspector_highlight` | `color` | The overlay drawn over the hovered element out on the desktop. Its alpha shows the element through. | [somewm/inspector.lua:49](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L49) |
-| `inspector_width` | `number` | The panel width in logical pixels. | [somewm/inspector.lua:54](https://github.com/trip-zip/somewm/blob/main/lua/somewm/inspector.lua#L54) |
 | `wallpaper` | `string\|gears.surface` | The wallpaper path. | [beautiful/init.lua:133](https://github.com/trip-zip/somewm/blob/main/lua/beautiful/init.lua#L133) |
-## SomeWM Extensions
-
-43 entries.
-
-| Variable | Type | Description | Source |
-| --- | --- | --- | --- |
-| `animation_appear` | `string` | The entrance every client maps with: `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. | [somewm/animation.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L42) |
-| `animation_appear_duration` | `number` | A client mapping, in seconds; needs an entrance from `animation_appear` or `c.animation.appear`. | [somewm/animation.lua:23](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L23) |
-| `animation_disappear` | `string` | The exit every client closes with, same words as `animation_appear`. | [somewm/animation.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L47) |
-| `animation_disappear_duration` | `number` | A client closing, in seconds; needs an entrance from `animation_disappear` or `c.animation.disappear`. | [somewm/animation.lua:28](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L28) |
-| `animation_duration` | `number` | The duration for every trigger that has none of its own, in seconds. Unset, nothing animates; 0 snaps. | [somewm/animation.lua:5](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L5) |
-| `animation_floating_duration` | `number` | A client toggling floating, in seconds. | [somewm/animation.lua:19](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L19) |
-| `animation_focus_duration` | `number` | The border colour easing on a focus change, in seconds. | [somewm/animation.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L38) |
-| `animation_layout_duration` | `number` | Tiled clients moving between slots, in seconds; 0 snaps. Requiring `somewm.layout_animation` sets 0.15. | [somewm/animation.lua:10](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L10) |
-| `animation_maximize_duration` | `number` | A client maximizing or going fullscreen, in seconds. | [somewm/animation.lua:15](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L15) |
-| `animation_tag_duration` | `number` | A tag switch, in seconds. Clients grow in and out unless `c.animation.tag` names another entrance. | [somewm/animation.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L33) |
-| `screenshot_frame_color` | `color` | The screenshot interactive frame color. | [awful/screenshot.lua:79](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L79) |
-| `screenshot_frame_shape` | `shape` | The screenshot interactive frame shape. | [awful/screenshot.lua:83](https://github.com/trip-zip/somewm/blob/main/lua/awful/screenshot.lua#L83) |
-| `systray_hover_bg` | `string` | The hover background color. | [wibox/widget/systray_icon.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L43) |
-| `systray_hover_scale` | `number` | The hover scale factor. | [wibox/widget/systray_icon.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L39) |
-| `systray_icon_change_triggers_urgent` | `boolean` | Whether icon changes trigger urgent styling. When an app changes its icon (e.g., Slack adding a notification badge), this triggers urgent styling instead. Best used with icon_override to show a clean icon while still getting notification indicators. | [wibox/widget/systray_icon.lua:150](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L150) |
-| `systray_icon_spacing` | `integer` | The systray icon spacing. | [wibox/widget/systray.lua:42](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L42) |
-| `systray_icon_style` | `function\|table` | Per-icon style overrides. Can be a function that receives the systray_item and returns a style table, or a table mapping item.id or item.app_name to style tables. Style tables can contain: - `icon_override`: path to custom icon - `hover_scale`: scale on hover - `hover_bg`: background color on hover - `urgent_bg`: background color when urgent - `urgent_color`: urgent indicator color - `urgent_outline_color`: urgent indicator outline - `urgent_style`: "dot", "ring", "glow", or "none" - `urgent_position`: "top_right", "top_left", "bottom_right", "bottom_left" - `urgent_size`: number, ratio if &lt;= 1, pixels if &gt; 1 - `urgent_shape`: gears.shape function (default: gears.shape.circle) - `icon_change_triggers_urgent`: boolean, icon changes trigger urgent - `overlay_triggers_urgent`: boolean, overlay presence triggers urgent styling - `overlay_position`: "bottom_right", "bottom_left", "top_right", "top_left" - `overlay_size`: number, ratio if &lt;= 1, pixels if &gt; 1 - `overlay_bg`: background color for overlay - `overlay_shape`: "circle", "rounded_rect", "rect" - `overlay_padding`: padding around overlay within background | [wibox/widget/systray_icon.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L47) |
-| `systray_max_rows` | `integer` | The maximum number of rows for systray icons. | [wibox/widget/systray.lua:37](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L37) |
-| `systray_menu_bg_focus` | `string` | Context menu focused background color. | [wibox/widget/systray_icon.lua:85](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L85) |
-| `systray_menu_bg_normal` | `string` | Context menu background color. | [wibox/widget/systray_icon.lua:77](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L77) |
-| `systray_menu_border_color` | `string` | Context menu border color. | [wibox/widget/systray_icon.lua:89](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L89) |
-| `systray_menu_border_width` | `number` | Context menu border width. | [wibox/widget/systray_icon.lua:93](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L93) |
-| `systray_menu_callback` | `function` | Context menu callback for customization. Called with (item, menu_items) before showing menu. Can modify menu_items. | [wibox/widget/systray_icon.lua:109](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L109) |
-| `systray_menu_fg_focus` | `string` | Context menu focused foreground color. | [wibox/widget/systray_icon.lua:81](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L81) |
-| `systray_menu_fg_normal` | `string` | Context menu foreground color. | [wibox/widget/systray_icon.lua:73](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L73) |
-| `systray_menu_font` | `string` | Context menu font. | [wibox/widget/systray_icon.lua:97](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L97) |
-| `systray_menu_height` | `number` | Context menu height. | [wibox/widget/systray_icon.lua:105](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L105) |
-| `systray_menu_width` | `number` | Context menu width. | [wibox/widget/systray_icon.lua:101](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L101) |
-| `systray_overlay_bg` | `string` | Background color for overlay icons. Draws a background shape behind the overlay icon for better visibility. | [wibox/widget/systray_icon.lua:137](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L137) |
-| `systray_overlay_padding` | `number` | Padding around overlay icon within its background. | [wibox/widget/systray_icon.lua:146](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L146) |
-| `systray_overlay_position` | `string` | The position of overlay icons on systray items. | [wibox/widget/systray_icon.lua:126](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L126) |
-| `systray_overlay_shape` | `string` | Shape for overlay background. | [wibox/widget/systray_icon.lua:142](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L142) |
-| `systray_overlay_size` | `number` | The size of overlay icons relative to the main icon. If value is &lt;= 1, treated as a ratio (e.g., 0.33 = 33% of icon size). If value is &gt; 1, treated as absolute pixels. | [wibox/widget/systray_icon.lua:131](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L131) |
-| `systray_overlay_triggers_urgent` | `boolean` | Whether overlay presence triggers urgent styling. When true, icons with an overlay will be rendered with urgent styling even if their status is not "NeedsAttention". | [wibox/widget/systray_icon.lua:120](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L120) |
-| `systray_paddings` | `integer` | The systray paddings (space around icons). | [wibox/widget/systray.lua:47](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray.lua#L47) |
-| `systray_show_overlay` | `boolean` | Whether to show overlay icons. Overlay icons are small badges displayed on top of the main icon, typically used to show status (like number of notifications). | [wibox/widget/systray_icon.lua:114](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L114) |
-| `systray_urgent_bg` | `string` | The urgent background color. Shown when the systray item status is "NeedsAttention". Similar to AwesomeWM's bg_urgent for clients/tags. | [wibox/widget/systray_icon.lua:21](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L21) |
-| `systray_urgent_color` | `string` | The urgent indicator color. | [wibox/widget/systray_icon.lua:27](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L27) |
-| `systray_urgent_outline_color` | `string` | The urgent indicator outline color. | [wibox/widget/systray_icon.lua:31](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L31) |
-| `systray_urgent_position` | `string` | Position of urgent indicators (dot style). | [wibox/widget/systray_icon.lua:157](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L157) |
-| `systray_urgent_shape` | `function` | Shape function for urgent indicators. Used with "dot" and "ring" styles. Receives (cr, width, height). | [wibox/widget/systray_icon.lua:168](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L168) |
-| `systray_urgent_size` | `number` | Size of urgent indicator dot. If value is &lt;= 1, treated as a ratio of icon size. If value is &gt; 1, treated as absolute pixels. | [wibox/widget/systray_icon.lua:162](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L162) |
-| `systray_urgent_style` | `string` | The urgent indicator style. | [wibox/widget/systray_icon.lua:35](https://github.com/trip-zip/somewm/blob/main/lua/wibox/widget/systray_icon.lua#L35) |
 
 ## Undocumented (Used in Code)
 
@@ -648,4 +648,4 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 - [Key Names](/docs/reference/key-names) – Common keybinding key names
 - [beautiful (AwesomeWM upstream docs)](https://awesomewm.org/apidoc/libraries/beautiful.html) – Full upstream API
 
-<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ 9f8e10dd41 | regenerate with `npm run generate:reference` -->
+<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ 65f3d63b65 | regenerate with `npm run generate:reference` -->

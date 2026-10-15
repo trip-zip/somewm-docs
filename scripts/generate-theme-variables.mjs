@@ -6,7 +6,11 @@
 //     --source /home/jimmy/tools/some \
 //     --prelude docs/reference/beautiful/_theme-variables-prelude.md \
 //     --out docs/reference/beautiful/theme-variables.md \
-//     --ref main
+//     --ref main \
+//     --upstream-ref awesome/master
+//
+// --upstream-ref names an AwesomeWM ref in the --source repo. Variables it
+// never mentions get a <SomewmOnly /> badge. Defaults to awesome/master.
 
 import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
@@ -55,15 +59,10 @@ const MODULE_LABELS = {
   gears: 'gears',
   ruled: 'ruled',
   menubar: 'menubar',
+  somewm: 'somewm',
 };
 
-// SomeWM-specific groupings: pulled out into their own section since they
-// don't exist in upstream AwesomeWM and deserve visibility. Members are
-// matched by prefix.
-const SOMEWM_PREFIXES = ['systray_', 'screenshot_', 'shadow_', 'lockscreen_', 'animation_'];
-
 function moduleBucket(record) {
-  if (SOMEWM_PREFIXES.some((p) => record.name.startsWith(p))) return '_somewm';
   const seg = record.file.split('/')[1] || 'root';
   return MODULE_LABELS[seg] || 'root';
 }
@@ -75,13 +74,12 @@ const LEGACY_ANCHORS = {
 };
 
 function moduleHeading(bucket) {
-  if (bucket === '_somewm') return 'SomeWM Extensions';
   const anchor = LEGACY_ANCHORS[bucket];
   if (anchor) return `${bucket} {#${anchor}}`;
   return bucket;
 }
 
-const MODULE_ORDER = ['awful', 'wibox', 'naughty', 'gears', 'ruled', 'menubar', 'root', '_somewm'];
+const MODULE_ORDER = ['awful', 'wibox', 'naughty', 'gears', 'ruled', 'menubar', 'somewm', 'root'];
 
 async function gitSha(source) {
   const { execFile } = await import('node:child_process');
@@ -92,12 +90,35 @@ async function gitSha(source) {
   });
 }
 
+// Every `beautiful.X` name the upstream AwesomeWM tree mentions, from @beautiful
+// tags and lookups alike. null when the ref is missing, which disables badges.
+async function upstreamNames(source, upstreamRef) {
+  const { execFile } = await import('node:child_process');
+  return new Promise((resolve) => {
+    execFile(
+      'git',
+      ['-C', source, 'grep', '-ohE', 'beautiful\\.[A-Za-z0-9_]+', upstreamRef, '--', 'lib/'],
+      { maxBuffer: 64 * 1024 * 1024 },
+      (err, stdout) => {
+        if (err) {
+          console.warn(`upstream ref ${upstreamRef} not readable in ${source}; no somewm-only badges.`);
+          resolve(null);
+          return;
+        }
+        const names = stdout.split('\n').filter(Boolean).map((l) => l.split(':').pop().slice('beautiful.'.length));
+        resolve(new Set(names));
+      },
+    );
+  });
+}
+
 async function main() {
   const args = parseArgs(process.argv);
   const source = args.source;
   const out = args.out;
   const preludePath = args.prelude;
   const ref = args.ref || 'main';
+  const upstreamRef = args['upstream-ref'] || 'awesome/master';
 
   if (!source || !out) {
     console.error('Usage: --source <path> --out <path> [--prelude <path>] [--ref <git-ref>]');
@@ -146,6 +167,9 @@ async function main() {
     list.sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  const upstream = await upstreamNames(source, upstreamRef);
+  const somewmOnly = (name) => upstream !== null && !upstream.has(name);
+
   const sha = await gitSha(source);
   const shortSha = sha.slice(0, 10);
   const totalDocumented = documented.length;
@@ -166,7 +190,11 @@ async function main() {
     if (!records || records.length === 0) continue;
     const heading = moduleHeading(bucket);
     const rows = records.map((r) => [
-      r.deprecated ? `~~\`${r.name}\`~~` : `\`${r.name}\``,
+      {
+        raw:
+          (r.deprecated ? `~~\`${r.name}\`~~` : `\`${r.name}\``) +
+          (somewmOnly(r.name) ? ' <SomewmOnly />' : ''),
+      },
       r.type ? `\`${r.type}\`` : '',
       r.description || (r.deprecated ? '_deprecated_' : '_(no description)_'),
       sourceLink(r.file, r.line, ref),

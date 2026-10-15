@@ -7,8 +7,10 @@ const GT = />/g;
 
 // MDX 3.x parses any `<` as the start of a JSX tag, which fails on content
 // like `<U+0020 SPACE>` or `<= 1`. Pre-escape angle brackets in cell content.
+// A `{ raw }` cell is emitted as-is, for JSX the caller wrote itself.
 export function escapeCell(value) {
   if (value === null || value === undefined) return '';
+  if (typeof value === 'object' && 'raw' in value) return value.raw;
   return String(value)
     .replace(PIPE, '\\|')
     .replace(NEWLINE, ' ')
