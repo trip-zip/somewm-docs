@@ -11,7 +11,7 @@ import AnimationDemo from '@site/src/components/AnimationDemo';
 
 SomeWM animates by declaring a transition on a node of the tree and letting the solver move it. Nothing is interpolated in Lua. Every animation is off until a duration is set, and a duration of 0 is off.
 
-The `.animation` property stores a persistent policy on clients, wiboxes and widgets. The widget method `:animate{...}` requests one change without replacing that policy. Policy assignments emit `property::animation`.
+The `.animation` property stores a persistent policy on clients, wiboxes, popups and widgets. Policies are copied on assignment and access. To change one, edit a copy and assign it back; assignments emit `property::animation`. The widget method `:animate{...}` requests one change without replacing that policy.
 
 ## Layout changes
 
@@ -61,7 +61,7 @@ ruled.client.append_rule {
 }
 ```
 
-One key holds either an entrance word or a duration. A client that names an entrance takes its duration from the theme, so this rule animates nothing until `theme.animation_appear_duration`, `animation_disappear_duration` and `animation_tag_duration` are set.
+One key holds either an entrance word or a duration. A client that names an entrance takes its duration from the theme. Each trigger in this rule animates when its own duration key (`theme.animation_appear_duration`, `animation_disappear_duration` or `animation_tag_duration`) is above 0, or when that key is unset and `theme.animation_duration` is above 0. The triggers can be enabled independently.
 
 <AnimationDemo name="fade" title="Fade">
   A client fades in and out, followed by a popup using the same entrance and exit style.
@@ -76,7 +76,15 @@ theme.animation_tag_duration = 0.15
 theme.animation_focus_duration = 0.1
 ```
 
-A number in `c.animation` is a duration for that trigger, and `c.animation.focus = 0.3` eases that one client's border over 0.3 seconds. `c.animation = false` turns every animation off for that client.
+A number in `c.animation` is a duration for that trigger. To ease one client's focus border over 0.3 seconds, reassign its policy:
+
+```lua
+local policy = c.animation or {}
+policy.focus = 0.3
+c.animation = policy
+```
+
+`c.animation = false` turns animation off for the client and its titlebar widgets. `c.animation = nil` removes the override so the client falls back to the theme and its titlebar widgets can use their own policies.
 
 With a tag duration above 0, from `theme.animation_tag_duration`, `theme.animation_duration` or a number in `c.animation.tag`, a tag switch grows clients in and out. `c.animation.tag` or `theme.animation_tag` can name another entrance. A client on its way out animates its frame, the border and titlebars; the window's own pixels snap away on the first frame.
 
@@ -96,6 +104,8 @@ local popup = awful.popup {
 ```
 
 `enter` and `exit` take the same words as a client. Setting `visible` then eases the box in or out. A wibox leaving the screen keeps its box and border for the duration, and its shadow goes on the first frame.
+
+Setting the wibox's or popup's `animation = false` disables its transitions and those of its child widgets. Setting `animation = nil` removes that override.
 
 <AnimationDemo name="slides" title="Directional slides">
   A popup enters and exits using `slide_left`, `slide_right`, `slide_up` and `slide_down`.
@@ -140,9 +150,9 @@ It sets each named property and eases it once; the next plain assignment snaps a
   Three widgets change size and colour at different speeds. The heart then grows and shrinks twice to make a gentle pulse.
 </AnimationDemo>
 
-`widget.animation = false` turns animation off for that widget and everything inside it, including children that set their own `animation`. The `:animate{}` method remains callable and applies its values immediately while animation is disabled.
+`widget.animation = false` turns animation off for that widget and everything inside it, including children that set their own `animation`. The `:animate{}` method remains callable and applies its values immediately while animation is disabled. `widget.animation = nil` removes the override; an ancestor's `animation = false` still suppresses the subtree.
 
-Each output keeps 200 transition records. A tree that animates more nodes than that warns once, and the nodes past the budget snap.
+Each output keeps 200 transition records, including configured records that are currently idle. When the budget is exhausted, the output warns once and the remaining nodes snap.
 
 ## Turning it all off
 
@@ -150,6 +160,6 @@ Each output keeps 200 transition records. A tree that animates more nodes than t
 require("somewm.animation").enabled = false
 ```
 
-Every client and widget transition then has a duration of 0, but a wibox's or popup's `animate.visible` still runs. While a `mousegrabber` runs, client and widget changes snap, so a drag never fights an easing box.
+This disables client and widget transitions and the `animation.visible` transitions on wiboxes and popups. Active transitions finish on the next rendered frame, including retained exits. A running `mousegrabber` suppresses the same transitions, so a drag never fights an easing box.
 
 [Clients in the Tree](/docs/next/concepts/clients-in-the-tree) for the frame these transitions move.

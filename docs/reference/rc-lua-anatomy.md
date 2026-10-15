@@ -124,7 +124,7 @@ local modkey     = "Mod4"
 - `awful.input.*`: keyboard layouts and pointer/touchpad config (compositor-side, no `setxkbmap` / `libinput-gestures`)
 - `output.connect_signal("added", ...)`: per-monitor fractional scaling
 - `awesome.set_idle_timeout()` and `awesome.idle_inhibit`: idle/inhibitor APIs
-- `somewm.layout_animation`: animated tile transitions; uncommenting it sets the layout duration to 0.15 ([Animation](/docs/next/guides/animation) has the theme keys)
+- `somewm.layout_animation`: deprecated alias that sets the layout duration to 0.15 when required. Set `theme.animation_layout_duration` to configure layout transitions ([Animation](/docs/next/guides/animation) has the theme keys).
 - `awful.ipc.register()`: custom IPC commands callable via `somewm-client`
 
 **Common edits:** Uncomment the snippet you want. Typical first uncomments:
