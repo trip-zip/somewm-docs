@@ -172,12 +172,28 @@ It sets each named property and eases it once; the next plain assignment snaps a
 
 Each output keeps 200 transition records, including configured records that are currently idle. When the budget is exhausted, the output warns once and the remaining nodes snap.
 
-## Turning it all off
+## Updating a policy
+
+Clients, wiboxes, popups and widgets copy `.animation` on assignment and access. Edit a copy and assign it back to apply changes:
+
+```lua
+local policy = box.animation or {}
+policy.bg = 0.5
+box.animation = policy
+```
+
+Assigning an edited policy notifies `property::animation` observers and schedules the update. Editing the original table or a returned copy alone leaves the stored policy unchanged.
+
+## Disabling animation
+
+Assign `.animation = false` to suppress an object and its descendants, including descendants with their own policies. A client's titlebar widgets are included. Assign `nil` to remove that override; client theme defaults and descendant policies then apply again.
+
+Disable all transitions with:
 
 ```lua
 require("somewm.animation").enabled = false
 ```
 
-This disables client and widget transitions and the `animation.visible` transitions on wiboxes and popups. Active transitions finish on the next rendered frame, including retained exits. A running `mousegrabber` suppresses the same transitions, so a drag never fights an easing box.
+This disables client and widget transitions and the `animation.visible` transitions on wiboxes and popups. Active transitions finish on the next rendered frame, including retained exits. Set `enabled = true` to let later changes animate again; a completed transition does not restart, and stored policies are unchanged throughout. A running `mousegrabber` suppresses the same transitions, so a drag never fights an easing box.
 
 [Clients in the Tree](/docs/next/concepts/clients-in-the-tree) for the frame these transitions move.
