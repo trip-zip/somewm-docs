@@ -52,6 +52,24 @@ A client reads its durations and entrances from `c.animation`, a table with one 
 
 An entrance is one of `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. `grow` scales the frame from nothing; the slides come in from that edge of the screen; `fade` blends the frame in from invisible. The same word runs backwards on the way out.
 
+A list runs several effects together in one transition, with one duration:
+
+```lua
+theme.animation_appear = { "fade", "slide_left" }
+```
+
+- One slide, `grow` and `fade` combine, in any order.
+- A second slide direction warns once and the first one named stays.
+- A repeated word counts once. `collapse` is another name for `grow`.
+
+`{ "slide_left", "slide_right" }` logs:
+
+```
+transition.enter: slide_left + slide_right conflict; slide_right is ignored, slide_left remains active
+```
+
+`none` names no entrance. Beside another effect it warns the same way. An explicit `disappear = "none"` closes the client without an animation instead of using the tag exit.
+
 From a rule:
 
 ```lua
@@ -61,7 +79,7 @@ ruled.client.append_rule {
 }
 ```
 
-One key holds either an entrance word or a duration. A client that names an entrance takes its duration from the theme. Each trigger in this rule animates when its own duration key (`theme.animation_appear_duration`, `animation_disappear_duration` or `animation_tag_duration`) is above 0, or when that key is unset and `theme.animation_duration` is above 0. The triggers can be enabled independently.
+One key holds an entrance word, a list of them, or a duration. A client that names an entrance takes its duration from the theme. Each trigger in this rule animates when its own duration key (`theme.animation_appear_duration`, `animation_disappear_duration` or `animation_tag_duration`) is above 0, or when that key is unset and `theme.animation_duration` is above 0. The triggers can be enabled independently.
 
 <AnimationDemo name="fade" title="Fade">
   A client fades in and out, followed by a popup using the same entrance and exit style.
@@ -103,7 +121,7 @@ local popup = awful.popup {
 }
 ```
 
-`enter` and `exit` take the same words as a client. Setting `visible` then eases the box in or out. A wibox leaving the screen keeps its box and border for the duration, and its shadow goes on the first frame.
+`enter` and `exit` take the same words and lists as a client. Setting `visible` then eases the box in or out. A wibox leaving the screen keeps its box and border for the duration, and its shadow goes on the first frame.
 
 Setting the wibox's or popup's `animation = false` disables its transitions and those of its child widgets. Setting `animation = nil` removes that override.
 
