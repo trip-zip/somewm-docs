@@ -13,7 +13,7 @@ SomeWM is a Wayland compositor built on [wlroots](https://gitlab.freedesktop.org
 | 1.4 | mirrors AwesomeWM master and is maintained indefinitely as the compatible line |
 | 2.x | keeps the configuration model and develops the libraries and compositor independently; public Lua APIs can change, and deprecated ones are removed |
 
-A shared name does not promise identical behaviour, defaults or signal timing. Check the SomeWM reference for your release; the [AwesomeWM API docs](https://awesomewm.org/apidoc/) explain inherited APIs but also describe ones SomeWM changed or removed. [Migrating](../getting-started/migrating.md#deprecated-apis-removed-in-somewm-20) lists the replacements, and [Deviations](../reference/deviations.md) every behavioural difference.
+A shared name does not promise identical behaviour, defaults or signal timing. Check the SomeWM reference for your release; the [AwesomeWM API docs](https://awesomewm.org/apidoc/) explain inherited APIs but also describe ones SomeWM changed or removed. [Migrating](../getting-started/migrating.md#deprecated-apis-removed-in-somewm-20) lists the replacements, and [Compatibility reference](../reference/deviations.md) every behavioural difference.
 
 ## Not part of the API
 

@@ -79,17 +79,7 @@ A key that defines an action skips compat interpretation and stops repeating. Ad
 
 ## Current limitations {#current-limitations}
 
-[Deviations](reference/deviations.md) is the full list.
-
-| Feature | Status |
-| --- | --- |
-| XEmbed tray apps | no icon; SNI works |
-| X property APIs | stubs |
-| `root._remove_key()` | no-op |
-| a widget that paints itself | left out; compose from stock widgets |
-| a wibox tree above 4096 nodes | shows nothing, with one warning; split it |
-| text under `rotate` or `mirror` | one line; a multi-line textbox is left out |
-| `grp:*` XKB toggle options | bind the switch yourself |
+The [compatibility reference](reference/deviations.md) lists platform differences, X-property behaviour, keyboard-layout limitations and XWayland gaps for this version.
 
 ## Reporting
 

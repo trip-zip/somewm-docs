@@ -26,7 +26,7 @@ A name is any string; the `::` in `property::name` is convention, not syntax.
 
 ## Dispatch
 
-A C-emitted signal does not run its Lua handlers inside the Wayland event that caused it. C queues it, finishes the event, and the queue drains at `some_refresh()` before each event-loop iteration: every queued handler runs in order, then the outputs a handler touched declare their trees ([How SomeWM draws](./how-somewm-draws.md)), then the loop blocks for the next event. C and Lua never share a call stack.
+Some C-generated notifications are queued until `some_refresh()`. The queue drains before `refresh` and the output declarations ([How SomeWM draws](./how-somewm-draws.md)). Requests whose results the compositor needs immediately call Lua synchronously.
 
 - **Queued:** property changes, focus, mouse motion, lifecycle, most `request::*`, the output and screen signals hotplug causes, layer-shell properties, most global signals. The exact set is the [dispatch section of the reference](../reference/signals.md#dispatch).
 - **Synchronous from C:** `request::manage`, `request::unmanage`, `request::geometry`, screen `added` and `removed`, and the client scalar `property::*` signals. The compositor acts on their handlers' results immediately.
@@ -37,7 +37,7 @@ A C-emitted signal does not run its Lua handlers inside the Wayland event that c
 
 **Coalescing.** `mouse::move` on one object is coalesced: of several queued moves with no other event between them, only the latest survives. Nothing else is coalesced.
 
-**Reentrancy.** A drain processes a snapshot. A signal emitted during the drain, by your handler or by C code it caused to run, waits for the next refresh. A handler therefore cannot re-enter the code that emitted its signal, and a property change made in a handler that triggers a queued signal fires on the next drain.
+**Reentrancy.** A drain processes a snapshot of the queue. New queued events wait for the next drain. Synchronous C signals and Lua-emitted signals still run inline, including when emitted by a queued handler. [State before a queued handler runs](../reference/signals.md#state-before-a-queued-handler-runs) describes the effect on Lua caches.
 
 ## The `request::*` pattern
 

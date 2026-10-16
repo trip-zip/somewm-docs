@@ -42,4 +42,4 @@ Practical rule for `rc.lua`: call `beautiful.init()` early, and require modules 
 
 ## Behavioral Notes
 
-SomeWM's `beautiful` implementation is fully compatible with AwesomeWM. Theme files work identically.
+Theme variables and GTK theme discovery follow the [compatibility reference](../deviations.md#architectural-differences) for this release. Use the [theme variable reference](theme-variables.md) for supported names.

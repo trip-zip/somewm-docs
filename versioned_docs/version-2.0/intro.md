@@ -14,7 +14,7 @@ SomeWM's documentation aims to be **self-sufficient**: a complete reference for 
 
 - **Comprehensive.** Every API surface AwesomeWM documents is, or will be, documented here.
 - **Organized by task.** We use the [Diátaxis framework](https://diataxis.fr/): tutorials (learning), how-to guides (doing), reference (looking up), and concepts (understanding), each kept separate. AwesomeWM's docs are LDoc-generated and do not draw these distinctions.
-- **Honest about Wayland.** Architectural differences from AwesomeWM, stubs, and SomeWM-only extensions are inline on the affected pages and indexed in [Deviations](reference/deviations.md).
+- **Honest about Wayland.** Architectural differences from AwesomeWM, stubs, and SomeWM-only extensions are inline on the affected pages and indexed in [Compatibility reference](reference/deviations.md).
 
 We are not self-sufficient on every topic yet. If you hit a gap, file a [discussion](https://github.com/trip-zip/somewm/discussions) and we will prioritize it. See [#532](https://github.com/trip-zip/somewm/discussions/532) for the conversation that started this work.
 

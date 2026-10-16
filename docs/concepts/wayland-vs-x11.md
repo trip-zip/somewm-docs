@@ -20,9 +20,9 @@ description: On Wayland the compositor owns drawing, input and placement, so som
 - **Systray.** Icons come over StatusNotifierItem. NetworkManager, Bluetooth applets, Discord and Steam work; XEmbed-only apps show nothing.
 - **Input injection.** `xdotool` cannot reach other apps. `root.fake_input()` works because the compositor itself injects through `wlr_seat`.
 - **Key repeat.** The compositor sends the repeat rate and delay with the keymap, and each application repeats on its own, asking the keymap whether the held key repeats. `keyboard_repeat_rate` and `keyboard_repeat_delay` set the timing; a layout can mark a key non-repeating and no property overrides it ([troubleshooting](../troubleshooting.md#a-key-doesnt-repeat-when-held)).
-- **X properties.** No equivalent exists. `awesome.register_xproperty()` and its family are stubs.
+- **X properties.** Wayland has no shared X11 property store. The [compatibility reference](../reference/deviations.md#stubbed-apis) distinguishes absent global calls from client-local storage.
 - **Borders.** The border is a scene rect around the client geometry. `c:geometry()` excludes it, as in AwesomeWM; titlebars sit inside the geometry and start inside the border.
-- **XKB toggle options.** `grp:alt_shift_toggle` and the other `grp:*` options need an X server to act on the key. On any Wayland compositor they do nothing. Bind the switch yourself ([Keyboard Layout Switching](/docs/guides/keyboard-layouts)):
+- **XKB toggle options.** `grp:alt_shift_toggle` and the other `grp:*` options need an X server to act on the key. On any Wayland compositor they do nothing. Bind the switch yourself ([Keyboard Layout Switching](../guides/keyboard-layouts.md)):
 
 ```lua
 awful.key({ "Mod1", "Shift" }, "space", function()

@@ -14,7 +14,7 @@ Signals are grouped by the class or module that emits them.
 
 ## Dispatch
 
-C-emitted signals are queued and drained at `some_refresh()` in 2.0, not run inline with the Wayland event that triggered them. See [Signals (concepts): Dispatch model](../concepts/signals.md#dispatch) for the model and the implications.
+The C-generated signals listed below are queued and drained at `some_refresh()`. Other C-generated signals and all Lua-emitted signals run synchronously. See [Signals (concepts): Dispatch model](../concepts/signals.md#dispatch) for the model and the implications.
 
 Currently queued:
 
@@ -25,7 +25,7 @@ Currently queued:
 - Request: `request::activate`, `request::urgent`
 - Systray: `request::secondary_activate`, `request::context_menu`, `request::scroll`
 - Output: `property::enabled`, `property::scale`, `property::transform`, `property::mode`, `property::adaptive_sync`, `property::screen` (screen attached), and the output class `added`
-- Screen: `property::scale`, `property::geometry`, `property::workarea`, `primary_changed`, and the screen class `property::_viewports`
+- Screen: `property::scale`, `property::geometry`, `property::workarea`, `primary_changed`, and the screen class `list` and `property::_viewports`
 - Layer shell: `property::layer`, `property::anchor`, `property::exclusive_zone`, `property::keyboard_interactive`, `property::margin`
 - Globals: `xkb::map_changed`, `xkb::group_changed`, `idle::stop`, `dpms::on`, `spawn::timeout`, `spawn::completed`, `switch::toggle`, `screen::focus`, `client::map`, `client::unmap`, `client::property::geometry`
 
@@ -45,7 +45,9 @@ Everything else C emits, and every Lua-emitted signal, dispatches synchronously.
 synchronous survivors are `request::manage` and `request::unmanage`, screen `added` and
 `removed`, output `removed` (and output `property::screen` when the screen is detached),
 `request::geometry`, and the client scalar properties such as `property::name`
-and `property::fullscreen`.
+and `property::fullscreen`. `request::focus_restore`, `scanning`, `scanned`,
+layer-surface lifecycle and keyboard requests, key and button callbacks,
+grabber callbacks and D-Bus method handlers also run synchronously.
 
 Two signals stay synchronous because a queued one would arrive too late to be useful.
 `idle::start` is emitted just before your `awesome.set_idle_timeout` callback runs, so it has to
@@ -55,6 +57,12 @@ suspends, and the event loop may stop before the next drain.
 Signals queued against a screen or output that is then removed are dropped rather than
 delivered, because a torn-down screen or output reports itself invalid. Reading any property
 other than `valid` on one raises `invalid object`, and `screen[s]` returns nil for it.
+
+### State before a queued handler runs
+
+The object may expose its new state before a queued handler updates a Lua cache. Immediately after a focus change, `client.focus` can name the new client while `awful.client.focus.history.get` and `history.previous` still reflect the previous focus event. Timer, IPC, D-Bus and keybinding callbacks can observe this interval. Code that needs the handler's result should defer that read until after the queue drains, for example with `gears.timer.delayed_call`.
+
+The queue drains before `refresh` and the layout pass. XKB change signals also use the queue, so caches updated by their handlers may lag the keyboard state until that drain. Lua-emitted `request::tag` and `request::select` do not use this queue.
 
 ## `client` signals
 
@@ -75,7 +83,7 @@ Emitted on the `client` class. Connect with `client.connect_signal("name", handl
 |--------|------|-------|
 | `focus` | `c` | Client gained focus. |
 | `unfocus` | `c` | Client lost focus. Fires before `focus` on the new client. |
-| `raised` | `c` | Client moved to top of its layer (see [Client Stacking](/docs/concepts/client-stack)). |
+| `raised` | `c` | Client moved to top of its layer (see [Client Stacking](../concepts/client-stack.md)). |
 | `lowered` | `c` | Client moved to bottom of its layer. |
 
 ### Properties
@@ -115,7 +123,7 @@ Each `property::*` fires after the property changes. Read the new value off the 
 |--------|------|-------|
 | `added` | `s` | New output connected. |
 | `removed` | `s` | Output disconnected. Tags on this screen will get `request::screen` next. |
-| `request::desktop_decoration` | `s` | Screen needs tags and wibars. Your handler creates them. See [Tag Persistence](/docs/reference/tag-persistence). |
+| `request::desktop_decoration` | `s` | Screen needs tags and wibars. Your handler creates them. See [Tag Persistence](tag-persistence.md). |
 | `request::wallpaper` | `s` | Screen wants its wallpaper drawn. The default handler builds it with `awful.wallpaper`. |
 | `request::focus_restore` | `s` | Something that had focus went away (client closed, layer surface dismissed, session unlocked, monitor disconnected). Default handler: `awful.permissions.focus_restore`, which activates the most recent visible client from focus history. If no handler focuses a client, C focuses the topmost client on the monitor. <SomewmOnly /> |
 | `property::geometry` | `s` | Screen geometry changed (resolution or layout). |
@@ -129,7 +137,7 @@ Connect with `tag.connect_signal("name", handler)`. Handlers receive the tag.
 
 | Signal | Args | Notes |
 |--------|------|-------|
-| `request::screen` | `t, reason` | Tag's screen was removed and it needs a new one. Default handler: `awful.permissions.tag_screen`. See [Tag Persistence](/docs/reference/tag-persistence). |
+| `request::screen` | `t, reason` | Tag's screen was removed and it needs a new one. Default handler: `awful.permissions.tag_screen`. See [Tag Persistence](tag-persistence.md). |
 | `request::default_layouts` | `context` (string) | Class signal emitted once at startup. Connect to register layouts via `awful.layout.append_default_layouts`. |
 | `property::selected` | `t` | Tag was selected or deselected. |
 | `property::activated` | `t` | Tag was added to or removed from a screen. |
@@ -158,10 +166,10 @@ Module-level signals on `ruled.notification`.
 |--------|------|-------|
 | `added` | `n` | A notification was created. |
 | `destroyed` | `n, reason` | A notification was destroyed. `reason` matches `naughty.notification_closed_reason.*`. |
-| `request::display` | `n` | Naughty wants this notification rendered. Connect a handler that builds a notification widget. See [Notifications](/docs/guides/notifications). |
+| `request::display` | `n` | Naughty wants this notification rendered. Connect a handler that builds a notification widget. See [Notifications](../guides/notifications.md). |
 | `request::action_icon` | `a` | An action wants its icon resolved. |
 
-See the [naughty reference](/docs/reference/naughty/) for the full set.
+See the [naughty reference](naughty/index.md) for the full set.
 
 ## Layer surface signals <SomewmOnly />
 
@@ -172,7 +180,7 @@ See the [naughty reference](/docs/reference/naughty/) for the full set.
 | `request::keyboard` | `l, context, hints` | Layer surface wants keyboard interactivity. |
 | `property::has_keyboard_focus` | `l` | Keyboard focus on the layer surface changed. |
 
-See [layer_surface reference](/docs/reference/layer_surface/) for context.
+See [layer_surface reference](layer_surface/index.md) for context.
 
 ## Lock signals <SomewmOnly />
 
@@ -197,7 +205,7 @@ See [layer_surface reference](/docs/reference/layer_surface/) for context.
 | `dpms::off` | none | At least one display entered sleep. |
 | `dpms::on` | none | At least one display woke up. |
 
-See [Lock, Idle, and DPMS reference](/docs/reference/lock).
+See [Lock, Idle, and DPMS reference](lock.md).
 
 ## `awesome` signals
 
@@ -206,10 +214,9 @@ Global signals on `awesome.*`. Connect with `awesome.connect_signal(...)`.
 | Signal | Args | Notes |
 |--------|------|-------|
 | `startup` | none | SomeWM finished starting. Fires after `client.scanned`. Safe to assume all default handlers are connected. |
-| `exit` | `restart` (boolean) | SomeWM is shutting down. `restart` is `true` if we're about to re-exec for a hot reload. |
+| `exit` | `restart` (boolean) | SomeWM is shutting down. `restart` is `true` for a Lua hot reload in the same process. |
 | `refresh` | none | About to redraw. Avoid expensive work in this handler; it fires often. |
 | `debug::error` | `msg` | An uncaught Lua error occurred. Default handler logs to stderr. |
-| `debug::deprecation` | `msg, args` | A deprecated API was called. |
 
 ## Example usage
 

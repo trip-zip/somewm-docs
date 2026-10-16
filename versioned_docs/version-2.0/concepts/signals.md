@@ -43,13 +43,11 @@ You can usually tell from where a signal is documented:
 
 ## Dispatch model
 
-In SomeWM 2.0, C-emitted signals don't run their Lua handlers inline with the Wayland event that triggered them. C queues the signal, finishes its event handler, and the queue drains at `some_refresh()`, called before each event-loop iteration. Drain runs every queued handler in order; then C applies whatever changed and the loop blocks for the next event.
-
-This is the same pattern LOVE and Bitsquid use: the engine (C) runs the loop and reaches Lua at deliberate hand-off points; Lua orchestrates declarative changes that the engine applies. AwesomeWM and SomeWM 1.x interleaved the two layers in the same call stack. The 2.0 model separates them. The architectural rationale is in [Architecture](./architecture.md#signals); this section covers what it means in practice.
+Some C-generated notifications are queued until `some_refresh()`. The queue drains before `refresh` and the layout pass. Requests whose results the compositor needs immediately call Lua synchronously. The [signal reference](../reference/signals.md#dispatch) defines both sets.
 
 ### What's queued
 
-C-emitted signals are queued, wired incrementally by group: property changes, focus, mouse motion, lifecycle, a set of `request::*` signals, the output and screen changes driven by monitor hotplug, layer-shell properties, and most global signals. Conversion is ongoing, so the exact membership lives in one place: the [Signals Reference dispatch section](../reference/signals.md#dispatch) is the current list.
+Queued signals include property changes, focus, mouse motion, lifecycle notifications, some requests, hotplug notifications, layer-shell properties and global signals. The [signal reference](../reference/signals.md#dispatch) lists the exact set.
 
 Other C-emitted signals (`request::manage`, `request::unmanage`, `request::geometry`, screen `added` and `removed`, and the client scalar `property::*` signals) still dispatch synchronously.
 
@@ -60,7 +58,7 @@ The one signal that splits differently is `property::workarea`: the emitter driv
 ### What stays synchronous
 
 - Signals you emit from Lua. `c:emit_signal("my::custom")`, `awesome.emit_signal("volume::changed")`, and the AwesomeWM libraries' Lua-side emits (`ruled.client` `request::rules`, `naughty` `request::display`) run handlers immediately. The queue applies to the C/Lua boundary, not to Lua-only signal use.
-- C-emitted signals not yet converted (the ones not in the table above).
+- C-emitted signals outside the queued set, including requests whose results the compositor needs immediately.
 
 ### Coalescing
 
@@ -70,14 +68,16 @@ No other queued signal is coalesced. Each emit produces one drained call, in que
 
 ### Reentrancy and snapshot semantics
 
-When the queue drains, it processes a snapshot of the events queued at that moment. Signals emitted *during* drain (by your handlers, or by C code that handlers caused to run) go on the queue and drain on the next refresh, not the current one. This prevents infinite loops if a handler indirectly triggers the same signal it was reacting to.
+When the queue drains, it processes a snapshot of the events queued at that moment. New queued events added during the drain wait for the next refresh. Synchronous C signals and Lua-emitted signals still run inline. The snapshot bounds a drain even when a queued handler adds more events.
 
 ### Practical consequences
 
-- Handlers run after the C event handler that triggered them returns. They can't re-enter the code that emitted the signal.
+- Queued handlers run after the C event handler that triggered them returns. They can't re-enter the code that emitted the signal.
 - Lua-emitted signals from inside a handler still dispatch synchronously, so a chain of Lua-only signals runs to completion within the same drain.
 - A property change you make from a handler that triggers a queued C signal will fire on the next drain, not this one.
 - Custom signals you emit from your own code keep AwesomeWM semantics: synchronous, in the same call stack as the emit.
+
+[State before a queued handler runs](../reference/signals.md#state-before-a-queued-handler-runs) describes the interval in which Lua caches can lag object state.
 
 ## Most signals receive their object as the first argument
 
@@ -177,5 +177,5 @@ For non-`request::` signals, additive `connect_signal` is the common case. For `
 - [Replacing a default handler](../guides/replace-default-handler.md): disconnect-and-replace pattern with worked examples
 - [React to client lifecycle](../guides/react-to-client-lifecycle.md): common patterns on `manage`, `focus`, `property::*`
 - [Defer startup with `request::rules`](../guides/defer-startup-with-request-rules.md): adding rules from a module without ordering pain
-- [Object Model](/docs/concepts/object-model): the things that emit signals
+- [Object Model](object-model.md): the things that emit signals
 - [`gears.object`](https://awesomewm.org/doc/api/libraries/gears.object.html): the underlying machinery

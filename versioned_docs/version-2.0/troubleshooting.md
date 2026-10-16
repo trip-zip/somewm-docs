@@ -50,7 +50,7 @@ Look for lines containing `error loading` or `error executing`.
 
 ### "X11 pattern detected" notification
 
-Your config contains code that won't work on Wayland. Edit your `rc.lua` to remove or replace X11-specific patterns. See [Migrating from AwesomeWM](/docs/getting-started/migrating).
+Your config contains code that won't work on Wayland. Edit your `rc.lua` to remove or replace X11-specific patterns. See [Migrating from AwesomeWM](getting-started/migrating.md).
 
 ## Widget Issues
 
@@ -70,7 +70,7 @@ somewm -L /usr/lib/lua/5.1
 
 ### Widget shows no theming (unstyled, wrong font)
 
-The widget module was required before `beautiful.init()` ran. Theme variables read at require time were `nil`, silently: no error is raised, the widget just renders with no colors and the default `sans 8` font. Move the widget `require` below `beautiful.init()` in your `rc.lua`. See [the widgets tutorial](/docs/tutorials/widgets#step-3-use-it-in-your-config).
+The widget module was required before `beautiful.init()` ran. Theme variables read at require time were `nil`, silently: no error is raised, the widget just renders with no colors and the default `sans 8` font. Move the widget `require` below `beautiful.init()` in your `rc.lua`. See [the widgets tutorial](tutorials/widgets.md#step-3-use-it-in-your-config).
 
 ### Systray icons not showing
 
@@ -214,21 +214,9 @@ SomeWM uses wlroots for output configuration. You can use `wlr-randr` to configu
 wlr-randr --output DP-1 --mode 1920x1080@60
 ```
 
-## Current Limitations {#current-limitations}
+## Current limitations {#current-limitations}
 
-The [Deviations reference](/docs/reference/deviations) is the canonical status list. Highlights:
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Systray (XEmbed apps) | Partial | SNI works, XEmbed doesn't |
-| X property APIs | Stub | X11 doesn't exist on Wayland |
-| Keybinding removal | Stub | `root._remove_key()` is no-op |
-
-### Partially Implemented
-
-| Feature | Status |
-|---------|--------|
-| XKB toggle options | Use keybindings instead |
+The [compatibility reference](reference/deviations.md) lists platform differences, X-property behaviour, keyboard-layout limitations and XWayland gaps for this version.
 
 ## Getting Help
 

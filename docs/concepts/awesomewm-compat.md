@@ -1,35 +1,29 @@
 ---
 sidebar_position: 4
-title: AwesomeWM Compatibility
-description: Which SomeWM line tracks which AwesomeWM, what a shared API name does and does not promise, the pattern behind every stub, and the behavioural differences a config meets.
+title: AwesomeWM compatibility
+description: The compatibility policy for SomeWM 2.1 and how versioned references define supported behaviour.
 ---
 
-# AwesomeWM Compatibility
+# AwesomeWM compatibility
 
-| SomeWM | Tracks | Status |
-| --- | --- | --- |
-| 1.4 | AwesomeWM master | maintained indefinitely as the compatible line; 2.x features are not backported except for parity |
-| 2.0 | its own line | current release, default docs |
-| 2.1 | its own line | in development |
+SomeWM 2.1 develops independently of AwesomeWM. Shared Lua names do not guarantee identical behaviour; the reference for this version defines the supported API.
 
-Compatibility is per API, not per library. A familiar name does not mean every function, argument, default or signal behaves as in AwesomeWM; the SomeWM reference for your release is the contract, and the linked upstream docs are background. 2.0 removed the deprecated APIs, among them `naughty.notify()`, `awful.rules` and the bare `manage` and `unmanage` signals ([replacements](../getting-started/migrating.md#deprecated-apis-removed-in-somewm-20)).
+## The 1.4 and 2.x lines
 
-## Stubs
+The 1.4 line follows AwesomeWM master. Its purpose is to preserve the upstream configuration API on Wayland. Features developed for 2.x are not routinely backported; parity with AwesomeWM is the reason for an exception.
 
-Most stubs are APIs whose whole job was X11 machinery Wayland does not have. `awesome.register_xproperty()` and its family exist so configs do not error, and do nothing: Wayland has no per-window named properties; apps talk through protocols. The reverse also happened: `root.fake_input()` and `awesome.restart()` were impossible early and now have Wayland-native implementations, the compositor injecting events through `wlr_seat` and rebuilding the Lua state in process. [Deviations](../reference/deviations.md) tracks each one.
+The 2.x line keeps the Lua configuration model while developing its libraries and compositor independently. Existing configurations are preserved where possible, but a shared name is not a promise of identical arguments, defaults or signal timing.
 
-## Behavioural differences
+<span id="stubs" />
 
-| Feature | AwesomeWM | SomeWM | Effect |
-| --- | --- | --- | --- |
-| systray | `_NET_SYSTEMTRAY` embeds X11 windows | StatusNotifierItem over D-Bus | modern apps work; XEmbed-only apps show no icon |
-| titlebar and border | border drawn outside by the X server | border is a scene rect; titlebars sit inside it | titlebars inset by `border_width` |
-| window visibility | `map` shows at once | shown when the first buffer arrives | no smearing |
-| clipboard | X selections | Wayland clipboard and primary | `wl-copy`, `wl-paste` |
-| screenshots | X11 grabbing | the compositor composes the capture | `somewm-client screenshot`, or grim and slurp |
+<span id="behavioural-differences" />
 
-## Testing and reporting
+<span id="testing-and-reporting" />
 
-`make test-integration` runs AwesomeWM's suite against SomeWM; X11-only tests are skipped. `somewm --check rc.lua` scans a config for X11 idioms ([Migrating](/docs/getting-started/migrating)).
+## The version defines the contract
 
-Before filing something that works in AwesomeWM and not here, check [Wayland vs X11](./wayland-vs-x11.md) and the affected reference page, then open an [issue](https://github.com/trip-zip/somewm/issues) with a minimal `rc.lua`, expected and actual behaviour, and `somewm-client version`.
+The [compatibility reference](../reference/deviations.md) records platform differences and unsupported behaviour for this version. Individual API references describe supported properties, methods and signals. Linked AwesomeWM documentation provides background for inherited APIs.
+
+[Upgrade from 2.0 to 2.1](../getting-started/upgrading-from-2.0.md) describes configuration changes between SomeWM releases. [Migrating from AwesomeWM](../getting-started/migrating.md) covers the move from X11 tools and assumptions to Wayland.
+
+[Wayland vs X11](wayland-vs-x11.md) explains protocol differences. [How SomeWM draws](how-somewm-draws.md) explains why clients and widgets share one layout tree.

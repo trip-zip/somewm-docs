@@ -113,23 +113,9 @@ end
 
 ## APIs removed in SomeWM 2.0 {#deprecated-apis-removed-in-somewm-20}
 
-AwesomeWM still ships these for backward compatibility. SomeWM 2.0 deleted them, so a call fails with `attempt to call field '...' (a nil value)` or a `require` error. SomeWM 1.4 keeps all of them. Third-party widget libraries are where they hide. 2.1 removed more, inside the widget libraries; [Upgrading from 2.0 to 2.1](./upgrading-from-2.0.md) lists those.
+SomeWM 2.0 removes deprecated APIs that AwesomeWM master and SomeWM 1.4 retain. The [1.4 to 2.0 upgrade guide](/docs/getting-started/upgrading-from-1.4#3-update-affected-configuration) gives the replacements, including notification helpers, lifecycle signals, `awful.util`, API levels and aliases. Check third-party modules as well as your own configuration.
 
-| Removed | Use |
-| --- | --- |
-| `naughty.notify(args)` | `naughty.notification(args)` |
-| `naughty.suspend()`, `resume()`, `toggle()`, `is_suspended()` | `naughty.suspended = true`, `false`, `not naughty.suspended`; read `naughty.suspended` |
-| `naughty.destroy(n, reason)`, `naughty.reset_timeout(n, t)`, `naughty.replace_text(n, title, text)` | `n:destroy(reason)`, `n:reset_timeout(t)`, `n.title = title; n.message = text` |
-| `naughty.getById(id)` | `naughty.get_by_id(id)` |
-| the bare `manage` and `unmanage` signals; handlers never fire and SomeWM warns at startup | `request::manage` and `request::unmanage`, with `(c, context, hints)` ([React to client lifecycle](../guides/react-to-client-lifecycle.md)) |
-| `awful.rules` | `ruled.client` |
-| `awful.util` | `gears.filesystem`, `gears.table`, `gears.string`, `gears.math`, `gears.color`, `gears.debug`, `gears.geometry` |
-| `awful.wibox` | `awful.wibar` |
-| `awful.ewmh` | `awful.permissions` |
-| `awful.widget.graph`, `progressbar`, `textclock` | `wibox.widget.*` |
-| `wibox.widget.background` | `wibox.container.background` |
-| `wibox.layout.margin`, `constraint`, `scroll`, `mirror`, `rotate` | `wibox.container.*` |
-| 26 `awful.tag.*` wrappers (`setmwfact`, `getgap`, `viewonly`, ...) and 5 `awful.client.*` wrappers (`getmaster`, `setmaster`, `setslave`, `getmarked`, `floating.toggle`) | the properties and methods AwesomeWM 4.0 introduced: `t.master_width_factor`, `t.gap`, `t:view_only()` |
+For 2.1, also follow [Upgrading from 2.0 to 2.1](upgrading-from-2.0.md), including its custom-widget restrictions.
 
 ## Try it
 
@@ -139,4 +125,4 @@ somewm -c ~/.config/awesome/rc.lua
 somewm -d -c ~/.config/awesome/rc.lua 2>&1 | tee migration.log   # with debug output
 ```
 
-[Wayland vs X11](/docs/concepts/wayland-vs-x11) has why each difference exists; [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) the contract; [awful.input](/docs/reference/awful/input) the input properties that replace `xset` and `xinput`.
+[Wayland vs X11](../concepts/wayland-vs-x11.md) has why each difference exists; [AwesomeWM Compatibility](../concepts/awesomewm-compat.md) the contract; [awful.input](../reference/awful/input.md) the input properties that replace `xset` and `xinput`.

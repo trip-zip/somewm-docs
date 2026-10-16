@@ -42,7 +42,7 @@ This page explains why some AwesomeWM features work differently (or don't work) 
 
 **Wayland**: Security model prevents apps from injecting input into other apps.
 
-**Impact**: External tools like `xdotool` cannot inject input. `root.fake_input()` works, because it is the compositor doing the injecting (via `wlr_seat`), so automation goes through SomeWM itself. See [Deviations](/docs/reference/deviations) for status.
+**Impact**: External tools like `xdotool` cannot inject input. `root.fake_input()` works, because it is the compositor doing the injecting (via `wlr_seat`), so automation goes through SomeWM itself. See [Compatibility reference](../reference/deviations.md) for status.
 
 ### Key Repeat Is Client-Side
 
@@ -58,7 +58,7 @@ This page explains why some AwesomeWM features work differently (or don't work) 
 
 **Wayland**: No equivalent mechanism exists.
 
-**Impact**: `awesome.register_xproperty()` and related APIs are stubs.
+**Impact**: X-property APIs have different availability. The [compatibility reference](../reference/deviations.md#stubbed-apis) lists which calls are absent and which are stubs.
 
 ### Titlebar Border Positioning
 
@@ -78,7 +78,7 @@ This page explains why some AwesomeWM features work differently (or don't work) 
 
 **Impact**: Sway, Hyprland, and other Wayland compositors have the same limitation.
 
-**Workaround**: Use explicit keybindings to switch layouts programmatically. See [Keyboard Layout Switching](/docs/guides/keyboard-layouts) for complete examples.
+**Workaround**: Use explicit keybindings to switch layouts programmatically. See [Keyboard Layout Switching](../guides/keyboard-layouts.md) for complete examples.
 
 ```lua
 awful.key({ "Mod1", "Shift" }, "space", function()
@@ -91,5 +91,5 @@ end)
 
 ## See Also
 
-- [Tag Persistence](/docs/concepts/tag-persistence) - How SomeWM handles monitor hotplug differently
-- [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) - Full compatibility matrix
+- [Tag Persistence](tag-persistence.md) - How SomeWM handles monitor hotplug differently
+- [AwesomeWM Compatibility](awesomewm-compat.md) - Full compatibility matrix

@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Upgrading from 2.0 to 2.1
 
-SomeWM 2.1 declares everything on an output as [one Clay tree per frame](../concepts/how-somewm-draws.md). The Lua API is unchanged and the default config and most published ones run as they are. A config notices 2.1 in three places: a widget that painted itself, a translucent bar, and a few properties the tree cannot hold. Every replacement is a stock widget or a property that already exists.
+SomeWM 2.1 declares everything on an output as [one Clay tree per frame](../concepts/how-somewm-draws.md). Stock widgets retain their configuration interfaces where supported; custom painters and the removed names below require configuration changes. A config notices 2.1 in three places: a widget that painted itself, a translucent bar, and a few properties the tree cannot hold. Compose custom widgets from supported stock classes; some removed features have no equivalent.
 
 ## What you will see
 
@@ -32,7 +32,7 @@ Each is one line in the log, once, naming the class, the property and what happe
 
 | You set | What happens |
 | --- | --- |
-| `bgimage` to a function | `wibox.drawable: bgimage functions are not drawn`. A surface or a file path still draws, once at its own size in the top-left corner. To cover a bar, prepare the image at the bar's size ([Put a PNG texture on your wibar](/docs/guides/wibar-background-image)). |
+| `bgimage` to a function | `wibox.drawable: bgimage functions are not drawn`. A surface or a file path still draws, once at its own size in the top-left corner. To cover a bar, prepare the image at the bar's size ([Put a PNG texture on your wibar](../guides/wibar-background-image.md)). |
 | a `shape` function that does more than trace a path | only the path is taken; a colour it sets or anything it paints is dropped. `gears.shape.rounded_rect` and the other `gears.shape` functions are fine. |
 | a widget tree of more than 4096 nodes in one wibox | the wibox shows nothing and warns once that it is over the output's element budget. |
 | a textbox with more than one line under a `rotate` or `mirror` | left out with a warning; rotated text is one line. |
@@ -41,7 +41,7 @@ Each is one line in the log, once, naming the class, the property and what happe
 | a padding, gap or border width below 0 | it is 0, with a warning. |
 | a colour that is not a solid or a gradient (a surface or mesh pattern) | transparent, with a warning naming the property. |
 
-Two differ without a warning at this release: a textbox's `wrap` is not read, every textbox wraps at words; and `wibox.container.tile` draws one copy of its widget, like `wibox.container.place`.
+Textboxes wrap at words; `wrap = "char"` warns that character wrapping is not applied. `wibox.container.tile` draws one copy of its widget and warns that tiling is not applied.
 
 ## How to read a warning
 
@@ -90,6 +90,8 @@ Without any change to `rc.lua`:
 | Stacking | 2.0 kept six fixed scene layers, background to overlay, and moved each client's and wibox's node between them in C. 2.1 has no layers: order is a band the tree declares ([Scene Graph](../concepts/scene-graph.md#bands)). |
 | Layouts | 2.0's `arrange` computed a rectangle per client in Lua. 2.1 declares the layout as a Clay subtree; an `arrange` layout still works, with its numbers marked `legacy` in the dump. |
 | Widget sizing | 2.0 asked each widget's `fit` for a size and its `layout` for its children's places, so the same question had many answers. 2.1 has one: Clay's solve. |
+| Client-local properties | `client:set_xproperty` stores scalar values across Lua hot reloads; the 2.0 method did nothing. See [client properties](../reference/deviations.md#x-property-family). |
+| Shadows | `clip_directional` is accepted but has no effect. Shadows fade on every side; remove the setting. See [shadow reference](../reference/shadows.md). |
 | Layout animation | A client frame declares no transition until something configures animation: `c.animation`, `theme.animation_duration` or any `theme.animation_*_duration` set to a number (0 included), `theme.animation_appear` or `animation_disappear`, or `somewm.animation.layout_duration` above 0. Requiring `somewm.layout_animation` sets that to 0.15 and is deprecated. A client's first frame after that, or after a reload, does not animate unless it has an entrance. |
 
 ## Removed names
@@ -129,14 +131,15 @@ Calling a removed function raises `attempt to call ... (a nil value)`. Setting a
 | `awful.client.shape`: `get_transformed`, `update.all`, `update.bounding`, `update.clip`, `update.input` | `client.shape` |
 | `carousel.scroll_duration` | `theme.animation_layout_duration` |
 | `somewm.layout_animation.easing` | none; the solver's curve |
-| `awesome.systray` | see [Deviations](/docs/reference/deviations) |
+| `awesome.systray` | `wibox.widget.systray`; the C painter entry point is gone |
+| `_wibox` | `wibox`; the private surface-backed C module is gone |
 | `ruled.client.completed_with_payload_callback` | `ruled.client.execute` |
 
 ### Theme variables
 
 Gone with the properties that read them: `slider_bar_border_color`, `slider_bar_border_width`, `slider_handle_margins`, `calendar_empty_color`, `checkbox_check_border_color`, `checkbox_check_border_width`, `checkbox_check_shape` and `radialprogressbar_paddings`. Setting one does nothing.
 
-New: `hotkeys_rows`, `calendar_popup_width`, `launcher_width`, and the inspector's `inspector_bg`, `inspector_bg_alt`, `inspector_border`, `inspector_fg`, `inspector_bg_selected`, `inspector_highlight`, `inspector_width` and `inspector_font` ([Theme Variables](/docs/reference/beautiful/theme-variables)).
+New: `hotkeys_rows`, `calendar_popup_width`, `launcher_width`, and the inspector's `inspector_bg`, `inspector_bg_alt`, `inspector_border`, `inspector_fg`, `inspector_bg_selected`, `inspector_highlight`, `inspector_width` and `inspector_font` ([Theme Variables](../reference/beautiful/theme-variables.md)).
 
 ## New in 2.1
 
@@ -146,7 +149,7 @@ New: `hotkeys_rows`, `calendar_popup_width`, `launcher_width`, and the inspector
 
 ## Building 2.1
 
-- SomeWM builds its own wlroots 0.20.2 and links it in; an installed wlroots is not used. The wlroots 0.19 path and `-Dwlroots_version` are gone. A distribution whose wayland, libdrm, xkbcommon, pixman or wayland-protocols is older than wlroots 0.20.2 gets that library built alongside it by the same build. See [Installation](/docs/getting-started/installation).
+- SomeWM builds its own wlroots 0.20.2 and links it in; an installed wlroots is not used. The wlroots 0.19 path and `-Dwlroots_version` are gone. A distribution whose wayland, libdrm, xkbcommon, pixman or wayland-protocols is older than wlroots 0.20.2 gets that library built alongside it by the same build. See [Installation](installation.md).
 - XWayland is always built in; `-Dxwayland` is gone. Building needs xcb, xcb-icccm and Xwayland installed.
 - `make install` does not delete files from an earlier install. If you installed 2.0 with `make install`, remove the old Lua tree first, or a config that requires a removed module such as `wibox.hierarchy` loads 2.0's copy and fails further on:
 
@@ -160,4 +163,4 @@ sudo make install
 - [How SomeWM draws](../concepts/how-somewm-draws.md) - the model behind every change on this page
 - [AwesomeWM widgets in that model](../concepts/widgets-in-the-tree.md) - what a widget declares, and what happens to one that paints
 - [Reading the tree](../concepts/reading-the-tree.md) - the dump and the inspector
-- [Deviations from AwesomeWM](/docs/reference/deviations) - every difference, 2.0 and 2.1
+- [AwesomeWM compatibility reference](../reference/deviations.md) - supported behaviour and platform limits in 2.1

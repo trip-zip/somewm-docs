@@ -6,7 +6,7 @@ description: SomeWM is a wlroots compositor that runs AwesomeWM's Lua API on Way
 
 # SomeWM Documentation
 
-SomeWM is a Wayland compositor built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots) that runs AwesomeWM's Lua configuration model. These docs follow [Diátaxis](https://diataxis.fr/): tutorials teach, guides solve one task, reference lists, concepts explain. Where SomeWM differs from AwesomeWM, the affected page says so and [Deviations](reference/deviations.md) indexes it. A gap is a [discussion](https://github.com/trip-zip/somewm/discussions) away from being filled.
+SomeWM is a Wayland compositor built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots) that runs AwesomeWM's Lua configuration model. These docs follow [Diátaxis](https://diataxis.fr/): tutorials teach, guides solve one task, reference lists, concepts explain. Where SomeWM differs from AwesomeWM, the affected page says so and [Compatibility reference](reference/deviations.md) indexes it. A gap is a [discussion](https://github.com/trip-zip/somewm/discussions) away from being filled.
 
 ## Start here
 
@@ -34,7 +34,7 @@ Input devices, CLI control, multi-monitor, autostart, notifications, screenshots
 | [awful](reference/awful/index.md), [wibox](reference/wibox/index.md), [beautiful](reference/beautiful/index.md), [naughty](reference/naughty/index.md), [gears](reference/gears/index.md) | the libraries |
 | [somewm-client](reference/somewm-client.md) | the IPC command line |
 | [Key Names](reference/key-names.md) | keys and modifiers |
-| [Deviations](reference/deviations.md) | every difference from AwesomeWM |
+| [Compatibility reference](reference/deviations.md) | platform differences and compatibility limits |
 
 ## Concepts
 
