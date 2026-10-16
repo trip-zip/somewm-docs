@@ -143,9 +143,38 @@ New: `hotkeys_rows`, `calendar_popup_width`, `launcher_width`, and the inspector
 
 ## New in 2.1
 
-- `client.shape`: nil, a corner radius in pixels, or a `gears.shape` function; a rounded rectangle is read as its radius and drawn through the compositor, on Wayland clients too. `gears.surface.apply_shape_bounding` sets it as it sets `wibox.shape`.
-- `screen.inspector` and `somewm.inspector.toggle()`, the live tree panel, and `somewm-client clay tree`, the text dump ([Reading the tree](../concepts/reading-the-tree.md)).
+Everything a 2.0 config can use that it could not before. Each group links the page that documents it.
+
+### Seeing the tree
+
+- `somewm-client clay tree [screen]` prints what the last frame solved: counters per band, then one line per retained node in draw order ([Reading the tree](../concepts/reading-the-tree.md)).
+- `screen.inspector` opens Clay's debug inspector on that screen, with the element tree and the selected element's solved box, and `property::inspector` fires on a change. `somewm.inspector.toggle(s)` flips it and `somewm.inspector.restyle()` re-reads the theme keys `inspector_bg`, `inspector_bg_alt`, `inspector_border`, `inspector_fg`, `inspector_bg_selected`, `inspector_highlight`, `inspector_width` and `inspector_font` ([Screen](../reference/screen.md)).
+
+### Clients
+
+- `client.shape`: nil, a corner radius in pixels, or a `gears.shape` function. A rounded rectangle is read as its radius and drawn through the compositor, on Wayland clients too, and a titlebar takes the corners on its edge. `gears.surface.apply_shape_bounding` sets it as it sets `wibox.shape` ([Rounded corners](../guides/rounded-corners.md)).
+- `awesome._active_modifiers` lists the modifiers held right now, from real keys and `root.fake_input` presses alike, as the names `awful.key` uses. `awful.keyboard.emulate_key_combination` reads it to release held modifiers first ([Deviations](../reference/deviations.md#signals)).
+
+### Animation
+
+All of it is new in 2.1. `somewm.layout_animation` is deprecated and `awesome.start_animation` is gone ([Animation](../guides/animation.md)).
+
+- `c.animation = { appear, disappear, tag, focus, maximize, floating }` and the rule property of the same name, with the theme keys `animation_appear`, `animation_disappear` and `animation_tag` for the entrance, one duration key per trigger, and `animation_duration` as the fallback for every trigger, layout included.
+- The entrances `grow`, `scale`, `scale_top`, `scale_bottom`, `scale_left`, `scale_right`, `slide_left`, `slide_right`, `slide_up`, `slide_down` and `fade`, alone or in a list that runs together.
+- `animation = { visible = { duration, enter, exit } }` on a wibox or `awful.popup`.
+- `widget.animation = { property = duration }` for `bg`, `border_color`, `border_width`, `forced_width`, `forced_height` and the progressbar and slider `value`, and `widget:animate{ property = value, duration = d }` for one change.
+- `.animation = false` on any of them turns the object and its descendants off, and `somewm.animation.enabled = false` turns everything off.
+
+### Widgets and popups
+
 - `awful.widget.calendar_popup.month` and `.year` take a `width`, defaulting to `beautiful.calendar_popup_width`, and the popup is an `awful.popup` placed inside the workarea; `awful.popup` gains `honor_workarea`.
+- `beautiful.launcher_width` sets the menubar launcher's width ahead of `menubar.geometry.width`. Without either the launcher spans the workarea.
+- `beautiful.hotkeys_rows` sets the rows in one column of the hotkeys help, default 20. The help and the menubar scroll instead of paging.
+- A childless `wibox.container.background` inside `wibox.layout.stack` paints its colour over the layers below it, and a floating `wibox.container.place` keeps its whole allocation.
+
+### Lock screen
+
+- `theme.lockscreen_wallpaper` and `theme.lockscreen_wallpaper_overlay`, or the `wallpaper` and `wallpaper_overlay` options of `lockscreen.init`, show an image letterboxed like the desktop wallpaper and dimmed by the overlay colour ([Lockscreen](../reference/lockscreen.md)).
 
 ## Building 2.1
 

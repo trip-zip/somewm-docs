@@ -97,7 +97,16 @@ Client-drawn maximise and minimise buttons request the same Lua state changes as
 
 Selected C-generated signals are queued; Lua-emitted signals and synchronous C requests run inline. The [signal reference](signals.md#dispatch) lists the exact dispatch rules.
 
-`spawn::change` and `spawn::canceled` are not emitted: Wayland activation does not provide X11 startup-notification progress and cancellation. Key press and release handlers, `root.fake_input()` and dynamic keybinding removal through `root._remove_key()` are supported.
+`spawn::change` and `spawn::canceled` are not emitted: Wayland activation does not provide X11 startup-notification progress and cancellation. Key press and release handlers, `root.fake_input()` and dynamic keybinding removal through `root._remove_key()` are supported. `awesome._active_modifiers` lists the modifiers held right now from the keyboard's xkb state, so a faked press shows until its release:
+
+```lua
+root.fake_input("key_press", "Control_L")
+root.fake_input("key_press", "Alt_L")
+awesome._active_modifiers   -- {"Control", "Mod1"}
+root.fake_input("key_release", "Alt_L")
+root.fake_input("key_release", "Control_L")
+awesome._active_modifiers   -- {}
+```
 
 ## XWayland limits
 

@@ -518,7 +518,7 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
-| `animation_appear` <SomewmOnly /> | `string\|table` | The entrance every client maps with: `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. A list combines effects simultaneously, with at most one slide plus grow and fade. | [somewm/animation.lua:52](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L52) |
+| `animation_appear` <SomewmOnly /> | `string\|table` | The entrance every client maps with: `grow`, `scale`, `scale_top`, `scale_bottom`, `scale_left`, `scale_right`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. A list combines effects simultaneously, with at most one slide, one size effect (`grow` or a scale word) and `fade`. | [somewm/animation.lua:52](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L52) |
 | `animation_appear_duration` <SomewmOnly /> | `number` | A client mapping, in seconds; needs an entrance from `animation_appear` or `c.animation.appear`. | [somewm/animation.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L33) |
 | `animation_disappear` <SomewmOnly /> | `string\|table` | The exit every client closes with, same words as `animation_appear`. | [somewm/animation.lua:58](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L58) |
 | `animation_disappear_duration` <SomewmOnly /> | `number` | A client closing, in seconds; needs an entrance from `animation_disappear` or `c.animation.disappear`. | [somewm/animation.lua:38](https://github.com/trip-zip/somewm/blob/main/lua/somewm/animation.lua#L38) |
