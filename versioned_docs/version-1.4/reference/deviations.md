@@ -1,255 +1,143 @@
 ---
 sidebar_position: 100
-title: Deviations from AwesomeWM
-description: Comprehensive reference of every API and behavioral difference between somewm and AwesomeWM.
+title: AwesomeWM compatibility reference
+description: Supported behaviour, platform differences and compatibility limits in SomeWM 1.4.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+# AwesomeWM compatibility reference
 
-# Deviations from AwesomeWM
+SomeWM 1.4 mirrors AwesomeWM master and is maintained as the upstream-compatible line. Wayland requires differences in protocols and desktop integration.
 
-This page is the dense reference for every place somewm's behavior or API surface differs from AwesomeWM. Architectural differences come from Wayland vs X11; stubs exist so configs don't error; somewm-only APIs add what AwesomeWM has no equivalent for.
+<span id="looking-for" />
 
-## Looking for...
+<span id="see-also" />
 
-| If you want | Read |
-|---|---|
-| The why and the philosophy | [Why somewm](/docs/next/concepts/why-somewm), [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) |
-| Background on the X11 vs Wayland split | [Wayland vs X11](/docs/concepts/wayland-vs-x11) |
-| Step-by-step migration help | [Migrating from AwesomeWM](/docs/getting-started/migrating) |
+| Need | Documentation |
+| --- | --- |
+| Move an AwesomeWM configuration to Wayland | [Migrating from AwesomeWM](../getting-started/migrating.md) |
+| Change SomeWM releases | [Upgrade from 1.4 to 2.0](/docs/getting-started/upgrading-from-1.4) |
+| Understand the compatibility policy | [AwesomeWM compatibility](../concepts/awesomewm-compat.md) |
+| Understand the platform | [Wayland vs X11](../concepts/wayland-vs-x11.md) |
 
-## Architectural Differences
+<span id="detail" />
 
-Wayland's design forces these to differ from AwesomeWM. The Lua API stays the same; the implementation underneath does not.
+## Platform differences {#architectural-differences}
 
-| Feature | AwesomeWM (X11) | somewm (Wayland) | Reason |
-|---|---|---|---|
-| Systray | X11 `_NET_SYSTEMTRAY` embed | StatusNotifierItem D-Bus (SNI) | X11 tray protocol doesn't exist on Wayland |
-| Titlebar borders | Outside frame (X server draws) | Inset by `border_width` | Scene graph positioning differs |
-| Window visibility | `xcb_map_window()` shows immediately | Content must exist before showing | Prevents smearing artifacts |
-| Map-time geometry | WM sends `ConfigureNotify` before map | Client commits first, then receives configure | Deferred arrange must flush before scene node enables |
-| WM restart | `execvp` replaces process; X server keeps clients | In-process Lua state rebuild via `awesome.restart()`; wlroots keeps clients. `awesome.quit(1)` does a cold restart via `somewm-session` | DRM/GPU state can't survive `exec`; the Lua VM can be rebuilt in place |
+| Area | SomeWM behaviour |
+| --- | --- |
+| System tray | `wibox.widget.systray` uses StatusNotifierItem over D-Bus. XEmbed-only tray applications do not appear. |
+| Clipboard | Wayland clipboard and primary-selection protocols replace X selections; see [protocol support](wayland-protocols.md). |
+| Screenshots | The compositor captures the scene; see [screenshots](../guides/screenshots.md). |
+| Monitor and input configuration | The compositor owns these settings; see [`output`](output.md) and [`awful.input`](awful/input.md). |
+| Configuration paths | SomeWM uses `somewm/` configuration and cache directories; see [configuration search order](../getting-started/first-launch.md#configuration-locations). |
+| GTK theme discovery | `beautiful.gtk` reads GTK settings files instead of creating GTK widgets. GTK CSS is not fully represented; the fallback is Adwaita Dark. |
+| Xresources | `gears.xresources` reads `~/.Xresources`, with fallback values. Updating the X server's resource database with `xrdb` does not update these values. |
 
-### Detail
+### Drawing and shapes
 
-**SNI systray.** AwesomeWM uses X11's `_NET_SYSTEMTRAY` to embed tray windows. somewm uses StatusNotifierItem D-Bus. Most modern apps (NetworkManager, Discord, Bluetooth applet) speak SNI. Legacy XEmbed-only apps won't appear. Implementation: `objects/systray.c` (D-Bus watcher), `lua/awful/statusnotifierwatcher.lua`, `wibox.widget.systray`.
+Widgets paint into drawable surfaces. The compositor places these surfaces alongside application surfaces in its scene. See [Architecture](../concepts/architecture.md).
 
-**Titlebar border positioning** (`objects/client.c`). On X11 borders sit outside the frame. On Wayland borders are scene rects at geometry edges, so titlebars start `border_width` inside.
+Client X11 shape masks have no Wayland implementation. See the [wibox reference](wibox/index.md) for widget and wibox shapes.
 
-**Map-time geometry** (`somewm.c:mapnotify`). On X11 the WM sends a configure with the tiled geometry before the window maps, so the client never renders at the wrong size. On Wayland the client commits its preferred size first, so `awful.layout.arrange()` (deferred via `timer.delayed_call`) must flush before the configure goes out. `luaA_emit_refresh()` after manage signals forces the deferred arrange so `c->geometry` holds the tiled dimensions before the configure flushes.
+Client geometry excludes the border. Titlebars occupy space inside the decorated client geometry; the border surrounds the client frame.
 
-**Window visibility timing** (`objects/drawin.c`). The scene node stays disabled until `drawin_refresh_drawable()` signals content ready. Prevents visual smearing during initial render.
+### Restart and reload
 
-**Restart model.** `awesome.restart()` rebuilds the Lua state in process while wlroots keeps running. Clients survive, and so do their tags and each screen's selected tags, which the compositor re-applies onto the tags the reloaded config created (see [Tag Persistence](../guides/tag-persistence.md#across-a-hot-reload)). Use `awesome.quit(1)` for a cold restart via `somewm-session`; that is needed only when DRM state has gone bad.
+`awesome.restart()` rebuilds the Lua state in the existing compositor. Application clients remain connected. It does not load a newly installed compositor executable.
 
-## Stubbed APIs
+Modules holding GLib sources or D-Bus registrations must release them on `exit` before their Lua state closes. See [signals](signals.md) and [tag persistence](../guides/tag-persistence.md).
 
-These exist so configs don't error, but do nothing meaningful.
+`awesome.quit(1)` requests a new process when launched through `somewm-session`; applications lose their Wayland connections during a process restart.
 
-| API | Status | Reason |
-|---|---|---|
-| `awesome.register_xproperty()` | Stub | X11 properties don't exist on Wayland |
-| `awesome.get_xproperty()` | Stub, returns `nil` | Same |
-| `awesome.set_xproperty()` | Stub, no-op + warning | Same |
-| `client:get_xproperty()` | Stub, returns `nil` | Same |
-| `client:set_xproperty()` | Stub, no-op | Same |
-| `spawn::change` / `spawn::canceled` | Not applicable | Wayland XDG Activation is fire and forget; no progress or cancel concept |
+## X-property APIs {#stubbed-apis}
 
-### X-property family
+| API | Behaviour |
+| --- | --- |
+| `awesome.register_xproperty(name, type)` | Accepts the declaration but registers no X11 property. |
+| `awesome.get_xproperty`, `awesome.set_xproperty` | Not defined. Calling either raises a Lua error. |
+| `client:get_xproperty`, `client:set_xproperty` | See [client properties](#x-property-family) below. |
 
-On X11, windows have arbitrary named properties (atoms) used for IPC and persistent state. Wayland has no equivalent: apps communicate via Wayland protocols, and persistent state belongs in compositor-side storage or D-Bus. There is no path forward for these stubs without changing the data model.
+### Client properties {#x-property-family}
 
-## Partially Implemented
+`client:get_xproperty(name)` returns `nil`; `client:set_xproperty(name, value)` does nothing. These client methods allow configurations to load, but do not persist values across a Lua reload.
 
-| Feature | Status | Notes |
-|---|---|---|
-| XKB toggle options (`grp:alt_shift_toggle` etc.) | Keybindings required | Toggle options don't trigger layout changes automatically |
+## Keyboard layouts {#partially-implemented}
 
-### XKB layout toggle
+`awesome.xkb_get_group_names()`, `awesome.xkb_get_layout_group()` and `awesome.xkb_set_layout_group()` are implemented. Layout indices are zero-based.
 
-On X11 these toggles work because the X server intercepts the combination and runs the switch. On Wayland the keypress is just a keypress. Workaround: bind explicitly via `awesome.xkb_set_layout_group()`.
+### Layout toggles {#xkb-layout-toggle}
 
-```lua
-awful.keyboard.append_global_keybindings({
-    awful.key({ "Mod1", "Shift" }, "space", function()
-        local current = awesome.xkb_get_layout_group()
-        awesome.xkb_set_layout_group((current + 1) % 2)
-    end),
-})
-```
+The `grp:*` XKB toggle options do not reliably switch the compositor's keyboard group. Explicit bindings can call `awesome.xkb_set_layout_group()` instead. Static options such as `ctrl:nocaps` and `compose:ralt` work. See [keyboard layouts](../guides/keyboard-layouts.md).
 
-Static XKB options like `ctrl:nocaps` and `compose:ralt` work normally; only `grp:*` toggles are affected.
+<span id="clientxdg_fullscreen---protocol-level-fullscreen-state" />
 
-## somewm-only APIs <SomewmOnly />
+## Client metadata and state
 
-These extend the AwesomeWM API with capabilities AwesomeWM has no equivalent for, usually because Wayland exposes something X11 didn't.
+Native Wayland clients provide an application ID, exposed as `client.class`. X11 `instance`, `machine` and `icon_name` metadata is unavailable for native clients; match rules by `class` instead. XWayland clients can supply X11 metadata.
 
-### `awful.input` - Input device configuration
+| Property | Behaviour |
+| --- | --- |
+| `client.id` | Compositor-assigned client identifier, also used by `somewm-client`. |
+| `client.aspect_ratio` | Width-to-height constraint; `0` or `nil` disables it. |
+| `client.xdg_fullscreen` | Read-only fullscreen state scheduled for an XDG client; falls back to `client.fullscreen` for other clients. |
+| `client.shadow` | Per-client shadow configuration; see [shadows](shadows.md). |
 
-18 properties for pointer (libinput) and keyboard settings. AwesomeWM delegated this to `xinput`, `xset`, and `setxkbmap` on X11.
+Protocol fullscreen state can differ from Lua state; `client.xdg_fullscreen` exposes that distinction.
 
-```lua
-local awful = require("awful")
+## Signals
 
--- Pointer
-awful.input.tap_to_click       = 1
-awful.input.natural_scrolling  = 1
-awful.input.pointer_speed      = 0.5
-awful.input.scroll_button      = 274  -- middle mouse
-awful.input.left_handed        = 0
+The 1.4 line preserves AwesomeWM signal dispatch semantics. The [signal reference](signals.md) lists signal names and arguments.
 
--- Keyboard
-awful.input.xkb_layout         = "us"
-awful.input.xkb_variant        = ""
-awful.input.xkb_options        = "ctrl:nocaps"
-awful.input.repeat_rate        = 25
-awful.input.repeat_delay       = 600
-```
+`spawn::change` and `spawn::canceled` are not emitted: Wayland activation does not provide X11 startup-notification progress and cancellation. Key press and release handlers, `root.fake_input()` and dynamic keybinding removal through `root._remove_key()` are supported.
 
-See [`awful.input`](/docs/reference/awful/input) for the full property list.
+## XWayland limits
 
-### NumLock at startup
+These limits concern X11 applications running through XWayland, not native Wayland clients.
 
-Wayland compositors start with NumLock off. AwesomeWM had no equivalent because X11 inherited NumLock state from the display server.
+| EWMH property | Limit |
+| --- | --- |
+| `_NET_FRAME_EXTENTS` | SomeWM does not publish frame extents. |
+| `_NET_DESKTOP_GEOMETRY` | The EWMH value is fixed at 1920 by 1080, rather than the output layout's size. |
+| `_NET_WM_DESKTOP` at initial map | The requested desktop is read but does not assign the client's tag. Configure placement through [client rules](../guides/client-rules.md). |
 
-```lua
-awesome._set_keyboard_setting("numlock", true)
-```
+<span id="somewm-only-apis-" />
 
-Implementation: `some_set_numlock()` in `somewm_api.c` toggles the Mod2 lock mask via `wlr_keyboard_notify_modifiers()` on every keyboard, matching Sway's `input * xkb_numlock enabled`. Mod2 is stripped from `CLEANMASK`, so keybindings work whether NumLock is on or off.
+<span id="awfulinput---input-device-configuration" />
 
-### `somewm-client` - IPC CLI
+<span id="numlock-at-startup" />
 
-More than 100 commands for external control (run `somewm-client commands` for the full list in your build). Replaces ad-hoc `awesome-client` use.
+<span id="somewm-client---ipc-cli" />
 
-```bash
-somewm-client ping
-somewm-client client list
-somewm-client client info focused
-somewm-client client focus <id>
-somewm-client input tap_to_click 1
-somewm-client screenshot save ~/shot.png
-somewm-client eval "return 1+1"
-```
+<span id="output---physical-monitor-object" />
 
-See [`somewm-client`](/docs/reference/somewm-client) for the full command set.
+<span id="screenscale---fractional-output-scaling" />
 
-### `output` - Physical monitor object
+<span id="tag-persistence-across-monitor-hotplug" />
 
-First-class Lua object representing a connector. Persists from plug to unplug, unlike `screen`, which is destroyed on disable. Read-write access to scale, transform, mode, position, adaptive sync. Replaces `xrandr` and the implicit X11 RandR plumbing.
+<span id="idle-management" />
 
-```lua
-for o in output do
-    if o.name == "eDP-1" then
-        o.scale = 1.5
-    end
-end
+## SomeWM extensions {#somewm-only-apis}
 
-output.connect_signal("added", function(o)
-    if o.name:match("^HDMI") then
-        o.mode     = { width = 2560, height = 1440 }
-        o.position = { x = 1920, y = 0 }
-    end
-end)
+| Area | API and documentation |
+| --- | --- |
+| Input devices and NumLock | [`awful.input`](awful/input.md); [`awesome._set_keyboard_setting`](awful/input.md) for NumLock |
+| Lua utilities | `gears.xresources` reads resource files; `gears.bitwise` provides bitwise operations on Lua versions without the operators |
+| IPC | [`somewm-client`](somewm-client.md), backed by `awful.ipc` |
+| Outputs and scaling | [`output`](output.md), [`screen.scale`](screen.md) |
+| Capture | [`screen.content`](screen.md), [`awful.screenshot`](awful/screenshot.md) |
+| Cursor themes | `root.cursor_theme`, `root.cursor_size`; [input devices](../guides/input-devices.md#cursor-theming) |
+| Shadows | Client and wibox shadows; [shadow reference](shadows.md) |
+| Tray integration | `awful.systray`, `awful.statusnotifierwatcher`, `wibox.widget.systray_icon`; [wibox widgets](wibox/index.md) |
+| Layer-shell rules | `ruled.layer_surface`; [layer surfaces](layer_surface/index.md) |
+| Scrolling layouts | `awful.layout.suit.carousel`; [carousel](awful/carousel.md) |
+| Monitor reconnection | [Tag persistence](tag-persistence.md); saved state is keyed by connector name |
+| Idle and locking | [Lock, idle and DPMS](lock.md), [session lock](lockscreen.md) |
 
-local s = screen.primary
-print(s.output.name)
-```
 
-Properties: `name`, `description`, `make`, `model`, `serial`, `enabled`, `scale`, `transform`, `mode`, `position`, `adaptive_sync`, `screen`, `valid`, `virtual`. See [`output`](/docs/reference/output).
+### Drawable scale {#drawinsurface_scale---hidpi-surface-override}
 
-### `screen.scale` - Fractional output scaling
+`drawin.surface_scale` overrides the drawable's raster scale: `0` selects the output scale, and a positive value selects that factor. Changing it recreates the surface. See [display scaling](../concepts/display-scaling.md).
 
-```lua
-screen.primary.scale = 1.5
-print(screen.primary.scale)  -- 1.5
-```
+## Testing compatibility {#testing-implications}
 
-```bash
-somewm-client screen scale
-somewm-client screen scale 1.5
-somewm-client screen scale 1 1.5
-```
-
-Apps that support `wp_fractional_scale_v1` render at native resolution. Struts and workarea recompute on scale change.
-
-### `drawin.surface_scale` - HiDPI surface override
-
-Override the drawable surface scale for individual drawins. At HiDPI scales (e.g. 1.5), drawable surfaces are created at physical resolution, which forces CPU-intensive upscaling for large `imagebox` content like screenshot overlays. Setting `surface_scale = 1.0` forces logical resolution and lets the GPU do the upscale.
-
-```lua
-local ss = awful.screenshot { interactive = true }
-ss:connect_signal("snipping::start", function(self)
-    if self._private.frame then
-        self._private.frame.surface_scale = 1.0
-    end
-end)
-```
-
-- `0` (default): auto, use output scale for HiDPI
-- `> 0`: force this scale factor
-
-Implementation: `drawin_t.scale_override` in `drawable_get_scale()` and `drawin_get_effective_scale()`. The setter recreates the drawable surface.
-
-### Tag persistence across monitor hotplug
-
-The default `somewmrc.lua` saves and restores tag state when monitors disconnect and reconnect. Tags are keyed by connector name (`eDP-1`, `HDMI-A-1`, ...).
-
-Wayland hotplug is everyday (laptop lids, USB-C docks, power saving). X11 RandR doesn't destroy and recreate screens the same way; on X11, disconnecting a monitor deletes its tags and dumps clients to a fallback screen, and reconnecting creates fresh defaults with no memory of the previous state.
-
-What gets saved: tag name, selected state, layout, `master_width_factor`, `master_count`, `gap`, client references.
-
-Customize or disable:
-
-```lua
--- Disable
-tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
-
--- Replace: move to primary instead of saving
-tag.connect_signal("request::screen", function(t, context)
-    if context ~= "removed" then return end
-    t.screen = screen.primary
-end)
-```
-
-Limitation: state is keyed by connector name. If connectors enumerate differently across reboots (USB-C dock reorder, for example), saved state won't match.
-
-See [Tag Persistence](/docs/concepts/tag-persistence).
-
-### `client.xdg_fullscreen` - Protocol-level fullscreen state
-
-Read-only. For XDG shell clients reads `xdg_toplevel.scheduled.fullscreen` (what the compositor told the client). For X11 / others falls back to `c.fullscreen`.
-
-AwesomeWM had no equivalent because X11 fullscreen is server-side. On Wayland the compositor must explicitly send a configure for fullscreen, so Lua state and client state can drift. This property exists for diagnostics and tests.
-
-```lua
-assert(c.xdg_fullscreen == c.fullscreen)
-```
-
-### Idle management
-
-Wayland-native idle detection and inhibition. AwesomeWM relied on external screensavers and power managers for this on X11.
-
-| API | Behavior |
-|---|---|
-| `awesome.set_idle_timeout(name, seconds, callback)` | Named idle timeout; reuse the same name to replace |
-| `awesome.idle` / `awesome.idle_inhibited` | State queries |
-| `awesome.idle_inhibit` | Lua-level inhibition; OR-ed with protocol inhibitors |
-| `idle::start` / `idle::stop` | Signals |
-
-Inhibition combines: protocol inhibitors (e.g., media players using `zwp_idle_inhibitor_v1`) and `awesome.idle_inhibit` are OR-ed together. Both must be inactive for idle to resume. Implementation: `some_recompute_idle_inhibit()` in `somewm.c`.
-
-## Testing implications
-
-| Test pattern | Issue | Workaround |
-|---|---|---|
-| X-property tests | APIs are stubs | Skip or use D-Bus alternatives |
-
-`root.fake_input()` and `awesome.restart()` work on Wayland and can be used in tests.
-
-## See also
-
-- [Why somewm](/docs/next/concepts/why-somewm) - what somewm commits to and what's open
-- [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) - compatibility status overview
-- [Wayland vs X11](/docs/concepts/wayland-vs-x11) - protocol-level background
-- [Migrating from AwesomeWM](/docs/getting-started/migrating) - step-by-step migration
+Tests relying on X11 properties or native clients' X11 metadata need a Wayland-specific expectation. Supported key release, keyboard-layout and input-injection APIs can be tested directly. [Nested compositor testing](../guides/testing-with-nested-compositor.md) keeps configuration checks separate from the desktop session.

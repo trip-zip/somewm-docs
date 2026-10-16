@@ -45,5 +45,5 @@ These APIs are unique to SomeWM and not available in AwesomeWM:
 | [Key Names](./key-names) | Modifier keys and key name reference |
 | [Signals](./signals) | Event signals by object type |
 | [Default Keybindings](./default-keybindings) | Built-in keyboard shortcuts |
-| [Deviations from AwesomeWM](./deviations) | Canonical status list: stubs, partials, SomeWM-only APIs |
+| [Compatibility reference](./deviations) | Canonical status list: stubs, partials, SomeWM-only APIs |
 | [Wayland Protocols](./wayland-protocols) | Protocols somewm advertises to clients |

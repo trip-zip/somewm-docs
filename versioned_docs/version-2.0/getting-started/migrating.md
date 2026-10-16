@@ -322,54 +322,23 @@ That shared model does not guarantee that every API is available or behaves iden
 
 ## Deprecated APIs Removed in SomeWM 2.0
 
-AwesomeWM still ships these for backward compatibility. SomeWM 2.0 deleted them, so a config
-that uses them fails with `attempt to call field '...' (a nil value)` or a `require` error.
-SomeWM 1.4 still has all of them.
+SomeWM 2.0 removes deprecated APIs that AwesomeWM master and SomeWM 1.4 retain. Check third-party modules as well as your own configuration.
 
 ### Notifications
 
-| AwesomeWM | SomeWM 2.0 |
-|-----------|------------|
-| `naughty.notify(args)` | `naughty.notification(args)` |
-| `naughty.suspend()` / `naughty.resume()` / `naughty.toggle()` | `naughty.suspended = true` / `false` / `not naughty.suspended` |
-| `naughty.is_suspended()` | `naughty.suspended` |
-| `naughty.destroy(n, reason)` | `n:destroy(reason)` |
-| `naughty.getById(id)` | `naughty.get_by_id(id)` |
-| `naughty.reset_timeout(n, t)` | `n:reset_timeout(t)` |
-| `naughty.replace_text(n, title, text)` | `n.title = title; n.message = text` |
+Use the [notification replacements](upgrading-from-1.4.md#notifications).
 
 ### Client lifecycle signals
 
-The bare `manage` and `unmanage` signals are gone. Handlers connected to them never fire.
-SomeWM logs a warning at startup when it sees one.
-
-| AwesomeWM | SomeWM 2.0 |
-|-----------|------------|
-| `client.connect_signal("manage", function(c) ...` | `client.connect_signal("request::manage", function(c, context, hints) ...` |
-| `client.connect_signal("unmanage", function(c) ...` | `client.connect_signal("request::unmanage", function(c, context, hints) ...` |
-
-See [React to client lifecycle](../guides/react-to-client-lifecycle.md).
+Use the [client lifecycle replacements](upgrading-from-1.4.md#client-lifecycle-handlers).
 
 ### Renamed modules
 
-The 3.x-to-4.x redirect shims were deleted. `require` the real module instead.
-
-| Removed | Use instead |
-|---------|-------------|
-| `awful.rules` | `ruled.client` |
-| `awful.util` | `gears.filesystem`, `gears.table`, `gears.string`, `gears.math`, `gears.color`, `gears.debug`, `gears.geometry` |
-| `awful.wibox` | `awful.wibar` |
-| `awful.ewmh` | `awful.permissions` |
-| `awful.widget.graph` / `progressbar` / `textclock` | `wibox.widget.*` |
-| `wibox.widget.background` | `wibox.container.background` |
-| `wibox.layout.margin` / `constraint` / `scroll` / `mirror` / `rotate` | `wibox.container.*` |
+Use the [module and helper replacements](upgrading-from-1.4.md#wallpapers-modules-and-helper-functions).
 
 ### Functional wrappers on `awful.tag` and `awful.client`
 
-26 `awful.tag.*` wrappers (`tag.setmwfact`, `tag.getgap`, `tag.viewonly`, and friends) and 5
-`awful.client.*` wrappers (`getmaster`, `setmaster`, `setslave`, `getmarked`,
-`floating.toggle`) were removed. All were replaced by object properties and methods in
-AwesomeWM 4.0, so use `t.master_width_factor`, `t.gap`, `t:view_only()`, and so on.
+Use object properties and methods from the [upgrade guide](upgrading-from-1.4.md#wallpapers-modules-and-helper-functions). Also check [API levels and aliases](upgrading-from-1.4.md#api-levels-and-less-common-aliases).
 
 ## Automatic Detection
 
@@ -439,6 +408,6 @@ end)
 
 ## Next Steps
 
-- See [Wayland vs X11](/docs/concepts/wayland-vs-x11) for a deeper understanding of the differences
-- Check [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) for the full compatibility matrix
-- Explore [SomeWM-only features](/docs/reference/awful/input) like `awful.input`
+- See [Wayland vs X11](../concepts/wayland-vs-x11.md) for a deeper understanding of the differences
+- Check [AwesomeWM Compatibility](../concepts/awesomewm-compat.md) for the full compatibility matrix
+- Explore [SomeWM-only features](../reference/awful/input.md) like `awful.input`

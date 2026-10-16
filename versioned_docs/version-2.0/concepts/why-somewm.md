@@ -45,11 +45,11 @@ Wayland is not X11. A few places force a behavioral difference no matter what:
 - **Restart**: somewm rebuilds the Lua state in process while wlroots keeps running. An X11 `execvp`-style restart isn't possible because GPU state can't survive
 - **Per-output scale**: Wayland has fractional scaling per output, so `screen.scale` is now a writable property
 
-The [Deviations reference](../reference/deviations.md) describes differences from AwesomeWM, including Wayland-specific behaviour. Consult the affected API reference for SomeWM behaviour in this release.
+The [Compatibility reference](../reference/deviations.md) describes differences from AwesomeWM, including Wayland-specific behaviour. Consult the affected API reference for SomeWM behaviour in this release.
 
 ## See also
 
-- [Deviations](../reference/deviations.md) - API and behavioural differences from AwesomeWM
-- [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) - compatibility status and stubs
-- [Wayland vs X11](/docs/concepts/wayland-vs-x11) - protocol-level background
-- [Migrating from AwesomeWM](/docs/getting-started/migrating) - step-by-step migration
+- [Compatibility reference](../reference/deviations.md) - API and behavioural differences from AwesomeWM
+- [AwesomeWM Compatibility](awesomewm-compat.md) - compatibility status and stubs
+- [Wayland vs X11](wayland-vs-x11.md) - protocol-level background
+- [Migrating from AwesomeWM](../getting-started/migrating.md) - step-by-step migration

@@ -64,7 +64,7 @@ Use the report as a starting point: it checks for syntax errors, missing local m
 
 ## 3. Update affected configuration
 
-Review your working copy and third-party modules for the following changes. The release's [changelog](https://github.com/trip-zip/somewm/blob/v2.0.0/CHANGELOG.md) and [removed API reference](https://github.com/trip-zip/somewm/blob/v2.0.0/DEVIATIONS.md#removed-apis) provide the source record for this checklist.
+Review your working copy and third-party modules for the following changes. The release's [changelog](https://github.com/trip-zip/somewm/blob/v2.0.0/CHANGELOG.md) provides the source record for this checklist.
 
 ### Notifications
 
@@ -78,7 +78,7 @@ naughty.notify { title = "Hello", text = "Ready" }
 naughty.notification { title = "Hello", message = "Ready" }
 ```
 
-Also replace functional helpers such as `naughty.destroy(n)` with object methods such as `n:destroy()`, and suspension functions with the `naughty.suspended` property. The [notification replacement table](../reference/naughty/index.md#removed-functions) lists these changes.
+The [notification reference](../reference/naughty/index.md#removed-functions) lists the functional helpers replaced by object methods and the `naughty.suspended` property.
 
 The `text` constructor argument still works as an alias for `message`; assigning `n.text` is not how to update a notification. Use `n.message`.
 
@@ -103,10 +103,10 @@ Connections to the old names warn and never run. Check scratchpads, placement, t
 | `awful.util` | The specific function in `gears.*` or `awful.*`; see examples below |
 | `awful.wibox` | `awful.wibar` |
 | `awful.ewmh` | `awful.permissions` |
-| Legacy `awful.widget.*`, `wibox.widget.background`, or `wibox.layout` container aliases | Their current `wibox.widget.*` or `wibox.container.*` modules |
+| `awful.widget.graph`, `awful.widget.progressbar`, `awful.widget.textclock` | The corresponding `wibox.widget.*` modules |
+| `wibox.widget.background` | `wibox.container.background` |
+| `wibox.layout.margin`, `constraint`, `scroll`, `mirror`, `rotate` | The corresponding `wibox.container.*` modules |
 | Functional tag/client wrappers such as `awful.tag.setmwfact`, `awful.tag.viewonly`, or `awful.client.floating.toggle` | Object properties and methods such as `t.master_width_factor`, `t:view_only()`, or `c.floating = not c.floating` |
-
-The [module and wrapper replacements](migrating.md#renamed-modules) give more detail.
 
 Common `awful.util` replacements include:
 
@@ -129,7 +129,19 @@ exe_callback = function(s)
 end,
 ```
 
-This belongs in your prompt options table. Other `awful.util` members do not all have direct replacements; consult the [release removal notes](https://github.com/trip-zip/somewm/blob/v2.0.0/DEVIATIONS.md#removed-apis) for any remaining calls.
+This belongs in your prompt options table. Other `awful.util` members do not all have direct replacements; review the replacements below for any remaining calls.
+
+Additional `awful.util` replacements:
+
+| Removed | Replacement |
+| --- | --- |
+| `escape`, `unescape` | `gears.string.xml_escape`, `gears.string.xml_unescape` |
+| `mkdir` | `gears.filesystem.make_directories` |
+| `get_rectangle_in_direction` | `gears.geometry.rectangle.get_in_direction` |
+| `getdir("config")`, `getdir("cache")` | `gears.filesystem.get_xdg_config_home() .. "somewm/"`, `gears.filesystem.get_cache_dir()` |
+| `restart` | `awesome.restart()` |
+| `geticonpath` | `menubar.utils.lookup_icon`; check the supported arguments in the module |
+| `checkfile`, `shell` | No replacement with the same interface; remove the dependency on these fields |
 
 ### API levels and less common aliases
 
@@ -137,23 +149,43 @@ This belongs in your prompt options table. Other `awful.util` members do not all
 
 The behaviours formerly selected by API level are fixed at level 4: `awful.autofocus` loads without a warning, `awful.permissions` does not automatically connect `mouse::enter` to `request::autoactivate`, and `wibox.widget.base.make_widget` defaults `enable_properties` to `false`. If you relied on another level, review focus-follows-mouse and custom widget construction explicitly.
 
-Check these less common removals if you maintain older widgets or libraries:
+#### Other removed APIs {#other-removed-apis}
 
 | Removed | Action |
-|---|---|
-| `<class>.add_signal`, `gears.object.add_signal` | Remove the declarations; signals do not need declaring before connecting handlers |
-| The `.data` alias on C API objects | Use `._private` for the same per-object table; do not replace unrelated application fields named `data` |
+| --- | --- |
+| `<class>.add_signal`, `gears.object.add_signal` | Remove declarations; signals do not need declaring before connecting handlers |
+| The `.data` alias on C API objects | Use `._private` for the same per-object table; leave unrelated application fields named `data` alone |
 | `_key`, `_timer` | Use `awful.key` and `gears.timer` |
-| `awful.screen.padding(s, p)` | Set `s.padding` |
-| `awful.screen.getdistance_sq(s, x, y)` | Use `s:get_square_distance(x, y)` |
-| `awful.key.execute(modifiers, key)` | Use `awful.keyboard.emulate_key_combination(modifiers, key)` |
-| Client `marked` / `unmarked` signals | Connect to `property::marked` and inspect the property |
+| `awful.ipc.remove_subscriber` | Remove the call; the compositor owns subscriber connections |
+| `gears.debug.deprecate_class` | Remove API-level proxy logic |
+
+`gears.debug.deprecate` prints a warning without consulting `args.deprecated_in`, emitting `debug::deprecation`, or routing deprecations through `debug::error`. Real Lua errors still use `debug::error`.
+
+#### Removed deprecated aliases {#removed-deprecated-aliases}
+
+| Removed | Replacement |
+| --- | --- |
+| `awful.screen.getdistance_sq(s, x, y)` | `s:get_square_distance(x, y)` |
+| `awful.screen.padding(s, p)` | The `screen.padding` property |
+| `awful.mouse.client.dragtotag.border(c)` | Set `awful.mouse.snap.drag_to_tag_enabled`, then use `awful.mouse.client.move(c)` |
+| `awful.mouse.client.corner(c, corner)` | `awful.placement.closest_corner` |
+| `awful.mouse.client_under_pointer()` | `mouse.current_client` |
+| `awful.key.execute(modifiers, key)` | `awful.keyboard.emulate_key_combination(modifiers, key)` |
+| `menubar.get(s)` and calling `menubar(s)` | `menubar.refresh(s)` |
+| `beautiful.theme_assets.recolor_titlebar_normal(t, c)`, `recolor_titlebar_focus(t, c)` | `beautiful.theme_assets.recolor_titlebar(t, c, "normal")` or `"focus"` |
+| `gears.filesystem.mkdir(dir)` | `gears.filesystem.make_directories(dir)` |
+| `gears.filesystem.get_dir("config")`, `get_dir("cache")` | `gears.filesystem.get_xdg_config_home() .. "somewm/"`, `gears.filesystem.get_cache_dir()` |
+| `wibox.layout.ratio:ajust_ratio`, `:ajust_widget_ratio` | `:adjust_ratio`, `:adjust_widget_ratio` |
+| `wibox.layout.grid:get_dimension()` | The `row_count` and `column_count` properties |
+| `naughty.notification.run` and `.destroy` properties | Connect to `invoked` and `destroyed` signals |
+| Client `marked`, `unmarked` signals | Connect to `property::marked` and inspect the property |
 | Textbox `property::align` signal | Connect to `property::halign` |
-| `gears.debug.deprecate_class` | Remove the obsolete API-level proxy logic |
+| `naughty.notificationClosedReason` | `naughty.notification_closed_reason` |
+| `notification_closed_reason.dismissedByUser`, `.dismissedByCommand` | `.dismissed_by_user`, `.dismissed_by_command` |
 
-`gears.debug.deprecate` now prints a warning without emitting `debug::deprecation` or routing deprecations through `debug::error`. Real Lua errors still use `debug::error`.
+Some deprecated names were already inert. Assignments to old grid properties such as `forced_num_rows`, `min_cols_size` and `horizontal_spacing`, background `shape_border_width` and `shape_border_color`, notification `text`, or textbox `align` do not update the corresponding live properties. Use the current API names. The notification constructor still accepts `text` as an argument, as described above.
 
-The [remaining deprecated aliases](https://github.com/trip-zip/somewm/blob/v2.0.0/DEVIATIONS.md#removed-deprecated-aliases) cover mouse helpers, menubar refresh, theme asset recolouring, filesystem helpers, layout methods, and notification aliases. Review them for dependencies outside your own config too.
+Deprecation does not always mean removal: `beautiful.xresources.get_dpi`, `wibox.container.background.bgimage`, `wibox.layout.grid:add_widget_at`, `menubar.icon_theme` and `menubar.index_theme` remain available in 2.0.
 
 ### Signal timing and the default config
 

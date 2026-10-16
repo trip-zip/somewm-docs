@@ -10,7 +10,7 @@ description: Short answers on what SomeWM is, config location and reload, restar
 
 **Why the name?** If Awesome is great, Some is adequate.
 
-**Is it stable?** In active development. [Deviations](reference/deviations.md) is the status list.
+**Is it stable?** In active development. [Compatibility reference](reference/deviations.md) is the status list.
 
 **Where is the config?** `~/.config/somewm/rc.lua`, then `~/.config/awesome/rc.lua`, then the bundled default ([Launch](getting-started/first-launch.md)).
 

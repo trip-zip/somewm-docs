@@ -203,6 +203,6 @@ end)
 
 ## See Also
 
-- **[The Object Model](/docs/concepts/object-model)** - Understanding screens, tags, clients, widgets
-- **[AwesomeWM Compatibility](/docs/concepts/awesomewm-compat)** - How SomeWM maintains compatibility
-- **[Basics](/docs/tutorials/basics)** - Put these concepts into practice
+- **[The Object Model](object-model.md)** - Understanding screens, tags, clients, widgets
+- **[AwesomeWM Compatibility](awesomewm-compat.md)** - How SomeWM maintains compatibility
+- **[Basics](../tutorials/basics.md)** - Put these concepts into practice

@@ -126,7 +126,7 @@ awful.spawn("grim ~/screenshot.png")
 | `xdotool mousemove` | Not yet implemented |
 
 :::note
-`root.fake_input()` is currently a stub in SomeWM. Virtual input requires wlroots virtual pointer/keyboard protocols which are planned for a future release.
+SomeWM implements `root.fake_input()` through the compositor. See the [compatibility reference](../reference/deviations.md#signals) for supported input behaviour.
 :::
 
 ### GTK/GDK via LGI {#gtkgdk-via-lgi}
@@ -396,6 +396,6 @@ end)
 
 ## Next Steps
 
-- See [Wayland vs X11](/docs/concepts/wayland-vs-x11) for a deeper understanding of the differences
-- Check [AwesomeWM Compatibility](/docs/concepts/awesomewm-compat) for the full compatibility matrix
-- Explore [SomeWM-only features](/docs/reference/awful/input) like `awful.input`
+- See [Wayland vs X11](../concepts/wayland-vs-x11.md) for a deeper understanding of the differences
+- Check [AwesomeWM Compatibility](../concepts/awesomewm-compat.md) for the full compatibility matrix
+- Explore [SomeWM-only features](../reference/awful/input.md) like `awful.input`
