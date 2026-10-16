@@ -50,7 +50,7 @@ A client reads its durations and entrances from `c.animation`, a table with one 
   The same window moves between maximised, tiled and floating states, with a different duration for each transition.
 </AnimationDemo>
 
-An entrance is one of `grow`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. `grow` scales the frame from nothing; the slides come in from that edge of the screen; `fade` blends the frame in from invisible. The same word runs backwards on the way out.
+An entrance is one of `grow`, `scale`, `scale_top`, `scale_bottom`, `scale_left`, `scale_right`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. `grow` sizes the frame up from nothing, so its box changes. The scale words shrink the finished picture about its centre or an edge midpoint, with the box unchanged ([Scale](#scale)). The slides come in from that edge of the screen, and `fade` blends the frame in from invisible. The same word runs backwards on the way out.
 
 A list runs several effects together in one transition, with one duration:
 
@@ -58,8 +58,8 @@ A list runs several effects together in one transition, with one duration:
 theme.animation_appear = { "fade", "slide_left" }
 ```
 
-- One slide, `grow` and `fade` combine, in any order.
-- A second slide direction warns once and the first one named stays.
+- One slide, one size effect (`grow` or one of the scale words) and `fade` combine, in any order.
+- A second slide direction, or a second size effect, warns once and the first one named stays.
 - A repeated word counts once. `collapse` is another name for `grow`.
 
 `{ "slide_left", "slide_right" }` logs:
@@ -109,6 +109,32 @@ With a tag duration above 0, from `theme.animation_tag_duration`, `theme.animati
 <AnimationDemo name="grow-shrink" title="Grow and shrink">
   Growing entrances and shrinking exits on clients, tag changes and a popup, shown with different durations.
 </AnimationDemo>
+
+### Scale
+
+`scale` shrinks the complete picture, the surface, border and titlebar together, about the centre of the frame. `scale_top`, `scale_bottom`, `scale_left` and `scale_right` hold that edge's midpoint still and shrink towards it. The frame's box in the layout does not change and the client receives the same configure sizes as an unanimated map, so neighbours do not move and the client never redraws for the effect. Pointer events hit the picture where it is drawn, so `mouse::enter` fires on the scaled edge.
+
+```lua
+ruled.client.append_rule {
+    rule = { class = "mpv" },
+    properties = { animation = { appear = "scale_top", disappear = "scale_top" } },
+}
+```
+
+Mid-flight, `somewm-client clay tree` prints the picture beside the box, `scale 0.715333 anchor top presented 29,32 146x161 box 0,32 204x225`: the box is the slot, `presented` is where the scaled picture is drawn, and the anchor is the edge held still.
+
+A popup can scale and fade in together and scale out from its bottom edge:
+
+```lua
+local popup = awful.popup {
+    widget = wibox.widget.textbox("hello"),
+    placement = awful.placement.centered,
+    animation = { visible = { duration = 1, enter = { "scale", "fade" }, exit = "scale_bottom" } },
+}
+popup.visible = true
+```
+
+The dump line for that popup mid-entrance reads `fade_alpha 0.366742 scale 0.633258 anchor center`, and both values reach their end together at the end of the duration. `{ "grow", "scale" }` logs `transition.enter: grow + scale conflict; scale is ignored, grow remains active`.
 
 ## Wiboxes and popups
 
@@ -186,7 +212,7 @@ Assigning an edited policy notifies `property::animation` observers and schedule
 
 ## Disabling animation
 
-Assign `.animation = false` to suppress an object and its descendants, including descendants with their own policies. A client's titlebar widgets are included. Assign `nil` to remove that override; client theme defaults and descendant policies then apply again.
+Assign `.animation = false` to suppress an object and its descendants, including descendants with their own policies. A client's titlebar widgets are included. Assign `nil` to remove that override, and client theme defaults and descendant policies apply again.
 
 Disable all transitions with:
 
@@ -194,6 +220,6 @@ Disable all transitions with:
 require("somewm.animation").enabled = false
 ```
 
-This disables client and widget transitions and the `animation.visible` transitions on wiboxes and popups. Active transitions finish on the next rendered frame, including retained exits. Set `enabled = true` to let later changes animate again; a completed transition does not restart, and stored policies are unchanged throughout. A running `mousegrabber` suppresses the same transitions, so a drag never fights an easing box.
+This disables client and widget transitions and the `animation.visible` transitions on wiboxes and popups. Active transitions finish on the next rendered frame, including retained exits. Set `enabled = true` to let later changes animate again. A completed transition does not restart, and stored policies are unchanged throughout. A running `mousegrabber` suppresses the same transitions, so a drag never fights an easing box.
 
 [Clients in the Tree](/docs/next/concepts/clients-in-the-tree) for the frame these transitions move.
