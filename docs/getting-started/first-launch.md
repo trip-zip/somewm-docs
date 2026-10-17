@@ -44,18 +44,18 @@ Mod4 is the Super key.
 | Mod4 + Ctrl + r | reload the config |
 | Mod4 + Shift + q | quit |
 
-Mod4 + s shows every binding; [Default Keybindings](/docs/reference/default-keybindings) lists them.
+Mod4 + s shows every binding; [Default Keybindings](../reference/default-keybindings.md) lists them.
 
 ## If it does not start
 
 | Symptom | Cause and fix |
 | --- | --- |
-| `No config found` | the Lua libraries are not installed; run `sudo make install`, the build directory alone does not work |
+| `FATAL: no working Lua config found!` | the Lua libraries are not installed; run `sudo make install`, the build directory alone does not work |
 | the config loads and it crashes | `somewm -d 2>&1 \| tee somewm.log`, or `WLR_DEBUG=1 somewm` for wlroots output; look for `error loading` or `error executing` |
 | a widget is missing | a widget with its own `draw` or `fit` method is left out of the tree; the log has `wibox.clay: <class> draws itself (...) and is left out of the tree`, `somewm-client clay tree` prints what was drawn, and [Upgrading from 2.0 to 2.1](./upgrading-from-2.0.md#what-you-will-see) has the cases |
 
 ## Next
 
-- an AwesomeWM config: [Migrating from AwesomeWM](/docs/getting-started/migrating)
+- an AwesomeWM config: [Migrating from AwesomeWM](migrating.md)
 - a SomeWM 2.0 config: [Upgrading from 2.0 to 2.1](./upgrading-from-2.0.md)
-- from scratch: [Basics](/docs/tutorials/basics)
+- from scratch: [Basics](../tutorials/basics.md)

@@ -28,7 +28,7 @@ A layout of your own written the AwesomeWM way, with an `arrange` function that 
 
 | Element | Declares |
 | --- | --- |
-| `CLIENT` | the frame: a column with the layout's sizing. Its padding is the border width, so the border takes room inside the frame and has no size word of its own. A floating client's frame carries its own box, marked `user`; a fullscreen one `grow`s to the output. |
+| `CLIENT` | the frame: a column with the layout's sizing. Border padding belongs to `CHROME` and `PROBE` when present, otherwise to `CLIENT`. A floating client's frame carries its own box, marked `user`; a fullscreen one `grow`s to the output. |
 | `TITLEBAR`, `TITLEBAR_LEFT`, `_RIGHT`, `_BOTTOM` | widget trees like a wibar's. A top or bottom bar spans the frame's width and a side bar its height; its thickness is `fixed`, marked `theme`. |
 | `SLOT` | `grow`s into what is left inside the frame |
 | `SURFACE` | the client's pixels: a floating element attached to the slot at the client's band, carrying the client's size hints as `min` and `max`, marked `protocol` |
@@ -37,7 +37,7 @@ When a client commits a size other than the one it was configured, the frame hol
 
 ## Floating, fullscreen, ontop, and order
 
-A layout does not take a floating client. It floats as a root of its own at its geometry plus border, marked `user`. A fullscreen client grows to the output, marked `output`. An ontop, above or below client under a stock layout tiles into its slot like any other; only its surface's band changes. Under `max` and `magnifier`, a floating client is above the layout's clients whatever the raise order, and a transient of such a client is above every client of that layout.
+A layout does not take a floating client. It floats as a root of its own at its geometry plus border, marked `user`. A fullscreen client has `w=grow h=grow`, attached to `OUTPUT`. An ontop, above or below client under a stock layout tiles into its slot like any other; only its surface's band changes. Under `max` and `magnifier`, a floating client is above the layout's clients whatever the raise order, and a transient of such a client is above every client of that layout.
 
 The scene draws roots in band order, lowest first: a below client at 10, a normal client at 20, above at 30, fullscreen at 40, ontop at 50 ([all bands](./scene-graph.md#bands)). Two clients in the same band are ordered by [the client stack](./client-stack.md).
 
@@ -48,7 +48,7 @@ See [Rounded Corners](../guides/rounded-corners.md) to set a client radius with 
 - `client.shape` is nil, a corner radius in pixels, or a `gears.shape` function. `gears.shape.rounded_rect`, or a function that draws its path, is read as that radius. Any other function warns once and the client stays square.
 - A titlebar on an edge takes that edge's corners and the surface takes the rest, each less the border width. The border stays square.
 - A shadow is drawn by the renderer around the frame's solved box. It declares no box and takes no room from the slot.
-- With `theme.animation_layout_duration` above 0, each frame declares a Clay transition on the client's box, and Clay moves it over that duration. At 0, a client snaps to its new box in one frame. [Animation](/docs/next/guides/animation) has the client, wibox and widget triggers.
+- With `theme.animation_layout_duration` above 0, each frame declares a Clay transition on the client's box, and Clay moves it over that duration. At 0, a client snaps to its new box in one frame. [Animation](../guides/animation.md) has the client, wibox and widget triggers.
 
 ## See it
 

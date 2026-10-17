@@ -25,7 +25,7 @@ awful.screen.connect_for_each_screen(function(s)
 end)
 ```
 
-`screen.primary`, `awful.screen.focused()` and `for s in screen do` are the three ways to reach a screen ([screen reference](/docs/reference/screen)).
+`screen.primary`, `awful.screen.focused()` and `for s in screen do` are the three ways to reach a screen ([screen reference](../reference/screen.md)).
 
 ## Moving windows
 
@@ -36,11 +36,11 @@ c:move_to_screen(c.screen:get_next_in_direction("right"))
 awful.screen.focus_relative(1)                            -- focus the next screen
 ```
 
-The default config binds Mod4 + o to focus the next screen and Mod4 + Shift + o to move the focused window there. A rule places an app on a screen: `properties = { screen = 2, tag = "web" }`.
+The default config binds Mod4 + o to move the focused window to the next screen. A rule places an app on a screen: `properties = { screen = 2, tag = "web" }`.
 
 ## Hotplug
 
-`screen` emits `added` and `removed`. On removal, `awful.permissions.tag_screen` saves each tag's state and moves its clients to another screen ([Tag Persistence](/docs/guides/tag-persistence)). To decide yourself:
+`screen` emits `added` and `removed`. On removal, `awful.permissions.tag_screen` saves each tag's state and moves its clients to another screen ([Tag Persistence](tag-persistence.md)). To decide yourself:
 
 ```lua
 tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
@@ -83,7 +83,7 @@ output.get_by_name("DP-2").transform = "90"
 output.get_by_name("DP-2").position = { x = 2560, y = 0 }
 ```
 
-[output reference](/docs/reference/output) has every property.
+[output reference](../reference/output.md) has every property.
 
 ## Per-screen differences
 
@@ -132,4 +132,4 @@ end)
 
 `somewm-client screen list` or `wlr-randr` shows what the compositor sees. Indices follow detection order, so pick a screen by output name or geometry, not by index, and use rules with `screen = screen.primary` for apps that must land on one screen.
 
-[Fractional Scaling](/docs/guides/fractional-scaling) covers per-screen scale; [The Object Model](/docs/concepts/object-model) the output, screen and client relationship.
+[Fractional Scaling](fractional-scaling.md) covers per-screen scale; [The Object Model](../concepts/object-model.md) the output, screen and client relationship.

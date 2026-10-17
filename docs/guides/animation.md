@@ -142,7 +142,7 @@ A wibox or `awful.popup` animates its visibility:
 
 ```lua
 local popup = awful.popup {
-    widget = my_widget,
+    widget = require("wibox").widget.textbox("hello"),
     animation = { visible = { duration = 0.2, enter = "fade", exit = "fade" } },
 }
 ```
@@ -222,4 +222,4 @@ require("somewm.animation").enabled = false
 
 This disables client and widget transitions and the `animation.visible` transitions on wiboxes and popups. Active transitions finish on the next rendered frame, including retained exits. Set `enabled = true` to let later changes animate again. A completed transition does not restart, and stored policies are unchanged throughout. A running `mousegrabber` suppresses the same transitions, so a drag never fights an easing box.
 
-[Clients in the Tree](/docs/next/concepts/clients-in-the-tree) for the frame these transitions move.
+[Clients in the Tree](../concepts/clients-in-the-tree.md) for the frame these transitions move.

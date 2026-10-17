@@ -6,7 +6,7 @@ description: Media keys, keygroups, mouse bindings, and organizing bindings as d
 
 # Keybinding patterns
 
-Media keys, a whole key row in one binding, mouse buttons, and bindings kept as data or in a module. [Keybindings](/docs/tutorials/keybindings) is the tutorial; [Key Names](/docs/reference/key-names) lists every key and modifier.
+`awful.key` binds individual keys or a named key group to Lua callbacks. [Keybindings](../tutorials/keybindings.md) is the tutorial; [Key Names](../reference/key-names.md) lists every key and modifier.
 
 ## Bind media keys
 
@@ -266,4 +266,4 @@ Then in your `rc.lua`:
 require("keybindings")
 ```
 
-[Default Keybindings](/docs/reference/default-keybindings) lists what is already bound; [awful.key upstream](https://awesomewm.org/apidoc/libraries/awful.key.html) is the API.
+[Default Keybindings](../reference/default-keybindings.md) lists what is already bound; [awful.key upstream](https://awesomewm.org/apidoc/libraries/awful.key.html) is the API.

@@ -34,10 +34,10 @@ Containers wrap a single child widget to modify its appearance or size.
 
 | Container | Effect |
 |-----------|--------|
-| `wibox.container.background` | Add background colour, foreground colour, shape, border |
+| `wibox.container.background` | Add background colour, foreground colour, shape, border; a childless background in a stack paints over the layers below. |
 | `wibox.container.margin` | Add padding around a widget |
 | `wibox.container.constraint` | Set minimum/maximum size |
-| `wibox.container.place` | Align widget within available space (centre, left, etc.) |
+| `wibox.container.place` | Align widget within available space (centre, left, etc.); a floating place keeps its whole allocation. |
 | `wibox.container.rotate` | Rotate content (90, 180, 270 degrees). Text inside draws as one line; a scroll container inside, or a rotate inside a rotate, is left out with a warning |
 | `wibox.container.mirror` | Flip content horizontally or vertically, with the same limits as rotate |
 | `wibox.container.scroll` | Scroll content that overflows |
@@ -105,6 +105,6 @@ w:get_children_by_id("my_text")[1].text = "Updated"
 
 ## Behavioral Notes
 
-SomeWM uses the SNI (StatusNotifierItem) protocol for the system tray instead of X11's XEmbed. See [Wayland vs X11](/docs/concepts/wayland-vs-x11) for details.
+SomeWM uses the SNI (StatusNotifierItem) protocol for the system tray instead of X11's XEmbed. See [Wayland vs X11](../../concepts/wayland-vs-x11.md) for details.
 
 `wibox.container.border` is gone; loading it is an error. Use `wibox.container.background` with `border_width`, `border_color` and `shape`. A widget class with its own `fit`, `draw` or `layout` method is left out of the tree with a warning; see [Upgrading from 2.0 to 2.1](../../getting-started/upgrading-from-2.0.md).

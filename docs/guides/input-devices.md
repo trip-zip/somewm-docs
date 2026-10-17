@@ -20,7 +20,7 @@ awful.input.keyboard_repeat_rate = 30
 awful.input.keyboard_repeat_delay = 300
 ```
 
-`1` enables, `0` disables, `-1` leaves the device's default. [awful.input reference](/docs/reference/awful/input) lists every property; `somewm-client input` prints them with their current values and sets one for a trial run ([CLI Control](/docs/guides/cli-control)).
+`1` enables, `0` disables, `-1` leaves the device's default. [awful.input reference](../reference/awful/input.md) lists every property; `somewm-client input` prints them with their current values and sets one for a trial run ([CLI Control](cli-control.md)).
 
 ## Per device
 
@@ -57,4 +57,4 @@ theme.cursor_mouse_resize = "cross"
 theme.enable_spawn_cursor = true     -- "watch" while an app starts
 ```
 
-Names are the X cursor names ([list](https://awesomewm.org/apidoc/documentation/06-appearance.md.html)). To persist a theme and size, set `XCURSOR_THEME` and `XCURSOR_SIZE` in the environment SomeWM starts in. A theme that is not installed falls back to wlroots' built-in cursors. [Theme Variables](/docs/reference/beautiful/theme-variables#cursors) has the cursor variables.
+Names are the X cursor names ([list](https://awesomewm.org/apidoc/documentation/06-appearance.md.html)). To persist a theme and size, set `XCURSOR_THEME` and `XCURSOR_SIZE` in the environment SomeWM starts in. A theme that is not installed falls back to wlroots' built-in cursors. [Theme Variables](../reference/beautiful/theme-variables.md#cursors) has the cursor variables.

@@ -143,7 +143,7 @@ async function main() {
   const intro = [
     '# All Keysyms',
     '',
-    `Complete enumeration of every keysym name SomeWM accepts in \`awful.key\` bindings. **${total} keysyms** in ${populated.length} categories.`,
+    `SomeWM resolves \`awful.key\` names through xkbcommon. **${total} keysyms** in ${populated.length} categories.`,
     '',
     'SomeWM resolves key names by calling `xkb_keysym_from_name()` (case-insensitive). Take any `XKB_KEY_*` name from this list, strip the `XKB_KEY_` prefix, and pass the remainder as a string.',
     '',
@@ -156,7 +156,7 @@ async function main() {
     'awful.key({}, "XF86AudioRaiseVolume", function() ... end)',
     '```',
     '',
-    'For the everyday key reference (modifiers, common keys, F-keys, media keys, mouse buttons), see **[Key Names](/docs/reference/key-names)**.',
+    'For the everyday key reference (modifiers, common keys, F-keys, media keys, mouse buttons), see **[Key Names](key-names.md)**.',
     '',
     ':::note Source of truth',
     `This page is generated from \`${headerPath}\` on the build host. SomeWM links against the same libxkbcommon at runtime, so the lists are identical.`,
@@ -177,8 +177,8 @@ async function main() {
   const footer = [
     '## See Also',
     '',
-    '- [Key Names](/docs/reference/key-names) – Curated reference for everyday bindings',
-    '- [Keybindings Tutorial](/docs/tutorials/keybindings) – Learn how to bind keys',
+    '- [Key Names](key-names.md) – Curated reference for everyday bindings',
+    '- [Keybindings Tutorial](../tutorials/keybindings.md) – Learn how to bind keys',
     '- [xkbcommon documentation](https://xkbcommon.org/doc/current/group__keysyms.html) – Upstream API reference',
     '',
     `<!-- generator: scripts/generate-keysyms.mjs | header: ${headerPath} | regenerate with \`npm run generate:reference\` -->`,

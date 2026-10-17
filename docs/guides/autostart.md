@@ -12,7 +12,7 @@ A plain `awful.spawn("nm-applet")` at the end of `rc.lua` runs again on every re
 | --- | --- | --- |
 | `awful.spawn.once(cmd)` | once per session, by command string; a reload skips it | tray applets, agents |
 | `awful.spawn.single_instance(cmd)` | only if no client of that command is running | apps you restart by hand or that may crash |
-| `awful.spawn.with_shell(cmd)` | through `sh -c`, every time | pipes, `&&`, redirects, `sleep` |
+| `awful.spawn.with_shell(cmd)` | through `$SHELL -c` (`/bin/sh` if unset), every time | pipes, `&&`, redirects, `sleep` |
 
 `once` and `single_instance` match the spawned client through startup notification, which a shell does not pass on, so a shell command guards itself:
 

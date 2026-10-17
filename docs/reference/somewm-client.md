@@ -253,7 +253,7 @@ Twenty-one properties are reachable over IPC. Run `somewm-client input` with no 
 | Keyboard | `keyboard_repeat_rate`, `keyboard_repeat_delay`, `xkb_layout`, `xkb_variant`, `xkb_options`, `xkb_model`, `xkb_rules` |
 
 :::note
-These commands set **global** input defaults. Per-device rules configured via `awful.input.rules` take priority over global settings. See [awful.input Reference](/docs/reference/awful/input#input-rules) for details.
+These commands set **global** input defaults. Per-device rules configured via `awful.input.rules` take priority over global settings. See [awful.input Reference](awful/input.md#input-rules) for details.
 :::
 
 :::caution
@@ -267,6 +267,8 @@ These commands set **global** input defaults. Per-device rules configured via `a
 | `mouse coords [x y]` | Get or set the cursor position |
 | `mouse screen` | Screen under the cursor |
 | `mousegrabber isrunning` | Whether a mousegrabber is active |
+| `mousegrabber test [max_events]` | Count events until the limit (default 10) or all buttons are released |
+| `mousegrabber track` | Print coordinates to the compositor log until all buttons are released |
 | `mousegrabber stop` | Stop the active mousegrabber |
 
 ## Keybinding and Rule Commands
@@ -338,7 +340,8 @@ Each line is the literal word `EVENT`, the event type, and a JSON object. Key or
 
 | Event | Payload keys |
 |-------|--------------|
-| `client_manage`, `client_unmanage` | `id`, `title`, `class` |
+| `client_manage` | `id`, `title`, `class`, `pid` |
+| `client_unmanage` | `id`, `title`, `class` |
 | `client_focus`, `client_unfocus` | `id`, `title`, `class` |
 | `client_title` | `id`, `title` |
 | `client_urgent` | `id`, `urgent`, `title`, `class` |
@@ -374,7 +377,7 @@ Spawn a nested somewm under your current Wayland or X11 session so you can itera
 |--------|-------------|
 | `--config FILE` | Path to the `rc.lua` to load. If omitted, the nested somewm follows its normal lookup. |
 | `--name NAME` | Instance name. Default `test`. 1 to 64 characters from `[A-Za-z0-9._-]`, no leading `.`. Each instance gets its own state dir at `$XDG_RUNTIME_DIR/somewm-test/<name>/`. |
-| `--host wayland\|x11\|headless` | Outer compositor type. Defaults to `wayland` if `WAYLAND_DISPLAY` is set; otherwise required. `headless` skips display nesting (no window opens) and is used by CI harnesses; typically paired with `WLR_RENDERER=pixman`. |
+| `--host wayland\|x11\|headless` | Outer compositor type. Defaults to `wayland` if `WAYLAND_DISPLAY` is set; otherwise required. `headless` skips display nesting (no window opens) and is used by CI harnesses; sets `WLR_RENDERER=pixman` unless already set. |
 | `--keybinds auto\|inhibit\|remap\|none` | How keys reach the nested somewm. `auto` tries the shortcut inhibitor protocol and falls back to `Mod4 -> Mod1` remap if the host doesn't support it. |
 | `--no-marker` | Skip the wibar marker textbox (cosmetic only). |
 | `--force` | Replace an already-running instance with the same name. |
@@ -383,14 +386,15 @@ The status block printed on success reports whether the outer compositor accepte
 
 ### Environment variables {#test-env}
 
-Set by `somewm-client test` on the nested compositor:
+Environment variables used by the nested compositor:
 
 | Variable | Purpose |
 |----------|---------|
 | `SOMEWM_TEST_NAME` | Instance name. Compositor reads this to know it is a test instance and to load the keybind-remap shim. |
+| `SOMEWM_TEST_NO_MARKER` | Set to `1` by the orchestrator for `--no-marker`. |
 | `SOMEWM_TEST_STATE_DIR` | Absolute path to the per-instance state directory. The compositor writes `keybinds_status` here. |
 | `SOMEWM_TEST_KEYBINDS_MODE` | One of `auto`, `inhibit`, `remap`, `none`. Mirrors `--keybinds`. |
-| `SOMEWM_TEST_KEYBINDS_REMAP` | Set to `1` when the orchestrator decides to fall back to `Mod4 -> Mod1` remap. The Lua shim reads this. |
+| `SOMEWM_TEST_KEYBINDS_REMAP` | Set to `1` by the compositor when it falls back to `Mod4 -> Mod1` remap. The Lua shim reads this. |
 | `SOMEWM_SOCKET` | Absolute path to the per-instance IPC socket so subsequent `somewm-client test ...` calls reach the right compositor. |
 | `XDG_RUNTIME_DIR` | Overridden to `<state-dir>/runtime` so the nested compositor's Wayland socket does not collide with the host's. |
 | `WLR_BACKENDS`, `WLR_RENDERER`, `WLR_X11_OUTPUTS`, `WLR_WL_OUTPUTS` | Selected based on `--host`. |
@@ -411,7 +415,7 @@ Each instance owns `$XDG_RUNTIME_DIR/somewm-test/<name>/`:
 | `log` | Combined stdout + stderr of the nested compositor. |
 | `ipc.sock` | Unix domain socket the orchestrator and `somewm-client test ...` connect to. |
 | `runtime/` | Per-instance `XDG_RUNTIME_DIR`. Contains the nested compositor's `wayland-N` socket. |
-| `info` | Key-value snapshot for scripts. Keys: `name`, `pid`, `host`, `display`, `config`, `started_at`, `keybinds_mode`, `keybinds_status`, `wl_socket_name`, `no_marker`. |
+| `info` | Key-value snapshot for scripts. Keys: `name`, `pid`, `host`, `host_display`, `config_path`, `started_at`, `keybinds_mode`, `keybinds_status`, `wl_socket_name`, `no_marker`. |
 | `keybinds_status` | Single line written by the nested compositor: `active`, `unavailable`, or `not-applicable`. |
 
 `test stop` removes the directory. A failed start leaves it in place so the log survives, and the next start under that name clears it.
@@ -485,4 +489,4 @@ A missing compositor and a rejected command are the two cases worth branching on
 
 ## See Also
 
-- [CLI Control Guide](/docs/guides/cli-control)
+- [CLI Control Guide](../guides/cli-control.md)

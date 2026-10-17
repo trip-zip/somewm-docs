@@ -6,7 +6,7 @@ description: Wibar configuration options reference
 
 # Wibar Properties
 
-Reference for `awful.wibar` configuration options.
+`awful.wibar` attaches a bar to a screen edge and reserves workarea space.
 
 ## Basic Properties
 
@@ -14,9 +14,10 @@ Reference for `awful.wibar` configuration options.
 |----------|------|---------|-------------|
 | `position` | string | `"top"` | Bar position: `"top"`, `"bottom"`, `"left"`, `"right"` |
 | `screen` | screen | - | Screen to attach the wibar to |
-| `height` | number | - | Bar height (for top/bottom bars) |
-| `width` | number | - | Bar width (for left/right bars) |
+| `height` | number | `beautiful.wibar_height` or `ceil(font height × 1.5)` | Bar height (for top/bottom bars) |
+| `width` | number | `beautiful.wibar_width` or `ceil(font height × 1.5)` | Bar width (for left/right bars) |
 | `visible` | boolean | `true` | Whether the wibar is visible |
+| `animation` | table/boolean | `nil` | Visibility transitions through `animation.visible`; see [Animation](../../guides/animation.md#wiboxes-and-popups). |
 
 ## Appearance
 
@@ -25,8 +26,8 @@ Reference for `awful.wibar` configuration options.
 | `bg` | color | `beautiful.wibar_bg` | Background color |
 | `fg` | color | `beautiful.wibar_fg` | Foreground/text color |
 | `bgimage` | surface/string | `beautiful.wibar_bgimage` | Background image, drawn over `bg`, once at its own size. A function is not drawn. See [Background Image](#background-image) |
-| `opacity` | number | `1` | Opacity (0.0 to 1.0). Each fill in the bar blends at this opacity on its own, so overlapping fills look denser than the bar's `bg` alone |
-| `shape` | function | - | Shape function (e.g., `gears.shape.rounded_rect`) |
+| `opacity` | number | `beautiful.wibar_opacity` or `nil` | Opacity (0.0 to 1.0). Each fill in the bar blends at this opacity on its own, so overlapping fills look denser than the bar's `bg` alone |
+| `shape` | function | `beautiful.wibar_shape` | Shape function (e.g., `gears.shape.rounded_rect`) |
 
 ## Borders
 
@@ -105,7 +106,7 @@ awful.wibar {
 awful.wibar {
     position = "top",
     screen = s,
-    bg = beautiful.wibar_bg .. "cc", -- Add alpha
+    bg = beautiful.bg_normal .. "cc", -- Add alpha
     border_width = 1,
     border_color = beautiful.border_color_normal,
 }
@@ -155,7 +156,7 @@ Notes:
 - `beautiful.wibar_bgimage` is read once, when the wibar is constructed, and only if you did not pass `bgimage` yourself. Setting the theme variable after the bar exists does nothing; assign `s.mywibox.bgimage = ...` instead.
 - `bgimage` is write-only: reading `s.mywibox.bgimage` does not return the value you set.
 
-For a step-by-step walkthrough, including how to prepare a bar-sized image, see [Put a PNG texture on your wibar](/docs/guides/wibar-background-image).
+For a step-by-step walkthrough, including how to prepare a bar-sized image, see [Put a PNG texture on your wibar](../../guides/wibar-background-image.md).
 
 ## Theme Variables
 
@@ -167,10 +168,21 @@ These `beautiful` variables provide defaults for wibars:
 | `wibar_fg` | Default foreground |
 | `wibar_bgimage` | Default background image (surface or path) |
 | `wibar_height` | Default height |
+| `wibar_width` | Default width |
+| `wibar_opacity` | Default opacity |
+| `wibar_ontop` | Default ontop state |
+| `wibar_cursor` | Default cursor |
+| `wibar_type` | Default window type |
+| `wibar_stretch` | Default stretch setting |
+| `wibar_margins` | Default margins |
+| `wibar_align` | Default alignment |
+| `wibar_shadow` | Default shadow |
+| `wibar_shape` | Default shape |
+| `wibar_font` | Default font |
 | `wibar_border_color` | Default border color |
 | `wibar_border_width` | Default border width |
 
 ## See Also
 
-- [Wibar Tutorial](/docs/tutorials/wibar) - Learn how to build wibars
+- [Wibar Tutorial](../../tutorials/wibar.md) - Learn how to build wibars
 - [awful.wibar (AwesomeWM docs)](https://awesomewm.org/apidoc/classes/awful.wibar.html) - Complete API reference

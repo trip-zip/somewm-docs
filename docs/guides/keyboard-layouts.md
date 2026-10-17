@@ -30,4 +30,4 @@ With exactly two layouts, `(current + 1) % 2` is enough.
 
 `awful.widget.keyboardlayout()` is a widget that follows the active layout; put it in a wibar section like any other.
 
-[Input Device Configuration](/docs/guides/input-devices) has the rest of `awful.input`; [awful.input reference](/docs/reference/awful/input) every property.
+[Input Device Configuration](input-devices.md) has the rest of `awful.input`; [awful.input reference](../reference/awful/input.md) every property.

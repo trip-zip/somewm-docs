@@ -28,7 +28,7 @@ Connecting without disconnecting adds to the default instead. For observation si
 
 ## Borders
 
-`context` says why the signal fired: `"added"`, `"active"`, `"inactive"`, `"floating"`, `"urgent"`, `"maximized"`, `"fullscreen"`.
+`context` says why the signal fired: `"added"`, `"active"`, `"inactive"`, `"floating"`, `"urgent"`.
 
 ```lua
 local function my_border_handler(c, context, hints)

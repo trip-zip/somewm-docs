@@ -36,4 +36,4 @@ awful.key({ modkey, "Mod1" }, "h", function() carousel.move_column(-1) end,
     { description = "move column left", group = "carousel" })
 ```
 
-[Carousel reference](/docs/reference/awful/carousel), [Column widths](/docs/guides/carousel-column-widths), [Scrollable Tiling](/docs/concepts/scrollable-tiling).
+[Carousel reference](../reference/awful/carousel.md), [Column widths](carousel-column-widths.md), [Scrollable Tiling](../concepts/scrollable-tiling.md).

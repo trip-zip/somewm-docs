@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Display Scaling <SomewmOnly />
 
-Every output has a scale, and `screen.scale` is `output.scale` on the screen's backing [output](/docs/reference/output). At scale 2, one logical pixel is a 2 by 2 block of physical pixels. SomeWM solves the whole tree in logical pixels; the output's scale is applied when rasters are drawn and when client buffers are placed. An output's logical size is its mode divided by its scale, and that is what `screen.geometry` reports.
+Every output has a scale, and `screen.scale` is `output.scale` on the screen's backing [output](../reference/output.md). At scale 2, one logical pixel is a 2 by 2 block of physical pixels. SomeWM solves the whole tree in logical pixels; the output's scale is applied when rasters are drawn and when client buffers are placed. An output's logical size is its mode divided by its scale, and that is what `screen.geometry` reports.
 
 Wayland clients are told the scale and render at it, so text is crisp at any scale. Fractional scales go through `wp_fractional_scale_v1`, which SomeWM advertises; a client without it renders at the next integer and is downscaled. XWayland clients only ever get an integer.
 
@@ -58,4 +58,4 @@ Each screen carries its own scale, and the compositor translates coordinates at 
 | an X11 app is blurry | XWayland gets an integer scale and its buffer is scaled | `GDK_SCALE=2` or `QT_SCALE_FACTOR=1.5` for that app, or a Wayland-native build |
 | widgets did not follow a scale change | a theme size written without `dpi()` | wrap it |
 
-[Fractional Scaling](/docs/guides/fractional-scaling) has the per-app configuration.
+[Fractional Scaling](../guides/fractional-scaling.md) has the per-app configuration.

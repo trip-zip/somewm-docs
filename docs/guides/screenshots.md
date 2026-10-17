@@ -29,7 +29,7 @@ awful.key({ modkey }, "Print", function()
 end, { description = "interactive screenshot", group = "screenshot" }),
 ```
 
-HiDPI needs nothing: the capture is one image element of the overlay and the selection a box Clay places ([how it works](/docs/concepts/screenshots)). For menus that close on focus loss, `auto_save_delay = 3` counts down first, and `timer::tick` carries the remaining seconds for a notification.
+HiDPI needs nothing: the capture is one image element of the overlay and the selection a box Clay places ([how it works](../concepts/screenshots.md)). For menus that close on focus loss, `auto_save_delay = 3` counts down first, and `timer::tick` carries the remaining seconds for a notification.
 
 ## From a shell
 
@@ -112,4 +112,4 @@ awful.keyboard.append_global_keybindings({
 
 If `grim` fails to create a screenshot, `echo $WAYLAND_DISPLAY` should name a socket; if `wl-copy` does nothing, `echo test | wl-copy && wl-paste` tests the clipboard.
 
-[awful.screenshot reference](/docs/reference/awful/screenshot) has every option and signal.
+[awful.screenshot reference](../reference/awful/screenshot.md) has every option and signal.

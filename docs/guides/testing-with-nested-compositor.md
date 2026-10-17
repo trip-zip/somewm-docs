@@ -93,8 +93,8 @@ If it locks up, `test stop --name sandbox` still works: the orchestrator runs in
 
 ```bash
 WLR_RENDERER=pixman somewm-client test start --name ci --host headless --config ./rc.lua
-somewm-client test eval --name ci 'return tostring(#screen) == "1"' | grep -q '^true$' || exit 1
-somewm-client test eval --name ci 'return type(awful.layout.layouts) == "table"' | grep -q '^true$' || exit 1
+somewm-client test eval --name ci 'return tostring(screen.count()) == "1"' | grep -q '^true$' || exit 1
+somewm-client test eval --name ci 'return type(require("awful").layout.layouts) == "table"' | grep -q '^true$' || exit 1
 somewm-client test stop --name ci
 ```
 

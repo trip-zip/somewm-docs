@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # lockscreen (module) <SomewmOnly />
 
-The default lockscreen module provides a ready-to-use lock screen UI built on top of the [Lock API](/docs/reference/lock). It handles password entry, multi-monitor coverage, screen hotplug, and theming.
+The default lockscreen module provides a ready-to-use lock screen UI built on top of the [Lock API](lock.md). It handles password entry, multi-monitor coverage, screen hotplug, and theming.
 
 ## Usage
 
@@ -60,7 +60,7 @@ For fonts specifically: `opts.font` > `beautiful.lockscreen_font` > `beautiful.f
 
 | Key | Action |
 |-----|--------|
-| Printable characters | Append to password (max 256 characters) |
+| Printable characters | Append unless the password already exceeds 256 bytes |
 | `Return` | Submit password for PAM verification |
 | `BackSpace` | Delete last character (UTF-8 aware) |
 | `Escape` | Clear entire password |
@@ -90,6 +90,7 @@ The module connects to these signals internally:
 | `lock::deactivate` | Hide all surfaces, clear password, stop keygrabber |
 | `screen.added` | Create cover for new screen, show if locked |
 | `screen.removed` | Migrate interactive UI or remove cover |
+| `screen` `property::geometry` | Resize and reposition that screen’s lock surface |
 
 ## Double-Init Guard
 
@@ -97,6 +98,6 @@ Calling `lockscreen.init()` more than once is safe. The second call is silently 
 
 ## See Also
 
-- [Lock, Idle, and DPMS Reference](/docs/reference/lock) - Core API
-- [Lockscreen Guide](/docs/guides/lockscreen) - Task-oriented examples
-- [Theme Variables](/docs/reference/beautiful/theme-variables) - `lockscreen_*` variables
+- [Lock, Idle, and DPMS Reference](lock.md) - Core API
+- [Lockscreen Guide](../guides/lockscreen.md) - Task-oriented examples
+- [Theme Variables](beautiful/theme-variables.md) - `lockscreen_*` variables

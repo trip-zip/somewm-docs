@@ -136,7 +136,7 @@ local my_clock = require("widgets.clock")   -- from the Widgets tutorial
   wibox.widget.systray(), separator(), my_clock, separator(), s.mylayoutbox },
 ```
 
-A widget you built drops into a section like a stock one ([Widgets](/docs/tutorials/widgets)).
+A widget you built drops into a section like a stock one ([Widgets](widgets.md)).
 
 ## Styling
 
@@ -148,7 +148,7 @@ theme.wibar_fg = "#ebdbb2"
 theme.wibar_height = 28
 ```
 
-`bg`, `fg` and `height` can also be passed to `awful.wibar` for one bar ([wibar reference](/docs/reference/wibox/wibar)).
+`bg`, `fg` and `height` can also be passed to `awful.wibar` for one bar ([wibar reference](../reference/wibox/wibar.md)).
 
 ## Complete example
 
@@ -264,4 +264,4 @@ Mod4 + b hides it and the windows take its space; again brings it back.
 - Widgets cut off: raise `height`.
 - No systray icons: `wibox.widget.systray()` can exist once; put it on `screen.primary` only.
 
-[Wibar reference](/docs/reference/wibox/wibar) has every property; [awful.wibar upstream](https://awesomewm.org/apidoc/classes/awful.wibar.html) the inherited API.
+[Wibar reference](../reference/wibox/wibar.md) has every property; [awful.wibar upstream](https://awesomewm.org/apidoc/classes/awful.wibar.html) the inherited API.

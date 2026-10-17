@@ -10,7 +10,7 @@ description: Known failures and their fixes, grouped by startup, widgets, test m
 
 | Symptom | Cause and fix |
 | --- | --- |
-| `No config found` | the Lua libraries are not installed; `sudo make install`. The search order is `~/.config/somewm/rc.lua`, `~/.config/awesome/rc.lua`, then `/etc/xdg/somewm/rc.lua` or `~/.local/etc/xdg/somewm/rc.lua`. |
+| `FATAL: no working Lua config found!` | the Lua libraries are not installed; `sudo make install`. The search order is `~/.config/somewm/rc.lua`, `~/.config/awesome/rc.lua`, then `/etc/xdg/somewm/rc.lua` or `~/.local/etc/xdg/somewm/rc.lua`. |
 | the config loads and it crashes | `somewm --verbose 2>&1 \| tee somewm.log`, `-d` for everything, `WLR_DEBUG=1` for wlroots; look for `error loading` or `error executing` ([Debugging](guides/debugging.md)) |
 | an "X11 pattern detected" notification | the config calls an X11 tool or API; [Migrating](getting-started/migrating.md) has the replacement for each |
 | black screen after login | `journalctl --user -xe \| grep somewm`, or `dbus-run-session somewm -d` from a TTY |

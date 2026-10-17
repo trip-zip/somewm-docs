@@ -24,4 +24,4 @@ On a scaled output a client at logical 800 by 600 has a 1600 by 1200 buffer at s
 
 `root.size()`, the capture, mousegrabber coordinates, the overlay and the crop are all in logical pixels, which is why the crop lands on the right ones.
 
-[Screenshots guide](/docs/guides/screenshots) has the setup; [awful.screenshot](/docs/reference/awful/screenshot) is the API.
+[Screenshots guide](../guides/screenshots.md) has the setup; [awful.screenshot](../reference/awful/screenshot.md) is the API.

@@ -14,7 +14,7 @@ On Wayland a monitor comes and goes often: a lid closes, a dock disconnects, a p
 
 | Step | Signal | Handler | Does |
 | --- | --- | --- | --- |
-| monitor disconnects | `tag` `request::screen` | `awful.permissions.tag_screen`, connected by default | saves each tag's metadata under the output's connector name (`eDP-1`, `HDMI-A-1`) and moves its clients to a surviving screen |
+| monitor disconnects | `tag` `request::screen` | `awful.permissions.tag_screen`, connected by default | saves each tag's metadata under the output's connector name (`eDP-1`, `HDMI-A-1`); C moves clients to a surviving screen |
 | monitor reconnects | `screen` `request::desktop_decoration` | the handler in `somewmrc.lua` | finds saved state for that connector and recreates the tags from it, or creates the default tags if there is none |
 
 Saved per tag: `name`, `selected`, `layout`, `master_width_factor`, `master_count`, `gap`, and the clients that were on it.
@@ -27,4 +27,4 @@ Saved per tag: `name`, `selected`, `layout`, `master_width_factor`, `master_coun
 
 AwesomeWM deletes the tags and dumps the clients on a fallback screen; a reconnected monitor gets default tags.
 
-[Tag Persistence guide](/docs/guides/tag-persistence) customises the behaviour; [the reference](/docs/reference/tag-persistence) has the signals and the saved-state table.
+[Tag Persistence guide](../guides/tag-persistence.md) customises the behaviour; [the reference](../reference/tag-persistence.md) has the signals and the saved-state table.

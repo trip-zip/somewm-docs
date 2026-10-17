@@ -20,6 +20,7 @@ Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press
 | `Mod4 + p` | Show menubar |
 | `Mod4 + w` | Show main menu |
 | `Mod4 + s` | Show keybinding help |
+| `Mod4 + Shift + i` | Toggle the Clay inspector |
 
 ## Window Focus
 
@@ -43,6 +44,7 @@ Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press
 | Keybinding | Action |
 |------------|--------|
 | `Mod4 + Space` | Next layout |
+| `Mod4 + numpad key` | Select the layout at that key’s index, if present |
 | `Mod4 + Shift + Space` | Previous layout |
 | `Mod4 + h` | Decrease master width |
 | `Mod4 + l` | Increase master width |
@@ -125,5 +127,5 @@ Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press
 
 ## See Also
 
-- [Keybindings Tutorial](/docs/tutorials/keybindings)
+- [Keybindings Tutorial](../tutorials/keybindings.md)
 - [AwesomeWM Key Docs](https://awesomewm.org/doc/api/libraries/awful.key.html)

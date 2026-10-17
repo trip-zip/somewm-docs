@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # output <SomewmOnly />
 
-The `output` object represents a physical monitor connector. Unlike [screen](/docs/reference/screen) objects (which are created and destroyed when outputs are enabled or disabled), output objects persist from the moment a monitor is plugged in until it is physically disconnected.
+The `output` object represents a physical monitor connector. Unlike [screen](screen.md) objects (which are created and destroyed when outputs are enabled or disabled), output objects persist from the moment a monitor is plugged in until it is physically disconnected.
 
 This is a SomeWM-only feature. AwesomeWM has no equivalent because X11 delegates monitor management to `xrandr`. On Wayland, the compositor owns the output lifecycle, so SomeWM exposes it directly.
 
@@ -284,7 +284,7 @@ end)
 
 ## See Also
 
-- [screen Reference](/docs/reference/screen) - The logical display object
-- [Multi-Monitor Setup](/docs/guides/multi-monitor) - Practical configuration patterns
-- [The Object Model](/docs/concepts/object-model) - How output relates to screen, tags, and clients
-- [Display Scaling](/docs/concepts/display-scaling) - How output scaling works
+- [screen Reference](screen.md) - The logical display object
+- [Multi-Monitor Setup](../guides/multi-monitor.md) - Practical configuration patterns
+- [The Object Model](../concepts/object-model.md) - How output relates to screen, tags, and clients
+- [Display Scaling](../concepts/display-scaling.md) - How output scaling works

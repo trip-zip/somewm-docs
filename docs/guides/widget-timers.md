@@ -112,7 +112,7 @@ local function update_battery()
             or capacity > 50 and "battery-good"
             or capacity > 20 and "battery-low"
             or "battery-empty"
-        battery_icon.image = "/usr/share/icons/Adwaita/symbolic/status/" .. icon .. "-symbolic.svg"
+        battery_icon.image = require("menubar").utils.lookup_icon_uncached(icon .. "-symbolic") or require("beautiful").awesome_icon
 
         if status == "Charging" then
             last_warning = nil
@@ -133,4 +133,4 @@ return battery_widget
 
 A CPU widget is the same shape with `head -1 /proc/stat` and the difference between two readings; a network widget pairs a 10-second timer with a `network::connected` signal you emit from the script that connects.
 
-A widget that paints with cairo in its timer is left out of the tree with a warning; compose it from stock widgets instead ([AwesomeWM widgets in that model](../concepts/widgets-in-the-tree.md)). [Widgets](/docs/tutorials/widgets) is the tutorial.
+A widget that paints with cairo in its timer is left out of the tree with a warning; compose it from stock widgets instead ([AwesomeWM widgets in that model](../concepts/widgets-in-the-tree.md)). [Widgets](../tutorials/widgets.md) is the tutorial.

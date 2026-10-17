@@ -34,7 +34,7 @@ Each tag keeps an ordered list of columns, each with `clients` and `width_fracti
 
 ## Scrolling
 
-When focus moves to a column outside the viewport, the carousel reads the solved boxes of the viewport and the column, computes the offset the [centering mode](/docs/reference/awful/carousel#centering-modes) asks for, and writes it to Clay's scroll record; the next frame scrolls there.
+When focus moves to a column outside the viewport, the carousel reads the solved boxes of the viewport and the column, computes the offset the [centering mode](../reference/awful/carousel.md#centering-modes) asks for, and writes it to Clay's scroll record; the next frame scrolls there.
 
 | `center_mode` | Scrolls |
 | --- | --- |
@@ -49,4 +49,4 @@ A scroll moves every client's box. With `theme.animation_layout_duration` above 
 
 `carousel.vertical` is the same layout turned 90 degrees: columns scroll vertically and a column's clients sit side by side.
 
-[Carousel reference](/docs/reference/awful/carousel) has every property and function; [the tutorial](/docs/tutorials/carousel) is a first session.
+[Carousel reference](../reference/awful/carousel.md) has every property and function; [the tutorial](../tutorials/carousel.md) is a first session.

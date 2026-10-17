@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Fractional Scaling <SomewmOnly />
 
-`screen.scale` is a writable property, any value above 0; [Display Scaling](/docs/concepts/display-scaling) explains what it does.
+`screen.scale` is a writable property, accepting values from 0.1 to 10.0; [Display Scaling](../concepts/display-scaling.md) explains what it does.
 
 | Panel | Scale |
 | --- | --- |
@@ -42,7 +42,7 @@ After a change, `s.geometry` reports the new logical size and `s.workarea` follo
 
 ## Theme sizes
 
-Every size in `theme.lua` goes through `dpi()`:
+`dpi()` scales theme sizes by the configured DPI, independently of `screen.scale`:
 
 ```lua
 local dpi = require("beautiful.xresources").apply_dpi
@@ -53,7 +53,7 @@ theme.notification_width = dpi(300)
 theme.menu_height = dpi(20)
 ```
 
-A bare number stays that many logical pixels at every DPI, which is the usual reason widgets look wrong after a scale change.
+Changing `screen.scale` leaves both bare numbers and `dpi()` results unchanged; the output scales their logical pixels when drawing.
 
 ## Blurry apps
 

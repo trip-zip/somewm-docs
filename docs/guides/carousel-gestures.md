@@ -21,10 +21,10 @@ The snap animates like every layout change, over the layout duration:
 theme.animation_layout_duration = 0.1   -- seconds; 0 snaps instantly
 ```
 
-`somewm.layout_animation` is deprecated; requiring it still sets the duration to 0.15. [Animation](/docs/next/guides/animation) has the rest.
+`somewm.layout_animation` is deprecated; requiring it still sets the duration to 0.15. [Animation](animation.md) has the rest.
 
 `carousel.scroll_duration` is gone and does nothing.
 
 `make_gesture_binding()` returns the binding; `binding:remove()` unbinds it.
 
-[Carousel reference](/docs/reference/awful/carousel), [Centering](/docs/guides/carousel-centering), [Scrollable Tiling](/docs/concepts/scrollable-tiling).
+[Carousel reference](../reference/awful/carousel.md), [Centering](carousel-centering.md), [Scrollable Tiling](../concepts/scrollable-tiling.md).

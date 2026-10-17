@@ -26,7 +26,7 @@ somewm-client input                         # every input property with its valu
 somewm-client lock                          # needs require("lockscreen").init() in rc.lua
 ```
 
-[somewm-client reference](/docs/reference/somewm-client) has every command and argument. Prefer a command to `eval`: its output is parseable and survives API changes.
+[somewm-client reference](../reference/somewm-client.md) has every command and argument. Prefer a command to `eval`: its output is parseable and survives API changes.
 
 ## eval
 
@@ -39,7 +39,7 @@ somewm-client eval "return awesome.startup_errors"
 Two constraints:
 
 - **One line.** Only the first line of a multi-line string runs; a string starting with a newline fails with `Missing Lua code to evaluate`. Join with semicolons.
-- **Only capi globals.** `client`, `screen`, `tag`, `mouse`, `awesome`, `root` and `require` are in scope. `awful`, `gears`, `beautiful`, `naughty`, `wibox` and `ruled` are nil until you `require` them.
+- **Global scope.** `eval` sees the config’s globals; local variables stay private. Use `require` for libraries kept local by the config.
 
 ```bash
 somewm-client eval "local awful = require('awful'); return awful.screen.focused().index"
@@ -50,7 +50,7 @@ Use `c.id`, which `client list` prints and every `client` command accepts; `c.wi
 
 ## Scripts
 
-Exit codes separate not running (2) from a bad command (1) ([table](/docs/reference/somewm-client#exit-codes)).
+Exit codes separate not running (2) from a bad command (1) ([table](../reference/somewm-client.md#exit-codes)).
 
 ```bash
 #!/bin/bash
@@ -69,14 +69,14 @@ selected=$(somewm-client client list | grep '^id=' | rofi -dmenu -p "Window")
 ```bash
 #!/bin/bash
 # toggle-layout.sh
-[ "$(somewm-client input xkb_layout)" = "us" ] && somewm-client input xkb_layout de || somewm-client input xkb_layout us
+[ "$(somewm-client input xkb_layout | tail -n +2)" = "us" ] && somewm-client input xkb_layout de || somewm-client input xkb_layout us
 ```
 
 ```ini
 # polybar
 [module/layout]
 type = custom/script
-exec = somewm-client input xkb_layout
+exec = somewm-client input xkb_layout | tail -n +2
 interval = 1
 ```
 

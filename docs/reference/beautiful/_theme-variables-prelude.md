@@ -42,7 +42,7 @@ root.cursor_theme("Adwaita")
 root.cursor_size(32)
 ```
 
-See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
+See [Input Devices: Cursor Theming](../../guides/input-devices.md#cursor-theming).
 :::
 
 ---

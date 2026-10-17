@@ -80,9 +80,9 @@ Several palettes keyed by name, with one selected at the top of the file, make a
 
 ## Wallpaper, icons, widget families
 
-- `theme.wallpaper = "/home/user/wallpapers/mountain.jpg"`; the default `request::wallpaper` handler draws it filling each screen with [awful.wallpaper](https://awesomewm.org/apidoc/popups_and_bars/awful.wallpaper.html). Per-monitor wallpapers are in [Multi-Monitor](/docs/guides/multi-monitor).
+- `theme.wallpaper = "/home/user/wallpapers/mountain.jpg"`; the default `request::wallpaper` handler draws it filling each screen with [awful.wallpaper](https://awesomewm.org/apidoc/popups_and_bars/awful.wallpaper.html). Per-monitor wallpapers are in [Multi-Monitor](../guides/multi-monitor.md).
 - `gears.color.recolor_image(path, colors.fg)` tints a white or black icon, which is how layout icons match a theme.
-- Each widget reads its own prefix: `taglist_bg_focus`, `tasklist_*`, `notification_*`, `hotkeys_*`. [Theme Variables](/docs/reference/beautiful/theme-variables) lists every one with its source.
+- Each widget reads its own prefix: `taglist_bg_focus`, `tasklist_*`, `notification_*`, `hotkeys_*`. [Theme Variables](../reference/beautiful/theme-variables.md) lists every one with its source.
 
 ## A complete theme
 
@@ -161,4 +161,4 @@ return theme
 - A value copied at require time, such as `bg = beautiful.bg_normal` at the top of a widget module required before `beautiful.init()`, stays nil. Move the require below `init`.
 - Layout icons: the default theme's live under `gears.filesystem.get_themes_dir() .. "default/layouts/"`.
 
-[Widgets](/docs/tutorials/widgets) is next; [beautiful](https://awesomewm.org/apidoc/libraries/beautiful.html) is the upstream reference.
+[Widgets](widgets.md) is next; [beautiful](https://awesomewm.org/apidoc/libraries/beautiful.html) is the upstream reference.

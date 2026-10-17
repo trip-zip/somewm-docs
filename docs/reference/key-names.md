@@ -6,7 +6,7 @@ description: Modifier keys and key name reference
 
 # Key Names
 
-Names you can pass to `awful.key` and `awful.button`. For the full enumeration of every keysym SomeWM accepts (~2,629 entries including international and dead keys), see **[All Keysyms](/docs/reference/key-names-all)**.
+`awful.key` accepts keysym names; `awful.button` accepts modifier names and button numbers. For the full enumeration of every keysym SomeWM accepts (~2,629 entries including international and dead keys), see **[All Keysyms](key-names-all.md)**.
 
 :::tip Case-insensitive
 SomeWM resolves keys via `xkb_keysym_from_name()` with the case-insensitive flag set. `"Return"`, `"return"`, and `"RETURN"` all resolve to the same keysym.
@@ -94,8 +94,8 @@ Passed as a Lua table, the first argument to `awful.key`.
 
 | Key | Lua Name |
 |-----|----------|
-| F1 – F12 | `"F1"` through `"F12"` |
-| F13 – F35 | `"F13"` through `"F35"` (available, rarely physical) |
+| F1 to F12 | `"F1"` through `"F12"` |
+| F13 to F35 | `"F13"` through `"F35"` (available, rarely physical) |
 
 ## Letters and Numbers
 
@@ -133,7 +133,7 @@ Passed as a Lua table, the first argument to `awful.key`.
 
 | Key | Lua Name |
 |-----|----------|
-| Keypad 0 – 9 | `"KP_0"` through `"KP_9"` |
+| Keypad 0 to 9 | `"KP_0"` through `"KP_9"` |
 | Keypad Enter | `"KP_Enter"` |
 | Keypad + / - / * / / | `"KP_Add"` / `"KP_Subtract"` / `"KP_Multiply"` / `"KP_Divide"` |
 | Keypad Decimal | `"KP_Decimal"` |
@@ -201,7 +201,7 @@ end)
 
 ## See Also
 
-- [All Keysyms](/docs/reference/key-names-all) – Full enumeration of every xkbcommon keysym
-- [Keybindings Tutorial](/docs/tutorials/keybindings) – Learn how to create keybindings
-- [Default Keybindings](/docs/reference/default-keybindings) – Built-in shortcuts
-- [awful.key (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/awful.key.html) – Complete API reference
+- [All Keysyms](key-names-all.md) - Full enumeration of every xkbcommon keysym
+- [Keybindings Tutorial](../tutorials/keybindings.md) - Learn how to create keybindings
+- [Default Keybindings](default-keybindings.md) - Built-in shortcuts
+- [awful.key (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/awful.key.html) - Complete API reference

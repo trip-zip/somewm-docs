@@ -17,7 +17,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 </YouWillLearn>
 
-You need the SomeWM binary [installed](/docs/getting-started/installation) and a graphical session of any kind. You do not need to log into SomeWM.
+You need the SomeWM binary [installed](../getting-started/installation.md) and a graphical session of any kind. You do not need to log into SomeWM.
 
 ## Start
 
@@ -65,5 +65,5 @@ The state directory and log are removed.
 
 - [Testing with a nested compositor](../guides/testing-with-nested-compositor.md#iterative-dev): the edit and reload loop against your real `rc.lua`
 - [Test Mode](../concepts/test-mode.md): what nesting is and is not, and the keybind handoff
-- [Installation](/docs/getting-started/installation) when you want it as your session
-- [Basics](/docs/tutorials/basics): the desktop, tags and layouts
+- [Installation](../getting-started/installation.md) when you want it as your session
+- [Basics](basics.md): the desktop, tags and layouts

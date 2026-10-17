@@ -18,7 +18,7 @@ The C-generated signals listed below are queued and drained at `some_refresh()`.
 
 Currently queued:
 
-- Property: `property::geometry`, `property::position`, `property::size`, `property::x`, `property::y`, `property::width`, `property::height`, `property::active`
+- Property: `property::geometry`, `property::position`, `property::size`, `property::x`, `property::y`, `property::width`, `property::height`, `property::active`, `property::border_color`
 - Focus: `focus`, `unfocus`, `client::focus`, `client::unfocus`
 - Mouse: `mouse::enter`, `mouse::leave`, `mouse::move` (coalesced per object)
 - Lifecycle: `list`, `swapped`
@@ -92,6 +92,10 @@ Each `property::*` fires after the property changes. Read the new value off the 
 
 | Signal | Notes |
 |--------|-------|
+| `property::shape` | Client shape changed. |
+| `property::animation` | Animation policy assigned. |
+| `property::size_hints` | Size hints changed, including Wayland committed min/max bounds. |
+| `property::border_color` | Border colour changed, including focus recolouring. |
 | `property::name` | Title changed. |
 | `property::class` | Class changed (rare; usually only at startup). |
 | `property::geometry` | Size or position changed. |
@@ -112,7 +116,7 @@ Each `property::*` fires after the property changes. Read the new value off the 
 | `request::titlebars` | `c, context, hints` | Client should grow titlebars. Connect to draw them (or skip drawing to opt out). |
 | `request::geometry` | `c, context, hints` | Client (or another module) asked to be moved/resized. `context` says why (`"maximized_horizontal"`, `"fullscreen"`, etc.). |
 | `request::tag` | `c, tag, hints` | Client needs a tag (after creation, after losing its screen). Default handler: `awful.permissions.tag`. `hints.reason` can be `"screen"`, `"screen-removed"`, `"rules"`. |
-| `request::border` | `c, context, hints` | Client wants its border restyled. Default handler: `awful.permissions.update_border`. `context` is one of `"added"`, `"active"`, `"inactive"`, `"floating"`, `"urgent"`, `"maximized"`, `"fullscreen"`. |
+| `request::border` | `c, context, hints` | Client wants its border restyled. Default handler: `awful.permissions.update_border`. `context` is one of `"added"`, `"active"`, `"inactive"`, `"floating"`, `"urgent"`. |
 | `request::urgent` | `c` | Urgency hint set. Fires alongside `property::urgent`. |
 | `request::default_keybindings` | `context` (string) | Class signal emitted once at startup. Connect to register default keybindings via `awful.keyboard.append_client_keybindings`. |
 | `request::default_mousebindings` | `context` (string) | Class signal emitted once at startup. Connect to register default mousebindings via `awful.mouse.append_client_mousebindings`. |
@@ -129,6 +133,7 @@ Each `property::*` fires after the property changes. Read the new value off the 
 | `property::geometry` | `s` | Screen geometry changed (resolution or layout). |
 | `property::workarea` | `s` | Workarea (geometry minus struts) changed. Fires when wibars appear or resize. |
 | `property::scale` | `s` | Output scale changed. <SomewmOnly /> |
+| `property::inspector` | `s` | Inspector opened or closed. <SomewmOnly /> |
 | `property::outputs` | `s` | Output metadata (model, make, refresh) changed. |
 
 ## `tag` signals
@@ -170,6 +175,12 @@ Module-level signals on `ruled.notification`.
 | `request::action_icon` | `a` | An action wants its icon resolved. |
 
 See the [naughty reference](naughty/index.md) for the full set.
+
+## Overflow layout signals
+
+| Signal | Args | Notes |
+| --- | --- | --- |
+| `property::scroll_factor` | `layout, factor` | Fires after a frame applies a changed scroll factor, including wheel input and content or viewport changes. |
 
 ## Layer surface signals <SomewmOnly />
 
