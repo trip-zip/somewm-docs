@@ -146,7 +146,7 @@ end
 
 ### drawin.shadow
 
-The `shadow` property on drawins and wiboxes works identically to the client shadow property.
+Drawins and wiboxes accept the client shadow settings; wibox shadow signals fire on `wibox.drawin`.
 
 **Type:** `boolean` or `table`
 
@@ -188,7 +188,7 @@ local notification_box = wibox {
 
 ### property::shadow
 
-Emitted when the shadow property changes on a client or drawin.
+Emitted on clients and drawins; connect through `wibox.drawin` for a wibox.
 
 ```lua
 client.connect_signal("property::shadow", function(c)
@@ -217,7 +217,7 @@ ruled.client.append_rule {
 somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { radius = 24, opacity = 0.5 } end'
 ```
 
-The [Shadows guide](/docs/guides/shadows) has tested recipes (drop shadows, halos, glows, per-window rules) ready to copy.
+The [Shadows guide](../guides/shadows.md) has tested recipes (drop shadows, halos, glows, per-window rules) ready to copy.
 
 ## Technical Notes
 
@@ -229,6 +229,6 @@ The [Shadows guide](/docs/guides/shadows) has tested recipes (drop shadows, halo
 
 ## See Also
 
-- [How-To: Shadows](/docs/guides/shadows) - Practical guide for common shadow configurations
-- [Theme Tutorial](/docs/tutorials/theme) - Introduction to theming
-- [Beautiful Theme Variables](/docs/reference/beautiful/theme-variables) - All theme variables
+- [How-To: Shadows](../guides/shadows.md) - Practical guide for common shadow configurations
+- [Theme Tutorial](../tutorials/theme.md) - Introduction to theming
+- [Beautiful Theme Variables](beautiful/theme-variables.md) - All theme variables

@@ -46,7 +46,7 @@ Fired when a new screen is created and needs tags and wibars.
 |----------|------|-------------|
 | `s` | screen | The new screen |
 
-The default handler checks for saved state matching `s.output.name`. If found, it restores saved tags. Otherwise, it creates default tags `"1"` through `"9"`.
+The default handler checks for saved state matching `s.output.name`. If found, it restores saved tags. Otherwise, it creates default tags `dev`, `web`, `chat`, `files`, `media`.
 
 ## Saved State Structure
 
@@ -91,9 +91,9 @@ After restore, the saved state for that connector is cleared (`awful.permissions
 
 The save handler is `awful.permissions.tag_screen`, connected automatically to `tag` `request::screen`. On `context == "removed"` it appends each dying tag's saved state (the fields above) to `awful.permissions.saved_tags[output_name]`.
 
-The restore handler lives in `somewmrc.lua`'s `request::desktop_decoration` handler. If saved state exists for the screen's output name it consumes it, recreating tags in a two-pass approach (first recreate all tags and collect each client's tag list, then move clients and assign the full lists) so clients that belong to multiple tags keep all of them. With no saved state, it falls back to creating the default "1"-"9" tags.
+The restore handler lives in `somewmrc.lua`'s `request::desktop_decoration` handler. If saved state exists for the screen's output name it consumes it, recreating tags in a two-pass approach (first recreate all tags and collect each client's tag list, then move clients and assign the full lists) so clients that belong to multiple tags keep all of them. With no saved state, it falls back to creating the default `dev`, `web`, `chat`, `files`, `media` tags.
 
-To replace or disable either handler, see the [Tag Persistence guide](/docs/guides/tag-persistence); the source lives in `awful/permissions/init.lua` and `somewmrc.lua`.
+To replace or disable either handler, see the [Tag Persistence guide](../guides/tag-persistence.md); the source lives in `awful/permissions/init.lua` and `somewmrc.lua`.
 
 ## Related Properties
 
@@ -106,12 +106,12 @@ These `output` properties are used for keying saved state:
 | `output.model` | string or nil | Monitor model |
 | `output.serial` | string or nil | Monitor serial number |
 
-See the [output reference](/docs/reference/output) for the full property list.
+See the [output reference](output.md) for the full property list.
 
 ## See Also
 
-- **[Tag Persistence Concepts](/docs/concepts/tag-persistence)** - Why this feature exists and its limitations
-- **[Tag Persistence Guide](/docs/guides/tag-persistence)** - Customize save/restore behavior
-- **[Multi-Monitor Setup](/docs/guides/multi-monitor)** - General multi-monitor configuration
-- **[screen Reference](/docs/reference/screen)** - Screen object API
-- **[Signals Reference](/docs/reference/signals)** - All signal types
+- **[Tag Persistence Concepts](../concepts/tag-persistence.md)** - Why this feature exists and its limitations
+- **[Tag Persistence Guide](../guides/tag-persistence.md)** - Customize save/restore behavior
+- **[Multi-Monitor Setup](../guides/multi-monitor.md)** - General multi-monitor configuration
+- **[screen Reference](screen.md)** - Screen object API
+- **[Signals Reference](signals.md)** - All signal types

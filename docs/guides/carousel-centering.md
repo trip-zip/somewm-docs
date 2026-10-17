@@ -52,4 +52,4 @@ awful.layout.suit.carousel.scroll_by(t, 1)
 awful.layout.suit.carousel.scroll_by(t, -0.5)
 ```
 
-[Carousel reference](/docs/reference/awful/carousel), [Gestures](/docs/guides/carousel-gestures), [Scrollable Tiling](/docs/concepts/scrollable-tiling).
+[Carousel reference](../reference/awful/carousel.md), [Gestures](carousel-gestures.md), [Scrollable Tiling](../concepts/scrollable-tiling.md).

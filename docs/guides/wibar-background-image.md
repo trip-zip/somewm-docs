@@ -52,4 +52,4 @@ The image's pixels are logical pixels, so one file covers the bar at any output 
 - `theme.wibar_bgimage` was set after the bar was created.
 - You set a function. The log says so.
 
-[Wibar properties](/docs/reference/wibox/wibar#background-image) lists the value types `bgimage` accepts.
+[Wibar properties](../reference/wibox/wibar.md#background-image) lists the value types `bgimage` accepts.

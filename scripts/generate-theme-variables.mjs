@@ -134,7 +134,15 @@ async function main() {
   for await (const f of walkLua(luaRoot, source)) {
     const content = await readFile(f.abs, 'utf8');
     documented.push(...parseLuaContent(content, f.rel));
-    allRefs.push(...findBeautifulReferences(content, f.rel));
+    const refs = findBeautifulReferences(content, f.rel);
+    if (f.rel === 'lua/lockscreen.lua') {
+      // The defaults loop reads each non-nil key through beautiful["lockscreen_" .. k].
+      const defaults = content.match(/local defaults = \{([\s\S]*?)\n\}/)?.[1] || '';
+      const line = content.slice(0, content.indexOf('beautiful["lockscreen_" .. k]')).split('\n').length;
+      for (const key of defaults.matchAll(/^\s*(\w+)\s*=\s*(?!nil\b)\S/gm))
+        refs.push({ name: `lockscreen_${key[1]}`, file: f.rel, line });
+    }
+    allRefs.push(...refs.filter((r) => r.name !== 'lockscreen_'));
   }
 
   for (const fname of EXTRA_LUA_ROOT_FILES) {
@@ -235,17 +243,17 @@ async function main() {
     '',
     '# Theme Variables',
     '',
-    `Generated from \`@beautiful\` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/${ref}/lua). Last sync: \`${shortSha}\`. **${totalDocumented} documented**, ${totalUndocumented} used-but-undocumented.`,
+    `The \`beautiful\` table supplies theme defaults to Lua modules. Annotations come from \`@beautiful\` LDoc tags in the [SomeWM source](https://github.com/trip-zip/somewm/tree/${ref}/lua). Last sync: \`${shortSha}\`. **${totalDocumented} documented**, ${totalUndocumented} used-but-undocumented.`,
     '',
-    'See the [Theme Tutorial](/docs/tutorials/theme) for how to apply these in a custom theme.',
+    'See the [Theme Tutorial](../../tutorials/theme.md) for how to apply these in a custom theme.',
     '',
   ].join('\n');
 
   const seeAlso = [
     '## See Also',
     '',
-    '- [Theme Tutorial](/docs/tutorials/theme) – Build a custom theme',
-    '- [Key Names](/docs/reference/key-names) – Common keybinding key names',
+    '- [Theme Tutorial](../../tutorials/theme.md) – Build a custom theme',
+    '- [Key Names](../key-names.md) – Common keybinding key names',
     '- [beautiful (AwesomeWM upstream docs)](https://awesomewm.org/apidoc/libraries/beautiful.html) – Full upstream API',
     '',
     `<!-- generator: scripts/generate-theme-variables.mjs | source ref: ${ref} @ ${shortSha} | regenerate with \`npm run generate:reference\` -->`,

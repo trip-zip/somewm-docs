@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Anatomy of `rc.lua`
 
-The default config ships as `somewmrc.lua` (1125 lines), installed to `/usr/share/somewm/somewmrc.lua` and as `/etc/xdg/somewm/rc.lua`. Copy it to `~/.config/somewm/rc.lua` to customize. This page maps each section to its purpose and the line you'd edit for a given goal.
+The default config ships as `somewmrc.lua` (1124 lines), installed to `/usr/share/somewm/somewmrc.lua` and as `/etc/xdg/somewm/rc.lua`. Copy it to `~/.config/somewm/rc.lua` to customize. This page maps each section to its purpose and the line you'd edit for a given goal.
 
 Source: `somewmrc.lua` in the SomeWM repository. Last synced: `d053da19d`. Line numbers drift as the config evolves; the section order is the stable part.
 
@@ -32,7 +32,7 @@ Source: `somewmrc.lua` in the SomeWM repository. Last synced: `d053da19d`. Line 
 | 14 | [Rules](#14-rules) | 1013-1054 | Auto-tag, float, or place specific apps |
 | 15 | [Titlebars](#15-titlebars) | 1056-1093 | Customize per-window titlebar widgets |
 | 16 | [Notifications](#16-notifications) | 1095-1120 | Change notification display and rules |
-| 17 | [Sloppy focus](#17-sloppy-focus) | 1122-1125 | Disable focus-follows-mouse |
+| 17 | [Sloppy focus](#17-sloppy-focus) | 1122-1124 | Disable focus-follows-mouse |
 
 ## 1. Error handling
 
@@ -62,7 +62,7 @@ end)
 
 - **L59** Default theme name: change `"gruvbox"` to `"catppuccin"`, `"nord"`, or any theme dir under `gears.filesystem.get_themes_dir()`
 - Replace `switch_theme()` with a fancier handler (e.g., reload only `beautiful` instead of restarting the whole compositor)
-- See the [Theme tutorial](/docs/tutorials/theme) for writing custom themes
+- See the [Theme tutorial](../tutorials/theme.md) for writing custom themes
 
 ```lua
 local theme_file = (os.getenv("XDG_CONFIG_HOME") or os.getenv("HOME") .. "/.config") .. "/somewm/theme"
@@ -99,7 +99,7 @@ beautiful.awesome_icon = img
 **Lines:** 114-122
 **Purpose:** Initialize the SomeWM lockscreen module, then define the globals used throughout the rest of the file: `terminal`, `editor`, `editor_cmd`, `modkey`.
 **Modules:** `lockscreen` (SomeWM-only)
-**SomeWM-specific** <SomewmOnly />**:** `require("lockscreen").init()` on L115. SomeWM ships a native Wayland lockscreen. See [Lockscreen](/docs/concepts/lockscreen).
+**SomeWM-specific** <SomewmOnly />**:** `require("lockscreen").init()` on L115. SomeWM ships a native Wayland lockscreen. See [Lockscreen](../concepts/lockscreen.md).
 **Common edits:**
 
 - **L119** `terminal = "foot"`: change to your terminal of choice (`alacritty`, `kitty`, `wezterm`, etc.)
@@ -124,7 +124,7 @@ local modkey     = "Mod4"
 - `awful.input.*`: keyboard layouts and pointer/touchpad config (compositor-side, no `setxkbmap` / `libinput-gestures`)
 - `output.connect_signal("added", ...)`: per-monitor fractional scaling
 - `awesome.set_idle_timeout()` and `awesome.idle_inhibit`: idle/inhibitor APIs
-- `somewm.layout_animation`: deprecated alias that sets the layout duration to 0.15 when required. Set `theme.animation_layout_duration` to configure layout transitions ([Animation](/docs/next/guides/animation) has the theme keys).
+- `somewm.layout_animation`: deprecated alias that sets the layout duration to 0.15 when required. Set `theme.animation_layout_duration` to configure layout transitions ([Animation](../guides/animation.md) has the theme keys).
 - `awful.ipc.register()`: custom IPC commands callable via `somewm-client`
 
 **Common edits:** Uncomment the snippet you want. Typical first uncomments:
@@ -142,7 +142,7 @@ local modkey     = "Mod4"
 -- awesome.set_idle_timeout("auto-lock", 600, function() awesome.lock() end)
 ```
 
-See the [Input Devices guide](/docs/guides/input-devices), [Autostart guide](/docs/guides/autostart), and [Fractional Scaling guide](/docs/guides/fractional-scaling) for full coverage.
+See the [Input Devices guide](../guides/input-devices.md), [Autostart guide](../guides/autostart.md), and [Fractional Scaling guide](../guides/fractional-scaling.md) for full coverage.
 
 ## 6. Menu
 
@@ -175,7 +175,7 @@ local menu_items = {
 **Lines:** 201-221
 **Purpose:** Register the layouts available in the cycle order. The first layout in the list is the default for new tags.
 **Modules:** `awful.layout.suit.*`
-**SomeWM-specific** <SomewmOnly />**:** `awful.layout.suit.carousel` (L210), SomeWM's scrollable tiling layout. See the [Carousel tutorial](/docs/tutorials/carousel).
+**SomeWM-specific** <SomewmOnly />**:** `awful.layout.suit.carousel` (L210), SomeWM's scrollable tiling layout. See the [Carousel tutorial](../tutorials/carousel.md).
 **Common edits:**
 
 - Reorder or remove layouts in the `append_default_layouts` call
@@ -237,7 +237,7 @@ end)
 tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
 ```
 
-See [Tag Persistence](/docs/concepts/tag-persistence) for the full mechanism.
+See [Tag Persistence](../concepts/tag-persistence.md) for the full mechanism.
 
 ## 10. Wibar
 
@@ -245,7 +245,7 @@ See [Tag Persistence](/docs/concepts/tag-persistence) for the full mechanism.
 **Purpose:** Build the top bar for each screen. Creates a rounded-background clock widget globally, then for each screen builds promptbox, layoutbox, taglist, tasklist (with a custom `widget_template` for icon + text + margins), and the final wibar as an `align` layout with `expand = "none"`: a left group, the clock between the groups, and a right group, so the clock sits in the middle of the bar.
 **Modules:** `awful.widget.prompt`, `awful.widget.layoutbox`, `awful.widget.taglist`, `awful.widget.tasklist`, `awful.widget.clienticon`, `awful.wibar`, `wibox.widget.systray`, `wibox.widget.textclock`, `wibox.container.background`, `gears.shape`
 **SomeWM-specific** <SomewmOnly />**:** L303-331, the restore branch. When `request::desktop_decoration` fires for a screen that was previously removed (and whose tags were saved), it rebuilds the tags and moves the saved clients back.
-**Common edits:** See the full [Wibar tutorial](/docs/tutorials/wibar). Quick hits:
+**Common edits:** See the full [Wibar tutorial](../tutorials/wibar.md). Quick hits:
 
 - **L333** Tag names: default is `{ "dev", "web", "chat", "files", "media" }`. Change to whatever you want (`{ "1", "2", ..., "9" }` to mirror AwesomeWM's defaults)
 - **L286-299** Clock styling: change format, background, rounded-corner radius
@@ -295,7 +295,7 @@ awful.mouse.append_global_mousebindings({
 | **tag (numrow)** | 823-885 | Mod+1-9, +Ctrl/Shift/Ctrl+Shift variants (view-only, toggle, move, toggle-on) |
 | **layout (numpad)** | 887-901 | Mod+Numpad picks a layout directly |
 
-**Common edits:** See the [Keybindings tutorial](/docs/tutorials/keybindings). To add or remove a binding, edit the appropriate group's `append_global_keybindings` call.
+**Common edits:** See the [Keybindings tutorial](../tutorials/keybindings.md). To add or remove a binding, edit the appropriate group's `append_global_keybindings` call.
 
 ```lua
 -- somewm group sample
@@ -355,7 +355,7 @@ ruled.client.append_rule {
 }
 ```
 
-See the [Client Rules guide](/docs/guides/client-rules) for the matcher reference.
+See the [Client Rules guide](../guides/client-rules.md) for the matcher reference.
 
 ## 15. Titlebars
 
@@ -402,11 +402,11 @@ ruled.notification.append_rule {
 }
 ```
 
-See the [Notifications guide](/docs/guides/notifications) for more.
+See the [Notifications guide](../guides/notifications.md) for more.
 
 ## 17. Sloppy focus
 
-**Lines:** 1122-1125
+**Lines:** 1122-1124
 **Purpose:** Focus follows the mouse: when the pointer enters a client window, that client gets focus without raising.
 **Modules:** `client.connect_signal`
 **Common edits:**
@@ -422,10 +422,10 @@ end)
 
 ## Related
 
-- [Architecture](/docs/concepts/architecture): the three-layer model: C core, Lua bindings, your config
-- [Signals](/docs/concepts/signals): the `request::*` pattern used in sections 1, 7, 8, 10, 13, 14, 15, 16
-- [Keybindings tutorial](/docs/tutorials/keybindings): detailed customization of section 12
-- [Wibar tutorial](/docs/tutorials/wibar): detailed customization of section 10
-- [Theme tutorial](/docs/tutorials/theme): detailed customization of `beautiful.init()` in section 2
-- [Carousel tutorial](/docs/tutorials/carousel): the SomeWM-specific layout enabled by default in section 7
-- [Basics tutorial](/docs/tutorials/basics): first run, copying the default config
+- [Architecture](../concepts/architecture.md): the three-layer model: C core, Lua bindings, your config
+- [Signals](../concepts/signals.md): the `request::*` pattern used in sections 1, 7, 8, 10, 13, 14, 15, 16
+- [Keybindings tutorial](../tutorials/keybindings.md): detailed customization of section 12
+- [Wibar tutorial](../tutorials/wibar.md): detailed customization of section 10
+- [Theme tutorial](../tutorials/theme.md): detailed customization of `beautiful.init()` in section 2
+- [Carousel tutorial](../tutorials/carousel.md): the SomeWM-specific layout enabled by default in section 7
+- [Basics tutorial](../tutorials/basics.md): first run, copying the default config

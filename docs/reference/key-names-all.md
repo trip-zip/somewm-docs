@@ -6,7 +6,7 @@ description: Full enumeration of xkbcommon keysym names accepted by SomeWM
 
 # All Keysyms
 
-Complete enumeration of every keysym name SomeWM accepts in `awful.key` bindings. **2629 keysyms** in 37 categories.
+SomeWM resolves `awful.key` names through xkbcommon. **2629 keysyms** in 37 categories.
 
 SomeWM resolves key names by calling `xkb_keysym_from_name()` (case-insensitive). Take any `XKB_KEY_*` name from this list, strip the `XKB_KEY_` prefix, and pass the remainder as a string.
 
@@ -19,7 +19,7 @@ awful.key({ modkey }, "return",     function() awful.spawn(terminal) end)
 awful.key({}, "XF86AudioRaiseVolume", function() ... end)
 ```
 
-For the everyday key reference (modifiers, common keys, F-keys, media keys, mouse buttons), see **[Key Names](/docs/reference/key-names)**.
+For the everyday key reference (modifiers, common keys, F-keys, media keys, mouse buttons), see **[Key Names](key-names.md)**.
 
 :::note Source of truth
 This page is generated from `/usr/include/xkbcommon/xkbcommon-keysyms.h` on the build host. SomeWM links against the same libxkbcommon at runtime, so the lists are identical.
@@ -2916,8 +2916,8 @@ This page is generated from `/usr/include/xkbcommon/xkbcommon-keysyms.h` on the 
 
 ## See Also
 
-- [Key Names](/docs/reference/key-names) – Curated reference for everyday bindings
-- [Keybindings Tutorial](/docs/tutorials/keybindings) – Learn how to bind keys
+- [Key Names](key-names.md) – Curated reference for everyday bindings
+- [Keybindings Tutorial](../tutorials/keybindings.md) – Learn how to bind keys
 - [xkbcommon documentation](https://xkbcommon.org/doc/current/group__keysyms.html) – Upstream API reference
 
 <!-- generator: scripts/generate-keysyms.mjs | header: /usr/include/xkbcommon/xkbcommon-keysyms.h | regenerate with `npm run generate:reference` -->

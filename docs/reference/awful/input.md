@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # awful.input <SomewmOnly />
 
-Runtime input device configuration for SomeWM. This API is unique to SomeWM and not available in AwesomeWM.
+`awful.input` applies pointer and keyboard settings at runtime. This API is unique to SomeWM and not available in AwesomeWM.
 
 ## Usage
 
@@ -27,18 +27,18 @@ print(awful.input.accel_speed)
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `tap_to_click` | number (0/1) | 0 | Enable tap-to-click on touchpads |
-| `natural_scrolling` | number (0/1) | 0 | Invert scroll direction (macOS-style) |
+| `tap_to_click` | number (0/1) | -1 | Enable tap-to-click on touchpads |
+| `natural_scrolling` | number (0/1) | -1 | Invert scroll direction (macOS-style) |
 | `accel_speed` | number | 0.0 | Pointer acceleration (-1.0 to 1.0) |
 | `scroll_button` | number | 0 | Button for scroll-on-button-down |
-| `left_handed` | number (0/1) | 0 | Swap left/right mouse buttons |
-| `middle_button_emulation` | number (0/1) | 0 | Emulate middle button with left+right |
+| `left_handed` | number (0/1) | -1 | Swap left/right mouse buttons |
+| `middle_button_emulation` | number (0/1) | -1 | Emulate middle button with left+right |
 | `scroll_method` | string | nil | Scroll method (see below) |
 | `accel_profile` | string | nil | Acceleration profile (see below) |
-| `tap_and_drag` | number (0/1) | 1 | Enable tap-and-drag |
-| `drag_lock` | number (0/1) | 0 | Enable drag lock |
+| `tap_and_drag` | number (0/1) | -1 | Enable tap-and-drag |
+| `drag_lock` | number (0/1) | -1 | Enable drag lock |
 | `tap_3fg_drag` | number (0/1) | -1 | Three-finger drag (tap 3 fingers, drag with 1) |
-| `disable_while_typing` | number (0/1) | 1 | Disable while typing |
+| `disable_while_typing` | number (0/1) | -1 | Disable while typing |
 | `dwtp` | number (0/1) | -1 | Disable touchpad while trackpoint in use (ThinkPad) |
 | `scroll_button_lock` | number (0/1) | -1 | Scroll button toggle vs hold (1=toggle, 0=hold) |
 | `clickfinger_button_map` | string | nil | Button map for clickfinger mode (see below) |
@@ -87,12 +87,11 @@ The `scroll_button` setting specifies which button activates scroll-on-button mo
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `xkb_layout` | string | "us" | Keyboard layout (e.g., "us", "de", "us,ru") |
+| `xkb_layout` | string | "" | Keyboard layout (e.g., "us", "de", "us,ru") |
 | `xkb_variant` | string | "" | Layout variant (e.g., "dvorak", "colemak") |
 | `xkb_options` | string | "" | XKB options (e.g., "ctrl:nocaps") |
 | `xkb_model` | string | "" | XKB model (e.g., "pc105") |
 | `xkb_rules` | string | "" |  XKB rules (e.g., "base") |
-| `numlock` | boolean | - | Toggle NumLock on/off |
 | `keyboard_repeat_rate` | number | 25 | Key repeat rate (keys per second) |
 | `keyboard_repeat_delay` | number | 600 | Delay before repeat starts (milliseconds) |
 
@@ -111,12 +110,12 @@ The `scroll_button` setting specifies which button activates scroll-on-button mo
 | `grp:win_space_toggle` | Super+Space switches layouts |
 
 :::warning Wayland Limitation
-`grp:*` toggle options do not automatically switch layouts on Wayland. Use explicit keybindings instead. See [Keyboard Layout Switching](/docs/guides/keyboard-layouts) for workarounds.
+`grp:*` toggle options do not automatically switch layouts on Wayland. Use explicit keybindings instead. See [Keyboard Layout Switching](../../guides/keyboard-layouts.md) for workarounds.
 :::
 
 ## Input Rules
 
-Per-device input configuration using the same `{ rule, properties }` pattern as [client rules](/docs/guides/client-rules). Rules let you apply different settings to different devices, for example enabling natural scrolling on your touchpad but not your mouse.
+Per-device input configuration using the same `{ rule, properties }` pattern as [client rules](../../guides/client-rules.md). Rules let you apply different settings to different devices, for example enabling natural scrolling on your touchpad but not your mouse.
 
 ### How Rules Work
 
@@ -140,7 +139,7 @@ awful.input.rules = {
 
 Both fields are optional. Omitting a field matches all devices. When both are present, both must match.
 
-Device names match the names libinput reports; the [Input Devices guide](/docs/guides/input-devices) shows how to discover them.
+Device names match the names libinput reports; the [Input Devices guide](../../guides/input-devices.md) shows how to discover them.
 
 ### Rule Properties
 
@@ -218,6 +217,6 @@ awful.input.rules = {
 
 ## See Also
 
-- [Input Device Configuration Guide](/docs/guides/input-devices)
-- [Client Rules Guide](/docs/guides/client-rules) - Same `{ rule, properties }` pattern for windows
-- [somewm-client input commands](/docs/reference/somewm-client)
+- [Input Device Configuration Guide](../../guides/input-devices.md)
+- [Client Rules Guide](../../guides/client-rules.md) - Same `{ rule, properties }` pattern for windows
+- [somewm-client input commands](../somewm-client.md)

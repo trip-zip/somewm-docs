@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Tag Persistence <SomewmOnly />
 
-Two handlers do the work ([how it works](/docs/concepts/tag-persistence)). `awful.permissions.tag_screen`, connected to `tag` `request::screen` when `awful.permissions` loads, saves each tag of a removed screen into `awful.permissions.saved_tags[connector]`. The `request::desktop_decoration` handler in `somewmrc.lua` restores from that table when a screen appears, and creates the default tags otherwise. Customising means replacing one or both.
+Two handlers do the work ([how it works](../concepts/tag-persistence.md)). `awful.permissions.tag_screen`, connected to `tag` `request::screen` when `awful.permissions` loads, saves each tag of a removed screen into `awful.permissions.saved_tags[connector]`. The `request::desktop_decoration` handler in `somewmrc.lua` restores from that table when a screen appears, and creates the default tags otherwise. Customising means replacing one or both.
 
 ## Save more properties
 
@@ -76,4 +76,4 @@ end)
 - A client that exited while the monitor was away has `valid == false` and is skipped; one you moved by hand is not on the restored tag.
 - State is in memory. A compositor restart starts fresh.
 
-[Tag Persistence reference](/docs/reference/tag-persistence) has the signals and the saved-state table; [output reference](/docs/reference/output) the identity fields.
+[Tag Persistence reference](../reference/tag-persistence.md) has the signals and the saved-state table; [output reference](../reference/output.md) the identity fields.

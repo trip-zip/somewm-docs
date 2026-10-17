@@ -28,4 +28,4 @@ They are mutually exclusive. While an ext-session-lock client is active, `awesom
 
 `awesome.set_idle_timeout(name, seconds, callback)` registers a named timeout. Several coexist, for example `dim` at 2 minutes and `lock` at 5. Any input resets all of them and emits `idle::stop`; `awesome.dpms_off()` and `awesome.dpms_on()` sleep and wake the outputs, and `dpms::on` fires on wake. A client holding an idle inhibitor through the idle-inhibit protocol, as video players do, stops the timeouts. Timeouts live in memory and do not survive a compositor restart.
 
-[Lock, Idle, and DPMS](/docs/reference/lock) is the API; [Lockscreen module](/docs/reference/lockscreen) is the bundled UI; [Lockscreen guide](/docs/guides/lockscreen) has the recipes.
+[Lock, Idle, and DPMS](../reference/lock.md) is the API; [Lockscreen module](../reference/lockscreen.md) is the bundled UI; [Lockscreen guide](../guides/lockscreen.md) has the recipes.

@@ -28,7 +28,7 @@ yay -S somewm-git
 paru -S somewm-git
 ```
 
-Then go to [Launch](/docs/getting-started/first-launch).
+Then go to [Launch](first-launch.md).
 
 #### Manual Build
 
@@ -41,6 +41,7 @@ sudo pacman -S \
     cairo \
     pango \
     gdk-pixbuf2 \
+    librsvg \
     wayland-protocols \
     libinput \
     libxkbcommon
@@ -68,6 +69,7 @@ sudo apt install \
     libcairo2-dev \
     libpango1.0-dev \
     libgdk-pixbuf-2.0-dev \
+    librsvg2-dev \
     libglib2.0-dev \
     libwayland-dev \
     libwayland-bin \
@@ -111,8 +113,6 @@ sudo apt install libpam0g-dev
 # Optional: systemd session integration (somewm-session, login manager entry)
 sudo apt install systemd-dev
 
-# Optional: SVG icon rendering
-sudo apt install gir1.2-rsvg-2.0
 ```
 
 ### Fedora
@@ -127,6 +127,7 @@ sudo dnf install \
     cairo-devel \
     pango-devel \
     gdk-pixbuf2-devel \
+    librsvg2-devel \
     wayland-devel \
     wayland-protocols-devel \
     libdrm-devel \
@@ -160,7 +161,7 @@ echo 'gui-wm/somewm ~amd64' >> /etc/portage/package.accept_keywords/somewm
 emerge -av gui-wm/somewm
 ```
 
-A `9999` ebuild tracks `main` and `1.4.9999` tracks `release/1.4`. Then go to [Launch](/docs/getting-started/first-launch).
+A `9999` ebuild tracks `main` and `1.4.9999` tracks `release/1.4`. Then go to [Launch](first-launch.md).
 
 ### NixOS
 

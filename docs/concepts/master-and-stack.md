@@ -54,4 +54,4 @@ The tasklist shows clients in list order, so master is leftmost and a client sen
 | `fair`, `fair.horizontal`, `max`, `floating` | no |
 | `carousel`, `carousel.vertical` | no; columns with their own widths ([Scrollable tiling](./scrollable-tiling.md)) |
 
-[Layout reference](/docs/reference/awful/layout) has the `arrange` contract and every built-in layout; [Custom Layouts](/docs/guides/custom-layouts) writes one.
+[Layout reference](../reference/awful/layout.md) has the `arrange` contract and every built-in layout; [Custom Layouts](../guides/custom-layouts.md) writes one.

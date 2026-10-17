@@ -83,7 +83,7 @@ local naughty = require("naughty")
 
 local clock_icon = wibox.widget {
     image = gears.color.recolor_image(
-        "/usr/share/icons/Adwaita/symbolic/status/clock-symbolic.svg",
+        require("menubar").utils.lookup_icon_uncached("clock-symbolic") or beautiful.awesome_icon,
         beautiful.fg_normal
     ),
     forced_width = 16,
@@ -176,4 +176,4 @@ w:get_children_by_id("text_role")[1].text = "Updated!"
 - `somewm-client clay tree` shows the widget's line with its size and where the size came from ([Reading the tree](../concepts/reading-the-tree.md)).
 - A timer needs `autostart = true`. An image path must be absolute: `os.getenv("HOME") .. "/.config/somewm/icons/clock.svg"`.
 
-[wibox reference](/docs/reference/wibox/) lists every primitive, container and layout; [Wibar](/docs/tutorials/wibar) builds the bar around this widget.
+[wibox reference](../reference/wibox/index.md) lists every primitive, container and layout; [Wibar](wibar.md) builds the bar around this widget.

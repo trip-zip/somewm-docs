@@ -17,7 +17,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 </YouWillLearn>
 
-The carousel puts each window in its own column on a strip wider than the screen, and the viewport scrolls to follow focus ([Scrollable Tiling](/docs/concepts/scrollable-tiling)).
+The carousel puts each window in its own column on a strip wider than the screen, and the viewport scrolls to follow focus ([Scrollable Tiling](../concepts/scrollable-tiling.md)).
 
 ## 1. Enable it
 
@@ -104,8 +104,8 @@ awful.layout.suit.carousel.set_center_mode("edge")   -- at runtime
 
 ## Next
 
-- [Column widths](/docs/guides/carousel-column-widths): presets, exact widths, maximize
-- [Stacking](/docs/guides/carousel-stacking): consume, push, expel, reorder
-- [Gestures](/docs/guides/carousel-gestures) and the vertical variant
-- [Centering modes](/docs/guides/carousel-centering): all four, peek width, scrolling from code
-- [Carousel reference](/docs/reference/awful/carousel)
+- [Column widths](../guides/carousel-column-widths.md): presets, exact widths, maximize
+- [Stacking](../guides/carousel-stacking.md): consume, push, expel, reorder
+- [Gestures](../guides/carousel-gestures.md) and the vertical variant
+- [Centering modes](../guides/carousel-centering.md): all four, peek width, scrolling from code
+- [Carousel reference](../reference/awful/carousel.md)

@@ -32,4 +32,4 @@ awful.key({ modkey }, "m", function() carousel.maximize_column() end,
     { description = "maximize column", group = "carousel" })
 ```
 
-[Carousel reference](/docs/reference/awful/carousel), [Stacking](/docs/guides/carousel-stacking), [Scrollable Tiling](/docs/concepts/scrollable-tiling).
+[Carousel reference](../reference/awful/carousel.md), [Stacking](carousel-stacking.md), [Scrollable Tiling](../concepts/scrollable-tiling.md).

@@ -44,12 +44,14 @@ awful.screenshot(args) -> screenshot
 | `file_name` | string | auto | Override filename (within `directory`) |
 | `date_format` | string | `"%Y%m%d%H%M%S"` | Date format for auto-generated filenames |
 | `cursor` | string | `"crosshair"` | Cursor shape during interactive mode |
-| `frame_color` | color | `"#ff0000"` | Selection rectangle color |
-| `frame_shape` | shape | `rectangle` | Selection rectangle shape |
+| `frame_color` | color | `nil` | Selection rectangle color |
+| `frame_shape` | shape | `nil` | Selection rectangle shape |
 | `auto_save_delay` | integer | `nil` | Seconds to wait before capture (`nil` = no delay) |
 | `auto_save_tick_duration` | number | `1.0` | Seconds between `timer::tick` signals |
 | `minimum_size` | table/integer | `{width=3, height=3}` | Minimum selection size (rejects smaller) |
 | `accept_buttons` | table | `{awful.button({}, 1)}` | Mouse buttons to confirm selection |
+| `accept_keys` | table | `{awful.key({}, "Return")}` | Keys that confirm selection |
+| `reject_keys` | table | `{awful.key({}, "Escape")}` | Keys that cancel selection |
 | `reject_buttons` | table | `{awful.button({}, 3)}` | Mouse buttons to cancel selection |
 
 If none of `screen`, `client`, or `geometry` are set, captures the entire desktop via `root.content()`.
@@ -124,6 +126,8 @@ s:reject("mouse_button") -- With reason
 | `minimum_size` | table/integer | Minimum selection dimensions |
 | `auto_save_delay` | integer | Delay before capture |
 | `accept_buttons` | table | Confirm buttons |
+| `accept_keys` | table | `{awful.key({}, "Return")}` | Keys that confirm selection |
+| `reject_keys` | table | `{awful.key({}, "Escape")}` | Keys that cancel selection |
 | `reject_buttons` | table | Cancel buttons |
 
 ## Signals
@@ -132,7 +136,7 @@ s:reject("mouse_button") -- With reason
 |--------|-----------|-------------|
 | `snipping::start` | `self` | Interactive overlay is shown |
 | `snipping::success` | `self` | Selection accepted, screenshot saved |
-| `snipping::cancelled` | `self, reason` | Selection cancelled (reason: `"mouse_button"`, `"key"`, `"no_selection"`, `"too_small"`) |
+| `snipping::cancelled` | `self, reason` | Selection cancelled (reason: `"mouse_button"`, `"key"`, `"no_selection"`, `"too_small"`, `"reject_called"`) |
 | `file::saved` | `self, file_path, method` | File written to disk |
 | `timer::started` | `self` | Auto-save delay timer started |
 | `timer::tick` | `self, remaining` | Timer tick (seconds remaining) |
@@ -152,7 +156,7 @@ All properties also emit `property::<name>` signals.
 When `interactive = true` and `refresh()` is called:
 
 1. The appropriate capture method runs (default: `root.content()` for full desktop)
-2. A fullscreen wibox is created with the captured image and a selection widget
+2. A wibox covers the pointer’s screen with the captured image and selection widget
 3. A mousegrabber tracks mouse position and button state
 4. A keygrabber handles accept/reject keys (Return/Escape by default)
 5. On accept: the captured surface is cropped to the selection and saved
@@ -161,7 +165,7 @@ Key internal fields available in signal handlers:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `self._private.frame` | wibox | The fullscreen overlay wibox |
+| `self._private.frame` | wibox | The overlay wibox covering the pointer’s screen |
 | `self._private.imagebox` | wibox.widget.imagebox | The screenshot background widget |
 | `self._private.selection_widget` | wibox.widget.separator | The selection rectangle |
 
@@ -212,6 +216,6 @@ local popup = awful.popup {
 
 ## See Also
 
-- [Screenshots Guide](/docs/guides/screenshots) - Practical setup and keybindings
-- [Screenshots Concepts](/docs/concepts/screenshots) - How the capture pipeline works
-- [Display Scaling](/docs/concepts/display-scaling) - HiDPI and logical vs physical pixels
+- [Screenshots Guide](../../guides/screenshots.md) - Practical setup and keybindings
+- [Screenshots Concepts](../../concepts/screenshots.md) - How the capture pipeline works
+- [Display Scaling](../../concepts/display-scaling.md) - HiDPI and logical vs physical pixels

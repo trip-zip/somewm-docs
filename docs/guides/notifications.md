@@ -6,7 +6,7 @@ description: "ruled.notification rules per app, urgency presets, a do-not-distur
 
 # Notifications
 
-`naughty` is the notification daemon; nothing else needs to run. [naughty reference](/docs/reference/naughty/) has every property.
+`naughty` is the notification daemon; nothing else needs to run. [naughty reference](../reference/naughty/index.md) has every property.
 
 ## Rules per app
 
@@ -20,7 +20,7 @@ ruled.notification.connect_signal("request::rules", function()
 end)
 ```
 
-[Matching fields](/docs/reference/naughty/#rule-matching-fields) and [settable properties](/docs/reference/naughty/#rule-settable-properties) list the rest. `message` and `title` take Lua patterns.
+[Matching fields](../reference/naughty/index.md#rule-matching-fields) and [settable properties](../reference/naughty/index.md#rule-settable-properties) list the rest. `message` and `title` take Lua patterns.
 
 ## Urgency presets
 
@@ -73,17 +73,16 @@ theme.notification_border_color = "#504945"
 theme.notification_border_width = 2
 theme.notification_width = 300
 theme.notification_max_width = 400
-theme.notification_max_height = 200
 theme.notification_icon_size = 48
 theme.notification_font = "monospace 10"
 theme.notification_shape = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, 8) end
 ```
 
-[Theme Variables](/docs/reference/beautiful/theme-variables#notifications) lists them all.
+[Theme Variables](../reference/beautiful/theme-variables.md#notifications) lists them all.
 
 ## A custom layout
 
-`request::display` receives each notification; build its box from `naughty.widget.icon`, `title`, `message` and `naughty.list.actions` with any [wibox layout](/docs/reference/wibox/):
+`request::display` receives each notification; build its box from `naughty.widget.icon`, `title`, `message` and `naughty.list.actions` with any [wibox layout](../reference/wibox/index.md):
 
 ```lua
 naughty.connect_signal("request::display", function(n)

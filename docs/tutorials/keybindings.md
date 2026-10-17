@@ -33,7 +33,7 @@ Mod4 + Ctrl + r reloads; Mod4 + b opens Firefox, tiled into the current tag. Eve
 ```lua
 awful.key(
     { modkey },                                            -- modifiers; {} for none
-    "b",                                                   -- key ([names](/docs/reference/key-names))
+    "b",                                                   -- key ([names](../reference/key-names.md))
     function() awful.spawn("firefox") end,                 -- runs on press
     { description = "open browser", group = "launcher" }   -- shown in the help popup
 )
@@ -64,5 +64,5 @@ If a binding does nothing: modifier names are case-sensitive, another binding ma
 ## Next
 
 - [Keybinding patterns](../guides/keybinding-patterns.md): media keys, the whole number row at once, mouse bindings, bindings as data
-- [Key Names](/docs/reference/key-names): every key and modifier name
-- [Widgets](/docs/tutorials/widgets)
+- [Key Names](../reference/key-names.md): every key and modifier name
+- [Widgets](widgets.md)

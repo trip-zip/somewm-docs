@@ -23,7 +23,7 @@ ruled.client.append_rule {
 somewm-client client list
 ```
 
-prints `class`, `instance`, `name` and `type` for every window. Or notify as windows open:
+prints `id`, `title`, `class`, `tags` and `floating` per window. Or notify as windows open:
 
 ```lua
 client.connect_signal("request::manage", function(c)
@@ -70,7 +70,7 @@ ruled.client.append_rule {
 }
 ```
 
-A `callback = function(c) ... end` runs after the properties for logic a table cannot express. The common one sends new windows to the stack instead of making them master ([Master and Stack](/docs/concepts/master-and-stack)):
+A `callback = function(c) ... end` runs after the properties for logic a table cannot express. The common one sends new windows to the stack instead of making them master ([Master and Stack](../concepts/master-and-stack.md)):
 
 ```lua
 callback = function(c) c:to_secondary_section() end,
@@ -139,4 +139,4 @@ end)
 - A rule that hits too much needs a narrower match: `{ class = "firefox", type = "normal" }` skips Firefox's popups.
 - A property that keeps reverting is set again by a later, broader rule. Move the specific rule after it.
 
-[Notifications](/docs/guides/notifications) uses `ruled.notification` the same way; [Shadows](/docs/guides/shadows) has per-app shadow rules.
+[Notifications](notifications.md) uses `ruled.notification` the same way; [Shadows](shadows.md) has per-app shadow rules.

@@ -34,7 +34,7 @@ local hdmi = output.get_by_name("HDMI-A-1")
 local o = screen.primary.output
 ```
 
-It carries hardware facts (make, model, serial, physical size), display state (scale, transform, mode, position, enabled) and `screen`, nil while disabled ([output reference](/docs/reference/output)).
+It carries hardware facts (make, model, serial, physical size), display state (scale, transform, mode, position, enabled) and `screen`, nil while disabled ([output reference](../reference/output.md)).
 
 ## Screen
 

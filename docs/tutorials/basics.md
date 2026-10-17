@@ -16,7 +16,7 @@ import YouWillLearn from '@site/src/components/YouWillLearn';
 
 </YouWillLearn>
 
-You need a running SomeWM session ([Launch](/docs/getting-started/first-launch)) or a nested one in a window ([Try SomeWM without logging out](/docs/tutorials/try-somewm-without-installing)), and a terminal. The default config uses `foot`.
+You need a running SomeWM session ([Launch](../getting-started/first-launch.md)) or a nested one in a window ([Try SomeWM without logging out](try-somewm-without-installing.md)), and a terminal. The default config uses `foot`.
 
 ## The desktop
 
@@ -36,7 +36,7 @@ A tag is a label on a window, not a container: a window can carry several, and a
 
 ## Windows
 
-Mod4 is the Super key. Press Mod4 + Return for a terminal; it fills the screen. Press it twice more: the first window keeps the left half, the master area, and the others stack on the right ([Master and Stack](/docs/concepts/master-and-stack)).
+Mod4 is the Super key. Press Mod4 + Return for a terminal; it fills the screen. Press it twice more: the first window keeps the left half, the master area, and the others stack on the right ([Master and Stack](../concepts/master-and-stack.md)).
 
 | Keys | Action |
 | --- | --- |
@@ -100,11 +100,11 @@ local terminal = "foot"
 
 Change it to `"alacritty"`, `"kitty"` or whatever you have. Save, press Mod4 + Ctrl + r to reload, then Mod4 + Return. Your terminal opens. The reload rebuilt the bar and the Lua state; your windows stayed where they were.
 
-A config with an error shows a notification with the line number and keeps the previous config running. The usual causes are a missing comma, a mismatched bracket, or a misspelled name.
+A broken config falls through to alternate configs; if none loads, the log reports a fatal error. The usual causes are a missing comma, a mismatched bracket, or a misspelled name.
 
 ## Next
 
-- [Theme](/docs/tutorials/theme): colours, fonts and gaps
-- [Keybindings](/docs/tutorials/keybindings): your own shortcuts
-- [Widgets](/docs/tutorials/widgets): a widget in the bar
-- [Default Keybindings](/docs/reference/default-keybindings): the complete list
+- [Theme](theme.md): colours, fonts and gaps
+- [Keybindings](keybindings.md): your own shortcuts
+- [Widgets](widgets.md): a widget in the bar
+- [Default Keybindings](../reference/default-keybindings.md): the complete list

@@ -75,6 +75,15 @@ Without any change to `rc.lua`:
 
 | Area | 2.1 |
 | --- | --- |
+| Client shape | Changing `c.shape` emits `property::shape` and arranges the screen. |
+| Entrance input | Widgets receive pointer events during their wibox or popup’s entrance animation. |
+| Bordered popups | Content larger than the slot is clipped while the popup keeps its slot geometry. |
+| Size-hint signals | `property::size_hints` fires when a Wayland client’s committed bounds change. |
+| Layout leaves | A leaf placed and sized with grow, fit or percent on one axis is omitted with a warning naming the client. |
+| Fractional dimensions | Padding, gaps, offsets and border widths round to the nearest whole pixel. |
+| Screenshot overlay | Interactive selection covers the pointer’s screen. |
+| Xwayland geometry | Content-size requests pass through the Clay client frame; geometry replies use the completed solve. |
+| Render verification | `render_verify` is removed; the verifier runs only in sanitizer and test builds. |
 | Imagebox sizing | An imagebox without a forced size takes its size from the told size above it, as 2.0's fit did; with none on either axis it declares the image's own size and can overflow a flex or fixed layout. An imagebox forced on one axis scales its image to that axis. |
 | Hotkeys help and menubar | They scroll instead of paging. Hotkeys: one column per group, continued every `beautiful.hotkeys_rows` rows (default 20), PgDn and PgUp scroll by one viewport. Menubar: `left_label` and `right_label` show while items lie beyond that side. |
 | Grid | A non-homogeneous grid no longer sizes its columns to the widest cell across rows. A homogeneous grid inside a content-sized box takes content-sized cells and warns. Border dashes draw solid and gradient border colours are transparent, both with a warning. |
@@ -180,12 +189,7 @@ All of it is new in 2.1. `somewm.layout_animation` is deprecated and `awesome.st
 
 - SomeWM builds its own wlroots 0.20.2 and links it in; an installed wlroots is not used. The wlroots 0.19 path and `-Dwlroots_version` are gone. A distribution whose wayland, libdrm, xkbcommon, pixman or wayland-protocols is older than wlroots 0.20.2 gets that library built alongside it by the same build. See [Installation](installation.md).
 - XWayland is always built in; `-Dxwayland` is gone. Building needs xcb, xcb-icccm and Xwayland installed.
-- `make install` does not delete files from an earlier install. If you installed 2.0 with `make install`, remove the old Lua tree first, or a config that requires a removed module such as `wibox.hierarchy` loads 2.0's copy and fails further on:
-
-```bash
-sudo rm -rf /usr/local/share/somewm/lua
-sudo make install
-```
+- `make install` removes the installed Lua tree before installing, so removed modules cannot load from an earlier installation.
 
 ## See Also
 

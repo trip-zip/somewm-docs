@@ -94,10 +94,10 @@ local n = naughty.notification {
     },
 }
 
-n:connect_signal("invoked", function(_, action_index)
-    if action_index == 1 then
+n:connect_signal("invoked", function(_, action)
+    if action == n.actions[1] then
         awful.spawn("xdg-open ~/Downloads/document.pdf")
-    elseif action_index == 2 then
+    elseif action == n.actions[2] then
         awful.spawn("nautilus ~/Downloads")
     end
 end)
@@ -111,8 +111,8 @@ Global defaults applied to all notifications:
 |----------|------|---------|-------------|
 | `timeout` | number | `5` | Auto-dismiss time in seconds |
 | `position` | string | `"top_right"` | Screen position |
-| `margin` | number | `10` | Margin from screen edge |
-| `icon_size` | number | `48` | Default icon size |
+| `margin` | number | `dpi(5)` | Margin from screen edge |
+| `icon_size` | number | `nil` | Default icon size |
 
 ```lua
 naughty.config.defaults.timeout = 5
@@ -145,7 +145,7 @@ Configure appearance per urgency level via `naughty.config.presets`:
 | Preset | Default Timeout | Description |
 |--------|----------------|-------------|
 | `naughty.config.presets.low` | `5` | Subtle, low-priority |
-| `naughty.config.presets.normal` | `5` | Standard notifications |
+| `naughty.config.presets.normal` | inherited | Empty preset; uses `naughty.config.defaults` |
 | `naughty.config.presets.critical` | `0` (never) | Requires manual dismissal |
 
 Each preset accepts `bg`, `fg`, `timeout`, and other notification properties:
@@ -243,7 +243,7 @@ The pre-AwesomeWM 4.4 functional API is gone. Calling any of these raises
 | `naughty.reset_timeout(n, t)` | `n:reset_timeout(t)` |
 | `naughty.replace_text(n, title, text)` | `n.title = title; n.message = text` |
 
-These still exist in SomeWM 1.4. See the [1.4 naughty reference](/docs/reference/naughty) if you have not upgraded.
+These still exist in SomeWM 1.4. See the [1.4 naughty reference](index.md) if you have not upgraded.
 
 ## Signals
 
@@ -260,14 +260,14 @@ These still exist in SomeWM 1.4. See the [1.4 naughty reference](/docs/reference
 
 | Signal | Arguments | Description |
 |--------|-----------|-------------|
-| `invoked` | `n, action_index` | User clicked a notification action |
+| `invoked` | `n, action` | User clicked a notification action |
 | `property::title` | `n` | Title changed |
 | `property::message` | `n` | Message changed |
 | `property::urgency` | `n` | Urgency changed |
 
 ## Theme Variables
 
-Notifications are styled via `beautiful` variables. See [Theme Variables: Notifications](/docs/reference/beautiful/theme-variables#notifications) for the full list.
+Notifications are styled via `beautiful` variables. See [Theme Variables: Notifications](../beautiful/theme-variables.md#notifications) for the full list.
 
 Key variables:
 
@@ -286,6 +286,6 @@ Key variables:
 
 ## See Also
 
-- **[Notifications Guide](/docs/guides/notifications)** - Practical configuration tasks
-- **[Theme Variables](/docs/reference/beautiful/theme-variables)** - All theme variables including notifications
+- **[Notifications Guide](../../guides/notifications.md)** - Practical configuration tasks
+- **[Theme Variables](../beautiful/theme-variables.md)** - All theme variables including notifications
 - **[naughty (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/naughty.html)** - Upstream API reference

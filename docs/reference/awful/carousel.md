@@ -39,6 +39,7 @@ These properties are set directly on the layout table. They apply globally to al
 | `carousel.default_column_width` | number | `1.0` | Width fraction for new columns (1.0 = full viewport width) |
 | `carousel.width_presets` | table | `{1/3, 1/2, 2/3, 1.0}` | Preset fractions cycled by `cycle_column_width()` |
 | `carousel.center_mode` | string | `"on-overflow"` | Viewport centering behavior (see [Centering Modes](#centering-modes)) |
+| `carousel.dynamic_peek_width` | number | `-1` | Edge-column peek width; negative values use `peek_width` |
 | `carousel.peek_width` | number | `0` | Pixels of visible content on each side to show adjacent column edges (`useless_gap` is added automatically) |
 
 Scrolling animates over the layout duration, the one setting for every layout; `carousel.scroll_duration` is gone. Set `theme.animation_layout_duration` for a faster or slower slide, or leave it at 0 for an instant snap. `somewm.layout_animation` is deprecated; requiring it still sets 0.15.
@@ -63,6 +64,7 @@ These can be set in your `beautiful` theme to override carousel defaults.
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
 | `beautiful.carousel_default_column_width` | number | `1.0` | Default width fraction for new columns |
+| `beautiful.carousel_dynamic_peek_width` | number | `-1` | Overrides edge-column peek width |
 | `beautiful.carousel_peek_width` | number | `0` | Pixels of visible content on each side for adjacent column edges (`useless_gap` is added automatically) |
 | `beautiful.carousel_center_mode` | string | `"on-overflow"` | Viewport centering behavior |
 | `beautiful.layout_carousel` | surface | nil | Layoutbox icon for the carousel layout |
@@ -76,6 +78,13 @@ theme.carousel_peek_width = 40
 theme.carousel_center_mode = "always"
 theme.layout_carousel = theme_dir .. "/layouts/carousel.png"
 ```
+
+## Direction and state
+
+| Function | Behaviour |
+| --- | --- |
+| `carousel.push_window_bydirection(dir)` | Moves the focused window towards `left`, `right`, `up` or `down`, within or between columns according to layout orientation. |
+| `carousel.get()` | Returns column span, viewport size and position, columns and focused-client position for the focused screen’s selected tag. |
 
 ## Column Width Functions
 
@@ -311,10 +320,10 @@ The carousel layout handles several things automatically:
 
 ## See Also
 
-- **[Scrollable Tiling](/docs/concepts/scrollable-tiling)** - How the strip, viewport, and animation model works
-- **[Carousel Tutorial](/docs/tutorials/carousel)** - Step-by-step first session with the carousel layout
-- **[Column Widths Guide](/docs/guides/carousel-column-widths)** - Resize and customize column widths
-- **[Stacking Guide](/docs/guides/carousel-stacking)** - Consume, expel, and push windows between columns
-- **[Gesture Scrolling Guide](/docs/guides/carousel-gestures)** - Set up touchpad gesture panning
-- **[Centering Modes Guide](/docs/guides/carousel-centering)** - Choose and configure viewport centering
-- **[Layout Protocol Reference](/docs/reference/awful/layout)** - The `arrange(p)` contract and built-in layouts
+- **[Scrollable Tiling](../../concepts/scrollable-tiling.md)** - How the strip, viewport, and animation model works
+- **[Carousel Tutorial](../../tutorials/carousel.md)** - Step-by-step first session with the carousel layout
+- **[Column Widths Guide](../../guides/carousel-column-widths.md)** - Resize and customize column widths
+- **[Stacking Guide](../../guides/carousel-stacking.md)** - Consume, expel, and push windows between columns
+- **[Gesture Scrolling Guide](../../guides/carousel-gestures.md)** - Set up touchpad gesture panning
+- **[Centering Modes Guide](../../guides/carousel-centering.md)** - Choose and configure viewport centering
+- **[Layout Protocol Reference](layout.md)** - The `arrange(p)` contract and built-in layouts

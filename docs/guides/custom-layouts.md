@@ -45,7 +45,7 @@ Mod4 + Space cycles to it.
 | --- | --- |
 | `p.workarea` | `x`, `y`, `width`, `height` of the usable screen: bars, struts and padding already subtracted; borders and gaps not yet |
 | `p.clients` | the tiled clients in creation order |
-| `p.tag` | the tag, with `master_count`, `master_width_factor`, `column_count` and the rest |
+| `screen[p.screen].selected_tag` | the tag, with `master_count`, `master_width_factor`, `column_count` and the rest |
 | `p.geometries` | the table you fill, one rectangle per client |
 
 ## A centred split
@@ -58,10 +58,11 @@ local centered_split = {
     arrange = function(p)
         local wa, n = p.workarea, #p.clients
         if n == 0 then return end
-        local nmaster = math.min(p.tag.master_count, n)
+        local t = screen[p.screen].selected_tag
+        local nmaster = math.min(t.master_count, n)
         local nstack = n - nmaster
 
-        local master_w = math.floor(wa.width * p.tag.master_width_factor)
+        local master_w = math.floor(wa.width * t.master_width_factor)
         local master_x = wa.x + math.floor((wa.width - master_w) / 2)
         local h = math.floor(wa.height / nmaster)
         for i = 1, nmaster do
@@ -80,7 +81,7 @@ local centered_split = {
 
 ## Gaps
 
-`skip_gap(nclients, tag)`, when present, is asked before `useless_gap` is applied; return true to suppress it:
+With `gap_single_client = false`, `skip_gap(nclients, tag)` returns true to suppress gaps:
 
 ```lua
 my_max.skip_gap = function() return true end                             -- clients overlap
@@ -95,4 +96,4 @@ centered_split.skip_gap = function(nclients) return nclients == 1 end
 - `awful.layout.arrange(s)` re-runs the layout without opening windows.
 - Try one, two and many clients, a screen resize, and odd `master_count` and `master_width_factor` values.
 
-[Layout reference](/docs/reference/awful/layout) has the full `arrange(p)` contract and every built-in layout; [Master and Stack](/docs/concepts/master-and-stack) the tag properties.
+[Layout reference](../reference/awful/layout.md) has the full `arrange(p)` contract and every built-in layout; [Master and Stack](../concepts/master-and-stack.md) the tag properties.

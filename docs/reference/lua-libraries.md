@@ -29,6 +29,7 @@ These APIs are unique to SomeWM and not available in AwesomeWM:
 | API | Purpose |
 |-----|---------|
 | [awful.input](./awful/input) | Runtime input device configuration |
+| [somewm.inspector](screen.md#somewminspector) | Toggle and restyle the Clay inspector |
 | [somewm-client](./somewm-client) | IPC command-line tool |
 | [output](./output) | Physical output objects that persist across disable/enable |
 | [layer_surface](./layer_surface/) | Layer-shell surfaces (bars, launchers) and their rules |

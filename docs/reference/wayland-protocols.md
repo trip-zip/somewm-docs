@@ -6,7 +6,7 @@ description: Wayland protocols somewm advertises to clients
 
 # Wayland Protocols
 
-Wayland protocols somewm advertises in its registry. Versions are the maximum announced; clients negotiate down as needed.
+SomeWM advertises supported Wayland protocols through its registry. Versions are the maximum announced; clients negotiate down as needed.
 
 ## Core
 
@@ -43,6 +43,7 @@ Wayland protocols somewm advertises in its registry. Versions are the maximum an
 
 | Protocol | Version | Purpose |
 |----------|---------|---------|
+| `zwp_tablet_manager_v2` | | Tablet tool and pad input |
 | `wp_cursor_shape_v1` | 1 | Named cursors |
 | `zwp_pointer_gestures_v1` | | Touchpad swipe, pinch, hold |
 | `zwp_pointer_constraints_v1` | | Lock or confine pointer |
@@ -69,7 +70,7 @@ Wayland protocols somewm advertises in its registry. Versions are the maximum an
 | `wp_single_pixel_buffer_manager_v1` | | Solid-color buffers |
 | `wp_fractional_scale_manager_v1` | 1 | Non-integer HiDPI scaling |
 | `wp_alpha_modifier_v1` | | Per-surface alpha |
-| `wp_presentation` | | Frame timestamps |
+| `wp_presentation` | 2 | Frame timestamps |
 | `wl_drm` | | Legacy, superseded by `zwp_linux_dmabuf_v1` |
 
 ## Idle

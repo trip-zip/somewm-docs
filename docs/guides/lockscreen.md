@@ -16,7 +16,7 @@ Mod4 + Shift + Escape locks; the password and Return unlock. `somewm-client lock
 
 ## Appearance and placement
 
-`theme.lockscreen_*` variables style it: `bg_color`, `fg_color`, `input_bg`, `border_color`, `error_color`, `font`, `font_large`, `wallpaper`, `wallpaper_overlay`. The `init` table overrides them and adds the formats and the screen:
+`theme.lockscreen_*` variables style it: `bg_color`, `fg_color`, `input_bg`, `border_color`, `error_color`, `font`, `font_large`, `wallpaper`, `wallpaper_overlay`. `lockscreen_clock_format` and `lockscreen_date_format` also have theme defaults; `init` overrides them and selects the screen:
 
 ```lua
 require("lockscreen").init({
@@ -113,6 +113,6 @@ An external locker works through `ext-session-lock-v1`: `swaylock -c 000000`. Wh
 
 ## When it does not lock
 
-`awesome.lock()` returns false with no surface registered, when already locked, or while an ext-session-lock client holds the session: `somewm-client eval "return awesome.locked, awesome.lock_mechanism"`. For idle: `awesome.idle_inhibit`, `awesome.idle_inhibited` and `awesome.idle_timeouts` are all readable the same way, and `awesome.dpms_state` for displays that stay dark.
+`awesome.lock()` returns true when already locked; false without a surface or while an ext-session-lock client holds the session: `somewm-client eval "return awesome.locked, awesome.lock_mechanism"`. For idle: `awesome.idle_inhibit`, `awesome.idle_inhibited` and `awesome.idle_timeouts` are all readable the same way, and `awesome.dpms_state` for displays that stay dark.
 
-[Lock, Idle, and DPMS](/docs/reference/lock) is the API; [Lockscreen module](/docs/reference/lockscreen) the bundled UI's options; [Session Locking](/docs/concepts/lockscreen) what C enforces.
+[Lock, Idle, and DPMS](../reference/lock.md) is the API; [Lockscreen module](../reference/lockscreen.md) the bundled UI's options; [Session Locking](../concepts/lockscreen.md) what C enforces.

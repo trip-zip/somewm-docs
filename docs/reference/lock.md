@@ -18,11 +18,11 @@ Lock, Idle, and DPMS are tightly coupled: idle timeouts can trigger DPMS and loc
 
 | Method | Arguments | Return | Description |
 |--------|-----------|--------|-------------|
-| `awesome.lock()` | none | boolean | Lock the session. Returns true on success, false if already locked, no lock surface registered, or ext-session-lock is active |
+| `awesome.lock()` | none | boolean | Lock the session. Returns true on success or when already locked; false without a surface or during ext-session-lock |
 | `awesome.unlock()` | none | boolean | Unlock the session. Returns true on success. Only succeeds if `awesome.authenticate()` was called with a correct password first |
-| `awesome.authenticate(password)` | string | none | Verify password via PAM. On success, marks session as authenticated. On failure, emits `lock::auth_failed` |
+| `awesome.authenticate(password)` | string | boolean | Verify password via PAM. Returns true and marks authenticated on success. On failure, emits `lock::auth_failed` |
 | `awesome.set_lock_surface(wibox)` | wibox | none | Register the interactive lock surface (receives keyboard input when locked) |
-| `awesome.clear_lock_surface()` | none | none | Unregister the lock surface. If called while locked, forces unlock |
+| `awesome.clear_lock_surface()` | none | none | Unregister the lock surface. The session stays locked |
 | `awesome.add_lock_cover(wibox)` | wibox | none | Register a cover surface for multi-monitor support (max 16). Idempotent |
 | `awesome.remove_lock_cover(wibox)` | wibox | none | Unregister a specific cover surface |
 | `awesome.clear_lock_covers()` | none | none | Unregister all cover surfaces |
@@ -32,8 +32,8 @@ Lock, Idle, and DPMS are tightly coupled: idle timeouts can trigger DPMS and loc
 | Property | Type | Description |
 |----------|------|-------------|
 | `awesome.locked` | boolean (read-only) | True if session is locked via the Lua lock API |
-| `awesome.lock_surface` | drawin or nil (read-only) | Currently registered interactive lock surface |
-| `awesome.lock_mechanism` | string or nil (read-only) | `"lua"` if locked via Lua API, nil if not locked |
+| `awesome.lock_surface` | drawin or nil (read-only) | Registered interactive drawin, or nil while it is invisible |
+| `awesome.lock_mechanism` | string or nil (read-only) | `"lua"` for Lua locking, `"ext"` for ext-session-lock, nil when unlocked |
 
 ### Signals
 
@@ -156,12 +156,12 @@ end
 | `dpms::off` | none | At least one display entered sleep mode |
 | `dpms::on` | none | At least one display woke up |
 
-Displays automatically wake on user activity (keyboard/mouse input).
+Displays wake on user activity unless `awesome.dpms_ignore_activity` is true.
 
 ## See Also
 
-- [Lockscreen Guide](/docs/guides/lockscreen) - Task-oriented examples
-- [Session Locking Concepts](/docs/concepts/lockscreen) - Architecture and design
-- [Default Lockscreen Module](/docs/reference/lockscreen) - Built-in lockscreen reference
-- [Signals Reference](/docs/reference/signals) - All signals
-- [somewm-client Reference](/docs/reference/somewm-client) - CLI lock command
+- [Lockscreen Guide](../guides/lockscreen.md) - Task-oriented examples
+- [Session Locking Concepts](../concepts/lockscreen.md) - Architecture and design
+- [Default Lockscreen Module](lockscreen.md) - Built-in lockscreen reference
+- [Signals Reference](signals.md) - All signals
+- [somewm-client Reference](somewm-client.md) - CLI lock command

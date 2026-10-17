@@ -6,7 +6,7 @@ description: Check a config before loading, read the error notification, the Lua
 
 # Debugging Your Config
 
-A config error at load falls back to the bundled config and shows a notification with the message, the file and line, and a stack trace. Read the trace from the bottom: the last line is where it failed. A reload that fails keeps the previous config running.
+A config error tries alternate configs; if none loads, the log reports a fatal error. Only `somewm-client reload` checks syntax first. Read the trace from the bottom: the last line is where it failed. Other reloads discard the old Lua state.
 
 ## Before loading {#check-before-loading}
 
@@ -67,7 +67,7 @@ somewm-client screen focused
 somewm-client eval "return type(require('beautiful'))"
 ```
 
-`eval` runs one line and sees only `client`, `screen`, `tag`, `mouse`, `awesome`, `root` and `require`; `awful` and the rest are nil until required ([CLI Control](/docs/guides/cli-control)).
+`eval` runs one line in the global environment; require libraries that the config keeps local ([CLI Control](cli-control.md)).
 
 ## Narrowing it down
 
@@ -77,4 +77,4 @@ Edit, `somewm --check`, Mod4 + Ctrl + r, watch for the notification. If the erro
 - No notification at all: the config failed before `naughty` loaded. Run from a terminal.
 - `module not found` for your own file: it must be under the config directory and required with dots.
 
-[Troubleshooting](/docs/troubleshooting) has specific known issues.
+[Troubleshooting](../troubleshooting.md) has specific known issues.

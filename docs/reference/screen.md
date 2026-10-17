@@ -43,7 +43,16 @@ local count = screen.count()
 | `workarea` | table | read | Usable area after panels/struts `{x, y, width, height}` |
 | `index` | number | read | 1-based screen index |
 | `padding` | table | read/write | Manual padding `{top, right, bottom, left}` |
-| `inspector` | boolean | read/write | The live tree panel over this screen; `true` opens it. Its colours, width and font are the `inspector_*` theme variables, and `require("somewm.inspector").toggle(s)` flips it. See [Reading the tree](../concepts/reading-the-tree.md#the-inspector) <SomewmOnly /> |
+| `inspector` | boolean | read/write | The live tree panel over this screen; `true` opens it. See [somewm.inspector](#somewminspector) for toggling and theme updates. <SomewmOnly /> |
+
+### somewm.inspector
+
+`require("somewm.inspector")` controls the inspector’s visibility and shared theme.
+
+| Function | Behaviour |
+| --- | --- |
+| `toggle(s)` | Flips `s.inspector` and returns its new boolean value; defaults to `awful.screen.focused()`. |
+| `restyle()` | Re-reads the [inspector theme variables](beautiful/theme-variables.md#somewm) for every open panel; opening a panel also applies them. |
 
 ### Output Information
 
@@ -173,7 +182,6 @@ fake:fake_remove()
 | `property::workarea` | `s, old_workarea` | Workarea changed (panel added/removed) |
 | `property::scale` | `s` | Output scale changed <SomewmOnly /> |
 | `property::outputs` | `s` | Output metadata changed |
-| `property::index` | `s` | Screen index changed |
 | `property::inspector` | `s` | The inspector was opened or closed <SomewmOnly /> |
 
 `property::geometry` and `property::workarea` pass the previous value as a second
@@ -253,8 +261,8 @@ end
 
 ## See Also
 
-- [Fractional Scaling Guide](/docs/guides/fractional-scaling) - Configure HiDPI displays
-- [Multi-Monitor Setup](/docs/guides/multi-monitor) - Per-screen configuration
-- [Tag Persistence](/docs/concepts/tag-persistence) - How tags survive monitor hotplug
-- [Display Scaling Concepts](/docs/concepts/display-scaling) - How scaling works
-- [Object Model](/docs/concepts/object-model) - How screens relate to tags and clients
+- [Fractional Scaling Guide](../guides/fractional-scaling.md) - Configure HiDPI displays
+- [Multi-Monitor Setup](../guides/multi-monitor.md) - Per-screen configuration
+- [Tag Persistence](../concepts/tag-persistence.md) - How tags survive monitor hotplug
+- [Display Scaling Concepts](../concepts/display-scaling.md) - How scaling works
+- [Object Model](../concepts/object-model.md) - How screens relate to tags and clients

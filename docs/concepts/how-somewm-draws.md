@@ -70,16 +70,16 @@ On a headless SomeWM with the bundled config, the dump starts:
 
 ```
 OK
-output HEADLESS-1 scale 1.00 inspector off frames 3 elements 39/65536 map 39 free 0 inspector_input 0 bounds 0/0
-  commands 21 mutations 1 created 0 swept 0 nodes 21 raster_bytes 3789136 buffers 1 declare 185us solve 42us reconcile 142us
+output HEADLESS-1 scale 1.00 inspector off frames 3 elements 41/65536 map 41 free 0 inspector_input 0 bounds 0/0
+  commands 23 mutations 6 created 2 swept 0 nodes 23 raster_bytes 3793424 buffers 2 declare 37us solve 36us reconcile 101us
   roots flow 1 floating 2 derived 0 legacy 0
   WALLPAPER screen 1 1280x720+0+0 converted: 5 nodes, 1 images clip w=grow h=grow row attach OUTPUT offset 0,0 band -4 box 0,0 1280x720
   ...
   Clay__RootContainer w=fixed(1280) output h=fixed(720) output row box 0,0 1280x720
     OUTPUT HEADLESS-1 w=fixed(1280) output h=fixed(720) output column box 0,0 1280x720
-      WIBAR screen 1 1280x32+0+0 converted: 30 nodes, 2 images, radius 8 clip w=grow h=fixed(32) theme row box 0,0 1280x32
-    6a6e2fe9     - spacer w=grow h=grow row box 0,0 580x32
-    20c65f54       wibox.layout.fixed w=fit h=grow row box 0,0 211x32
+      WIBAR screen 1 1280x32+0+0 converted: 32 nodes, 4 images, radius 8 clip w=grow h=fixed(32) theme row box 0,0 1280x32
+    6a6e2fe9     - spacer w=grow h=grow row box 0,0 582x32
+    58414e45       wibox.layout.fixed w=fit h=grow row box 0,0 211x32
 ```
 
 One root is in the flow: `OUTPUT`, a column of the bar and the workarea. Every other root floats at a band. An element line is id, name, sizing per axis with its source word, direction, padding and gap, then the solved box. [Reading the tree](./reading-the-tree.md) walks a whole dump.

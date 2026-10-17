@@ -88,5 +88,5 @@ ruled.layer_surface.append_rule {
 
 ## See Also
 
-- [Signals Reference](/docs/reference/signals) - Layer surface signals
+- [Signals Reference](../signals.md) - Layer surface signals
 - [wlr-layer-shell protocol](https://wayland.app/protocols/wlr-layer-shell-unstable-v1)

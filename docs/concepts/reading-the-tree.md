@@ -61,9 +61,9 @@ Anything in a flow carries a sizing and gets its box from the solve: a widget, a
 ### Header
 
 ```
-output HEADLESS-1 scale 1.00 inspector off frames 6 elements 48/65536 map 48 free 0 inspector_input 0 bounds 0/0
-  commands 28 mutations 0 created 0 swept 0 nodes 28 raster_bytes 3802016 buffers 0 declare 19us solve 45us reconcile 6us
-  roots flow 1 floating 3 derived 0 legacy 0
+output HEADLESS-1 scale 1.00 inspector off frames 3 elements 41/65536 map 41 free 0 inspector_input 0 bounds 0/0
+  commands 23 mutations 6 created 2 swept 0 nodes 23 raster_bytes 3793424 buffers 2 declare 37us solve 36us reconcile 101us
+  roots flow 1 floating 2 derived 0 legacy 0
 ```
 
 - Line 1: the output, its scale, whether the inspector is open, how many frames it has declared, and `elements` used of the per-output budget. `map` and `free` are Clay's element-id table and its freed slots. `inspector_input` and `bounds` are zero until the inspector opens.
@@ -78,7 +78,7 @@ Dump twice with nothing changed and `frames` does not move: an output with nothi
   WALLPAPER screen 1 1280x720+0+0 converted: 5 nodes, 1 images clip w=grow h=grow row attach OUTPUT offset 0,0 band -4 box 0,0 1280x720
   Clay__RootContainer w=fixed(1280) output h=fixed(720) output row box 0,0 1280x720
     OUTPUT HEADLESS-1 w=fixed(1280) output h=fixed(720) output column box 0,0 1280x720
-      WIBAR screen 1 1280x32+0+0 converted: 30 nodes, 2 images, radius 8 clip w=grow h=fixed(32) theme row box 0,0 1280x32
+      WIBAR screen 1 1280x32+0+0 converted: 32 nodes, 4 images, radius 8 clip w=grow h=fixed(32) theme row box 0,0 1280x32
       WORKAREA - w=grow h=grow row pad 8,8,8,8 gap 8 box 0,32 1280x688
   SURFACE CLIENT_1 w=grow h=grow attach PARENT offset 0,0 band 20 custom box 10,72 624x638
   cursor left_ptr w=fixed(24) theme h=fixed(24) theme attach ROOT offset 97,99 band 32767 image box 97,99 24x24
@@ -104,12 +104,13 @@ To read a size, walk the nesting. The clock's margin is 120 by 32: it fits along
 ```
   realized:
   b334a95b RECTANGLE     z=0    box 0,0 1280x720 rbox 0,0 1280x720 output HEADLESS-1
+  63d73290 CUSTOM        z=-    box 0,0 1280x720 rbox 0,0 1280x720 drawin screen 1 1280x720+0+0 clip
   63d73290 SCISSOR_START z=-    box 0,0 1280x720 rbox 0,0 1280x720 drawin screen 1 1280x720+0+0
-  61bdd938 CUSTOM        z=-    box 0,0 1280x720 rbox 0,0 1280x720 widget wibox.container.background raster=3686400
-  05d20e1f IMAGE         z=-    box 540,260 91x200 rbox 540,260 91x200 widget image image raster=72800
+  f767848d CUSTOM        z=-    box 0,0 1280x720 rbox 0,0 1280x720 widget wibox.container.background raster=3686400
+  c1b0daaa IMAGE         z=-    box 540,260 91x200 rbox 540,260 91x200 widget image image raster=72800
   08efd078 SCISSOR_END   z=-    box 0,0 0x0 rbox 0,0 0x0 -
+  7c2c5897 SCISSOR_START z=-    box 0,0 1280x32 rbox 0,0 1280x32 drawin screen 1 1280x32+0+0
   7c2c5897 RECTANGLE     z=0    box 0,0 1280x32 rbox 0,0 1280x32 drawin screen 1 1280x32+0+0
-  525dcab8 TEXT          z=-    box 36,6 22x20 rbox 36,6 22x20 drawin screen 1 1280x32+0+0 raster=1760
 ```
 
 The tree is what was declared. This list is what the renderer holds: one line per Clay render command, in draw order, with the id of the element it came from. `RECTANGLE` and `BORDER` are scene rects and cost no pixels. `TEXT` and `IMAGE` are rasters, `raster=` their bytes. `CUSTOM` is a client surface, a shadow, or a fill cut by a path; ending in `clip` or `configure` it is a marker holding no node. `SCISSOR_START` and `SCISSOR_END` bracket a clip. `rbox` is the box after clipping. Only rectangles carry `z=`, their band.
@@ -159,7 +160,7 @@ Its lines in the dump:
 screen.primary.inspector = true
 ```
 
-opens Clay's debug view on that screen: one row per element, the selected element's box, sizing, padding, alignment and colours, and a highlight on the desktop over the element under the pointer. `require("somewm.inspector").toggle()` flips it from a keybinding. Its colours, width and font are the `beautiful.inspector_*` variables ([Theme Variables](/docs/reference/beautiful/theme-variables)).
+opens Clay's debug view on that screen: one row per element, the selected element's box, sizing, padding, alignment and colours, and a highlight on the desktop over the element under the pointer. [`somewm.inspector.toggle()`](../reference/screen.md#somewminspector) flips it from a keybinding. Its colours, width and font are the `beautiful.inspector_*` variables ([Theme Variables](../reference/beautiful/theme-variables.md)).
 
 The panel is part of the tree, at band 32765, so the header grows while it is open:
 

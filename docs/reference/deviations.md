@@ -49,7 +49,6 @@ Client geometry excludes the border. Titlebars occupy space inside the decorated
 
 Modules holding GLib sources or D-Bus registrations must release them on `exit` before their Lua state closes. See [signals](signals.md) and [tag persistence](../guides/tag-persistence.md).
 
-`awesome.quit(1)` requests a new process when launched through `somewm-session`; applications lose their Wayland connections during a process restart.
 
 ## X-property APIs {#stubbed-apis}
 

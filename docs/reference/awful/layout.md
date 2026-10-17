@@ -32,7 +32,7 @@ local my_layout = {
 
 ## The `arrange(p)` Contract
 
-When a tag needs laying out (client added/removed, tag properties changed, screen resized), the compositor calls `arrange(p)` with a single parameter table `p`.
+Custom layouts receive `arrange(p)` when placement changes; stock layouts declare through `_clay` and their `arrange` functions are not called.
 
 ### Fields in `p`
 
@@ -42,7 +42,7 @@ When a tag needs laying out (client added/removed, tag properties changed, scree
 | `p.workarea` | table | `{x, y, width, height}` usable screen area. Wibars, padding, and struts are already subtracted. |
 | `p.geometries` | table | Empty weak-keyed table. Write `p.geometries[c] = {x, y, width, height}` for each client. |
 | `p.screen` | number | Screen index |
-| `p.tag` | tag | The tag being arranged |
+| `screen[p.screen].selected_tag` | tag | The tag being arranged |
 | `p.useless_gap` | number | Gap size in pixels (from `tag.gap` or `beautiful.useless_gap`) |
 
 ### What `arrange` must do
@@ -76,7 +76,7 @@ This means your `arrange` function should use the full `p.workarea` dimensions. 
 
 ## Tag Properties
 
-Layouts can read tag properties from `p.tag` to control their behavior. The master/stack layouts use these extensively. See [Master and Stack](/docs/concepts/master-and-stack) for details.
+Layouts can read tag properties from `screen[p.screen].selected_tag` to control their behavior. The master/stack layouts use these extensively. See [Master and Stack](../../concepts/master-and-stack.md) for details.
 
 | Property | Default | Description |
 |----------|---------|-------------|
@@ -158,8 +158,8 @@ All built-in layouts live under `awful.layout.suit`:
 | `suit.corner.ne` | `"cornerne"` | Master top-right corner |
 | `suit.corner.sw` | `"cornersw"` | Master bottom-left corner |
 | `suit.corner.se` | `"cornerse"` | Master bottom-right corner |
-| `suit.carousel` | `"carousel"` | Scrollable horizontal columns ([reference](/docs/reference/awful/carousel)) |
-| `suit.carousel.vertical` | `"carousel.vertical"` | Scrollable vertical columns ([reference](/docs/reference/awful/carousel)) |
+| `suit.carousel` | `"carousel"` | Scrollable horizontal columns ([reference](carousel.md)) |
+| `suit.carousel.vertical` | `"carousel.vertical"` | Scrollable vertical columns ([reference](carousel.md)) |
 
 ## `skip_gap(nclients, tag)`
 
@@ -194,6 +194,6 @@ The built-in `max` layout always returns `true` since clients fill the entire sc
 
 ## See Also
 
-- **[Custom Layouts Guide](/docs/guides/custom-layouts)** - Step-by-step guide to writing your own layout
-- **[Master and Stack](/docs/concepts/master-and-stack)** - How master/stack layouts divide the screen
+- **[Custom Layouts Guide](../../guides/custom-layouts.md)** - Step-by-step guide to writing your own layout
+- **[Master and Stack](../../concepts/master-and-stack.md)** - How master/stack layouts divide the screen
 - **[AwesomeWM awful.layout docs](https://awesomewm.org/apidoc/libraries/awful.layout.html)** - Full upstream API reference

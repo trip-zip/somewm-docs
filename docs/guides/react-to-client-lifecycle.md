@@ -81,4 +81,4 @@ client.connect_signal("request::unmanage", function(c)
 end)
 ```
 
-[Client Rules](/docs/guides/client-rules) covers the declarative form.
+[Client Rules](client-rules.md) covers the declarative form.

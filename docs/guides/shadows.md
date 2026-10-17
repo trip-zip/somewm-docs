@@ -31,7 +31,7 @@ The same names with `shadow_drawin_` apply to wiboxes, so panels can have lighte
 theme.shadow_drawin_enabled = false      -- or radius 6, opacity 0.3
 ```
 
-[Shadow reference](/docs/reference/shadows) has the defaults.
+[Shadow reference](../reference/shadows.md) has the defaults.
 
 ## Per client and per wibox
 
