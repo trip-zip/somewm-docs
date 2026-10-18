@@ -49,11 +49,14 @@ const config: Config = {
           numberPrefixParser: false,
           editUrl: 'https://github.com/trip-zip/somewm-docs/tree/main/',
           routeBasePath: '/docs',
-          lastVersion: '2.0',
+          lastVersion: '2.1',
           versions: {
             current: {
-              label: '2.1 (dev)',
+              label: '2.2 (dev)',
               banner: 'unreleased',
+            },
+            '2.1': {
+              label: '2.1',
             },
             '2.0': {
               label: '2.0',

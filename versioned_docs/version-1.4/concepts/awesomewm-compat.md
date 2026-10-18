@@ -52,6 +52,6 @@ The 2.x line keeps the Lua configuration model while developing its libraries an
 
 The [compatibility reference](../reference/deviations.md) records platform differences and unsupported behaviour for this version. Individual API references describe supported properties, methods and signals. Linked AwesomeWM documentation provides background for inherited APIs.
 
-[Upgrade from 1.4 to 2.0](/docs/getting-started/upgrading-from-1.4) describes configuration changes between SomeWM releases. [Migrating from AwesomeWM](../getting-started/migrating.md) covers the move from X11 tools and assumptions to Wayland.
+[Upgrade from 1.4 to 2.0](/docs/2.0/getting-started/upgrading-from-1.4) describes configuration changes between SomeWM releases. [Migrating from AwesomeWM](../getting-started/migrating.md) covers the move from X11 tools and assumptions to Wayland.
 
 [Wayland vs X11](wayland-vs-x11.md) explains protocol differences. [Architecture](architecture.md) explains the compositor and its Lua libraries.

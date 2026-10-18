@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Documentation
-description: SomeWM is a wlroots compositor that runs AwesomeWM's Lua API on Wayland. Tutorials, how-to guides, reference and concepts for the 2.1 development version.
+description: SomeWM is a wlroots compositor that runs AwesomeWM's Lua API on Wayland. SomeWM 2.2 is in development; 2.1 is the current release.
 ---
 
 # SomeWM Documentation
@@ -42,4 +42,4 @@ Input devices, CLI control, multi-monitor, autostart, notifications, screenshots
 
 ## Versions
 
-These pages track 2.1, in development. The version switcher has 2.0, the current release, and 1.4, which mirrors AwesomeWM master and is maintained indefinitely. The [AwesomeWM apidoc](https://awesomewm.org/apidoc/) covers inherited APIs not yet documented here.
+These pages track 2.2, in development. The version switcher has 2.1, the current release, and 1.4, which mirrors AwesomeWM master and is maintained indefinitely. The [AwesomeWM apidoc](https://awesomewm.org/apidoc/) covers inherited APIs not yet documented here.
