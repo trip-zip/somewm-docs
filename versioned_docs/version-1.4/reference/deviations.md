@@ -15,7 +15,7 @@ SomeWM 1.4 mirrors AwesomeWM master and is maintained as the upstream-compatible
 | Need | Documentation |
 | --- | --- |
 | Move an AwesomeWM configuration to Wayland | [Migrating from AwesomeWM](../getting-started/migrating.md) |
-| Change SomeWM releases | [Upgrade from 1.4 to 2.0](/docs/getting-started/upgrading-from-1.4) |
+| Change SomeWM releases | [Upgrade from 1.4 to 2.0](/docs/2.0/getting-started/upgrading-from-1.4) |
 | Understand the compatibility policy | [AwesomeWM compatibility](../concepts/awesomewm-compat.md) |
 | Understand the platform | [Wayland vs X11](../concepts/wayland-vs-x11.md) |
 
