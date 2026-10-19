@@ -34,6 +34,7 @@ Client rules live in `ruled.client`, not `awful`. SomeWM 2.0 deleted the `awful.
 
 | Module | Description |
 |--------|-------------|
+| [awful.accessibility](./accessibility) | Pointer location with rings, magnification, and shake activation |
 | [awful.input](./input) | Runtime input device configuration (pointer, keyboard) |
 
 ## Behavioral Notes
