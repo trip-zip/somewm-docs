@@ -1,10 +1,14 @@
 ---
 sidebar_position: 1
 title: Architecture
-description: "Three layers, as in AwesomeWM: a C core that owns Wayland, wlroots and the objects; Lua libraries that supply defaults; your config on top. C and Lua meet at signals, properties and methods, never in one call stack."
+description: Lua supplies configuration and layout declarations. A scheduled C-to-Lua notification queue precedes the Clay layout pass and scene reconciliation.
 ---
 
 # Architecture
+
+SomeWM separates state changes, layout computation and scene rendering. C owns Wayland objects and protocol handling; Lua supplies configuration and policy. Queued notifications reach Lua at the refresh boundary. Each dirty output then follows a common declaration, Clay solve and scene reconciliation path.
+
+## Who owns the work
 
 ```
 ┌─────────────────────────────────────┐
@@ -48,7 +52,17 @@ awful.keyboard.append_global_keybindings({
 | properties | Lua reads state and writes changes C applies | `c.floating = true`, `c.geometry = { x = 100, y = 100, width = 800, height = 600 }` |
 | methods | Lua asks for an action | `c:kill()`, `c:move_to_tag(t)`, `t:view_only()` |
 
-C handles each Wayland event without entering Lua. Signals it emits go on a queue that drains at `some_refresh()` before every event-loop iteration: the handlers run in order, then each output a handler touched [declares its tree once and the renderer draws it](./how-somewm-draws.md), then the loop blocks for the next event. AwesomeWM and SomeWM 1.x ran Lua handlers inside the event handler, several times per event; 2.x never shares a call stack between the layers. [Signals](./signals.md) has what is queued, what stays synchronous, and coalescing.
+The C-to-Lua boundary has explicit dispatch rules. Notifications such as geometry, focus and pointer motion are queued. `some_refresh()` drains them before emitting `refresh` and applying pending updates. This lets their handlers run after the emitting C operation returns. Requests whose answers C needs immediately remain synchronous, as do Lua-emitted signals. [Signals](./signals.md#dispatch) explains the boundary.
+
+## From state changes to a displayed frame
+
+The configuration and libraries update objects and mark affected outputs dirty. At an output's frame boundary, Lua compiles pending layout descriptions. C assembles the output tree, Clay computes the sizes and positions, and the renderer reconciles the resulting commands into `wlr_scene`.
+
+![Lua declarations become one output tree, Clay computes layout in C, and SomeWM reconciles the resulting commands into the wlroots scene.](/img/architecture/clay-frame-pipeline.svg)
+
+Client layouts, bars and widget containers contribute to that same tree. Their geometry is computed in the output pass, and the scene is updated from its completed result. An application still supplies its own surface pixels. wlroots presents the scene after reconciliation.
+
+The architectural boundary is between **declaring what belongs on the output**, **computing its layout**, and **applying the solved result to the scene**. A widget property setter marks pending work; it does not paint a widget surface immediately. [How SomeWM draws](./how-somewm-draws.md) follows these stages through the main loop and explains what Clay computes.
 
 ## Startup
 

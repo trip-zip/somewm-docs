@@ -89,11 +89,11 @@ client.connect_signal("focus", function(c)
 end)
 ```
 
-SomeWM 2.0 changes how those handlers reach Lua. AwesomeWM and SomeWM 1.x interleaved C and Lua in the same call stack: a Wayland event entered C, emitted a signal, ran Lua handlers inside the event handler, returned to C, emitted another signal, ran more Lua. One Wayland event could transition between C and Lua five or six times before settling.
+SomeWM 2.0 makes notification delivery a scheduled part of the main loop. C queues notifications such as geometry, focus and pointer motion, then `some_refresh()` dispatches them to Lua before refresh work. Their handlers run after the C operation that emitted them returns.
 
-2.0 follows the engine model used by LOVE and Bitsquid: Lua orchestrates, C executes, with deliberate hand-off points between them. C handles each Wayland event without entering Lua. Outgoing signals go on a queue. At `some_refresh()`, called before each event-loop iteration, the queue drains: every queued handler runs in order, with no Wayland callbacks interleaved. Then C applies whatever Lua changed (geometry, stacking, drawin updates) and the loop blocks for the next event. The two layers no longer share a call stack.
+The queue processes a snapshot in order. New queued notifications wait for the next drain, while redundant pointer moves can be combined. Requests whose results C needs immediately, and signals emitted by Lua, remain synchronous. The distinction is an explicit dispatch policy across the C-to-Lua boundary.
 
-For per-signal mechanics (what's queued, what's still synchronous, how coalescing works), see [Signals (concepts)](./signals.md).
+[Why the queue is an execution boundary](./signals.md#why-the-queue-is-an-execution-boundary) explains the ordering, object lifetimes and effect on configuration handlers.
 
 ### Properties
 

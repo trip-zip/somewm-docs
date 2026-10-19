@@ -1,7 +1,7 @@
 ---
 sidebar_position: 8
 title: Signals
-description: Objects emit signals; rc.lua connects handlers. C-emitted signals are queued and drained before each event-loop iteration, Lua-emitted ones run inline. The request::* pattern and startup order.
+description: The C-to-Lua notification queue defines when configuration reactions run. Dispatch rules, synchronous requests, coalescing and startup order.
 ---
 
 # Signals
@@ -24,11 +24,21 @@ A name is any string; the `::` in `property::name` is convention, not syntax.
 | Lua libraries | `ruled.client` `request::rules`, `naughty` `request::display`, `awful.layout` `request::default_layouts` | yes; they exist so modules can plug in without monkey-patching |
 | your code | `awesome.emit_signal("volume::changed")` | |
 
+## Why the queue is an execution boundary
+
+A notification emitted inside a C operation can immediately call Lua, whose handlers can call back into C and change related objects. That nests configuration reactions inside the operation producing the notification. The queue gives selected notifications a separate delivery phase.
+
+C records the signal, its target and its arguments. At `some_refresh()`, the queue dispatches a snapshot in order, before the `refresh` signal and pending layout work. Handlers can update configuration state during that phase. New queued notifications wait for the next drain, so a handler cannot keep extending the current batch indefinitely.
+
+This also gives notification delivery explicit lifetime rules. Queued events hold Lua references to their targets and arguments until delivery. Pending references are cleared when the owning Lua state is replaced during reload. Consecutive pointer moves for the same object can be coalesced while preserving intervening events.
+
+The result is a defined place to run queued configuration reactions. It does not make every callback asynchronous or eliminate every C-to-Lua call. Requests needing an immediate answer and Lua-emitted signals remain synchronous. The dispatch rules below distinguish those paths.
+
 ## Dispatch
 
 Some C-generated notifications are queued until `some_refresh()`. The queue drains before `refresh` and the output declarations ([How SomeWM draws](./how-somewm-draws.md)). Requests whose results the compositor needs immediately call Lua synchronously.
 
-- **Queued:** property changes, focus, mouse motion, lifecycle, most `request::*`, the output and screen signals hotplug causes, layer-shell properties, most global signals. The exact set is the [dispatch section of the reference](../reference/signals.md#dispatch).
+- **Queued:** property changes, focus, mouse motion, lifecycle, selected `request::*`, the output and screen signals hotplug causes, layer-shell properties, most global signals. The exact set is the [dispatch section of the reference](../reference/signals.md#dispatch).
 - **Synchronous from C:** `request::manage`, `request::unmanage`, `request::geometry`, screen `added` and `removed`, and the client scalar `property::*` signals. The compositor acts on their handlers' results immediately.
 - **Synchronous when Lua caused it:** `screen.fake_add`, `screen.fake_remove`, `s:swap()`, `screen.primary = s`, `awesome.dpms_on()` deliver inline, so a change you make is visible to your next line.
 - **Always synchronous:** anything emitted from Lua, including the libraries' own `request::*` emits and your custom signals. The queue is the C to Lua boundary only.
@@ -71,5 +81,5 @@ Connect a `request::rules` handler at module load time and it runs in time, what
 
 - In `request::manage`, handlers connected after `awful.permissions` and `ruled.client` see the client tagged and placed; handlers connected before do not.
 - In `request::unmanage`, the client is gone: geometry and screen may be invalid. Stash what you need at `request::manage`.
-- `refresh` fires every frame. Keep its handlers small.
+- `refresh` runs during the main-loop refresh phase, which can run without presenting a frame. Keep its handlers small.
 - Errors in handlers are caught and logged through `debug::error`; connect your own handler to surface them elsewhere.

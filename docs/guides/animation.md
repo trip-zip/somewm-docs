@@ -6,6 +6,7 @@ description: Ease layout changes, client appearance, focus borders, wibox visibi
 
 import SomewmOnly from '@site/src/components/SomewmOnly';
 import AnimationDemo from '@site/src/components/AnimationDemo';
+import AnimationComparison from '@site/src/components/AnimationComparison.mdx';
 
 # Animation <SomewmOnly />
 
@@ -111,6 +112,8 @@ With a tag duration above 0, from `theme.animation_tag_duration`, `theme.animati
 </AnimationDemo>
 
 ### Scale
+
+<AnimationComparison />
 
 `scale` shrinks the complete picture, the surface, border and titlebar together, about the centre of the frame. `scale_top`, `scale_bottom`, `scale_left` and `scale_right` hold that edge's midpoint still and shrink towards it. The frame's box in the layout does not change and the client receives the same configure sizes as an unanimated map, so neighbours do not move and the client never redraws for the effect. Pointer events hit the picture where it is drawn, so `mouse::enter` fires on the scaled edge.
 

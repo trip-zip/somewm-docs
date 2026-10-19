@@ -1,0 +1,23 @@
+.source {
+  margin: -0.5rem 0 1.5rem;
+}
+
+.source > summary {
+  width: fit-content;
+  color: var(--ifm-color-content-secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.source > summary:hover {
+  color: var(--ifm-color-content);
+}
+
+.source > summary:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 4px;
+}
+
+.content {
+  margin-top: 1rem;
+}

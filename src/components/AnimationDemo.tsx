@@ -6,9 +6,11 @@ interface AnimationDemoProps {
   name: string;
   title: string;
   children: React.ReactNode;
+  width?: number;
+  height?: number;
 }
 
-export default function AnimationDemo({name, title, children}: AnimationDemoProps): React.ReactElement {
+export default function AnimationDemo({name, title, children, width = 1200, height = 800}: AnimationDemoProps): React.ReactElement {
   const captionId = useId();
   const videoUrl = useBaseUrl(`/img/animation/${name}.mp4`);
   const posterUrl = useBaseUrl(`/img/animation/${name}.png`);
@@ -22,8 +24,8 @@ export default function AnimationDemo({name, title, children}: AnimationDemoProp
         playsInline
         preload="metadata"
         poster={posterUrl}
-        width={1200}
-        height={800}
+        width={width}
+        height={height}
         aria-label={title}
         aria-describedby={captionId}>
         <source src={videoUrl} type="video/mp4" />

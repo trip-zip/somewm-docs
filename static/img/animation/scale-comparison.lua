@@ -1,0 +1,163 @@
+local options = ... or {}
+local awful = require("awful")
+local beautiful = require("beautiful")
+local gears = require("gears")
+local wibox = require("wibox")
+
+assert(require("somewm.animation").enabled, "Enable SomeWM animations first")
+if _G.somewm_animation_comparison then _G.somewm_animation_comparison.stop() end
+local target = awful.screen.focused()
+if options.output then
+    target = assert(output.get_by_name(options.output), "Output not found").screen
+end
+local bg, fg = beautiful.bg_normal or "#282828", beautiful.fg_normal or "#ebdbb2"
+local family = (beautiful.font or "sans 10"):gsub("%s+%d+%.?%d*$", "")
+local function text(value, size, color, bold)
+    return wibox.widget {
+        markup = '<span foreground="' .. (color or fg) .. '">'
+            .. gears.string.xml_escape(value) .. '</span>',
+        font = family .. (bold and " Bold " or " ") .. size,
+        align = "center",
+        valign = "center",
+        widget = wibox.widget.textbox,
+    }
+end
+local effects = {
+    { name = "Fade", enter = "fade", color = "#d79921" },
+    { name = "Scale", enter = "scale", color = "#83a598" },
+    { name = "Scale + fade", enter = { "scale", "fade" }, color = "#b8bb26" },
+}
+local state = { running = true, completed = false, timers = {}, cards = {}, screen = target }
+_G.somewm_animation_comparison = state
+function state.stop()
+    for _, timer in ipairs(state.timers) do timer:stop() end
+    for _, card in ipairs(state.cards) do card.animation = false; card.visible = false end
+    if state.board then state.board.visible = false end
+    state.running = false
+end
+local function later(seconds, callback)
+    local timer = gears.timer.start_new(seconds, function()
+        if not state.running then return false end
+        local ok, err = pcall(callback)
+        if not ok then state.error = tostring(err); state.stop() end
+        return false
+    end)
+    state.timers[#state.timers + 1] = timer
+end
+
+local columns = wibox.layout.flex.horizontal()
+columns.spacing = 24
+local slots = {}
+for i, effect in ipairs(effects) do
+    slots[i] = wibox.widget { forced_height = 200, widget = wibox.widget.textbox }
+    columns:add(wibox.widget {
+        text(effect.name, 20, effect.color, true),
+        slots[i],
+        spacing = 12,
+        layout = wibox.layout.fixed.vertical,
+    })
+end
+local phase = text("Same duration. Same popup.", 16)
+state.board = awful.popup {
+    screen = target, visible = true, ontop = true, input_passthrough = true,
+    bg = bg, fg = fg, minimum_width = 1004, maximum_width = 1004,
+    placement = awful.placement.centered,
+    widget = {
+        {
+            text("Three ways to appear", 27, fg, true),
+            text("Fade, scale, and both together · 0.8 seconds", 16),
+            columns,
+            phase,
+            spacing = 20,
+            layout = wibox.layout.fixed.vertical,
+        },
+        margins = 28,
+        widget = wibox.container.margin,
+    },
+}
+
+local function build_cards()
+    local board = state.board
+    if board.width ~= 1004 or board.height < 300 then return false end
+    local boxes = {}
+    for i, slot in ipairs(slots) do
+        local x = 28 + (i - 1) * 324 + 150
+        for y = 0, board.height - 1, 8 do
+            for _, hit in ipairs(board:find_widgets(x, y)) do
+                if hit.widget == slot then boxes[i] = hit; break end
+            end
+            if boxes[i] then break end
+        end
+        if not boxes[i] or boxes[i].height < 200 then return false end
+    end
+    state.geometry = board:geometry()
+    for i, effect in ipairs(effects) do
+        local box = boxes[i]
+        state.cards[i] = awful.popup {
+            screen = target, visible = false, ontop = true, input_passthrough = true,
+            placement = awful.placement.top_left,
+            offset = {
+                x = board.x - target.geometry.x + box.x + (box.width - 270) / 2,
+                y = board.y - target.geometry.y + box.y + (box.height - 170) / 2,
+            },
+            minimum_width = 270, maximum_width = 270,
+            minimum_height = 170, maximum_height = 170,
+            bg = bg, fg = fg, shape = gears.shape.rounded_rect,
+            border_width = 2, border_color = effect.color,
+            widget = {
+                {
+                    text("Hello, SomeWM", 21, fg, true),
+                    text("A real popup", 16),
+                    spacing = 8,
+                    layout = wibox.layout.fixed.vertical,
+                },
+                valign = "center", halign = "center",
+                widget = wibox.container.place,
+            },
+            animation = {
+                visible = { duration = 0.8, enter = effect.enter, exit = effect.enter },
+            },
+        }
+    end
+    return true
+end
+
+local function show(visible, label)
+    phase.text = label
+    for _, card in ipairs(state.cards) do card.visible = visible end
+end
+local function cycle(number)
+    state.phase = "enter"
+    show(true, "Entering together")
+    later(2.2, function()
+        state.phase = "exit"
+        show(false, "Leaving together")
+    end)
+    later(4, function()
+        if number < 2 then
+            cycle(number + 1)
+        else
+            state.phase = "final"
+            show(true, "Same duration. Same popup.")
+            later(2.2, function() state.completed = true; state.stop() end)
+        end
+    end)
+end
+
+local attempts = 0
+local ready = gears.timer.start_new(0.05, function()
+    attempts = attempts + 1
+    local ok, built = pcall(build_cards)
+    if not ok or attempts > 100 then
+        state.error = ok and "Popup layout did not settle" or tostring(built)
+        state.stop()
+        return false
+    end
+    if not built then return true end
+    state.ready = true
+    state.phase = "ready"
+    later(1.2, function() cycle(1) end)
+    return false
+end)
+state.timers[#state.timers + 1] = ready
+return "Animation comparison opened on screen " .. target.index

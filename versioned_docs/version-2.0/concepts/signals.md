@@ -41,6 +41,16 @@ You can usually tell from where a signal is documented:
 - `client::*`, `screen::*`, `tag::*`, layer-surface signals → C side
 - Module-level signals on `ruled.*`, `naughty`, `awful.layout` → Lua side
 
+## Why the queue is an execution boundary
+
+A notification emitted inside a C operation can immediately call Lua, whose handlers can call back into C and change related objects. That nests configuration reactions inside the operation producing the notification. The queue gives selected notifications a separate delivery phase.
+
+C records the signal, its target and its arguments. At `some_refresh()`, the queue dispatches a snapshot in order, before the `refresh` signal and pending layout work. Handlers can update configuration state during that phase. New queued notifications wait for the next drain, so a handler cannot keep extending the current batch indefinitely.
+
+This also gives notification delivery explicit lifetime rules. Queued events hold Lua references to their targets and arguments until delivery. Pending references are cleared when the owning Lua state is replaced during reload. Consecutive pointer moves for the same object can be coalesced while preserving intervening events.
+
+The result is a defined place to run queued configuration reactions. It does not make every callback asynchronous or eliminate every C-to-Lua call. Requests needing an immediate answer and Lua-emitted signals remain synchronous. The dispatch rules below distinguish those paths.
+
 ## Dispatch model
 
 Some C-generated notifications are queued until `some_refresh()`. The queue drains before `refresh` and the layout pass. Requests whose results the compositor needs immediately call Lua synchronously. The [signal reference](../reference/signals.md#dispatch) defines both sets.
