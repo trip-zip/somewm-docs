@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Theme Variables
 
-The `beautiful` table supplies theme defaults to Lua modules. Annotations come from `@beautiful` LDoc tags in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `6b6cb90bd2`. **458 documented**, 88 used-but-undocumented.
+The `beautiful` table supplies theme defaults to Lua modules. Annotations come from `@beautiful` LDoc tags in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `3d83522a15`. **476 documented**, 88 used-but-undocumented.
 
 See the [Theme Tutorial](../../tutorials/theme.md) for how to apply these in a custom theme.
 
@@ -63,10 +63,28 @@ See [Input Devices: Cursor Theming](../../guides/input-devices.md#cursor-theming
 
 ## awful
 
-283 entries.
+301 entries.
 
 | Variable | Type | Description | Source |
 | --- | --- | --- | --- |
+| `accessibility_cursor_finder_color` <SomewmOnly /> | `color` | Solid ring colour. | [awful/accessibility.lua:51](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L51) |
+| `accessibility_cursor_finder_cooldown` <SomewmOnly /> | `number` | Shake cooldown in seconds after deflation begins or the locator stops. | [awful/accessibility.lua:129](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L129) |
+| `accessibility_cursor_finder_deflate_delay` <SomewmOnly /> | `number` | Inactivity in seconds before cursor deflation. | [awful/accessibility.lua:105](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L105) |
+| `accessibility_cursor_finder_deflate_duration` <SomewmOnly /> | `number` | Cursor deflation duration in seconds; zero snaps. | [awful/accessibility.lua:99](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L99) |
+| `accessibility_cursor_finder_duration` <SomewmOnly /> | `number` | Ring duration in seconds. | [awful/accessibility.lua:39](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L39) |
+| `accessibility_cursor_finder_effect` <SomewmOnly /> | `string` | Visual effect: rings, magnify, or both. | [awful/accessibility.lua:33](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L33) |
+| `accessibility_cursor_finder_enabled` <SomewmOnly /> | `boolean` | Allow explicit and shake activation. | [awful/accessibility.lua:27](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L27) |
+| `accessibility_cursor_finder_history_window` <SomewmOnly /> | `number` | Shake motion history window in seconds. | [awful/accessibility.lua:111](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L111) |
+| `accessibility_cursor_finder_inflate_duration` <SomewmOnly /> | `number` | Cursor inflation duration in seconds; zero snaps. | [awful/accessibility.lua:93](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L93) |
+| `accessibility_cursor_finder_line_width` <SomewmOnly /> | `number` | Ring stroke width in logical pixels. | [awful/accessibility.lua:57](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L57) |
+| `accessibility_cursor_finder_magnification` <SomewmOnly /> | `number` | Initial cursor magnification factor. | [awful/accessibility.lua:75](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L75) |
+| `accessibility_cursor_finder_max_scale` <SomewmOnly /> | `number` | Maximum cursor magnification factor. | [awful/accessibility.lua:87](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L87) |
+| `accessibility_cursor_finder_min_diagonal` <SomewmOnly /> | `number` | Minimum shake bounds diagonal in logical pixels. | [awful/accessibility.lua:123](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L123) |
+| `accessibility_cursor_finder_over_magnification` <SomewmOnly /> | `number` | Additional magnification per repeated activation. | [awful/accessibility.lua:81](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L81) |
+| `accessibility_cursor_finder_radius` <SomewmOnly /> | `number` | Initial outer ring radius in logical pixels. | [awful/accessibility.lua:45](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L45) |
+| `accessibility_cursor_finder_ring_count` <SomewmOnly /> | `integer` | Number of concentric rings. | [awful/accessibility.lua:63](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L63) |
+| `accessibility_cursor_finder_sensitivity` <SomewmOnly /> | `number` | Required travelled-distance to bounding-diagonal ratio. | [awful/accessibility.lua:117](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L117) |
+| `accessibility_cursor_finder_shake_enabled` <SomewmOnly /> | `boolean` | Enable event-driven shake detection for this instance. | [awful/accessibility.lua:69](https://github.com/trip-zip/somewm/blob/main/lua/awful/accessibility.lua#L69) |
 | `calendar_popup_width` <SomewmOnly /> | `number` | The calendar width, when the popup is created without a `width`. With neither, the popup follows the calendar's content. | [awful/widget/calendar_popup.lua:49](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L49) |
 | `calendar_style` | `cell_properties` | The generic calendar style table. Each table property can also be defined by `beautiful.calendar_[flag]_[property]=val`. | [awful/widget/calendar_popup.lua:43](https://github.com/trip-zip/somewm/blob/main/lua/awful/widget/calendar_popup.lua#L43) |
 | `carousel_center_mode` <SomewmOnly /> | `string` | Viewport centering mode. | [awful/layout/suit/carousel.lua:56](https://github.com/trip-zip/somewm/blob/main/lua/awful/layout/suit/carousel.lua#L56) |
@@ -657,4 +675,4 @@ See [Input Devices: Cursor Theming](../../guides/input-devices.md#cursor-theming
 - [Key Names](../key-names.md) – Common keybinding key names
 - [beautiful (AwesomeWM upstream docs)](https://awesomewm.org/apidoc/libraries/beautiful.html) – Full upstream API
 
-<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ 6b6cb90bd2 | regenerate with `npm run generate:reference` -->
+<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ 3d83522a15 | regenerate with `npm run generate:reference` -->

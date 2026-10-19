@@ -76,6 +76,7 @@ const sidebars: SidebarsConfig = {
           label: 'awful',
           items: [
             'reference/awful/index',
+            'reference/awful/accessibility',
             'reference/awful/layout',
             'reference/awful/carousel',
             'reference/awful/input',
