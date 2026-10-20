@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Theme Variables
 
-The `beautiful` table supplies theme defaults to Lua modules. Annotations come from `@beautiful` LDoc tags in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `73a5ee6305`. **477 documented**, 88 used-but-undocumented.
+The `beautiful` table supplies theme defaults to Lua modules. Annotations come from `@beautiful` LDoc tags in the [SomeWM source](https://github.com/trip-zip/somewm/tree/main/lua). Last sync: `ea3a2a1a9e`. **477 documented**, 88 used-but-undocumented.
 
 See the [Theme Tutorial](../../tutorials/theme.md) for how to apply these in a custom theme.
 
@@ -676,4 +676,4 @@ See [Input Devices: Cursor Theming](../../guides/input-devices.md#cursor-theming
 - [Key Names](../key-names.md) – Common keybinding key names
 - [beautiful (AwesomeWM upstream docs)](https://awesomewm.org/apidoc/libraries/beautiful.html) – Full upstream API
 
-<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ 73a5ee6305 | regenerate with `npm run generate:reference` -->
+<!-- generator: scripts/generate-theme-variables.mjs | source ref: main @ ea3a2a1a9e | regenerate with `npm run generate:reference` -->
