@@ -6,10 +6,10 @@ description: Pointer location with rings, magnification, and optional shake acti
 
 # awful.accessibility
 
-`awful.accessibility` provides a pointer locator. It can display static or shrinking rings,
-temporarily enlarge a themed cursor, or combine both effects. Activation is an
-explicit Lua call or an optional shake gesture. Loading `awful` does not enable
-shake detection or start a locator.
+`awful.accessibility` provides a pointer locator. It can display static or
+shrinking rings, temporarily enlarge a themed cursor, or combine both effects.
+Activation is an explicit Lua call or an optional shake gesture. Loading `awful`
+does not enable shake detection or start a locator.
 
 ## Usage
 
@@ -26,8 +26,8 @@ awful.keyboard.append_global_keybindings {
 ```
 
 The module-level `awful.accessibility.find_cursor()` uses a default instance.
-Without theme overrides it displays rings. `awful.accessibility.stop_cursor_finder()` stops
-that default instance only.
+Without theme overrides it displays rings.
+`awful.accessibility.stop_cursor_finder()` stops that default instance only.
 
 ## Reduced motion and persistent cursor size
 
@@ -136,9 +136,10 @@ if configured; setting `cursor_finder_shake_enabled = false` disables it.
 
 Only one locator owns the pointer at a time. Activating another instance stops
 the previous one. If an end-signal handler activates a locator, that later
-activation takes precedence over the interrupted request. Calling `stop_cursor_finder()` on an inactive instance does not affect the
-active instance. Enabling shake detection on another instance disables it on
-the previous observer and emits its property-change signal.
+activation takes precedence over the interrupted request. Calling
+`stop_cursor_finder()` on an inactive instance does not affect the active
+instance. Enabling shake detection on another instance disables it on the
+previous observer and emits its property-change signal.
 
 Rings pass input through and follow pointer motion. The cursor hotspot stays at
 the pointer throughout enlargement. Themed cursors, including shapes requested
