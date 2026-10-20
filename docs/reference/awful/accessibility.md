@@ -6,7 +6,7 @@ description: Pointer location with rings, magnification, and optional shake acti
 
 # awful.accessibility
 
-`awful.accessibility` provides a pointer locator. It can display shrinking rings,
+`awful.accessibility` provides a pointer locator. It can display static or shrinking rings,
 temporarily enlarge a themed cursor, or combine both effects. Activation is an
 explicit Lua call or an optional shake gesture. Loading `awful` does not enable
 shake detection or start a locator.
@@ -26,8 +26,38 @@ awful.keyboard.append_global_keybindings {
 ```
 
 The module-level `awful.accessibility.find_cursor()` uses a default instance.
-Without theme overrides it displays rings. `awful.accessibility.stop()` stops
+Without theme overrides it displays rings. `awful.accessibility.stop_cursor_finder()` stops
 that default instance only.
+
+## Reduced motion and persistent cursor size
+
+```lua
+root.cursor_size(48)
+
+local a11y = awful.accessibility {
+    cursor_finder_effect = "both",
+    cursor_finder_shake_enabled = true,
+    cursor_finder_animated = false,
+}
+```
+
+With `cursor_finder_animated = false`, rings keep their size and opacity while
+following the pointer, then disappear after `cursor_finder_duration` seconds.
+Magnification changes immediately and restores the base size immediately after
+`cursor_finder_deflate_delay` seconds of inactivity. Inflation and deflation
+durations are ignored. Repeated activation restarts the lifetimes and adds
+magnification up to the configured maximum.
+
+This setting controls pointer-locator animation only. A keyboard binding can
+activate the same effects without a shake gesture.
+
+`root.cursor_size(48)` sets the base cursor size; placing it in `rc.lua` reapplies
+it when the configuration loads. `XCURSOR_SIZE=48` in the compositor's startup
+environment also sets the base size. Temporary magnification multiplies the
+configured base size on each output; completion and cancellation restore that
+base, including when it is larger than the default. Cursor themes may provide
+discrete image sizes. Client-uploaded cursors remain application-controlled.
+See [Cursor theming](../../guides/input-devices.md#cursor-theming).
 
 ## Constructor
 
@@ -57,7 +87,8 @@ factors are relative to the cursor's normal size on its output.
 | --- | --- | --- |
 | `cursor_finder_enabled` | `true` | Boolean; assigning `false` ends this instance's active locator and suppresses activation. |
 | `cursor_finder_effect` | `"rings"` | `"rings"`, `"magnify"`, or `"both"`. Changing it ends the active locator. |
-| `cursor_finder_duration` | `0.8` | Ring animation duration, 0.01–60. |
+| `cursor_finder_animated` | `true` | Boolean; `false` holds static rings and changes magnification immediately. Changing it ends the active locator. |
+| `cursor_finder_duration` | `0.8` | Ring display duration, 0.01–60, for animated and static rings. |
 | `cursor_finder_radius` | `100` | Largest ring's initial radius, 1–512. |
 | `cursor_finder_color` | `"#ff6600"` | Solid ring colour. |
 | `cursor_finder_line_width` | `3` | Ring stroke width, 1–64. |
@@ -87,7 +118,7 @@ and resets the deflation delay. Direction changes during continued shaking also
 extend that delay. Rings finish after their own duration; with both effects,
 magnification can remain active after the rings disappear.
 
-### `a11y:stop()`
+### `a11y:stop_cursor_finder()`
 
 Cancels this instance's timers and rings and immediately restores normal cursor
 size if this instance owns the active locator. Shake detection remains enabled
@@ -104,7 +135,8 @@ if configured; setting `cursor_finder_shake_enabled = false` disables it.
 ## Pointer and instance behaviour
 
 Only one locator owns the pointer at a time. Activating another instance stops
-the previous one. Calling `stop()` on an inactive instance does not affect the
+the previous one. If an end-signal handler activates a locator, that later
+activation takes precedence over the interrupted request. Calling `stop_cursor_finder()` on an inactive instance does not affect the
 active instance. Enabling shake detection on another instance disables it on
 the previous observer and emits its property-change signal.
 
