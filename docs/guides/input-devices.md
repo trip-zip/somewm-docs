@@ -58,3 +58,6 @@ theme.enable_spawn_cursor = true     -- "watch" while an app starts
 ```
 
 Names are the X cursor names ([list](https://awesomewm.org/apidoc/documentation/06-appearance.md.html)). To persist a theme and size, set `XCURSOR_THEME` and `XCURSOR_SIZE` in the environment SomeWM starts in. A theme that is not installed falls back to wlroots' built-in cursors. [Theme Variables](../reference/beautiful/theme-variables.md#cursors) has the cursor variables.
+
+For temporary pointer enlargement, locator rings, and reduced-motion locator
+behaviour, see [awful.accessibility](../reference/awful/accessibility.md).
