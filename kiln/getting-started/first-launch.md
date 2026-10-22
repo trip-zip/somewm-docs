@@ -28,7 +28,7 @@ checkout. Neither command rotates logs.
 For the maintainer’s physical TTY session, `./run-tty` builds the normal binary
 and launches foot with the actual config/theme, a private bus and IPC socket.
 It preserves the login runtime directory and records the trial directory in
-`build/last-tty-trial`. Read the checkout’s `TTY-TRIAL.md` before physical tests;
+`build/last-tty-trial`. Read the checkout's `TESTING.md` before physical tests;
 this launcher is for a free seat, not a second desktop on an occupied seat.
 
 Flags and environment:

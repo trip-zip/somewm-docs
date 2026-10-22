@@ -28,7 +28,8 @@ The implementation retains these documented limits:
 
 - Clay hit testing misses a visible child in a horizontal-only clip and accepts
   a hit outside a nested outer clip. Exact inherited capture/scissor fingerprints
-  are retained in the source repository's `PARITY.md` and baseline JSON files.
+  are retained in the source repository's `scripts/clay-contract-baseline.json`
+  and `scripts/clay-live-baseline.json` test fixtures.
 - Inspector custom palette styling is deferred. Rejected raster work can advance
   private inspector selection; a rejected toggle needs retry. There is no claim
   of private Clay state rollback.
@@ -38,8 +39,7 @@ The implementation retains these documented limits:
 
 The three XWayland classifications are guarded against wlroots 0.20.2 and
 XWayland 24.1.14. Supported-path soak success does not erase them. The source
-checkout's `AUDIT-20.md` and coverage matrix retain exact strict failures,
-partial original test legs and independent software receipts.
+checkout's `TESTING.md` describes the compatibility suite and strict probes.
 
 ## The drawing vocabulary
 

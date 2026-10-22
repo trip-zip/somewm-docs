@@ -83,7 +83,7 @@ PID cleanup and socket checks for longer tests.
 The sequence above is a manual smoke test. For automated runs use the existing
 `make compat-test` harness, which waits for readiness, asserts results and
 cleans up on failures. It also retains the historical C comparison checkout;
-see the source repository's `TRANSITION.md` for baseline provenance.
+see the source repository's `TESTING.md` for baseline provenance.
 
 ## See also
 
