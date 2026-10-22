@@ -7,17 +7,14 @@ slug: /
 
 # Kiln
 
-Kiln is a Wayland compositor configured in Lua, with its active development
-moving to Odin. Windows, bars, widgets, menus and notifications share one
+Kiln is a Wayland compositor written in Odin and configured in Lua. Windows, bars, widgets, menus and notifications share one
 [Clay](https://github.com/nicbarker/clay) layout tree per output. Lua defines
 policy; Odin handles the compositor and retained rendering over wlroots.
 
-The maintainer runs the Odin implementation on a real desktop. Automated
-software checks and operator-reported physical use are distinct evidence;
-[known limitations](/kiln/concepts/limitations) remain. The C implementation
-is the historical reference and comparison baseline. Current installed names
-are `kiln-odin` and `kiln-odin-client`; the Lua module and config directory
-remain `kiln`.
+The maintainer runs Kiln on a real desktop. The API remains experimental;
+[known limitations](/kiln/concepts/limitations) distinguish software coverage,
+operator-reported physical use and pending hardware checks. Build and run it
+with `make` and `make run`, or use `./run-tty` from a free physical TTY.
 
 The screenshots below are historical C Kiln captures. New Odin desktop
 captures have not yet replaced them.
@@ -57,16 +54,7 @@ The API is not yet stable and may change between releases.
 | [Reference](/kiln/reference/) | You need the exact property, method, signal, or default |
 | [Concepts](/kiln/concepts/the-clay-bet) | You want to understand how kiln works and why |
 
-Short answers to common questions are in the [FAQ](/kiln/faq). The [existing public repository](https://github.com/trip-zip/kiln) currently
-contains the C baseline. The Odin source destination is awaiting the
-maintainer’s migration decision; these local documentation changes are a
-publication draft.
-
-Some detailed guides retain C-era shell recipes. For Odin, use
-`kiln-odin-client eval` in place of `scripts/kiln-eval` with an explicit Lua
-`return` when querying, and `kiln-odin-client` in place of `kiln-client`. The
-current [installation](/kiln/getting-started/installation),
-[first launch](/kiln/getting-started/first-launch) and
-[headless guide](/kiln/guides/testing-headless) supersede old make targets.
-Public Lua reference material is retained; C implementation details are
-historical where labelled.
+Short answers to common questions are in the [FAQ](/kiln/faq). The source lives
+at [github.com/trip-zip/kiln](https://github.com/trip-zip/kiln). Kiln is MIT
+licensed. The retired C implementation remains in Git history at
+`c-baseline-82ad185` for reproducible comparisons.

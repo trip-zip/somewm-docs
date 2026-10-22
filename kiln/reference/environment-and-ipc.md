@@ -10,7 +10,7 @@ A running kiln is scriptable from the outside: it loads its config from a fixed 
 
 ```bash
 # ask a running kiln a question from a shell
-kiln-odin-client eval 'return #client.all()'
+kiln-client eval 'return #client.all()'
 ```
 
 ## Environment variables
@@ -44,7 +44,7 @@ First hit wins:
 
 1. `KILN_RC` (used verbatim if set and non-empty)
 2. `$XDG_CONFIG_HOME/kiln/rc.lua` when `XDG_CONFIG_HOME` is set, otherwise `~/.config/kiln/rc.lua`
-3. The compiled installed default, `<datadir>/kiln-odin/rc.lua`
+3. The compiled installed default, `<datadir>/kiln/rc.lua`
 4. `kilnrc.lua` in the working directory
 
 ## Flags
@@ -54,7 +54,7 @@ First hit wins:
 | `-s <command>` | Run a startup command once the compositor is up. |
 
 ```bash
-kiln-odin -s 'foot'
+kiln -s 'foot'
 ```
 
 ## IPC: the eval socket
@@ -73,9 +73,9 @@ Use the installed CLI (or `./build/kiln-client` in the source tree). Set
 `KILN_SOCK` or pass `-s PATH` to select the intended instance:
 
 ```bash
-kiln-odin-client eval 'return core.output.list()[1].name'
-kiln-odin-client eval 'core.spawn({ "foot" })'
-kiln-odin-client eval 'require("kiln").notify{ title = "hi", message = "from IPC" }'
+kiln-client eval 'return core.output.list()[1].name'
+kiln-client eval 'core.spawn({ "foot" })'
+kiln-client eval 'require("kiln").notify{ title = "hi", message = "from IPC" }'
 ```
 
 :::warning

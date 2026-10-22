@@ -6,13 +6,11 @@ sidebar_position: 19
 
 # kiln-client
 
-The installed Odin command is **`kiln-odin-client`**, built as
-`build/kiln-client`. This page keeps its existing URL and the shorter
-`kiln-client` spelling in the verb examples: substitute `kiln-odin-client`
-for an Odin installation. Bash, zsh and fish completions install under the
-Odin name. Always select the intended instance with `-s PATH` or `KILN_SOCK`.
-`output list` displays refresh in Hz; `output mode` currently forwards the
-backend's **mHz** value despite its help argument being called `hz`.
+The command is **`kiln-client`**, built as `build/kiln-client`. Installation
+includes bash, zsh and fish completions. Select the intended instance with
+`-s PATH` or `KILN_SOCK`. `output list` displays refresh in Hz;
+`output mode` currently forwards the backend's **mHz** value despite its help
+argument being called `hz`.
 
 `kiln-client` is the CLI over kiln's IPC socket: a fixed verb surface plus a
 reflection layer over the object classes, so scripts and keybind-external

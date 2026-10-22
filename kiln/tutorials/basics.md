@@ -21,18 +21,20 @@ existing Wayland or X session to nest inside. All chords below are the default
 From the source tree:
 
 ```bash
-make run
+kiln_demo=$(mktemp -d /tmp/kiln-demo.XXXXXX)
+cp kilnrc.lua "$kiln_demo/rc.lua"
+printf 'Trial config: %s/rc.lua\n' "$kiln_demo"
+KILN_RC="$kiln_demo/rc.lua" KILN_SOCK="$kiln_demo/eval.sock" \
+  dbus-run-session -- ./build/kiln
 ```
 
 kiln detects it is inside a session and opens as a window. Click into it so it
 has your keyboard. You should see the stock desktop: a top bar with five tags,
 the generated wallpaper, and an empty workarea.
 
-:::tip
-If you already run kiln as your real session, start a second instance with
-`make dev` instead. It gets its own IPC socket and log, so it cannot
-interfere with the live one.
-:::
+This session has its own IPC socket and config copy. Keep the trial directory
+path for edits and commands from a second terminal. Your normal config is not
+used by this tutorial.
 
 ## 2. Open some terminals
 
@@ -87,13 +89,9 @@ Related states: `mod+f` fullscreen, `mod+m` maximize, `mod+n` minimize
 
 ## 6. Edit your config and reload
 
-Make the config yours, if you have not yet:
+Open the trial's `rc.lua` in another terminal. Use the trial config path printed at startup.
 
-```bash
-mkdir -p ~/.config/kiln && cp kilnrc.lua ~/.config/kiln/rc.lua
-```
-
-Open it and change something visible, say the accent color (put the line
+Change something visible, say the accent color (put the line
 after the palette block near the top, so the palette does not overwrite it):
 
 ```lua
@@ -110,7 +108,7 @@ Every kiln also exposes a live Lua socket, so the same reload works from any
 terminal, key or no key:
 
 ```bash
-scripts/kiln-eval 'require("kiln").reload()'
+KILN_SOCK=/tmp/kiln-demo.REPLACE_ME/eval.sock scripts/kiln-eval 'require("kiln").reload()'
 ```
 
 (The socket cannot see your rc's `kiln` local; `require("kiln")` returns the

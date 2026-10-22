@@ -1,6 +1,6 @@
 ---
 title: Testing Headless
-description: Start a private Odin Kiln instance, query it, capture it and shut down only that instance.
+description: Start a private Kiln instance, query it, capture it and shut down only that instance.
 sidebar_position: 20
 ---
 
@@ -13,7 +13,7 @@ workload you intend to measure.
 
 ## Booting headless
 
-From a built Odin checkout, this creates private runtime, config, data, cache
+From a built Kiln checkout, this creates private runtime, config, data, cache
 and IPC paths and loads the stock config explicitly:
 
 ```sh
@@ -26,13 +26,12 @@ env -u DISPLAY -u WAYLAND_DISPLAY -u WAYLAND_SOCKET \
   XDG_CACHE_HOME="$kiln_test/cache" KILN_RC="$PWD/kilnrc.lua" \
   KILN_SOCK="$kiln_test/eval.sock" WLR_BACKENDS=headless \
   WLR_LIBINPUT_NO_DEVICES=1 WLR_RENDERER=pixman \
-  dbus-run-session -- ./build/kiln-odin >"$kiln_test/server.log" 2>&1 &
+  dbus-run-session -- ./build/kiln >"$kiln_test/server.log" 2>&1 &
 kiln_test_pid=$!
 ```
 
 Keep this shell open for the following commands. Wait for the socket and check
-`server.log` if startup fails. `make headless` is a C-only target and does not
-exist in this build. Odin refuses to bind an occupied socket rather than
+`server.log` if startup fails. Kiln refuses to bind an occupied socket rather than
 unlinking it; a unique private path is still necessary to address the right
 instance.
 
@@ -45,7 +44,7 @@ instance.
 ```
 
 With the stock config and one output, expect `pong`, `1` and `5`. The installed
-command spelling is `kiln-odin-client`. A config's local `kiln` is not global;
+command spelling is `kiln-client`. A config's local `kiln` is not global;
 use `require("kiln")` in an eval. Spawn into this instance using its child
 environment instead of guessing a display name:
 

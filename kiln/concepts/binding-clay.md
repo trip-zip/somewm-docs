@@ -1,5 +1,5 @@
 ---
-title: Binding Clay
+title: Binding Clay (C baseline)
 description: "How kiln drives Clay from Lua: one context per output, declarations over FFI, and a client window as a CUSTOM leaf."
 sidebar_position: 2
 ---

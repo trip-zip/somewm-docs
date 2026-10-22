@@ -22,10 +22,10 @@ Not as drawing primitives. The paint vocabulary is rectangles, corner radius, bo
 
 ## How do I script or query kiln from the shell?
 
-kiln listens on a unix socket (`$XDG_RUNTIME_DIR/kiln.sock`, overridable with `KILN_SOCK`). Send Lua text, get the result back: it is a live REPL into the config VM, so everything in these docs is drivable from a script. The installed `kiln-odin-client` command handles the socket protocol:
+kiln listens on a unix socket (`$XDG_RUNTIME_DIR/kiln.sock`, overridable with `KILN_SOCK`). Send Lua text, get the result back: it is a live REPL into the config VM, so everything in these docs is drivable from a script. The installed `kiln-client` command handles the socket protocol:
 
 ```bash
-kiln-odin-client eval 'require("kiln").notify{title = "hello", message = "from the shell"}'
+kiln-client eval 'require("kiln").notify{title = "hello", message = "from the shell"}'
 ```
 
 See [IPC and Scripting](/kiln/guides/ipc-and-scripting).
@@ -60,14 +60,14 @@ kiln only redraws a screen when something marks it dirty. Most stdlib property w
 
 ## Can I log into kiln from a display manager?
 
-Installation supplies `kiln-odin.desktop`, named **kiln Odin**. A system
+Installation supplies `kiln.desktop`, named **Kiln**. A system
 installation can be discovered by a display manager; user-prefix discovery
 depends on that manager. Kiln also runs from a free TTY or nested inside an
-existing desktop. For a nested session from the Odin checkout:
+existing desktop. For a nested session from the source checkout:
 
 ```bash
 kiln_demo=$(mktemp -d /tmp/kiln-demo.XXXXXX)
-KILN_SOCK="$kiln_demo/eval.sock" dbus-run-session -- ./build/kiln-odin
+KILN_SOCK="$kiln_demo/eval.sock" dbus-run-session -- ./build/kiln
 ```
 
 See [First Launch](/kiln/getting-started/first-launch).
@@ -81,7 +81,7 @@ See [First Launch](/kiln/getting-started/first-launch).
 Call `kiln.reload()`. It re-runs your config in the live compositor: clients, tags, and screens survive. Bind it to a key, or trigger it over IPC:
 
 ```bash
-kiln-odin-client eval 'require("kiln").reload()'
+kiln-client eval 'require("kiln").reload()'
 ```
 
 (Over the socket, use `require("kiln")`: the `kiln` variable is local to your

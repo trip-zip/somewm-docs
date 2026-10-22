@@ -15,14 +15,15 @@ explore. Launched from a bare TTY it runs directly on DRM as your session.
 ```bash
 kiln_demo=$(mktemp -d /tmp/kiln-demo.XXXXXX)
 KILN_SOCK="$kiln_demo/eval.sock" KILN_RC="$PWD/kilnrc.lua" \
-  dbus-run-session -- ./build/kiln-odin -s foot
+  dbus-run-session -- ./build/kiln -s foot
 ```
 
 Run it under a session bus. The bus serves two things: clients you spawn
 (portals, apps that expect D-Bus), and kiln's own D-Bus integrations, which is
 how desktop notifications and system tray items reach the compositor. Without
-a bus, apps still run but anything D-Bus-shaped is missing. The command above creates a private bus and IPC path. `make run` does not
-wrap D-Bus or rotate logs in the Odin build. Run from the source checkout.
+a bus, apps still run but anything D-Bus-shaped is missing. The command above creates a private bus and IPC path. `make run` also wraps
+D-Bus, but uses the default IPC path and your normal config. Run from the source
+checkout. Neither command rotates logs.
 
 For the maintainer’s physical TTY session, `./run-tty` builds the normal binary
 and launches foot with the actual config/theme, a private bus and IPC socket.
@@ -102,7 +103,7 @@ Keep an existing config. For a new one, copy the default without overwriting:
 mkdir -p ~/.config/kiln
 cp -n kilnrc.lua ~/.config/kiln/rc.lua  # a new config only
 # or, after make install:
-cp -n /usr/local/share/kiln-odin/rc.lua ~/.config/kiln/rc.lua
+cp -n /usr/local/share/kiln/rc.lua ~/.config/kiln/rc.lua
 ```
 
 Everything above (keys, tags, layouts, the bar, the wallpaper, the theme) is

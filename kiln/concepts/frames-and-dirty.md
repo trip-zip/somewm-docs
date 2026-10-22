@@ -32,16 +32,16 @@ The reason is a feedback loop. kiln configures a client to the box Clay solved; 
 
 ## The frame clock and animation
 
-Sometimes a screen should redraw every frame for a while: an easing tag switch, a sliding master split. For that there is a per-output frame clock. `core.tick(screen, true)` arms it; while armed, C delivers a `frame::tick` event with the screen and the true time delta on every output frame, and the screen re-solves at panel rate. `core.tick(screen, false)` disarms it and the screen goes idle again.
+Sometimes a screen should redraw every frame for a while: an easing tag switch, a sliding master split. For that there is a per-output frame clock. `core.tick(screen, true)` arms it; while armed, the core delivers a `frame::tick` event with the screen and the true time delta on every output frame, and the screen re-solves at panel rate. `core.tick(screen, false)` disarms it and the screen goes idle again.
 
 Animation is plain Lua state on top of that clock. `kiln.animation.start(screen, key, target, dur, from)` begins easing a named value toward a target (ease-out cubic, 0.15 seconds by default), arming the screen's tick if it was idle. `kiln.animation.get(key, default)` returns the eased value mid-flight and the caller's own value once settled. Declarations read `get` where they would read the raw value, so an animated frame is just an ordinary frame that happened to read an in-between number. When the last animation on a screen finishes, its tick disarms automatically.
 
-C holds none of this: no easing curves, no animation state, no durations. The clock is the only C mechanism; the motion is your Lua. The stdlib uses the same machinery for its own effects, like the tag-switch reveal and the master-split slide.
+The core holds none of this: no easing curves, no animation state, no durations. The clock is the only native mechanism; the motion is your Lua. The stdlib uses the same machinery for its own effects, like the tag-switch reveal and the master-split slide.
 
 ## See also
 
 - [The Clay Bet](/kiln/concepts/the-clay-bet)
 - [The Object Model](/kiln/concepts/object-model)
-- [The C/Lua Boundary](/kiln/concepts/c-lua-boundary)
+- [The Native/Lua Boundary](/kiln/concepts/c-lua-boundary)
 - [Widgets tutorial](/kiln/tutorials/widgets)
 - [core reference](/kiln/reference/core)

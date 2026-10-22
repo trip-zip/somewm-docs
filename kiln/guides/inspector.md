@@ -28,7 +28,7 @@ kiln.key {
 or over [IPC](/kiln/guides/ipc-and-scripting), which is the one to reach for when a keybinding is the thing you are debugging:
 
 ```bash
-kiln-odin-client eval 'require("kiln").inspector()'
+kiln-client eval 'require("kiln").inspector()'
 ```
 
 `kiln.inspector(s)` takes an optional screen and defaults to the focused one. Close it with the same key or the `x` in its header.

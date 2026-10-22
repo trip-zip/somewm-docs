@@ -39,7 +39,9 @@ scripts/kiln-eval 'return #client.all(), #screen.all()'
 Errors come back prefixed `ERROR:` with the Lua message.
 
 :::note
-The reply is capped at 4096 bytes. For big dumps, return compact strings, or write to a file from inside the chunk and read that.
+Raw replies are not capped at 4096 bytes. The CLI `kiln-client eval` takes a
+Lua statement chunk, so use an explicit `return` when asking it for a value.
+`scripts/kiln-eval` uses the raw expression-or-statement evaluator.
 :::
 
 ## 3. One-liners
@@ -90,10 +92,12 @@ door to anything without a verb.
 
 ## 4. Target a nested dev instance
 
-Each kiln instance owns one socket. Your daily session uses the default path; a nested test instance started with `make dev` picks a private socket (like `/tmp/kiln-dev-1.sock`) and prints it at startup, so scripts target it explicitly:
+Each Kiln instance owns one socket. Give a nested test a private path as in
+[First launch](/kiln/getting-started/first-launch), then target that path
+explicitly from the same shell:
 
 ```bash
-KILN_SOCK=/tmp/kiln-dev-1.sock scripts/kiln-eval 'return #screen.all()'
+KILN_SOCK="$kiln_demo/eval.sock" scripts/kiln-eval 'return #screen.all()'
 ```
 
 See [Reload and Debugging](/kiln/guides/reload-and-debugging) for the nested-instance workflow, and [Testing Headless](/kiln/guides/testing-headless) for driving an invisible instance in tests.
