@@ -32,7 +32,7 @@ The stack orders clients within a band. `c.below`, `c.above`, `c.ontop` and `c.f
 | `c:swap(other)` | no | swaps positions in the clients array, which layouts read |
 | switching tags | no | |
 
-Raise and lower carry a client's transients with it.
+Raising or lowering a client also raises or lowers its transients.
 
 ## Two arrays
 

@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Scrollable Tiling <SomewmOnly />
 
-The carousel layout puts clients in columns on a strip wider than the screen and shows the part under a viewport. In [the tree](./clients-in-the-tree.md#a-layout-is-a-tree) it is a Clay scroll container inside the workarea whose content is a row of columns. Each column is a `percent` of the viewport's width, its `width_fraction`; the clients in a column are a column of equal percents. Clay keeps the scroll offset as its scroll record, printed on the container's line in the dump with the `scroll` source word. Nothing in the layout computes a pixel position.
+Carousel arranges clients in columns on a scrollable strip. Each column’s `width_fraction` sets its share of the viewport width. [Clay computes the geometry](./clients-in-the-tree.md#a-layout-is-a-tree) and stores the scroll offset, labelled `scroll` in the dump.
 
 | | Master and stack | Carousel |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ The carousel layout puts clients in columns on a strip wider than the screen and
 
 ## Columns
 
-Each tag keeps an ordered list of columns, each with `clients` and `width_fraction` (1.0 is the viewport, 0.5 half of it), plus a reverse index from client to column and row. Clients in one column split its height equally. Each time the layout is described it drops clients no longer tiled on the tag and columns left empty, adds new clients each in its own column after the focused one, and rebuilds the index, so clients added by rules or signals appear at the next frame.
+Each tag stores ordered columns with `clients` and `width_fraction` fields, plus an index from client to column and row. Clients in a column split its height equally. On each layout pass, removed clients and empty columns are discarded. New clients get a column after the focused one, and the index is rebuilt.
 
 ## Scrolling
 
@@ -45,7 +45,7 @@ When focus moves to a column outside the viewport, the carousel reads the solved
 
 The offset is clamped to the strip. With `peek_width` above zero the viewport is padded by `peek_width + useless_gap` on each side, so that many pixels of the neighbouring columns show.
 
-A scroll moves every client's box. With `theme.animation_layout_duration` above 0, each client frame carries a Clay transition and slides over that duration; at 0, a scroll snaps. There is no carousel-specific setting.
+A scroll moves every client's box. With `theme.animation_layout_duration` above 0, client frames animate over that duration; at 0, a scroll snaps. There is no carousel-specific setting.
 
 `carousel.vertical` is the same layout turned 90 degrees: columns scroll vertically and a column's clients sit side by side.
 

@@ -4,19 +4,9 @@ title: Theme
 description: Write a theme file, load it with beautiful.init, see a change land on reload, and build it from a palette table.
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Theme
 
-<YouWillLearn>
-
-- How `beautiful` variables reach every widget
-- Writing and loading a theme file
-- A palette table and recoloured icons
-
-</YouWillLearn>
-
-`beautiful.init(path)` loads a Lua file that returns a table, and every widget reads its colours, fonts and sizes from `beautiful.*` afterwards. Before `init` runs, every variable is nil and reading one raises no error, so `require` widget modules after the `beautiful.init()` line in `rc.lua`.
+`beautiful.init(path)` loads the table returned by a theme file. Require widget modules after this call so they read the initialised colours, fonts and sizes.
 
 ## A theme file
 
@@ -56,9 +46,9 @@ local beautiful = require("beautiful")
 beautiful.init(os.getenv("HOME") .. "/.config/somewm/theme/theme.lua")
 ```
 
-Mod4 + Ctrl + r. Windows now sit apart by the gap and the focused border is slate blue. Change `useless_gap` to `dpi(16)`, reload, and the windows jump apart. Every variable works this way.
+Reload with Mod4 + Ctrl + r. Check the gaps and slate-blue focused border. Change `useless_gap` to `dpi(16)` and reload to increase the gaps.
 
-`dpi(n)` scales `n` by the screen's DPI, so `dpi(8)` is 8 pixels on a 1080p panel and about 16 on a 4K one. Use it for gaps, borders, padding and icon sizes; not for colours or opacity.
+`dpi(n)` scales sizes by DPI. Use it for gaps, borders, padding and icons.
 
 ## A palette
 

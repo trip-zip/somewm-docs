@@ -17,7 +17,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 | `SOMEWM_SOCKET` | a per-instance IPC socket, so `somewm-client test eval --name <n>` reaches the right one |
 | `SOMEWM_TEST_NAME` | the instance name, read by the keybind remap shim |
 
-Same `/home`, same uid, same Lua libraries, same D-Bus session. There is no VM, chroot or container. A test `rc.lua` that runs `os.execute("rm -rf ~")` removes your home. For isolation use a VM or another user; test mode is a fast loop for trusted Lua.
+Test mode shares your files, user account, Lua libraries and D-Bus session. Use it with trusted configs; use a VM or another user for isolation.
 
 | You want to | Use |
 | --- | --- |
@@ -45,6 +45,6 @@ The status block says which path you got.
 
 ## Credit
 
-The idea comes from [AWMTT](https://github.com/serialoverflow/awmtt) by serialoverflow, which gave AwesomeWM this loop through Xephyr; see [`ATTRIBUTION.md`](https://github.com/trip-zip/somewm-docs/blob/main/ATTRIBUTION.md). Nesting a Wayland compositor is native, which is what makes the named instances, the headless host and `test eval` against the nested Lua VM possible.
+Test mode was inspired by [AWMTT](https://github.com/serialoverflow/awmtt) by serialoverflow, which runs AwesomeWM in Xephyr. See [attribution](https://github.com/trip-zip/somewm-docs/blob/main/ATTRIBUTION.md).
 
 [Testing with a nested compositor](../guides/testing-with-nested-compositor.md) is the how-to; [Try SomeWM without installing](../tutorials/try-somewm-without-installing.md) is the first run.

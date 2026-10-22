@@ -6,20 +6,20 @@ description: The sizing words Clay solves, which AwesomeWM property declares eac
 
 # Reading the tree
 
-`somewm-client clay tree` prints the element tree SomeWM [declared and solved](./how-somewm-draws.md) for each output, as of the last frame, followed by the render commands the scene holds. `screen.inspector = true` draws the same tree as a panel over that screen. Every box on screen is on one line of the dump, with the declaration that produced it and the word for who chose each number.
+`somewm-client clay tree` prints each output's [solved element tree](./how-somewm-draws.md) and render commands from the last frame. `screen.inspector = true` shows the tree over that screen.
 
 ## Sizing
 
-Each axis of an element is sized one of four ways. These are Clay's four sizing modes; the dump prints the short names.
+Each axis uses one of four sizing modes:
 
 | Dump | Meaning |
 | --- | --- |
 | `fit` | the content: measured text, the image, or the children plus padding and gaps (`CLAY_SIZING_FIT`) |
 | `grow` | what is left in the parent after its other children, shared among growing siblings (`CLAY_SIZING_GROW`) |
-| `fixed(N)` | a told number (`CLAY_SIZING_FIXED`) |
+| `fixed(N)` | an explicit size (`CLAY_SIZING_FIXED`) |
 | `percent(N)` | a share of the parent (`CLAY_SIZING_PERCENT`) |
 
-A fit or a grow can carry a floor or a cap: `fit>=32` is never below 32, `grow<=200` never above 200. Four more declarations place children: direction (`row` or `column`), `gap N` between neighbours, `pad l,r,t,b` inside the edges, and alignment.
+`fit` and `grow` support minimum and maximum sizes: `fit>=32` is at least 32, and `grow<=200` is at most 200. Direction (`row` or `column`), `gap`, `pad l,r,t,b`, and alignment place the children.
 
 What you write in `rc.lua` declares them:
 
@@ -30,15 +30,15 @@ What you write in `rc.lua` declares them:
 | `wibox.layout.align` | three slots. `expand = "inside"` (default): outer two fit, middle grows. `"outside"`: middle fits, outer two grow. `"none"`: all three fit, each outer one at its edge of a growing box, so the middle centres in the whole length |
 | `spacing` | the gap, unless a `spacing_widget` is set, which then sits between the children |
 | `wibox.container.margin` | padding from `left`, `right`, `top`, `bottom`; the child fills what is inside |
-| `wibox.container.constraint` | from `width` and `height`: a cap with `strategy = "max"` (default), a floor with `"min"`, a told number with `"exact"` |
+| `wibox.container.constraint` | from `width` and `height`: a cap with `strategy = "max"` (default), a floor with `"min"`, an explicit size with `"exact"` |
 | `wibox.container.place` | alignment of its child (`halign`, `valign`, centred by default); the child fits unless `content_fill_*` makes it grow; the place grows where `fill_*` says |
 | `wibox.container.background` | no size of its own: a fill, a corner radius and a border around a child that fills it; `border_strategy = "inner"` adds the border width as padding |
-| `forced_width`, `forced_height` | a told number; where the parent makes that axis grow, it becomes a floor instead |
-| a wibar's `height` | a told number, from `beautiful.wibar_height` in the bundled config |
+| `forced_width`, `forced_height` | an explicit size; where the parent makes that axis grow, it becomes a floor instead |
+| a wibar's `height` | an explicit size, from `beautiful.wibar_height` in the bundled config |
 
 ## Where a number comes from
 
-Every `fixed` and `percent` carries a word for who chose it:
+Each `fixed` or `percent` size is labelled with its source:
 
 | Word | Source |
 | --- | --- |
@@ -50,11 +50,13 @@ Every `fixed` and `percent` carries a word for who chose it:
 | `transition` | the current value of an animation Clay keeps for that box |
 | `scroll` | Clay's scroll record: a scrollbar thumb's length, a clip's offset |
 
-A bare `fit` or `grow` has no number, so no word. The header counts `derived`, a number SomeWM's own code computed from a solve. It reads 0 on every stock config.
+Bare `fit` and `grow` sizes have no source label. The header's `derived` count tracks sizes SomeWM computed from a previous solve; it is 0 in stock configs.
 
-A told number bounds what is inside it. It passes down, less padding, to a child that grows across the parent's flow or is the only child. Below a `fit` ancestor it is only a cap, since the fit may solve smaller. A `percent` ancestor stops it. A child growing along the flow beside siblings gets no bound; its share is Clay's to decide. This is how a 32-pixel bar makes a 24-pixel square icon 32 wide: the height reaches the icon through growing ancestors, and its width is its height times its aspect, so the line reads `w=fit>=32 theme`.
+An explicit size, minus padding, bounds a child that grows across the parent's flow or is its only child. A `fit` ancestor makes this a maximum; a `percent` ancestor stops propagation. Children growing along the flow beside siblings receive no such bound; Clay computes their shares.
 
-Anything in a flow carries a sizing and gets its box from the solve: a widget, a tiled client, the bundled bar. Anything outside it floats at a band and carries its own box: a wibox placed by its geometry and a floating client (marked `user`), the pointer (`theme`, or `protocol` for a client-set cursor). A popup attached to a widget is sized by its content.
+For example, a 32-pixel bar sets a square icon's height through its growing ancestors. The icon's aspect ratio then sets its width to 32, shown as `w=fit>=32 theme`.
+
+Clay computes geometry for elements in the flow, including tiled clients, widgets, and bars. Floating elements use a band and explicit geometry: `user` for wiboxes and floating clients, `theme` or `protocol` for the pointer. A popup attached to a widget is sized by its content.
 
 ## The dump
 
@@ -67,7 +69,7 @@ output HEADLESS-1 scale 1.00 inspector off frames 3 elements 41/65536 map 41 fre
 ```
 
 - Line 1: the output, its scale, whether the inspector is open, how many frames it has declared, and `elements` used of the per-output budget. `map` and `free` are Clay's element-id table and its freed slots. `inspector_input` and `bounds` are zero until the inspector opens.
-- Line 2: the last frame. `commands` from the solve, `mutations` the renderer made to the scene, nodes `created` and `swept`, `nodes` held now, `raster_bytes` held by rasters, `buffers` rastered this frame, and the time of each step.
+- Line 2: the last frame. `commands` from the solve, `mutations` the renderer made to the scene, nodes `created` and `swept`, current `nodes`, raster memory in `raster_bytes`, `buffers` rastered this frame, and the time of each step.
 - Line 3: roots in the flow and floating, and the two counts that must be 0: `derived` and `legacy`.
 
 Dump twice with nothing changed and `frames` does not move: an output with nothing dirty is not declared.
@@ -84,7 +86,7 @@ Dump twice with nothing changed and `frames` does not move: an output with nothi
   cursor left_ptr w=fixed(24) theme h=fixed(24) theme attach ROOT offset 97,99 band 32767 image box 97,99 24x24
 ```
 
-A root line is its role in capitals and the object: `WIBAR screen 1`, `SURFACE CLIENT_1`, `cursor left_ptr`. One root is in the flow, `OUTPUT`: a column of the bars and the `WORKAREA` between them, so the workarea is what the bars leave, not a subtraction. Every other root floats: `attach` is what it is placed against, `offset` its position from there, `band` its z-index ([table](./scene-graph.md#bands)). A wibox root reports `converted: N nodes, M images` from its widget tree, `radius` from its shape, and `clip` when it cuts its content. The geometry after the object is what `wibox:geometry()` reports.
+A root line is its role in capitals and the object: `WIBAR screen 1`, `SURFACE CLIENT_1`, `cursor left_ptr`. One root is in the flow, `OUTPUT`: a column of the bars and the `WORKAREA` between them, with the workarea filling the remaining space. Every other root floats: `attach` is what it is placed against, `offset` its position from there, `band` its z-index ([table](./scene-graph.md#bands)). A wibox root reports `converted: N nodes, M images` from its widget tree, `radius` from its shape, and `clip` when it cuts its content. The geometry after the object is what `wibox:geometry()` reports.
 
 ### Elements
 
@@ -95,9 +97,17 @@ A root line is its role in capitals and the object: `WIBAR screen 1`, `SURFACE C
     5a1614a8           text "Sun Oct 11  16:11" font=2 box 588,6 104x20
 ```
 
-Each element line, in order: the id (eight hex digits, the same every frame while the widget exists); the name (the widget's class, a role a stock widget gives its parts such as `text_role`, or `- spacer` for a box no widget owns); `w=` and `h=` sizing with any floor, cap and source word; direction, `pad` and `gap`; `clip`, or `image WxH` for an image; and `box x,y WxH`, the solved result. A text line is the textbox's content and font id.
+Each element line lists:
 
-To read a size, walk the nesting. The clock's margin is 120 by 32: it fits along the bar and grows to the bar's height. Its `pad 0,0,6,6` leaves the background 20 tall at y 6. The background's `pad 8,8,0,0` leaves the textbox 104 wide, which is the measured width of the text. So the clock is 104 plus 8 plus 8, and every term is on a line.
+- The id: eight hex digits, stable while the widget exists.
+- The widget class or role, such as `text_role`; `- spacer` means no associated widget.
+- `w=` and `h=`, including minimum, maximum, and source labels.
+- Direction, padding, gap, and clipping or image dimensions.
+- `box x,y WxH`: the computed position and size.
+
+Text lines show the content and font id.
+
+The clock's margin is 120 × 32. Vertical padding of 6 leaves the background 20 pixels tall at y=6. Horizontal padding of 8 leaves 104 pixels for the text: 104 + 8 + 8 = 120.
 
 ### The realized list
 
@@ -113,9 +123,12 @@ To read a size, walk the nesting. The clock's margin is 120 by 32: it fits along
   7c2c5897 RECTANGLE     z=0    box 0,0 1280x32 rbox 0,0 1280x32 drawin screen 1 1280x32+0+0
 ```
 
-The tree is what was declared. This list is what the renderer holds: one line per Clay render command, in draw order, with the id of the element it came from. `RECTANGLE` and `BORDER` are scene rects and cost no pixels. `TEXT` and `IMAGE` are rasters, `raster=` their bytes. `CUSTOM` is a client surface, a shadow, or a fill cut by a path; ending in `clip` or `configure` it is a marker holding no node. `SCISSOR_START` and `SCISSOR_END` bracket a clip. `rbox` is the box after clipping. Only rectangles carry `z=`, their band.
+The realized list contains one line per render command, in draw order, with the originating element id.
 
-This list is a frame's cost: moving a rectangle rasters nothing; changing a text rasters that one line.
+- `RECTANGLE` and `BORDER` use scene rectangles without raster buffers. Only rectangles report their band as `z=`.
+- `TEXT` and `IMAGE` use rasters; `raster=` reports their bytes.
+- `CUSTOM` represents a client surface, shadow, or clipped fill. Entries ending in `clip` or `configure` are markers without scene nodes.
+- `SCISSOR_START` and `SCISSOR_END` delimit clipping. `rbox` is the box after clipping.
 
 ## A worked example
 
@@ -173,6 +186,6 @@ output HEADLESS-1 scale 1.00 inspector on frames 9 elements 663/65536 map 663 fr
 ## When something is wrong
 
 - **A widget is missing.** It is not in the tree at all. The log has a line ending `is left out of the tree` naming the class and why ([the cases](./widgets-in-the-tree.md#a-widget-that-paints-itself)).
-- **A widget is the wrong size.** Read the word after its number, then its parent's line. `fit>=32` is content given a floor; a `grow` beside siblings got a share.
-- **A property does nothing.** Look for a `wibox.clay:` warning naming it; the value was one the tree cannot hold, and the warning says what happened instead.
+- **A widget is the wrong size.** Read its source label and parent's line. `fit>=32` has a minimum of 32; `grow` shares available space with siblings.
+- **A property does nothing.** Look for a `wibox.clay:` warning naming it; the warning identifies the unsupported value and what happened instead.
 - **A client is somewhere odd.** Find its `CLIENT` line under `WORKAREA`, or its `SURFACE` root if it floats, and read the band and the source word on its box.

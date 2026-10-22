@@ -21,7 +21,7 @@ The whole sizing vocabulary is four rules, set per axis:
 | percent | a fraction of the parent | `w = "25%"` |
 | fit | just big enough for the children | `w = "fit"` |
 
-A container lays its children out in one of two directions, left to right or top to bottom. That is the entire model. If you know flexbox, you already know Clay.
+A container lays its children out in one of two directions, left to right or top to bottom.
 
 ![Three cells in one row, labelled w = 180, w = "grow" and w = "25%", each drawn at the width Clay solved for it](/img/kiln/clay/01-sizing.png)
 
@@ -91,7 +91,7 @@ ui.bar(s, { edge = "top" }, function()
 end)
 ```
 
-The percent thirds are the centering mechanism: Clay sizes a percent child unconditionally, so the middle third's center is the bar's center at any tasklist width, and the side regions clip so an overfull tasklist truncates at its third instead of pushing the clock aside. No float, no spacer arithmetic, no arithmetic at all.
+The percent thirds are the centering mechanism: Clay sizes a percent child unconditionally, so the middle third's center is the bar's center at any tasklist width, and the side regions clip so an overfull tasklist truncates at its third instead of pushing the clock aside.
 
 ## One fork, at the leaf
 

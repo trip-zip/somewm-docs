@@ -4,7 +4,6 @@ description: "Replace the notification defaults with a system of your own: rule-
 sidebar_label: "06 · Notifications"
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
 import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
@@ -12,44 +11,30 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="06" />
 
-<YouWillLearn>
-
-- How notifications travel from apps over D-Bus into naughty, and where your code hooks in
-- Routing and styling notifications per app family and urgency with `ruled.notification`
-- Keeping a history with an unread counter, plus DND and focus modes
-- Wiring action buttons (Open, Snooze, Mark Read) through the `invoked` signal
-- Building a grouped notification center popup with an unread badge on the clock
-
-</YouWillLearn>
-
 ## Where We Are
 
-In [chapter 05](./05-rules-titlebars.md) we met `ruled.client`: a declarative rule engine that matches new windows and applies properties to them. This chapter applies the exact same idea to notifications, then goes much further: a 1,180-line `notifications.lua` that routes, records, snoozes, and collects every notification your desktop produces. It is the biggest single file in the series, so we will walk the interesting parts closely and summarize the repetitive ones. To catch up: `git checkout 05-rules-titlebars`.
+Build `notifications.lua` with routing rules, history, snooze, and a notification center. To catch up: `git checkout 05-rules-titlebars`.
 
 ## How Naughty Works
 
-Desktop notifications are not a window manager invention. Any app that wants to notify you (Firefox, Discord, `notify-send`) sends a message over the D-Bus session bus to whatever service owns the `org.freedesktop.Notifications` name. On a GNOME desktop that service is part of the shell. Under AwesomeWM and SomeWM, it is **naughty**, the built-in notification library. Naughty claims the D-Bus name, receives the messages, and turns each one into a notification object with a `title`, `message`, `app_name`, `urgency`, optional `icon`, and optional `actions`.
+Apps send notifications over D-Bus to `org.freedesktop.Notifications`. Under AwesomeWM and SomeWM, **naughty** receives them and creates notification objects with a `title`, `message`, `app_name`, `urgency`, and optional `icon` and `actions`.
 
-From there, two signals drive everything, and both should look familiar after chapter 05:
+Two hooks control what happens next:
 
-1. `ruled.notification` fires its rules against the new notification, exactly like `ruled.client` fires against a new window. Rules set properties (position, timeout, colors) and can run a callback.
-2. Naughty emits `request::display`, asking your config to actually put the notification on screen. The stock answer is one line: `naughty.layout.box({ notification = n })`, which builds a default popup box.
+1. `ruled.notification` applies rules to set properties and run callbacks.
+2. Naughty emits `request::display`. Your handler calls `naughty.layout.box({ notification = n })` to show a popup.
 
-The default `rc.lua` contained a minimal version of both: one catch-all rule and a bare `request::display` handler. Our diff deletes that stanza from `rc.lua` and moves the whole subsystem into `notifications.lua`.
+Move the default notification rule and `request::display` handler from `rc.lua` into `notifications.lua`.
 
-### A Safety Net for Fragile Modules
+### Report module errors {#a-safety-net-for-fragile-modules}
 
-Before requiring the new module, `rc.lua` grows a small wrapper. Read the comments carefully, they carry the design reasoning:
+Load the module after theme initialisation, using this wrapper to report errors:
 
 ```lua
 -- rc.lua
--- These two modules are the ones most likely to break a config badly enough that you
--- cannot log in. Load them behind pcall and report the failure as a notification, so a
--- typo costs you one missing feature instead of a session.
---
--- Report failures on both channels on purpose. If the module that failed is
--- `notifications`, then nothing ever registered a `request::display` handler and the
--- notification below paints nowhere, so stderr is the only thing you will actually see.
+-- Catch module errors so the rest of the config can load.
+-- Report to stderr as well: if notifications failed to load, there may be
+-- no request::display handler to show the error.
 local function try(name, fn)
   local ok, err = pcall(fn)
   if not ok then
@@ -69,11 +54,9 @@ try("notifications", function()
 end)
 ```
 
-The double reporting is the point. A failed module load normally shows up as a critical notification, which is great, unless the broken module is the one that displays notifications. In that case the `naughty.notification` call succeeds but paints nothing, because nobody is answering `request::display` anymore. Writing to stderr as well means the error still lands in your session log either way. We will reuse `try()` for every big module we add from here on.
-
 ## Routing Notifications with Rules
 
-`notifications.lua` opens with a module table `M` and a `M.config` block of tunables: a five second default timeout, a table of position presets, DND and focus mode flags, and sound file paths. Then comes the rule set, registered the same way client rules were:
+Start `notifications.lua` with a module table, `local M = {}`. Its `M.config` defines the default timeout, positions, quiet modes, and sound paths. Register the rules:
 
 ```lua
 -- notifications.lua
@@ -104,9 +87,9 @@ ruled.notification.connect_signal("request::rules", function()
   })
 ```
 
-The empty `rule = {}` matches everything, so every notification gets a screen, a timeout, and the top-right position unless a later rule says otherwise. The critical rule shows the two properties you will tweak most: `timeout = 0` means "stay until dismissed" (the freedesktop spec's convention, which naughty follows), and `position` moves urgent things to the top middle of the screen where you cannot miss them. A `low` urgency rule follows the same shape: dimmer colors, three second timeout, slight transparency.
+The empty rule matches every notification; later rules override its properties. A `low` urgency rule follows with dimmer colours, a three-second timeout, and slight transparency.
 
-After urgency comes routing by app family. The browser rule is the most interesting because it carries the VIP feature. First, the configuration and matcher near the top of the file:
+The browser rule checks for VIP contacts:
 
 ```lua
 -- notifications.lua
@@ -135,8 +118,6 @@ local function is_vip(notification)
   return false
 end
 ```
-
-`vip_contacts` ships empty on purpose: it is a personal list, and the intended use is two or three names of people whose messages must never scroll past unseen. The `find(..., 1, true)` detail matters because contact names come from the real world, and a name like "J. Smith-Jones" contains two Lua pattern metacharacters.
 
 The browser rule uses it in its callback:
 
@@ -167,15 +148,11 @@ The browser rule uses it in its callback:
   })
 ```
 
-Ordinary browser noise goes to the bottom right, out of your eyeline. A message mentioning a VIP is promoted to critical, restyled, pinned until you deal with it, and given different action buttons. Note the pattern here: **the rules attach actions declaratively** via `naughty.action({ name = ... })`. An action is just a named button; what clicking it does is decided later, in one central handler we will get to shortly.
-
-Two more rules are worth a close look. Calendar and reminder apps get `timeout = 0`, because a reminder that silently disappears after five seconds has failed at its one job, plus Snooze and Dismiss buttons. Media players get the opposite treatment: bottom middle, four seconds, and deliberately no actions, because "now playing" toasts are purely informational.
-
-The remaining rules follow the same shape and you can skim them on the branch: chat apps (Discord, Slack, Teams) at top right with a ten second timeout and Open, Mark Read, and Snooze actions; email clients at bottom left with Read, Archive, Snooze; system and device events at top middle; battery notifications forced to critical with an orange background; download completions at bottom right with an Open Folder button.
+`naughty.action({ name = ... })` adds a button. A shared handler defines what clicking it does.
 
 ## History, Unread Counts, and Quiet Modes
 
-Rules decide where a notification goes. The state layer remembers that it existed. `M.history` is a plain array capped at `M.max_history = 50`, with `M.unread_count` tracking how many entries you have not looked at yet:
+`M.history` stores up to `M.max_history = 50` notifications. `M.unread_count` tracks unread entries:
 
 ```lua
 -- notifications.lua
@@ -212,11 +189,9 @@ local function add_to_history(notification)
 end
 ```
 
-New entries are inserted at index 1 so the history reads newest-first. The trim loop at the bottom does the bookkeeping a naive `table.remove` would forget: if the entry falling off the end was never read, the unread counter must come down with it, and any reference in `M.active_notifications` (a map of still-on-screen resident notifications, keyed by id) must be released so the object can be collected.
+When the count changes, emit `awesome.emit_signal("notification::unread_count", M.unread_count)`. The clock widget will subscribe to this signal.
 
-Every time the count changes, the module emits `awesome.emit_signal("notification::unread_count", M.unread_count)`. This is the same custom-signal pattern our widgets used in chapter 03: the notification module does not know or care who is listening; the clock widget will subscribe later.
-
-The quiet modes live in one small predicate:
+Check the quiet modes before displaying a notification:
 
 ```lua
 -- notifications.lua
@@ -236,11 +211,11 @@ local function should_display(n)
 end
 ```
 
-DND mode swallows everything except critical notifications. Focus mode is subtler: it only suppresses popups while the focused client is fullscreen, so a game or a movie is never interrupted but normal desktop use is unaffected. Both have toggle functions (`M.toggle_dnd_mode`, `M.toggle_focus_mode`) exported for keybindings, and `set_dnd_mode` emits a `notifications::dnd_changed` signal so anything mirroring the state (the dashboard toggle, eventually) stays in sync.
+Critical notifications bypass both quiet modes. Export `M.toggle_dnd_mode` and `M.toggle_focus_mode` for keybindings. `set_dnd_mode` emits `notifications::dnd_changed` so widgets can update.
 
 ## Drawing the Notification Itself
 
-With rules and state in place, the display handler is short:
+Connect the display handler:
 
 ```lua
 -- notifications.lua
@@ -265,9 +240,9 @@ naughty.connect_signal("request::display", function(n)
 end)
 ```
 
-The ordering is deliberate: history is recorded before the DND check, so muted notifications are not lost, they just wait in the notification center. `resident = true` tells naughty not to destroy the notification when an action is invoked, which matters for critical items you may act on more than once. Returning without calling `naughty.layout.box` is all it takes to suppress the popup.
+`resident = true` keeps a notification open after an action is invoked.
 
-`build_widget_template(n)` is a named builder that returns the declarative widget tree naughty should render: an icon constrained to `beautiful.notification_icon_size` on the left, a vertical stack of `naughty.widget.title` (bold) over `naughty.widget.message` on the right, the action row underneath, all wrapped in a `wibox.container.background` that pulls `bg`, `fg`, shape, and border from the notification (as set by the rules) with theme fallbacks. The `naughty.widget.*` entries are placeholder widgets that naughty fills with the actual notification content.
+`build_widget_template(n)` arranges the icon, title, message, and action row. It uses the notification’s colours, shape, and border, with theme fallbacks. Naughty fills the `naughty.widget.*` placeholders with notification content.
 
 The action row comes from a second builder:
 
@@ -299,11 +274,11 @@ The action row comes from a second builder:
       widget = naughty.list.actions,
 ```
 
-`naughty.list.actions` is a stock widget that renders one button per action, laying them out with `base_layout` and stamping each one from `widget_template`. The `id = "text_role"` textbox is where it injects each action's name. `build_actions_widget` returns `nil` when the notification has no actions, and since `nil` entries simply vanish from a declarative widget table, actionless notifications get no empty button row.
+`naughty.list.actions` builds each button from `widget_template`, inserting its name into `text_role`. Return `nil` from `build_actions_widget` when there are no actions to avoid an empty row.
 
 ## Actions: One Handler for Every Button
 
-The rules attached the buttons; one signal handler gives them behavior. When any action on any notification is clicked, naughty emits `invoked` with the notification and the action:
+Clicking an action emits `invoked` with the notification and the action:
 
 ```lua
 -- notifications.lua
@@ -335,11 +310,11 @@ naughty.connect_signal("invoked", function(n, a)
 end)
 ```
 
-Dispatching on `a.name` keeps the whole action vocabulary in one place. "Open" and "Reply" walk the client list and activate the first window whose class matches the notification's app name, jumping you straight to Discord or Firefox. The four acknowledge-style names all funnel into `mark_read_in_history`, which finds the matching history entry by `id` (falling back to a title-plus-message comparison for notifications that never got one), flips `is_read`, decrements the counter, and re-emits the unread signal. The comment is honest about the limits: our side of "Archive" is local bookkeeping; whether the email actually gets archived is between the button and the sending app.
+`mark_read_in_history` matches by `id`, falling back to title and message. It marks the entry read, decrements the counter, and emits the unread signal.
 
 ## Snooze
 
-Snoozing is "make this notification come back later", and it needs three pieces: durations, a re-fire mechanism, and a picker UI.
+Define the available snooze durations:
 
 ```lua
 -- notifications.lua
@@ -351,7 +326,7 @@ M.snooze_durations = {
 }
 ```
 
-The re-fire is a single-shot `gears.timer` (the same timer type our widgets poll with, but `single_shot = true` makes it fire once and stop):
+Use a single-shot timer to create the notification again:
 
 ```lua
 -- notifications.lua (inside snooze_notification)
@@ -374,15 +349,14 @@ The re-fire is a single-shot `gears.timer` (the same timer type our widgets poll
   })
 ```
 
-Notice it does not resurrect the original notification object; it fires a brand new one from the saved plain-data snapshot, with a suffix noting the snooze. Because it is a new notification, it flows through the rules and the display handler like any other. The timer is stashed in `M.snoozed_notifications` so it is not garbage collected before it fires.
+The new notification goes through the rules and display handler again. Store the timer in `M.snoozed_notifications` to prevent garbage collection before it fires.
 
-The picker is our first hand-rolled **popup**: `awful.popup` is a free-floating wibox that sizes itself to the widget you hand it. `build_picker_widget` builds a vertical column of duration buttons (each an icon, a label, hover colors, and a click handler that calls `snooze_notification`), and `show_snooze_picker` wraps it in a popup placed near the mouse cursor, clamped to the screen edges. Then comes the part to actually study:
+`awful.popup` sizes itself to its widget. `build_picker_widget` creates duration buttons; `show_snooze_picker` places the popup near the cursor and clamps it to the screen edges. Add a dismissal handler:
 
 ```lua
 -- notifications.lua (inside show_snooze_picker)
-  -- Close on click outside. The handler has to be connected *after* this
-  -- click finishes (hence the timer), and has to disconnect itself - an
-  -- awkward dance every popup in this config ends up re-inventing.
+  -- Wait until the opening click finishes before connecting the handler.
+  -- Disconnect it after dismissal.
   gears.timer.start_new(0.1, function()
     local close_handler
     close_handler = function()
@@ -395,13 +369,11 @@ The picker is our first hand-rolled **popup**: `awful.popup` is a free-floating 
 end
 ```
 
-Why the 0.1 second delay? The click that opened the picker is still in flight. Connect the close handler immediately and it can catch the tail of that very click, closing the picker the instant it opens. So we defer the connection past the current click, and the handler disconnects itself after firing so it does not leak. It works, but the comment is not shy about it: this is an awkward dance.
-
-The notification center does its own version of the same dance. Its lifecycle is a `show`/`hide`/`toggle` triple guarded by a `popup_visible` flag, plus two dismissal handlers:
+The notification center uses a `popup_visible` flag and two dismissal handlers:
 
 ```lua
 -- notifications.lua
--- Close on click outside (the dashboard does the same dance)
+-- Close when a client is clicked
 client.connect_signal("button::press", function()
   if popup_visible then
     M.hide_notification_center()
@@ -415,11 +387,11 @@ tag.connect_signal("property::selected", function()
 end)
 ```
 
-Click any window or switch tags and the center closes, which is what you expect from transient UI. But step back and count what we hand-rolled in this one file: visibility state, show/hide/toggle, click-outside-to-close (twice, in two different ways), screen-edge clamping. We hand-roll this lifecycle here; the dashboard will need the same dance, and in [the next chapter](./07-exitscreen.md) we extract it once and for all into the modal pattern.
+[The next chapter](./07-exitscreen.md) extracts these handlers into a shared modal controller.
 
 ## The Notification Center
 
-The center is what makes the history worth keeping: press `Mod+Shift+N` (or click the clock) and a popup lists everything, grouped by app. The grouping pass:
+Press `Mod+Shift+N` or click the clock to open the history, grouped by app:
 
 ```lua
 -- notifications.lua (inside group_notifications_by_app)
@@ -440,11 +412,11 @@ The center is what makes the history worth keeping: press `Mod+Shift+N` (or clic
     end
 ```
 
-It returns both the groups map and a `group_order` array sorted by each group's latest timestamp, so the app that pinged you most recently sits on top. Groups render collapsed by default: `create_group_header` draws a chevron, the app name, a count, a per-group unread badge, and a relative timestamp from `format_time_ago` (which returns "now", "12m ago", "3h ago", or a date for anything older than a day). Clicking a header flips a flag in the `expanded_groups` table and calls `refresh_popup`, which rebuilds the whole widget tree from current state, the same rebuild-on-change approach our widgets have used since chapter 03, just at popup scale.
+`group_order` sorts apps by their latest notification. Groups start collapsed; clicking a header toggles its entry in `expanded_groups` and rebuilds the popup.
 
-Expanded groups list their notifications through `create_notification_item`: a bold title with an unread dot, the message ellipsized to one line, the relative time, and a small clock button that opens the snooze picker for that entry. Clicking the item body marks it read, adjusts the counter, emits the unread signal, and refreshes. The header row holds the two bulk actions: **Clear Read** rebuilds `M.history` keeping only unread entries (releasing `active_notifications` references for the ones removed), and **Clear All** resets history, counter, and the active map in one stroke. A `max_visible` cap of 15 rows keeps the popup from growing past the screen; everything is assembled by `create_popup_widget`, which you can browse on the branch since it just composes the pieces you have already seen.
+Click a notification to mark it read, or its clock button to snooze it. **Clear Read** removes read entries and their active references; **Clear All** resets history, the unread count, and active references. `max_visible` limits the popup to 15 rows.
 
-The last two touches close the loop. `widgets/clock.lua` wraps the chapter 03 clock in a layout with a tiny circular badge, subscribes to the unread signal, and becomes a button:
+In `widgets/clock.lua`, add an unread badge and a click handler:
 
 ```lua
 -- widgets/clock.lua
@@ -461,7 +433,7 @@ awesome.connect_signal("notification::unread_count", function(count)
 end)
 ```
 
-Inside `set_clock`, the badge shows `math.min(notifications.unread_count, 99)` and hides itself when the count is zero. And `keybindings.lua` adds one row to the global table from chapter 02:
+Inside `set_clock`, the badge shows `math.min(notifications.unread_count, 99)` and hides itself when the count is zero. Add a keybinding in `keybindings.lua`:
 
 ```lua
 -- keybindings.lua
@@ -474,7 +446,7 @@ Reload the config, then generate some traffic from the Lua prompt (`Mod+x`):
 require("notifications").generate_sample_notifications()
 ```
 
-Five staggered samples fire, each landing where its rule routed it: the critical battery warning pinned top middle, the Discord message top right, the Firefox download bottom right. The clock grows a badge; `Mod+Shift+N` opens the center with the history grouped and waiting.
+Check the five samples: the battery warning should stay top middle, Discord appear top right, and Firefox bottom right. The clock should show an unread badge. Press `Mod+Shift+N` to see the grouped history.
 
 ## Try It
 

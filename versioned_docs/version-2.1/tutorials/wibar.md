@@ -4,19 +4,9 @@ title: Wibar
 description: Build a status bar in a factory module, fill its three align sections with the standard widgets, add separators and a custom widget, style it from the theme, and bind a toggle.
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Wibar
 
-<YouWillLearn>
-
-- Attaching a wibar per screen from `request::desktop_decoration`
-- The three-section align layout
-- Standard widgets, separators, custom widgets, theme styling, a toggle key
-
-</YouWillLearn>
-
-`awful.wibar` makes a bar on a screen, and its `widget` is the whole bar: a tree whose root is almost always `wibox.layout.align.horizontal` with a left, a centre and a right section. The default config makes one per screen in the `request::desktop_decoration` handler.
+Build one bar per screen in `request::desktop_decoration`. Use `wibox.layout.align.horizontal` for left, centre and right sections.
 
 ## An empty bar
 
@@ -111,7 +101,7 @@ return function(s)
 end
 ```
 
-Reload: tags on the left, a button per open window in the centre, systray, clock and layout icon on the right. The buttons you declared are live: click a tag, click a tasklist entry to minimise, scroll the taglist to cycle.
+Reload. Check the tags on the left, tasklist in the centre, and tray, clock and layout icon on the right. Click a tasklist entry to minimise its window, and scroll the taglist to switch tags.
 
 ## Separators and your own widgets
 

@@ -13,17 +13,15 @@ A widget in SomeWM is a description of an element, not a thing that paints one. 
 | Class | Declares |
 | --- | --- |
 | `wibox.widget.textbox` | its text, font, colour, alignment and whether it ellipsizes. Clay measures the text through its one measure callback and wraps it at words. |
-| `wibox.widget.imagebox` | the image and its aspect. Sized from the told size above it: a 32-pixel bar and a square image make a 32 by 32 box. With no told size above it, the image's own size. |
-| `wibox.container.background` | a fill, a border and a corner radius around a child that fills it. A `shape` of `gears.shape.rounded_rect`, or a function drawing that path, is a corner radius. Any other shape is a path the fill fills and the child is cut by. |
+| `wibox.widget.imagebox` | the image and its aspect. Sized from an explicit ancestor size propagated through the tree ([rules](./reading-the-tree.md#where-a-number-comes-from)): a 32-pixel bar and a square image make a 32 by 32 box. Without that bound, it uses the image's dimensions. |
+| `wibox.container.background` | a fill, a border and a corner radius around a child that fills it. A `shape` of `gears.shape.rounded_rect`, or a function drawing that path, is a corner radius. Other shapes clip the fill and child to the supplied path. |
 | layouts and containers | a direction, a sizing for each child, padding, a gap and an alignment ([table](./reading-the-tree.md#sizing)) |
-| `progressbar`, `slider`, `checkbox`, `arcchart` | composed from the values you set: a progressbar's bar is `value` over `max_value` as a percent of its box, a slider's handle is a path placed at `value`, a checkbox or arcchart is a square of its forced or told size. Nothing is measured. |
+| `progressbar`, `slider`, `checkbox`, `arcchart` | composed from the values you set: a progressbar's bar is `value` over `max_value` as a percent of its box, a slider's handle is a path placed at `value`, a checkbox or arcchart is a square sized explicitly or from its ancestors. Nothing is measured. |
 | `awful.widget.taglist`, `tasklist`, `layoutlist` | pass through to the layout that holds their items; each tag, task or layout entry is an ordinary widget in the tree |
 
 ## A widget that paints itself
 
 A widget with its own `draw`, `fit`, `layout`, `before_draw_children` or `after_draw_children` method is left out of the tree, with everything inside it. The log gets one warning per class naming the methods it found. The wibox's own background stays.
-
-Such a method answers a question Clay has already answered: how big the box is, where its children go, or what it looks like. If both answered, they could disagree, and a box nobody declared could not be read in the dump.
 
 A custom widget written the AwesomeWM way, filling its box with a rounded rectangle:
 
@@ -77,11 +75,11 @@ local sample = wibox {
     51c3b964 wibox.container.background w=grow h=grow row box 100,100 400x48
 ```
 
-The background grows on both axes because a wibox's widget fills the wibox. Its `shape` is a corner radius of 10, the default of `gears.shape.rounded_rect`. Being in the tree, it can be read in the dump, given corners, and hit-tested like any other widget.
+The background fills the wibox. `gears.shape.rounded_rect` defaults to a corner radius of 10.
 
 ## Properties that warn once
 
-When a property holds a value the tree cannot hold, SomeWM warns once, naming the class, the property and what happens instead, and goes on without that value. When the value keeps the widget out of the tree, the warning ends `and is left out of the tree`. In the warnings' own words:
+Unsupported property values produce one warning naming the class, property, and resulting behaviour. If the widget is omitted, the warning ends `and is left out of the tree`.
 
 | You set | Warning |
 | --- | --- |

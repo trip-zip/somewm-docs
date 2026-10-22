@@ -128,8 +128,6 @@ local function menubar_items()
 end
 ```
 
-The action is the point of the recipe: `kiln.spawn_with_token` mints an activation token for the child, so the app opens focused. The user asked for the window; the window gets the seat.
-
 :::note
 `kiln.icon.path` is a bounded lookup: the app's own `Icon=` line, then hicolor at common sizes, then pixmaps. It does not walk icon-theme inheritance chains, so a name only your GTK theme ships may resolve to nil. Menu rows render fine without an icon.
 :::

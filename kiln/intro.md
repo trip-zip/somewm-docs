@@ -7,84 +7,35 @@ slug: /
 
 # Kiln
 
-A stripped down Wayland compositor where the entire screen is one [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, tags, menus, and notifications are all nodes in it. There is no window layer and a separate widget layer, no widget pass and a separate window pass: one tree, solved as a whole, every frame that needs drawing.
+Kiln is a Wayland compositor configured in Lua. Windows, bars, widgets, menus, and notifications share one [Clay](https://github.com/nicbarker/clay) layout tree.
 
 ![The default kiln desktop: two terminals tiled under the bar](/img/kiln/desktop.png)
 
-## Your desktop is a config
-
-This is the bar from the default `rc.lua`, unedited:
-
-```lua
-ui.bar(s, { edge = "top", dir = "row", h = th.bar_height,
-    color = th.bg, pad = { x = 8 } }, function()
-    backdrop(s)
-    ui.row({ w = "33.33%", h = "grow", gap = 6,
-            clip = { horizontal = true },
-            align = { y = "center" } }, function()
-        launcher_glyph(s)
-        taglist(s)
-        tasklist(s)
-    end)
-    ui.row({ w = "33.33%", h = "grow", align = "center" }, function()
-        -- A tooltip is the on_hover handler ui.tooltip makes,
-        -- nothing else.
-        ui.box({ id = "clock", color = th.bg2, radius = 4,
-            pad = { x = 8 },
-            on_hover = ui.tooltip(function()
-                return os.date("%A %d %B %Y")
-            end),
-        }, widgets.clock)
-    end)
-    ui.row({ w = "33.33%", h = "grow", gap = 6,
-            clip = { horizontal = true },
-            align = { x = "right", y = "center" } }, function()
-        widgets.systray()
-        layoutbox(s)
-    end)
-end)
-```
-
-What to notice:
-
-- **You can see the tree.** A row of three percent-third regions, each region a container of cells. The clock is centered because its region's center is the bar's center, not because anything computed a position: Clay sizes a percent child unconditionally, so the middle third holds the center at any tasklist width. The side regions clip, so an overfull tasklist truncates at its third instead of pushing into the middle.
-- **A bar is a box with children.** So is a menu, a notification, and a tiled window's frame. There is one set of constructors, used everywhere.
-- **`backdrop(s)` is the wallpaper**, declared here and floated to the root's background band. It reads oddly until you accept the premise: there is one tree, so the desktop background is declared in it like everything else.
-- **Nothing here is imperative.** No draw callback, no widget object to construct and wire up. You declare what the screen should look like and the solver does the rest.
-
-## It really is a Clay tree
-
-Clay's own debug inspector works on the live desktop. Not a reimplementation and not a screenshot tool: the actual inspector, walking the actual tree that laid out the screen you are looking at. Toggle it with `mod+shift+i`.
-
-![Clay's debug inspector open over the kiln desktop](/img/kiln/inspector.png)
-
-If you already know Clay, the parts worth knowing up front:
-
-- **Clay v0.14, vendored unpatched.** `third_party/clay.h` is byte for byte upstream. There is no fork.
-- **One `Clay_Context` per output**, declared from Lua over the LuaJIT FFI against a single reused `Clay_ElementDeclaration`. Nothing is allocated per element per frame.
-- **A client window is a `CUSTOM` leaf** whose `customData` is the client handle. Clay is solving layout for real application windows, and the renderer places each client's buffer tree at the box it solved.
-
-Why one tree owns the whole screen, and what that deletes: [The Clay Bet](/kiln/concepts/the-clay-bet). How it is bound, down to the render command loop: [Binding Clay](/kiln/concepts/binding-clay).
+<span id="your-desktop-is-a-config" />
 
 ## Start here
 
 1. [Install kiln](/kiln/getting-started/installation) from source.
-2. [Launch it nested](/kiln/getting-started/first-launch) inside your current session, so nothing is at stake.
-3. Work through [the basics](/kiln/tutorials/basics), which walks the default config and ends with you changing it live.
+2. [Launch it nested](/kiln/getting-started/first-launch) inside your current session.
+3. Edit your config with [the basics tutorial](/kiln/tutorials/basics).
 
 `mod+Return` opens a terminal, `mod+s` shows every binding on one sheet, `mod+shift+q` quits.
 
+## Inspect the desktop {#it-really-is-a-clay-tree}
+
+Press `mod+shift+i` to inspect the desktop’s layout with Clay’s debug inspector.
+
+![Clay's debug inspector open over the kiln desktop](/img/kiln/inspector.png)
+
 ## Coming from AwesomeWM or SomeWM
 
-[kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) is the bridge page: what carries over, what does not, and when to choose which.
+See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) for compatibility and configuration differences.
 
 :::info
-kiln is a young project. The API is functional and fully documented here, but it is not yet frozen: names and shapes may still change between releases.
+The API is not yet stable and may change between releases.
 :::
 
 ## Where things live
-
-These docs follow the [Diátaxis framework](https://diataxis.fr/). The sidebar lists every page; this is which section to open.
 
 | Section | Open it when |
 |---------|--------------|

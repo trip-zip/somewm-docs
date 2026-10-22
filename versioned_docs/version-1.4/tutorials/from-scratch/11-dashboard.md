@@ -1,10 +1,9 @@
 ---
 title: "Dashboard: The Control Center"
-description: Compose profile, sliders, toggles, and calendar modules into one popup, bind sliders two ways to the system without feedback loops, and make toggle buttons tell the truth.
+description: Build a dashboard with volume and brightness sliders, quick settings, a clock, and a calendar.
 sidebar_label: "11 · Dashboard"
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
 import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
@@ -12,25 +11,15 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="11" />
 
-<YouWillLearn>
-
-- how to compose four independent section modules into a single popup, and why the widget tree is built once and refreshed, never rebuilt
-- the anatomy of `wibox.widget.slider` and how to bind it two ways to a system value like volume
-- the programmatic-set guard that stops a read-then-assign from writing the value straight back to the system
-- toggle buttons that update optimistically, then re-read the real system state to correct themselves
-- how the DND toggle drives the notification module through its public API and follows it through a signal
-
-</YouWillLearn>
-
 ## Where We Are
 
-In [chapter 10](./10-launcher.md) we replaced the menubar with a fuzzy-search launcher, our fourth overlay UI built on [the modal pattern](./07-exitscreen.md): a popup plus a controller that owns visibility, Escape, click-outside dismissal, and the `<name>::visible` signal. This chapter builds the fifth and largest one: a control center on Mod+D with a clock, volume and brightness sliders, six quick-setting toggles, and a browsable calendar. To catch up: `git checkout 10-launcher`.
+Build a dashboard on Mod+D with a clock, volume and brightness sliders, quick settings, and a calendar. To catch up: `git checkout 10-launcher`.
 
 ## One Popup, Four Modules
 
-The dashboard is the biggest widget tree in the config, so it does not live in one file. It is a directory, `dashboard/`, with an `init.lua` that assembles four section modules. This is the payoff of the `?/init.lua` template we added to `package.path` back in chapter 02: `require("dashboard")` finds `dashboard/init.lua`, and inside the directory each section is its own module with its own state.
+Create `dashboard/init.lua` to assemble four section modules: profile, sliders, toggles, and calendar. `require("dashboard")` loads this file through the `?/init.lua` search path.
 
-Wiring it up costs two lines in `keybindings.lua`:
+Add the module and keybinding to `keybindings.lua`:
 
 ```lua
 -- keybindings.lua
@@ -42,7 +31,7 @@ local dashboard = require("dashboard")
   {{ modkey }, "d",                     function() dashboard.toggle() end,                        "toggle dashboard",                      "awesome"  },
 ```
 
-Every section module exports a `create()` function that returns a finished widget, so `init.lua` reads like a table of contents:
+Each section exports `create()`, which returns its widget:
 
 ```lua
 -- dashboard/init.lua
@@ -72,11 +61,9 @@ local function create_dashboard_widget()
 end
 ```
 
-Four sections stacked in a `fixed.vertical` layout, wrapped in a margin and a background. Each section owns its content and its update logic; `init.lua` only decides the order and the frame around them.
+### Build Once, Refresh on Opening {#build-once-refresh-forever}
 
-### Build Once, Refresh Forever
-
-The controller is a `modal.new` call, same as the exit screen, the launcher, and the notification center, with the same named place function they all carry:
+Create the popup with `modal.new` and place it below the bar:
 
 ```lua
 -- dashboard/init.lua
@@ -111,11 +98,9 @@ local controller = modal.new({
   end,
 ```
 
-Note `parent = d.screen`, not `awful.screen.focused()`: `place` docks the popup on whatever screen the popup is currently on, and *which* screen that is stays the controller's decision, made in `modal.show` before `on_show` runs.
+`profile.create()` starts timers; `sliders.create()` and `toggles.create()` register signal handlers and refresh functions. Call them once in `build_popup`. Rebuilding on every opening would leave the previous timers and handlers running.
 
-The critical decision hides in what this does *not* do. The launcher and switcher rebuild their result lists every time the selection changes, because their content is cheap: textboxes with no behavior. The dashboard sections are not cheap. `profile.create()` starts timers. `sliders.create()` and `toggles.create()` connect signal handlers and register refresh functions. If we rebuilt the tree on every open, each open would create a fresh set of timers and signal connections while the old ones kept running against widgets nothing displays anymore. That is a leak, and one that grows a little every time you press Mod+D.
-
-So the tree is built exactly once. The modal controller already gives us the right hook: `build_popup` runs on the first show only, and `on_show` runs on every show. Placement rides on the popup itself, and the comment in `build_popup` says why: `awful.popup` re-applies its `placement` function whenever the popup's size changes, which covers the very first show, before the widget has been measured. That leaves `on_show` doing only what legitimately changes between opens, position and freshness:
+On each opening, reposition the popup and read the current system values:
 
 ```lua
 -- dashboard/init.lua
@@ -128,15 +113,11 @@ So the tree is built exactly once. The modal controller already gives us the rig
   end,
 ```
 
-The `place(popup)` call re-docks the popup on the screen the controller just assigned; without it, reopening the dashboard on a different monitor would leave it where the last size change put it. `awful.placement.top_right` pins the popup to the top-right corner of that screen, and the top margin pushes it just below the wibar, so it drops down under the clock like a phone's control center. On every open, `sliders.refresh()` and `toggles.refresh()` re-read the system: volume may have changed from a keybinding, WiFi may have been switched off in a terminal. The widgets persist; their contents are re-synced at the moment you look at them.
-
-:::note
-This split is worth internalizing: **build** what is expensive and stateful once, **refresh** what mirrors the outside world on every show. Every section module below is shaped by it, exporting `create()` for the first job and, where it matters, `refresh()` for the second.
-:::
+`place(popup)` uses the screen assigned by the modal controller, so reopening on another monitor moves the dashboard there.
 
 ## Sliders: Two-Way Binding
 
-`dashboard/sliders.lua` is a factory, `create_slider`, called twice: once for volume, once for brightness. At its center is a widget we have not used yet, `wibox.widget.slider`, a built-in leaf widget that renders a draggable handle on a bar and stores a number in its `value` property:
+In `dashboard/sliders.lua`, define `create_slider` for volume and brightness:
 
 ```lua
 -- dashboard/sliders.lua
@@ -157,15 +138,13 @@ This split is worth internalizing: **build** what is expensive and stateful once
   })
 ```
 
-The anatomy splits into two parts. The **bar** is the track: `bar_color` paints the whole track, `bar_active_color` paints the filled portion left of the handle. The **handle** is the grabbable circle. Dragging it changes `value` between `minimum` and `maximum`, and every change fires a `property::value` signal, the same property-change signal mechanism we have been connecting to since the widget chapter.
+`bar_color` sets the track colour; `bar_active_color` sets its filled portion. Dragging the handle changes `value` and emits `property::value`.
 
-A slider that only displays would be easy. This one is bound in both directions: dragging it must *write* to the system, and the system's real value must be *read* back into it. The factory takes both directions as parameters: `get_cmd`, a shell command that prints the current value, and `set_cmd`, a function that turns a number into the shell command that applies it.
+The factory takes `get_cmd`, which reads the system value, and `set_cmd`, which converts a value into a command to apply it.
 
 ### The Feedback Loop
 
-Here is the trap. `property::value` fires on *every* change to `value`, including assignments from our own code. So the naive flow, read the system value, assign it to the slider, deadlocks into an echo: the assignment fires `property::value`, the handler runs `set_cmd`, and we have written back to the system the very value we just read from it. Harmless-looking, but it means every refresh spawns a pointless shell command, and with a slow device it can race against a real drag.
-
-The fix is a flag that marks our own assignments:
+Use a flag to distinguish programmatic assignments from user input:
 
 ```lua
 -- dashboard/sliders.lua
@@ -191,11 +170,11 @@ The fix is a flag that marks our own assignments:
   end)
 ```
 
-Signal handlers run synchronously in Lua's single thread, so setting the flag, assigning, and clearing the flag is airtight: the handler sees `setting_programmatically == true`, updates the percentage label, and skips the write. Only a genuine drag reaches `set_cmd`. This guard pattern shows up in every two-way binding you will ever build, in any toolkit.
+The handler runs synchronously during `slider.value` assignment, before the flag is cleared. It updates the label but skips `set_cmd`.
 
 ### Reading the System
 
-The other direction is `read_system_value`, which runs `get_cmd` asynchronously and funnels the result through the guarded `set_value`. Each slider registers its reader in a module-level `refreshers` table, and `sliders.refresh()`, the function `on_show` calls, just walks it:
+`read_system_value` runs `get_cmd` asynchronously and passes its result to `set_value`. Register each reader in `refreshers`; `sliders.refresh()` calls them when the dashboard opens:
 
 ```lua
 -- dashboard/sliders.lua
@@ -209,9 +188,7 @@ The other direction is `read_system_value`, which runs `get_cmd` asynchronously 
   end
 ```
 
-Note what the optional `signal` parameter means. The volume keybindings from chapter 02 emit a bare `awesome.emit_signal("volume::update")` with no payload; it does not say what the volume *is*, only that it changed. The slider treats the signal as "re-read", the same convention the wibar volume widget already follows, so there is exactly one source of truth: the system itself.
-
-The two concrete sliders show both configurations:
+Configure the volume slider:
 
 ```lua
 -- dashboard/sliders.lua
@@ -226,11 +203,11 @@ The two concrete sliders show both configurations:
   )
 ```
 
-Volume listens for `volume::update` so it tracks the media keys live even while the dashboard is open. Brightness passes `nil` for the signal: nothing else in the config changes brightness, and since `refresh()` re-reads every slider on every open, a signal would buy nothing. Refresh-on-open is the safety net that makes signals optional.
+Volume updates on `volume::update`. Brightness passes `nil` for the signal and refreshes when the dashboard opens.
 
-## Toggles: Buttons That Tell the Truth
+## Quick Settings {#toggles-buttons-that-tell-the-truth}
 
-`dashboard/toggles.lua` follows the same factory shape. `create_toggle(icon, label, key, on_toggle, check_cmd, signal)` builds one square button; six of them make the "Quick Settings" grid: WiFi, Bluetooth, DND, night light, airplane mode, and microphone. State lives in a plain module-level table, `toggle_states`, keyed by name, and a small `update_visual` swaps the button between active styling (accent background, dark text) and inactive (subtle background, normal text).
+`create_toggle(icon, label, key, on_toggle, check_cmd, signal)` builds a button for WiFi, Bluetooth, DND, night light, airplane mode, or microphone. Store state in `toggle_states[key]`; `update_visual` applies active or inactive styling.
 
 A click flips the state optimistically, restyles, and runs the command:
 
@@ -245,9 +222,9 @@ A click flips the state optimistically, restyles, and runs the command:
   end))
 ```
 
-The `on_toggle` callbacks are plain `awful.spawn` calls: `nmcli radio wifi on/off`, `bluetoothctl power on/off`, `gammastep -O 4500` versus `pkill gammastep`, `wpctl set-mute` for the mic. Fire and forget.
+External controls use `nmcli`, `bluetoothctl`, `gammastep`, and `wpctl`.
 
-But optimism is not truth. WiFi might be toggled from a terminal, gammastep might crash, Bluetooth might refuse. So most toggles also take a `check_cmd` that reads the real state, and register its reader in a `refreshers` table exactly like the sliders do, so `toggles.refresh()` corrects the whole grid every time the dashboard opens. The interesting part is interpreting the output, because every tool phrases its answer differently:
+Most toggles also use a `check_cmd` to read the current state, since commands can fail or settings can change elsewhere. Register each reader in `refreshers` so `toggles.refresh()` updates the grid whenever the dashboard opens:
 
 ```lua
 -- dashboard/toggles.lua
@@ -264,11 +241,9 @@ local function parse_enabled(stdout)
 end
 ```
 
-A naive `stdout:match("on")` would report WiFi as enabled whenever `nmcli` says "disc**on**nected". The `%f[%a]on%f[%A]` frontier pattern anchors the match at word boundaries, so only a standalone "on" (or "yes", "enabled", or a bare "1") counts. It is a two-line function, but it is the difference between a toggle grid you trust and one you learn to ignore.
+### Do Not Disturb {#the-dnd-toggle-talks-to-chapter-06}
 
-### The DND Toggle Talks to Chapter 06
-
-One toggle controls no external program at all. Do Not Disturb lives inside our own [notification module](./06-notifications.md), and the toggle is its remote control:
+Connect DND to the [notification module](./06-notifications.md):
 
 ```lua
 -- dashboard/toggles.lua
@@ -280,11 +255,9 @@ One toggle controls no external program at all. Do Not Disturb lives inside our 
   end, nil, "notifications::dnd_changed")
 ```
 
-Clicking calls `notifications.set_dnd_mode(state)`, the public API. And because `set_dnd_mode` emits `notifications::dnd_changed`, the toggle passes that signal name as its sixth parameter, so if DND is flipped from anywhere else, a keybinding, the notification center, the button restyles itself immediately. Two modules built five chapters apart, coordinating entirely through one function call and one signal, with neither reaching into the other's internals.
+## Clock and Battery {#profile-the-payoff-of-a-shared-battery-api}
 
-## Profile: The Payoff of a Shared Battery API
-
-The top section is the friendly one: a large `wibox.widget.textclock` for the time, a second one for the date (textclock re-renders itself on a timer, so both stay current for free), a time-of-day greeting refreshed by a `gears.timer`, and a battery line. The battery line is the part worth pausing on:
+Use `wibox.widget.textclock` for the time and date, and a `gears.timer` for the greeting. Subscribe to the existing battery poll:
 
 ```lua
 -- dashboard/profile.lua
@@ -300,11 +273,11 @@ end
 awesome.connect_signal("battery::update", render_battery)
 ```
 
-Back in [the widgets chapter](./03-widgets.md) we made `widgets/battery.lua` export `get_status()` and `level_icon()` instead of keeping them local to the wibar widget, and its 10-second poll broadcasts every reading as a `battery::update` signal. Here is why: the profile section gets battery reporting, upower fallbacks included, without running a poll of its own. It connects `render_battery` to that signal and, in `create()`, seeds the display with one direct `battery.get_status(render_battery)` call so the line is correct before the next broadcast arrives. Its icon can never disagree with the wibar's, because they are the same function fed by the same poll. `battery_line` then formats the status into "87% · 1.2h remaining" style text. The rest of the section is layout, browse the branch.
+In `create()`, call `battery.get_status(render_battery)` to initialise the display before the next broadcast. `battery_line` formats the reading as text such as “87% · 1.2h remaining”.
 
-## Calendar: Same Techniques, New Widget
+## Calendar {#calendar-same-techniques-new-widget}
 
-The last section wraps another built-in, `wibox.widget.calendar.month`, which renders a month grid from a date table. Its one interesting property is `fn_embed`, a hook that receives each generated cell widget plus a flag ("header", "weekday", "focus", "normal") and returns the widget to actually display. Our `decorate_cell` uses it to set fonts, dim other-month days, and wrap today in an accent-colored background:
+`wibox.widget.calendar.month` renders a month from a date table. Its `fn_embed` callback receives a cell widget and a flag such as `"header"`, `"weekday"`, `"focus"`, or `"normal"`. Use it to style cells; this branch highlights today:
 
 ```lua
 -- dashboard/calendar.lua
@@ -320,9 +293,9 @@ The last section wraps another built-in, `wibox.widget.calendar.month`, which re
       })
 ```
 
-Navigation is three textbox buttons (previous, "Today", next) whose click handlers mutate a `displayed_date` table and assign it back to `cal.date`, which makes the calendar re-render that month. Buttons, hover restyling on `mouse::enter`/`mouse::leave`, month arithmetic: every technique is one you have already used in this chapter or an earlier one, so we will not walk it line by line. Browse `dashboard/calendar.lua` on the branch; it is 163 self-contained lines.
+Add previous, Today, and next buttons. Update `displayed_date` and assign it to `cal.date` to display the chosen month.
 
-Press Mod+D in your nested session. The dashboard drops in below the bar; drag the volume slider and watch the wibar widget update through the same `volume::update` convention; toggle WiFi off in a terminal, close and reopen the dashboard, and watch the button tell the truth.
+Press Mod+D. Check that the dashboard opens below the bar and that the volume slider changes the system volume. Change volume with a media key and check the slider updates. Reopen the dashboard to check that brightness and quick settings refresh.
 
 ## Try It
 
@@ -333,7 +306,7 @@ Press Mod+D in your nested session. The dashboard drops in below the bar; drag t
 
 ## Checkpoint
 
-Your config now matches [the `11-dashboard` branch](https://github.com/trip-zip/awesome-from-scratch/tree/11-dashboard): five files under `dashboard/`, one keybinding, and a control center that stays in sync with the system it controls.
+The finished code is on [the `11-dashboard` branch](https://github.com/trip-zip/awesome-from-scratch/tree/11-dashboard).
 
 ```bash
 git checkout 11-dashboard

@@ -6,7 +6,7 @@ description: "somewm --check scans an rc.lua for X11 idioms. The replacements fo
 
 # Migrating from AwesomeWM
 
-An AwesomeWM `rc.lua` at `~/.config/awesome/rc.lua` is loaded as is. What breaks is X11: tools run through `io.popen`, X properties, GTK inside the compositor, and the deprecated APIs AwesomeWM still ships and SomeWM 2.0 removed.
+SomeWM loads `~/.config/awesome/rc.lua`. Check it for X11 tools and properties, GTK imports, and APIs removed in SomeWM 2.0.
 
 ## Check first
 
@@ -74,11 +74,11 @@ local menubar = require("menubar")
 local path = menubar.utils.lookup_icon_uncached("firefox")
 ```
 
-A GTK settings window is its own process, like any Wayland client. Put it in a standalone script with a `#!` line and `awful.spawn` it; a file that ends in `app:run()` is already a complete program and only needed to stop being `require`d.
+Run GTK settings windows as separate processes with `awful.spawn`. A script ending in `app:run()` should be executed, not loaded with `require`.
 
 ### Client icons {#client-icons}
 
-`c.icon` is nil for native Wayland clients: there is no `_NET_WM_ICON`. A tasklist or dock then draws its fallback for every window. Resolve the icon from `c.class`, which both Wayland and XWayland clients set:
+`c.icon` is nil for native Wayland clients. Resolve icons from `c.class`, which both Wayland and XWayland clients provide:
 
 ```lua
 local menubar = require("menubar")

@@ -6,7 +6,7 @@ description: SomeWM is a wlroots compositor that runs AwesomeWM's Lua API on Way
 
 # SomeWM Documentation
 
-SomeWM is a Wayland compositor built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots) that runs AwesomeWM's Lua configuration model. These docs follow [Diátaxis](https://diataxis.fr/): tutorials teach, guides solve one task, reference lists, concepts explain. Where SomeWM differs from AwesomeWM, the affected page says so and [Compatibility reference](reference/deviations.md) indexes it. A gap is a [discussion](https://github.com/trip-zip/somewm/discussions) away from being filled.
+SomeWM runs AwesomeWM’s Lua configuration model on Wayland, using [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots). The [compatibility reference](reference/deviations.md) lists differences from AwesomeWM.
 
 ## Start here
 
@@ -24,7 +24,7 @@ SomeWM is a Wayland compositor built on [wlroots](https://gitlab.freedesktop.org
 
 ## Guides
 
-Input devices, CLI control, multi-monitor, autostart, notifications, screenshots, scaling, shadows, lockscreen, client rules, custom layouts, testing in a nested compositor, and the carousel set. The sidebar lists them all.
+Use the sidebar to find guides for specific tasks, such as configuring input devices, client rules, or multiple monitors.
 
 ## Reference
 
@@ -38,7 +38,10 @@ Input devices, CLI control, multi-monitor, autostart, notifications, screenshots
 
 ## Concepts
 
-[How SomeWM draws](concepts/how-somewm-draws.md) and [Reading the tree](concepts/reading-the-tree.md) are the 2.1 model; [The Object Model](concepts/object-model.md), [Architecture](concepts/architecture.md) and [Signals](concepts/signals.md) the Lua side; [Why SomeWM](concepts/why-somewm.md), [AwesomeWM Compatibility](concepts/awesomewm-compat.md) and [Wayland vs X11](concepts/wayland-vs-x11.md) the relationship to AwesomeWM.
+- [How SomeWM draws](concepts/how-somewm-draws.md): layout and rendering
+- [Reading the tree](concepts/reading-the-tree.md): inspect layout results
+- [The Object Model](concepts/object-model.md), [Architecture](concepts/architecture.md), and [Signals](concepts/signals.md): objects and configuration
+- [Why SomeWM](concepts/why-somewm.md), [AwesomeWM Compatibility](concepts/awesomewm-compat.md), and [Wayland vs X11](concepts/wayland-vs-x11.md): design and compatibility
 
 ## Versions
 

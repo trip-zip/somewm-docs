@@ -5,17 +5,8 @@ description: Enable the scrollable carousel layout, open windows into columns, n
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly';
-import YouWillLearn from '@site/src/components/YouWillLearn';
 
 # Carousel Layout <SomewmOnly />
-
-<YouWillLearn>
-
-- Enabling the carousel and opening windows into columns
-- Navigating, resizing and stacking columns
-- Gesture scrolling and centering modes
-
-</YouWillLearn>
 
 The carousel puts each window in its own column on a strip wider than the screen, and the viewport scrolls to follow focus ([Scrollable Tiling](../concepts/scrollable-tiling.md)).
 

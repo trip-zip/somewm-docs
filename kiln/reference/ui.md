@@ -198,37 +198,7 @@ Layer-shell surfaces declare into the band their protocol layer names: `backgrou
 
 ## Menus
 
-A menu is ordinary nodes in the screen's Clay tree, declared while open, gone when closed. There is no menu widget object.
-
-```lua
-kiln.menu.show({
-  under = "launcher",
-  items = {
-    { "terminal", function() kiln.spawn("foot") end },
-    { "layouts", {
-      { "tile", function() screen.focused.selected_tag.layout = kiln.layout.tile end },
-      { "max",  function() screen.focused.selected_tag.layout = kiln.layout.max end },
-    } },
-  },
-})
-```
-
-| Function | Description |
-|---|---|
-| `kiln.menu.show(cfg)` | Open a menu. cfg: `screen` (default the focused screen), `items` (required), `x`, `y` (root offset, default 0), `under` (element id to drop below, the usual case for a bar button). |
-| `kiln.menu.close()` | Close the open menu and its submenu chain. |
-| `kiln.menu.client_list(cfg)` | A ready menu over all mapped clients, labelled and iconed like tasklist rows; pressing a row unminimizes, views, focuses, and raises the client. Same cfg as `show` but for `items`, which it fills in. |
-| `kiln.menu.nav(verb)` | Drive the open menu from the keyboard: `"down"`, `"up"`, `"enter"` (descend into a submenu or run the row), `"back"` (close one level, or the chain at the root), `"close"`. Returns whether the verb was handled. |
-| `kiln.menu.keys` | The keysym-to-verb map behind the built-in keyboard handling: Down/Up move, Right/Return/KP_Enter enter, Left/Escape go back. Replaceable per key (`kiln.menu.keys.j = "down"`) or wholesale. |
-
-Each item is `{ "label", action }` with an optional `icon = path`. When the second element is a function, pressing the row closes the menu and calls it. When it is a table, the row is a submenu that opens beside it on hover. That one rule is the entire item schema.
-
-An open menu declares its own near-invisible screen-sized scrim underneath itself: a press anywhere outside the menu closes it, while presses on rows never reach the scrim.
-
-An open menu also holds the keyboard: arrow keys move the selection, Right or
-Return enters a submenu or runs the row, Left or Escape backs out. The map is
-`kiln.menu.keys`; a keyboard descent into a submenu lights its first row,
-while a pointer descent does not (the pointer already says where it is).
+`ui.menu(cfg)` is an alias for `kiln.menu.show(cfg)`. See the [menu reference](./menu.md) for options, item definitions, and keyboard navigation.
 
 ## See also
 

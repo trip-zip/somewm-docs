@@ -6,7 +6,7 @@ description: The C-to-Lua notification queue defines when configuration reaction
 
 # Signals
 
-Every object in SomeWM is a `gears.object`: it emits named signals, and handlers connected to a name run with the object as their first argument. The compositor emits them when something happens (a client maps, focus moves, an output appears), and the Lua libraries emit them to ask for something (`request::rules`, `request::display`). [Signals Reference](../reference/signals.md) lists every one with its arguments.
+Signals are named events. Connected handlers receive the emitting object as their first argument. The compositor and Lua libraries emit signals for changes and requests; [Signals Reference](../reference/signals.md) lists their arguments.
 
 ```lua
 client.connect_signal("focus", handler)
@@ -24,19 +24,15 @@ A name is any string; the `::` in `property::name` is convention, not syntax.
 | Lua libraries | `ruled.client` `request::rules`, `naughty` `request::display`, `awful.layout` `request::default_layouts` | yes; they exist so modules can plug in without monkey-patching |
 | your code | `awesome.emit_signal("volume::changed")` | |
 
-## Why the queue is an execution boundary
+## Why notifications are queued {#why-the-queue-is-an-execution-boundary}
 
-A notification emitted inside a C operation can immediately call Lua, whose handlers can call back into C and change related objects. That nests configuration reactions inside the operation producing the notification. The queue gives selected notifications a separate delivery phase.
+Calling Lua during a C operation lets handlers call back into C before that operation finishes. Queuing notifications postpones those reactions until `some_refresh()`.
 
-C records the signal, its target and its arguments. At `some_refresh()`, the queue dispatches a snapshot in order, before the `refresh` signal and pending layout work. Handlers can update configuration state during that phase. New queued notifications wait for the next drain, so a handler cannot keep extending the current batch indefinitely.
-
-This also gives notification delivery explicit lifetime rules. Queued events hold Lua references to their targets and arguments until delivery. Pending references are cleared when the owning Lua state is replaced during reload. Consecutive pointer moves for the same object can be coalesced while preserving intervening events.
-
-The result is a defined place to run queued configuration reactions. It does not make every callback asynchronous or eliminate every C-to-Lua call. Requests needing an immediate answer and Lua-emitted signals remain synchronous. The dispatch rules below distinguish those paths.
+Queued events retain references to their targets and arguments until delivery. Reloading clears pending references when replacing the Lua state.
 
 ## Dispatch
 
-Some C-generated notifications are queued until `some_refresh()`. The queue drains before `refresh` and the output declarations ([How SomeWM draws](./how-somewm-draws.md)). Requests whose results the compositor needs immediately call Lua synchronously.
+At `some_refresh()`, queued notifications run before `refresh` and the [output layout pass](./how-somewm-draws.md). Dispatch depends on the emitter:
 
 - **Queued:** property changes, focus, mouse motion, lifecycle, selected `request::*`, the output and screen signals hotplug causes, layer-shell properties, most global signals. The exact set is the [dispatch section of the reference](../reference/signals.md#dispatch).
 - **Synchronous from C:** `request::manage`, `request::unmanage`, `request::geometry`, screen `added` and `removed`, and the client scalar `property::*` signals. The compositor acts on their handlers' results immediately.
@@ -47,7 +43,7 @@ Some C-generated notifications are queued until `some_refresh()`. The queue drai
 
 **Coalescing.** `mouse::move` on one object is coalesced: of several queued moves with no other event between them, only the latest survives. Nothing else is coalesced.
 
-**Reentrancy.** A drain processes a snapshot of the queue. New queued events wait for the next drain. Synchronous C signals and Lua-emitted signals still run inline, including when emitted by a queued handler. [State before a queued handler runs](../reference/signals.md#state-before-a-queued-handler-runs) describes the effect on Lua caches.
+**Reentrancy.** A drain processes a snapshot of the queue in order. New queued events wait for the next drain. Synchronous C signals and Lua-emitted signals still run inline, including when emitted by a queued handler. [State before a queued handler runs](../reference/signals.md#state-before-a-queued-handler-runs) describes the effect on Lua caches.
 
 ## The `request::*` pattern
 
@@ -66,7 +62,7 @@ client.connect_signal("request::tag", function(c, t, hints)
 end)
 ```
 
-Most carry a `context` string and a `hints` table after the object: `request::border` passes `"added"`, `"active"`, `"inactive"`, `"floating"`. [Replacing a default handler](../guides/replace-default-handler.md) has the patterns.
+Most pass a `context` string and a `hints` table after the object: `request::border` passes `"added"`, `"active"`, `"inactive"`, `"floating"`. [Replacing a default handler](../guides/replace-default-handler.md) has the patterns.
 
 ## Startup order
 

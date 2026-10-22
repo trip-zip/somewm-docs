@@ -37,7 +37,7 @@ Choose **SomeWM** if you have an AwesomeWM configuration or depend on its ecosys
 
 Choose **kiln** if you want to write the single-tree model directly: the `ui.*` API, layouts without arithmetic, widgets without lifecycle, and policy as replaceable Lua functions. SomeWM 2.1 draws from the same kind of tree, with the same inspector, under the AwesomeWM API. You will write your configuration fresh, and it will be shorter than the one you left, but it is a rewrite, not a port.
 
-kiln is also younger and blunter about it: a proof of concept with an unstable API. SomeWM is the conservative choice; kiln is where the API experiment continues, now that its engine runs in SomeWM 2.1. Both are honest about which they are.
+kiln is also younger and blunter about it: a proof of concept with an unstable API. SomeWM is the conservative choice; kiln is where the API experiment continues, now that its engine runs in SomeWM 2.1.
 
 ## See also
 

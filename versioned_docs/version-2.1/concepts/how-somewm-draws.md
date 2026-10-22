@@ -8,21 +8,19 @@ description: How pending state changes become one output layout, computed by Cla
 
 SomeWM computes client and widget layout in the same C layout pass. Lua supplies the state and layout declarations. [Clay](https://github.com/nicbarker/clay) resolves those declarations into boxes and render commands, and SomeWM's renderer applies the result to `wlr_scene` before wlroots presents it.
 
-Bars, widgets, popups, notifications and client frames participate in that pass. An application still renders the pixels inside its own surface; Clay computes where that surface and its decorations belong.
-
 ## What computing layout means
 
-A native layout supplies relationships and constraints, rather than a finished rectangle for every child. The output is a column containing its bar and workarea. The bar has a declared height; the workarea grows into the remaining space. Inside the workarea, a tiled master column takes `tag.master_width_factor` of the available width and the stack takes the rest.
+Layouts declare sizing rules. The output is a column containing bars and a workarea that fills the remaining space. In the tile layout, the master column takes `tag.master_width_factor` of the available width; stack columns divide the rest.
 
-A widget container uses the same computation. It supplies a direction, padding, gaps and child sizing rules. A textbox supplies text and a font. Clay resolves the container's dimensions and the children's positions, using the renderer's text-measurement callback when it needs text dimensions.
+Widget containers declare direction, padding, gaps and child sizes. Textboxes provide text and fonts. Clay computes their geometry, calling the renderer to measure text when needed.
 
-For example, changing `tag.master_width_factor` from `0.5` to `0.65` changes the share declared by the stock tile layout. Lua does not calculate each client's new x coordinate and width. At the next layout pass, Clay computes the client boxes from that share, the workarea and its gaps. The [client layout example](./clients-in-the-tree.md#see-it) shows the property and its solved boxes in the dump.
+Changing `tag.master_width_factor` changes the declared share. Clay computes the new client rectangles at the next layout pass; see the [client layout example](./clients-in-the-tree.md#see-it).
 
-Your configuration still composes supported `awful` and `wibox` objects. Their describers translate properties into declarations. Custom client layouts using `arrange` retain a compatibility path: their calculated rectangles enter the tree as explicit geometry, marked `legacy`. Custom widget `fit`, `layout` and `draw` methods are [not part of this path](./widgets-in-the-tree.md).
+Supported `awful` and `wibox` objects translate their properties into declarations through *describer* functions. Custom client layouts using `arrange` supply explicit geometry, marked `legacy`. Custom widget `fit`, `layout` and `draw` methods are [unsupported](./widgets-in-the-tree.md).
 
 ## A defined stage in the main loop
 
-A property change records state and marks the affected output dirty. Dirty widget descriptions are compiled at the frame's `clay::declare` boundary. A clean output skips declaration and solving; a dirty output declares and solves its complete tree. Dirty tracking avoids unnecessary compilation, but does not mean Clay solves isolated dirty nodes independently.
+Property changes mark the affected output dirty. At `clay::declare`, pending widget descriptions are compiled. A dirty output solves its complete tree; a clean output skips declaration and solving.
 
 ![Lua declarations become one output tree, Clay computes layout in C, and SomeWM reconciles the resulting commands into the wlroots scene.](/img/architecture/clay-frame-pipeline.svg)
 
@@ -37,7 +35,7 @@ The normal path runs in this order:
 | Reconcile the scene | Apply the completed command array to retained scene nodes, matching them by element id. | `render_reconcile()` in `render.c` |
 | Present | Commit the scene to the output. | `rendermon()` in `monitor.c`, `wlr_scene_output_commit()` |
 
-The GLib prepare source in `loop.c` runs `some_refresh()` before polling and dispatches pending Wayland idle work. Output frame callbacks enter `declare_output_frame()` before presenting; a deadline fallback can enter the same pass if the backend has not supplied a frame callback. Both use the same declaration, solve and reconciliation function. There is no separate widget painting loop alongside it.
+`loop.c` runs `some_refresh()` before polling and dispatches pending Wayland idle work. Output frame callbacks call `declare_output_frame()` before presenting. A deadline fallback calls the same function if no frame callback arrives.
 
 Changes raised during a pass mark work for a subsequent pass. The declaration function guards against recursive entry. Active transitions request further frames until they settle. [Signals](./signals.md#dispatch) explains which callbacks run before this work and which remain synchronous.
 
@@ -47,7 +45,7 @@ Clay outputs a flat array of render commands with solved boxes, clipping and dra
 
 The renderer draws solid rectangles, borders and rounded corners with scene rects. Text, images, paths and shadows use cached raster content. Changes to content, size, output scale or path clipping can require rebuilding a raster. Cairo and Pango serve that rendering work; a stock widget does not receive a Cairo context and paint its own surface.
 
-Client surface commands attach application content at the solved positions. The compositor controls the frame and placement; the application controls its pixels. The final GPU or pixman composition remains wlroots' responsibility. Clay computes layout, SomeWM reconciles the scene, and wlroots presents it.
+Application surfaces are placed at their solved positions. Applications render their own pixels; wlroots performs the final GPU or pixman composition.
 
 ## State, layout and scene
 
@@ -57,13 +55,13 @@ Client surface commands attach application content at the solved positions. The 
 | Solved element tree | The boxes and relationships computed for an output. Clay retains state needed for element identity, scrolling, text measurement and transitions between passes. | `somewm-client clay tree`, `screen.inspector`, `clay::solved` |
 | Retained scene | Rectangles, raster buffers and client surfaces that wlroots can draw. | The dump's `realized:` section |
 
-Solved geometry is published back to objects for inspection, input handling and protocol updates. That readback exposes the result of the layout pass; it does not run an independent layout algorithm. The [scene graph](./scene-graph.md) explains how declared stacking order becomes scene order.
+Solved geometry is available for inspection, input handling and protocol updates. The [scene graph](./scene-graph.md) explains stacking order.
 
 ## What Clay is
 
-Clay is a single-header immediate-mode layout library, vendored unmodified in `third_party/clay.h`. The exact pin and checksum are recorded in `third_party/README.clay.md`. Immediate mode means SomeWM re-declares the output tree for each layout pass. Clay retains the state needed to connect successive passes, including element identities, scroll positions and transitions.
+Clay is a single-header layout library, vendored unmodified in `third_party/clay.h`; `third_party/README.clay.md` records its version and checksum. SomeWM re-declares the tree each layout pass. Clay retains identities, scroll positions and transitions between passes.
 
-The dump and these pages use Clay's model with short words:
+Dump labels map to these Clay definitions:
 
 | In the dump | In clay.h |
 | --- | --- |
@@ -78,7 +76,7 @@ The dump and these pages use Clay's model with short words:
 | `transition` | `Clay_TransitionData`; Clay animates the box, SomeWM declares only the target |
 | the inspector | Clay's own debug view, `Clay_SetDebugModeEnabled`, styled from `beautiful.inspector_*` |
 
-Clay's limits are SomeWM's limits:
+Configured limits:
 
 | Budget | Value | Where |
 | --- | --- | --- |
@@ -88,7 +86,7 @@ Clay's limits are SomeWM's limits:
 
 ## What SomeWM adds
 
-- **A source word on every number.** Each `fixed` or `percent` size says who chose it: `user`, `theme`, `output`, `protocol`, `legacy`, `transition` or `scroll` ([list](./reading-the-tree.md#where-a-number-comes-from)). The header's `derived` counts numbers SomeWM computed from a previous solve. It must read 0, and the test suite checks it.
+- **Size sources.** Each `fixed` or `percent` size is labelled `user`, `theme`, `output`, `protocol`, `legacy`, `transition` or `scroll` ([list](./reading-the-tree.md#where-a-number-comes-from)). The header's `derived` counts numbers SomeWM computed from a previous solve. It must read 0, and the test suite checks it.
 - **Bands.** Everything outside the output's flow floats at a z-index assigned from state: wallpaper -4, normal client 20, pointer 32767 ([table](./scene-graph.md#bands)).
 - **Describers.** Every stock `wibox` class has a function that turns its properties into declarations ([what each declares](./widgets-in-the-tree.md)).
 
@@ -114,4 +112,4 @@ output HEADLESS-1 scale 1.00 inspector off frames 3 elements 41/65536 map 41 fre
     58414e45       wibox.layout.fixed w=fit h=grow row box 0,0 211x32
 ```
 
-One root is in the flow: `OUTPUT`, a column of the bar and the workarea. Every other root floats at a band. An element line is id, name, sizing per axis with its source word, direction, padding and gap, then the solved box. [Reading the tree](./reading-the-tree.md) walks a whole dump.
+[Reading the tree](./reading-the-tree.md) explains the dump’s fields and sizing labels.

@@ -42,7 +42,7 @@ can never be more current than what your build answers:
 kiln-client commands        # every verb, one per line
 kiln-client help            # every verb with its arguments
 kiln-client help tag view   # one verb, or one namespace: help tag
-kiln-client reflect client  # every method, getter, setter a class carries
+kiln-client reflect client  # every method, getter, and setter of a class
 ```
 
 ## Verbs
@@ -78,7 +78,7 @@ kiln-client reflect client  # every method, getter, setter a class carries
 | Verb | Does |
 |---|---|
 | `client list` / `client visible` | Every client / only those on a selected tag, unminimized |
-| `client info [client]` | Every property one client carries |
+| `client info [client]` | All properties of a client |
 | `client focus [client]` | Focus; also `next` or `prev` around the list |
 | `client close [client]` / `client kill [client]` | Polite close / SIGKILL |
 | `client raise` / `client lower [client]` | Restack within the band |
@@ -137,7 +137,7 @@ kiln-client reflect tag
 | `get <class> <selector> <property>` | Read a property off every object the selector resolves to |
 | `set <class> <selector> <property> <value>` | Write a property on every one |
 | `call <class> <selector> <method> [arg...]` | Invoke a method on every one |
-| `reflect [class]` | Every method, getter, setter, and property a class carries |
+| `reflect [class]` | All methods, getters, setters, and properties of a class |
 
 ## Selectors
 

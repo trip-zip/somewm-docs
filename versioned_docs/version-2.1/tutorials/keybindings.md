@@ -4,17 +4,7 @@ title: Keybindings
 description: Add a global keybinding and a per-client one, reload, press them, and find them in the help popup.
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Keybindings
-
-<YouWillLearn>
-
-- The four parts of an `awful.key`
-- A global keybinding and a per-client keybinding
-- How your bindings appear in the help popup
-
-</YouWillLearn>
 
 ## A global keybinding
 

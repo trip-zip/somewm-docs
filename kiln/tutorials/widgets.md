@@ -6,16 +6,9 @@ sidebar_position: 4
 
 # Widgets
 
-A kiln widget is just a function that declares nodes, called from your bar
-function every dirty frame. There is no widget object and no update method:
-the only question a widget ever raises is "what makes the screen dirty when
-my data changes?" `ui.widget{}` answers it, wiring timers and signals to
-dirty marks and handing you back the plain function.
+`ui.widget` creates a function that declares UI elements, with timers or signal listeners to trigger redraws. Call it from your bar function.
 
-Two names sound alike and do different jobs. `ui.widget` is the wiring
-constructor this page is about. [`kiln.widgets`](/kiln/reference/widgets) is
-the stock widgets (taglist, clock, the form widgets); your own
-widgets compose stock pieces the same way your bar does.
+[`kiln.widgets`](/kiln/reference/widgets) provides stock widgets such as the taglist and clock.
 
 ## Prerequisites
 
@@ -59,18 +52,11 @@ The spec's first positional entry (or a `fn` field) is the declare function;
 	end)
 ```
 
-The widget is the function itself: you call it where you want its cells.
-
-Reload. The clock sits at the right end of your bar and the seconds tick
-visibly: `every = 1` marks the screen dirty once a second, so the bar
-redraws once a second, and only because this widget asked it to.
+Reload. The clock appears on the right and updates every second.
 
 ## 2. External data: a battery reader with spawn.watch
 
-For data that lives outside the compositor, poll a command and park the
-result in a table the widget reads. `kiln.spawn.watch(cmd, interval, cb)`
-runs the command, feeds each output line to `cb`, and re-runs it `interval`
-seconds after it exits:
+`kiln.spawn.watch(cmd, interval, cb)` runs a command, passes each output line to `cb`, and runs it again `interval` seconds after it exits:
 
 ```lua
 local stats = { battery = nil }
@@ -88,15 +74,9 @@ local battery = ui.widget {
 }
 ```
 
-Add `battery()` to your bar and reload. The bar shows your charge percentage,
-or `n/a` if there is no `BAT0` to read (some machines name it `BAT1`; adjust
-the path). Either way the widget renders: the fallback is part of the declare
-function, not an error case.
+Add `battery()` to your bar and reload. It shows the charge percentage, or `n/a` if no `BAT0` is found. Adjust the path if your battery has a different name, such as `BAT1`.
 
-The callback stores the fact and calls `kiln.dirty()`, so the redraw happens
-when the data changes, not on a render timer; the widget itself needs no
-`every`. The same pattern reads CPU load, volume, or anything else a command
-can print: one `spawn.watch` per source, one shared `stats` table.
+The callback saves the reading and calls `kiln.dirty()` to redraw. The widget needs no `every` timer.
 
 `spawn.watch` returns a handle with `:stop()`, and `kiln.reload()` stops all
 watches automatically, so an edited config never doubles its pollers. See
@@ -119,24 +99,13 @@ local focus_indicator = ui.widget {
 }
 ```
 
-Put it in your bar, reload, and click between two windows: the label follows
-the focused title as you switch, and reads "nothing focused" on an empty tag.
-Whenever any client emits `focus` or `property::title`, the screens are
-marked dirty and the next frame re-declares the widget with the new fact.
-Listeners are registered once per signal name no matter how many widgets
-watch it. The full signal list is in the
-[signals reference](/kiln/reference/signals).
+Add it to your bar, reload, and switch between windows. The label shows the focused window's title, or "nothing focused" on an empty tag. Listeners are registered once per signal name; see the [signals reference](/kiln/reference/signals).
 
-(For this particular example `watch` is belt and braces: focus and title
-changes already dirty the screen. `watch` earns its keep for properties you
-invent yourself, which redraw nothing on their own.)
+Focus and title changes already trigger redraws. `watch` is needed for custom properties that do not.
 
 ## 4. Keyed lists with ui.each
 
-When a widget shows one cell per item of a changing collection, declare it
-with `ui.each(items, key, declare)`. The `key` function gives each item a
-stable id, so a cell's identity (its press handler, its per-item state)
-follows the item rather than its list position:
+`ui.each(items, key, declare)` declares a cell per item. Give each item a stable key to preserve its handler and state when the list is reordered:
 
 ```lua
 local function note_key(n)
@@ -164,9 +133,7 @@ Wire the chips into your bar, reload, and send yourself a notification:
 scripts/kiln-eval 'require("kiln").notify { title = "hello" }'
 ```
 
-A chip labeled "hello" appears in the bar alongside the popup. Press the chip
-and both vanish: the press handler dismisses the notification, the dismissal
-fires `notification::dismissed`, and the next frame declares one chip fewer.
+A chip labelled "hello" appears in the bar. Click it to dismiss the notification and remove the chip.
 
 `declare(item, id, st)` receives a per-key state table `st` that survives
 across frames as long as the key is still declared, then vanishes with it.
@@ -175,9 +142,7 @@ scoped by the key function's identity.
 
 ## 5. A stock meter
 
-A percent meter is a track with a fill whose width is a percentage of its
-parent: two nested boxes, no drawing code. That composition ships stock
-as `widgets.progress`, so a meter is one call:
+Add a progress bar with `widgets.progress`:
 
 ```lua
 	widgets.progress({ id = "meter", value = 0.42,
@@ -187,14 +152,7 @@ as `widgets.progress`, so a meter is one call:
 Drop that line into your bar function and reload: a thin 100 px track
 appears with the left 42 percent filled in the accent color.
 
-The form widgets (`progress`, `separator`, `toggle`, `slider`) are
-controlled: you own the value and the widget draws it. Nothing inside
-`widgets.progress` remembers 0.42; the next frame draws whatever your
-declare function passes, which is exactly how every other fact on the bar
-already behaves. Wiring one to `ui.widget` is therefore just reading your
-own state in the declare function, as the complete example below does. The
-cfg for each form widget is in the
-[kiln.widgets reference](/kiln/reference/widgets#form-widgets).
+Pass the current value on each frame. See the [form widgets reference](/kiln/reference/widgets#form-widgets) for configuration options.
 
 ## Complete example
 
@@ -241,11 +199,7 @@ screen.on("added", function(s)
 end)
 ```
 
-Reload. On battery hardware the meter tracks your charge; on anything else
-the bar reads "no battery" instead of erroring. The fill even recolors below
-20 percent, because state read at declare time is the entire styling model:
-`spawn.watch` owns the number, `ui.widget` owns the dirty mark, and
-`widgets.progress` just draws whatever it is handed.
+Reload. The meter shows the charge and changes colour below 20%. Without a battery, it displays "no battery".
 
 ## See also
 

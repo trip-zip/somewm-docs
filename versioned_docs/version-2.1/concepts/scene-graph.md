@@ -1,16 +1,16 @@
 ---
 sidebar_position: 3
 title: Scene Graph
-description: The scene is what wlroots draws, in the order the tree declares. Every floating root carries a band, Clay's zIndex, from the wallpaper at -4 to the pointer at 32767.
+description: How bands and client stacking determine drawing order in the wlroots scene.
 ---
 
 # Scene Graph
 
-The scene is what wlroots draws. It holds nothing of its own: each frame, SomeWM [declares the output as one Clay tree, solves it, and reconciles the result into the scene](./how-somewm-draws.md). What is above what is a number on each floating root, its band, which is the Clay floating element's `zIndex`. Clay sorts floating roots by it, and the renderer keeps that order in the scene.
+SomeWM updates the wlroots scene from [Clay’s layout result](./how-somewm-draws.md). Each floating root has a band, stored as Clay’s `zIndex`, which determines its drawing order.
 
 ## Bands
 
-The scene draws roots from the lowest band to the highest, and roots in the same band in declaration order, so a later popup is above an earlier one. The numbers are the `Z_*` enum in `declare.c`:
+Lower bands draw first. Within a band, roots draw in declaration order, so a later popup appears above an earlier one. The values come from `Z_*` in `declare.c`:
 
 | Band | What is there |
 | --- | --- |
@@ -61,11 +61,11 @@ A wibox's band follows its `type` and `ontop`:
 | `awful.menu`, a tooltip, an `awful.popup` with `ontop = true` | 80 |
 | a `naughty` notification | 90 |
 
-So a wibar stays above a maximized client because the client's cell is inside the workarea the bar leaves; a fullscreen client at 40 covers a bar in the flow and a wibox at 25; an ontop bar at 60 stays above it; a notification at 90 is above both.
+A fullscreen client covers a bar in the flow. An ontop bar remains above it; notifications appear above both.
 
 ## Struts and the workarea
 
-Nobody subtracts a wibar from the screen. The output is a column: top bar, workarea, bottom bar, and Clay gives the workarea what is left. `screen.workarea` is that element's solved box.
+The output is a column of bars and workarea. Clay assigns the remaining space to the workarea; `screen.workarea` reports its solved rectangle.
 
 ```lua
 local s = screen.primary

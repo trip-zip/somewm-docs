@@ -4,17 +4,7 @@ title: Basics
 description: The default desktop, the keybindings for windows, tags and layouts, and your first config edit and reload.
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Basics
-
-<YouWillLearn>
-
-- How to read the default desktop
-- The keybindings for windows, tags and layouts
-- How to edit and reload `rc.lua`
-
-</YouWillLearn>
 
 You need a running SomeWM session ([Launch](../getting-started/first-launch.md)) or a nested one in a window ([Try SomeWM without logging out](try-somewm-without-installing.md)), and a terminal. The default config uses `foot`.
 
@@ -32,7 +22,7 @@ The bar at the top is the wibar. Left to right:
 | systray | app indicators |
 | layout icon | the current layout; rightmost |
 
-A tag is a label on a window, not a container: a window can carry several, and a screen can show several at once.
+A window can belong to several tags, and a screen can display several tags at once.
 
 ## Windows
 
@@ -57,7 +47,11 @@ The number keys address tags by position: Mod4 + 1 is `dev`, Mod4 + 2 is `web`.
 | Mod4 + Shift + 1 to 5 | move the focused window to that tag |
 | Mod4 + Ctrl + 1 to 5 | also view that tag |
 
-Try it: open a terminal, Mod4 + 2, open another, Mod4 + 1. The first is still there. With it focused, Mod4 + Shift + 3 moves it to `chat`; Mod4 + 3 shows it alone. Mod4 + Ctrl + 2 from `dev` tiles both tags' windows together and highlights both tags; the same keys again go back.
+Open a terminal on `dev`, press Mod4 + 2, and open another on `web`. Return with Mod4 + 1.
+
+With the first terminal focused, Mod4 + Shift + 3 moves it to `chat`; Mod4 + 3 shows it.
+
+Return to `dev` and press Mod4 + Ctrl + 2 to view `dev` and `web` together. Both tags are highlighted. Press the same keys again to hide `web`.
 
 ## Layouts
 
@@ -85,7 +79,7 @@ Try it: open a terminal, Mod4 + 2, open another, Mod4 + 1. The first is still th
 
 ## Your first edit
 
-SomeWM loads `~/.config/somewm/rc.lua`, then `~/.config/awesome/rc.lua`, then the bundled default. Start from the default:
+Copy the bundled config to `~/.config/somewm/rc.lua`:
 
 ```bash
 mkdir -p ~/.config/somewm

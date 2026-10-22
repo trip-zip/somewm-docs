@@ -4,19 +4,9 @@ title: Widgets
 description: Build a clock widget in its own module, update it on a timer, add an icon, containers, a tooltip and click handlers, and put it in the bar.
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Widgets
 
-<YouWillLearn>
-
-- Composing primitives, containers and layouts
-- A clock widget that updates on a timer
-- Icons, tooltips, click handlers, shell output and signals
-
-</YouWillLearn>
-
-A widget is a declarative table: a primitive shows content (`textbox`, `imagebox`), a container modifies one child (`margin`, `background`), a layout arranges several (`fixed`, `flex`, `align`). None of them draws itself; SomeWM solves the bar from their declarations once per frame ([what each class declares](../concepts/widgets-in-the-tree.md)). They nest:
+Compose widgets from primitives (`textbox`, `imagebox`), single-child containers (`margin`, `background`), and layouts (`fixed`, `flex`, `align`). They nest in declarative tables:
 
 ```lua
 wibox.widget {
@@ -61,7 +51,7 @@ local my_clock = require("widgets.clock")
 ```
 
 :::warning
-A widget module runs when required. A theme value read at its top level, such as `bg = beautiful.bg_normal`, is nil before `beautiful.init()`, with no error: the widget renders unstyled in `sans 8`. A later `init` does not restyle it. If a widget ignores the theme, check this order first.
+A module required before `beautiful.init()` may copy nil theme values without an error. Loading the theme later does not update those copies.
 :::
 
 Then in the right section of the bar:

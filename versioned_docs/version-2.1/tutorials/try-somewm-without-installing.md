@@ -4,18 +4,9 @@ title: Try SomeWM Without Logging Out
 description: Start a nested SomeWM in a window on your current desktop with somewm-client test, spawn a terminal into it, reload a config, and stop it cleanly.
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Try SomeWM Without Logging Out <SomewmOnly />
-
-<YouWillLearn>
-
-- Starting a nested SomeWM in a window from any Wayland or X11 session
-- Spawning a terminal into it and using a keybinding
-- Reloading an `rc.lua` and stopping the instance
-
-</YouWillLearn>
 
 You need the SomeWM binary [installed](../getting-started/installation.md) and a graphical session of any kind. You do not need to log into SomeWM.
 

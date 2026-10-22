@@ -54,8 +54,6 @@ The wlroots build inside SomeWM needs wlroots' own build dependencies too: the p
 
 ### Debian/Ubuntu
 
-The build always builds wlroots from source, and on Debian 13 and Ubuntu 24.04 also wayland, libdrm, xkbcommon, pixman and wayland-protocols at the versions wlroots needs. That needs wlroots' own build dependencies as well as SomeWM's.
-
 ```bash
 # Required dependencies
 sudo apt install \
@@ -183,7 +181,7 @@ make
 sudo make install
 ```
 
-The build checks that LGI, the Lua GObject Introspection bindings the libraries use for cairo, Pango and GLib, is installed for your Lua version, and names the package to install if not. The package must match the Lua version:
+LGI provides the cairo, Pango and GLib bindings. The build checks for it and reports missing packages. Install the package for your Lua version:
 
 | Lua Version | Arch Linux | Debian/Ubuntu | Fedora |
 |-------------|------------|---------------|--------|

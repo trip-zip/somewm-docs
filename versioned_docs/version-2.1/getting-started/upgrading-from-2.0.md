@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Upgrading from 2.0 to 2.1
 
-SomeWM 2.1 declares everything on an output as [one Clay tree per frame](../concepts/how-somewm-draws.md). Stock widgets retain their configuration interfaces where supported; custom painters and the removed names below require configuration changes. A config notices 2.1 in three places: a widget that painted itself, a translucent bar, and a few properties the tree cannot hold. Compose custom widgets from supported stock classes; some removed features have no equivalent.
+SomeWM 2.1 uses [Clay for client and widget layout](../concepts/how-somewm-draws.md). Custom widget painters must be replaced with compositions of supported widgets. Check the changed behaviour and removed APIs below; some have no replacement.
 
 ## What you will see
 
@@ -20,15 +20,15 @@ A widget with its own `fit`, `layout` or `draw` is [left out of the tree](../con
 W: awesome: wibox.clay: badge draws itself (:draw, :fit) and is left out of the tree
 ```
 
-The symptom is a gap where the widget was; the wibox's background still shows. Compose the look from stock widgets instead: a `wibox.container.background` with `bg`, `shape` and `border_width` replaces most hand-drawn boxes ([example](../concepts/widgets-in-the-tree.md#the-same-look-without-a-painter)). Third-party widget libraries are where this hits, and a library widget that draws with cairo needs the library's update.
+The widget disappears while its wibox background remains. Replace custom drawing with stock widgets; for boxes, use `wibox.container.background` with `bg`, `shape` and `border_width` ([example](../concepts/widgets-in-the-tree.md#the-same-look-without-a-painter)). Third-party Cairo widgets need updates from their libraries.
 
 ### A translucent wibox looks denser where fills overlap
 
-A wibox with `opacity` below 1 blends each fill at that opacity, so overlapping fills add up: a blue container on a blue wibox at 0.5 is denser than either alone. 2.0 blended the finished wibox once; the 2.1 renderer draws each fill as its own rect. Lower the inner containers' opacity, or give only the outermost one an alpha.
+2.0 applied opacity to the finished wibox. 2.1 applies it to each fill, so overlapping translucent fills look denser. Lower the inner containers’ opacity or apply alpha only to the outermost background.
 
-### A few things the tree cannot hold warn and change
+### Unsupported properties {#a-few-things-the-tree-cannot-hold-warn-and-change}
 
-Each is one line in the log, once, naming the class, the property and what happens instead:
+These values produce one warning naming the class, property and resulting behaviour:
 
 | You set | What happens |
 | --- | --- |
@@ -54,7 +54,7 @@ journalctl --user -u somewm.service -f
 A SomeWM started from a terminal prints them there. The three forms are:
 
 - `wibox.clay: <class> draws itself (...) and is left out of the tree`, or `has no describer and is left out of the tree`: the widget and its subtree are not drawn.
-- `wibox.clay: <class> <property> <what happens>`: the value was changed to one the tree can hold, and the rest of the widget is drawn.
+- `wibox.clay: <class> <property> <what happens>`: an unsupported value was adjusted; the rest of the widget is drawn.
 - `wibox.clay: <class> <property> is ignored`: a property the class no longer has; nothing changes.
 
 To see what was drawn instead, print the tree or open the inspector:
@@ -67,7 +67,7 @@ somewm-client clay tree
 screen.primary.inspector = true
 ```
 
-[Reading the tree](../concepts/reading-the-tree.md) walks the output. A widget that was left out is simply absent from it.
+[Reading the tree](../concepts/reading-the-tree.md) explains the output.
 
 ## Behaviour that changed
 
@@ -84,7 +84,7 @@ Without any change to `rc.lua`:
 | Screenshot overlay | Interactive selection covers the pointer’s screen. |
 | Xwayland geometry | Content-size requests pass through the Clay client frame; geometry replies use the completed solve. |
 | Render verification | `render_verify` is removed; the verifier runs only in sanitizer and test builds. |
-| Imagebox sizing | An imagebox without a forced size takes its size from the told size above it, as 2.0's fit did; with none on either axis it declares the image's own size and can overflow a flex or fixed layout. An imagebox forced on one axis scales its image to that axis. |
+| Imagebox sizing | An imagebox without a forced size takes its size from an explicit ancestor size, as 2.0's fit did; with none on either axis it declares the image's own size and can overflow a flex or fixed layout. An imagebox forced on one axis scales its image to that axis. |
 | Hotkeys help and menubar | They scroll instead of paging. Hotkeys: one column per group, continued every `beautiful.hotkeys_rows` rows (default 20), PgDn and PgUp scroll by one viewport. Menubar: `left_label` and `right_label` show while items lie beyond that side. |
 | Grid | A non-homogeneous grid no longer sizes its columns to the widest cell across rows. A homogeneous grid inside a content-sized box takes content-sized cells and warns. Border dashes draw solid and gradient border colours are transparent, both with a warning. |
 | Clients under a layout | An ontop, above or below client tiles into its slot, as in AwesomeWM. A client whose protocol minimum exceeds its tiled cell overhangs the cell; the workarea and its neighbours keep their size. A client that draws a size other than the one it was given is drawn at the drawn size, cut at its cell. |
@@ -98,7 +98,7 @@ Without any change to `rc.lua`:
 | Align with `expand = "none"` | An outer widget wider than its half pushes the centre widget off centre instead of being cut at the half. |
 | Stacking | 2.0 kept six fixed scene layers, background to overlay, and moved each client's and wibox's node between them in C. 2.1 has no layers: order is a band the tree declares ([Scene Graph](../concepts/scene-graph.md#bands)). |
 | Layouts | 2.0's `arrange` computed a rectangle per client in Lua. 2.1 declares the layout as a Clay subtree; an `arrange` layout still works, with its numbers marked `legacy` in the dump. |
-| Widget sizing | 2.0 asked each widget's `fit` for a size and its `layout` for its children's places, so the same question had many answers. 2.1 has one: Clay's solve. |
+| Widget sizing | Clay computes widget geometry, replacing the per-widget `fit` and `layout` calls used in 2.0. |
 | Client-local properties | `client:set_xproperty` stores scalar values across Lua hot reloads; the 2.0 method did nothing. See [client properties](../reference/deviations.md#x-property-family). |
 | Shadows | `clip_directional` is accepted but has no effect. Shadows fade on every side; remove the setting. See [shadow reference](../reference/shadows.md). |
 | Layout animation | A client frame declares no transition until something configures animation: `c.animation`, `theme.animation_duration` or any `theme.animation_*_duration` set to a number (0 included), `theme.animation_appear` or `animation_disappear`, or `somewm.animation.layout_duration` above 0. Requiring `somewm.layout_animation` sets that to 0.15 and is deprecated. A client's first frame after that, or after a reload, does not animate unless it has an entrance. |
@@ -116,7 +116,7 @@ Calling a removed function raises `attempt to call ... (a nil value)`. Setting a
 | `wibox.widget.base.fit_widget`, `layout_widget`, `place_widget_at`, `place_widget_via_matrix`, `rect_to_device_geometry`, and `no_parent_I_know_what_I_am_doing` | The solver places every widget. |
 | `wibox.widget.draw_to_cairo_context`, `draw_to_image_surface`, `draw_to_svg_file`, `wibox:to_widget`, `wibox:save_to_svg` | Capture the screen: `root.content()`, `screen.content`, `somewm-client screenshot`. |
 | `wibox.widget.textbox:get_preferred_size`, `get_preferred_size_at_dpi`, `get_height_for_width`, `get_height_for_width_at_dpi`, `wibox.widget.textbox.get_markup_geometry`, `menubar.utils.compute_text_width`, `menubar.utils.compute_textbox_width` | The solver measures text. Let the textbox fit, or give it a `forced_width`. |
-| the drawable `refresh` method and `surface` property, the drawin `surface_scale` and `shape_border` properties | A drawable holds no surface. The renderer draws a shaped wibox's border from `border_width` and `border_color`. |
+| the drawable `refresh` method and `surface` property, the drawin `surface_scale` and `shape_border` properties | Drawables no longer have surfaces. The renderer draws a shaped wibox's border from `border_width` and `border_color`. |
 | the scroll container's `context`, `first_x`, `first_y`, `fit_width`, `fit_height`, `hierarchy`, `surface_width`, `surface_height` | The container is a scroll element of the tree. |
 | the wibox `__tostring` | `tostring(wibox)` prints the table. |
 
@@ -152,12 +152,10 @@ New: `hotkeys_rows`, `calendar_popup_width`, `launcher_width`, and the inspector
 
 ## New in 2.1
 
-Everything a 2.0 config can use that it could not before. Each group links the page that documents it.
-
 ### Seeing the tree
 
 - `somewm-client clay tree [screen]` prints what the last frame solved: counters per band, then one line per retained node in draw order ([Reading the tree](../concepts/reading-the-tree.md)).
-- `screen.inspector` opens Clay's debug inspector on that screen, with the element tree and the selected element's solved box, and `property::inspector` fires on a change. `somewm.inspector.toggle(s)` flips it and `somewm.inspector.restyle()` re-reads the theme keys `inspector_bg`, `inspector_bg_alt`, `inspector_border`, `inspector_fg`, `inspector_bg_selected`, `inspector_highlight`, `inspector_width` and `inspector_font` ([Screen](../reference/screen.md)).
+- `screen.inspector` opens Clay’s layout inspector; changes emit `property::inspector`. `somewm.inspector.toggle(s)` toggles it, and `somewm.inspector.restyle()` reloads its theme settings ([Screen](../reference/screen.md)).
 
 ### Clients
 
@@ -166,13 +164,9 @@ Everything a 2.0 config can use that it could not before. Each group links the p
 
 ### Animation
 
-All of it is new in 2.1. `somewm.layout_animation` is deprecated and `awesome.start_animation` is gone ([Animation](../guides/animation.md)).
+Configure client transitions with `c.animation`, popup visibility with `animation.visible`, and widget properties with `widget.animation` or `widget:animate{...}`. Set `.animation = false` to disable an object and its descendants, or `somewm.animation.enabled = false` to disable all transitions.
 
-- `c.animation = { appear, disappear, tag, focus, maximize, floating }` and the rule property of the same name, with the theme keys `animation_appear`, `animation_disappear` and `animation_tag` for the entrance, one duration key per trigger, and `animation_duration` as the fallback for every trigger, layout included.
-- The entrances `grow`, `scale`, `scale_top`, `scale_bottom`, `scale_left`, `scale_right`, `slide_left`, `slide_right`, `slide_up`, `slide_down` and `fade`, alone or in a list that runs together.
-- `animation = { visible = { duration, enter, exit } }` on a wibox or `awful.popup`.
-- `widget.animation = { property = duration }` for `bg`, `border_color`, `border_width`, `forced_width`, `forced_height` and the progressbar and slider `value`, and `widget:animate{ property = value, duration = d }` for one change.
-- `.animation = false` on any of them turns the object and its descendants off, and `somewm.animation.enabled = false` turns everything off.
+`somewm.layout_animation` is deprecated and `awesome.start_animation` is removed. See [Animation](../guides/animation.md) for durations, effects and examples.
 
 ### Widgets and popups
 
@@ -187,7 +181,7 @@ All of it is new in 2.1. `somewm.layout_animation` is deprecated and `awesome.st
 
 ## Building 2.1
 
-- SomeWM builds its own wlroots 0.20.2 and links it in; an installed wlroots is not used. The wlroots 0.19 path and `-Dwlroots_version` are gone. A distribution whose wayland, libdrm, xkbcommon, pixman or wayland-protocols is older than wlroots 0.20.2 gets that library built alongside it by the same build. See [Installation](installation.md).
+- SomeWM builds wlroots 0.20.2 and any required dependency upgrades; see [Installation](installation.md). The wlroots 0.19 build path and `-Dwlroots_version` are removed.
 - XWayland is always built in; `-Dxwayland` is gone. Building needs xcb, xcb-icccm and Xwayland installed.
 - `make install` removes the installed Lua tree before installing, so removed modules cannot load from an earlier installation.
 

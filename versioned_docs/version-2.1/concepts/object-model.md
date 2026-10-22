@@ -34,11 +34,11 @@ local hdmi = output.get_by_name("HDMI-A-1")
 local o = screen.primary.output
 ```
 
-It carries hardware facts (make, model, serial, physical size), display state (scale, transform, mode, position, enabled) and `screen`, nil while disabled ([output reference](../reference/output.md)).
+Output properties include make, model, serial, physical size, scale, transform, mode, position and enabled state. `screen` is nil while disabled ([output reference](../reference/output.md)).
 
 ## Screen
 
-A display with tags and wibars. `s.geometry` is its box, `s.workarea` what the bars leave.
+A display with tags and wibars. `s.geometry` is its rectangle; `s.workarea` excludes space reserved by bars.
 
 ```lua
 local s = screen.primary
@@ -78,7 +78,7 @@ s.mywibar = awful.wibar { position = "top", screen = s }
 local popup = wibox { width = 200, height = 100, visible = true }
 ```
 
-A widget describes an element of the wibox's tree: what it holds, how it is sized, its colour and border. It never draws; every frame the wibox is [solved from its widgets' descriptions](./widgets-in-the-tree.md). Three kinds, nested in declarative tables:
+Widgets declare content, sizing and appearance for [SomeWM to lay out](./widgets-in-the-tree.md). Three kinds compose in nested tables:
 
 | Kind | Role | Examples |
 | --- | --- | --- |

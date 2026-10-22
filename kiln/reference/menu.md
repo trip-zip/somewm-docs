@@ -66,6 +66,8 @@ Each item is a table: label first, payload second. The payload's type is the who
 | `Right`, `Return`, `KP_Enter` | `enter` (enter a submenu, or run the row) |
 | `Left`, `Escape` | `back` (close one level; closing the last level closes the menu) |
 
+Entering a submenu by keyboard selects its first row. Opening it with the pointer does not.
+
 ## Theme keys
 
 The menu reads `menu_width` (default 200), `menu_height` (row height, 24), and `menu_submenu_icon` (optional image path drawn on submenu rows; unset renders a `>`), plus the shared palette: `bg` for the panel, `accent` for its border, `bg2` for the highlighted row. See [Theme Variables](theme-variables.md).

@@ -48,7 +48,7 @@ A size written as a bare number stays that many logical pixels at every DPI.
 
 ## Mixed-DPI setups
 
-Each screen carries its own scale, and the compositor translates coordinates at screen boundaries. A 4K panel at 1.5 next to a 1080p panel at 1.0 is two screens with different logical sizes and nothing more to configure.
+Screens can use different scales, such as 1.5 on a 4K panel and 1.0 on a 1080p panel. The compositor translates coordinates between them.
 
 ## Blurry apps
 

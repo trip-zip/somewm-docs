@@ -10,19 +10,19 @@ import AnimationComparison from '@site/src/components/AnimationComparison.mdx';
 
 # Animation <SomewmOnly />
 
-SomeWM animates by declaring a transition on a node of the tree and letting the solver move it. Nothing is interpolated in Lua. Every animation is off until a duration is set, and a duration of 0 is off.
+Set a duration to enable animation; 0 disables it. SomeWM uses Clay transitions for layout, visibility and widget-property changes.
 
-The `.animation` property stores a persistent policy on clients, wiboxes, popups and widgets. Policies are copied on assignment and access. To change one, edit a copy and assign it back; assignments emit `property::animation`. The widget method `:animate{...}` requests one change without replacing that policy.
+Use `.animation` for a persistent policy and `widget:animate{...}` for a single change. See [Updating a policy](#updating-a-policy) to edit an existing policy.
 
 ## Layout changes
 
-Set the layout duration and every client box eases to its new place on a resize, a tag's layout change or a carousel scroll. When a client maps or closes, the other clients ease. The client itself appears or goes in one frame unless it has an entrance.
+Animate client layout changes, including resize, tag layout changes and carousel scrolling:
 
 ```lua
 theme.animation_layout_duration = 0.15   -- seconds
 ```
 
-From code, `somewm.animation.layout_duration` sets it; `theme.animation_layout_duration` and `theme.animation_duration` both win over it when set. Requiring `somewm.layout_animation` still sets it to 0.15, as it did in 1.4 and 2.0, and that module is deprecated. A client's first frame after the duration is set, or after a reload, does not animate.
+`somewm.animation.layout_duration` sets the duration from code. Theme values `animation_layout_duration` and `animation_duration` take precedence. The deprecated `somewm.layout_animation` module sets it to 0.15 when required. A client’s first frame after enabling it or reloading does not animate. Appearance and disappearance use separate triggers below.
 
 <AnimationDemo name="layout" title="Layout resize and swap">
   Tiled windows ease into their new geometry when the master width changes and when the windows swap places.
@@ -51,7 +51,16 @@ A client reads its durations and entrances from `c.animation`, a table with one 
   The same window moves between maximised, tiled and floating states, with a different duration for each transition.
 </AnimationDemo>
 
-An entrance is one of `grow`, `scale`, `scale_top`, `scale_bottom`, `scale_left`, `scale_right`, `slide_left`, `slide_right`, `slide_up`, `slide_down` or `fade`. `grow` sizes the frame up from nothing, so its box changes. The scale words shrink the finished picture about its centre or an edge midpoint, with the box unchanged ([Scale](#scale)). The slides come in from that edge of the screen, and `fade` blends the frame in from invisible. The same word runs backwards on the way out.
+Choose an entrance effect:
+
+| Effect | Behaviour |
+| --- | --- |
+| `grow` | Increases the frame’s layout size from zero. |
+| `scale`, `scale_top`, `scale_bottom`, `scale_left`, `scale_right` | Scales the rendered image around its centre or an edge midpoint; layout size stays unchanged. See [Scale](#scale). |
+| `slide_left`, `slide_right`, `slide_up`, `slide_down` | Slides from that screen edge. |
+| `fade` | Increases opacity from transparent. |
+
+Exits reverse the effect.
 
 A list runs several effects together in one transition, with one duration:
 
@@ -80,7 +89,7 @@ ruled.client.append_rule {
 }
 ```
 
-One key holds an entrance word, a list of them, or a duration. A client that names an entrance takes its duration from the theme. Each trigger in this rule animates when its own duration key (`theme.animation_appear_duration`, `animation_disappear_duration` or `animation_tag_duration`) is above 0, or when that key is unset and `theme.animation_duration` is above 0. The triggers can be enabled independently.
+Each `c.animation` trigger accepts an effect name, a list of effects, or a duration. Effects use their trigger’s theme duration, falling back to `theme.animation_duration`. The duration must be above 0.
 
 <AnimationDemo name="fade" title="Fade">
   A client fades in and out, followed by a popup using the same entrance and exit style.
@@ -103,9 +112,7 @@ policy.focus = 0.3
 c.animation = policy
 ```
 
-`c.animation = false` turns animation off for the client and its titlebar widgets. `c.animation = nil` removes the override so the client falls back to the theme and its titlebar widgets can use their own policies.
-
-With a tag duration above 0, from `theme.animation_tag_duration`, `theme.animation_duration` or a number in `c.animation.tag`, a tag switch grows clients in and out. `c.animation.tag` or `theme.animation_tag` can name another entrance. A client on its way out animates its frame, the border and titlebars; the window's own pixels snap away on the first frame.
+Tag transitions default to `grow`; override the effect with `c.animation.tag` or `theme.animation_tag`. On exit, the frame, border and titlebars animate, but the application’s pixels disappear on the first frame.
 
 <AnimationDemo name="grow-shrink" title="Grow and shrink">
   Growing entrances and shrinking exits on clients, tag changes and a popup, shown with different durations.
@@ -115,7 +122,7 @@ With a tag duration above 0, from `theme.animation_tag_duration`, `theme.animati
 
 <AnimationComparison />
 
-`scale` shrinks the complete picture, the surface, border and titlebar together, about the centre of the frame. `scale_top`, `scale_bottom`, `scale_left` and `scale_right` hold that edge's midpoint still and shrink towards it. The frame's box in the layout does not change and the client receives the same configure sizes as an unanimated map, so neighbours do not move and the client never redraws for the effect. Pointer events hit the picture where it is drawn, so `mouse::enter` fires on the scaled edge.
+`scale` transforms the surface, border and titlebars together. Its directional variants keep the named edge’s midpoint fixed. Layout and configure sizes stay unchanged, so neighbours stay in place and clients need not redraw. Pointer events follow the scaled image, including `mouse::enter`.
 
 ```lua
 ruled.client.append_rule {
@@ -124,7 +131,7 @@ ruled.client.append_rule {
 }
 ```
 
-Mid-flight, `somewm-client clay tree` prints the picture beside the box, `scale 0.715333 anchor top presented 29,32 146x161 box 0,32 204x225`: the box is the slot, `presented` is where the scaled picture is drawn, and the anchor is the edge held still.
+During a transition, `somewm-client clay tree` reports both layout and display geometry. In `scale 0.715333 anchor top presented 29,32 146x161 box 0,32 204x225`, `presented` is the scaled image and `box` is the layout slot.
 
 A popup can scale and fade in together and scale out from its bottom edge:
 
@@ -137,7 +144,7 @@ local popup = awful.popup {
 popup.visible = true
 ```
 
-The dump line for that popup mid-entrance reads `fade_alpha 0.366742 scale 0.633258 anchor center`, and both values reach their end together at the end of the duration. `{ "grow", "scale" }` logs `transition.enter: grow + scale conflict; scale is ignored, grow remains active`.
+The dump reports both `fade_alpha` and `scale`; they complete together. `grow` and `scale` conflict, so only the first effect is used.
 
 ## Wiboxes and popups
 
@@ -152,15 +159,13 @@ local popup = awful.popup {
 
 `enter` and `exit` take the same words and lists as a client. Setting `visible` then eases the box in or out. A wibox leaving the screen keeps its box and border for the duration, and its shadow goes on the first frame.
 
-Setting the wibox's or popup's `animation = false` disables its transitions and those of its child widgets. Setting `animation = nil` removes that override.
-
 <AnimationDemo name="slides" title="Directional slides">
   A popup enters and exits using `slide_left`, `slide_right`, `slide_up` and `slide_down`.
 </AnimationDemo>
 
 ## Widgets
 
-A widget eases a property with `widget.animation`, a table of property to duration in seconds:
+Set `widget.animation` to a table of properties and durations in seconds:
 
 ```lua
 local box = wibox.container.background()
@@ -185,7 +190,7 @@ Properties that animate:
 
 Any other property in the table warns once and that property snaps. On a `wibox.container.background` whose shape is not a rounded rectangle, `bg`, `border_color` and `border_width` snap and warn once. A widget's position inside its layout always snaps, so a spacing change moves it in one frame while its own size eases.
 
-For one change without a standing field, call the method:
+For a single change:
 
 ```lua
 box:animate { bg = "#ff0000", duration = 0.3 }
@@ -197,7 +202,7 @@ It sets each named property and eases it once; the next plain assignment snaps a
   Three widgets change size and colour at different speeds. The heart then grows and shrinks twice to make a gentle pulse.
 </AnimationDemo>
 
-`widget.animation = false` turns animation off for that widget and everything inside it, including children that set their own `animation`. The `:animate{}` method remains callable and applies its values immediately while animation is disabled. `widget.animation = nil` removes the override; an ancestor's `animation = false` still suppresses the subtree.
+When animation is disabled, `:animate{}` still applies its values immediately.
 
 Each output keeps 200 transition records, including configured records that are currently idle. When the budget is exhausted, the output warns once and the remaining nodes snap.
 
@@ -215,7 +220,7 @@ Assigning an edited policy notifies `property::animation` observers and schedule
 
 ## Disabling animation
 
-Assign `.animation = false` to suppress an object and its descendants, including descendants with their own policies. A client's titlebar widgets are included. Assign `nil` to remove that override, and client theme defaults and descendant policies apply again.
+Assign `.animation = false` to disable an object and its descendants, including a client’s titlebar widgets. This overrides descendant policies. Assign `nil` to remove the override; theme defaults and descendant policies then apply, unless an ancestor still disables them.
 
 Disable all transitions with:
 
@@ -223,6 +228,6 @@ Disable all transitions with:
 require("somewm.animation").enabled = false
 ```
 
-This disables client and widget transitions and the `animation.visible` transitions on wiboxes and popups. Active transitions finish on the next rendered frame, including retained exits. Set `enabled = true` to let later changes animate again. A completed transition does not restart, and stored policies are unchanged throughout. A running `mousegrabber` suppresses the same transitions, so a drag never fights an easing box.
+Active transitions finish on the next rendered frame, including retained exits. Setting `enabled = true` enables future changes; it does not restart completed transitions or alter stored policies. A running `mousegrabber` also suppresses transitions during a drag.
 
 [Clients in the Tree](../concepts/clients-in-the-tree.md) for the frame these transitions move.
