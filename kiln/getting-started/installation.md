@@ -68,8 +68,16 @@ Logs go to the terminal.
 ## Install
 
 ```sh
-make install prefix="$HOME/.local"
+make && sudo make install
 ```
+
+Build as your normal user. Installation copies that build to `/usr/local`
+without invoking Odin or rebuilding Clay as root. Reinstalling leaves the
+running compositor on its existing executable; the next launch uses the update.
+
+From a free TTY, log in as your normal user and run `kiln`. It selects the
+physical display/input backends and loads your config. Super+Return opens a
+terminal; Super+Shift+q quits. No source checkout or launcher script is needed.
 
 The installed command names are `kiln` and `kiln-client`. Installation
 also supplies bash/zsh/fish completions, `share/wayland-sessions/kiln.desktop`
@@ -77,10 +85,17 @@ also supplies bash/zsh/fish completions, `share/wayland-sessions/kiln.desktop`
 `share/kiln`. A user prefix does not guarantee display-manager discovery;
 system login menus normally scan system session directories.
 
-The default prefix is `/usr/local`, requiring write permissions there.
-`prefix`, `bindir` and `datadir` can be set per invocation; no Meson reconfigure
-step is needed. `DESTDIR` stages an install without changing its compiled runtime
-paths. Uninstall with the same paths:
+For a user prefix, use matching build and install settings:
+
+```sh
+make prefix="$HOME/.local"
+make install prefix="$HOME/.local"
+```
+
+`prefix`, `bindir` and `datadir` are configurable. The install datadir must match
+the build because the Lua runtime path is compiled into the executable.
+`DESTDIR` stages an install without changing those runtime paths.
+Uninstall with the same paths:
 
 ```sh
 make uninstall prefix="$HOME/.local"

@@ -18,14 +18,20 @@ KILN_SOCK="$kiln_demo/eval.sock" KILN_RC="$PWD/kilnrc.lua" \
   dbus-run-session -- ./build/kiln -s foot
 ```
 
-Run it under a session bus. The bus serves two things: clients you spawn
+The private bus serves two things: clients you spawn
 (portals, apps that expect D-Bus), and kiln's own D-Bus integrations, which is
 how desktop notifications and system tray items reach the compositor. Without
 a bus, apps still run but anything D-Bus-shaped is missing. The command above creates a private bus and IPC path. `make run` also wraps
 D-Bus, but uses the default IPC path and your normal config. Run from the source
 checkout. Neither command rotates logs.
 
-For the maintainer’s physical TTY session, `./run-tty` builds the normal binary
+After `make && sudo make install`, start the installed `kiln` command from a
+free TTY as your normal user. It uses the login's D-Bus user session, selects
+DRM/libinput and loads your config. No backend variables or launcher wrapper
+are needed. On systems without a login-provided bus, use `dbus-run-session -- kiln`.
+Super+Return opens a terminal and Super+Shift+q quits.
+
+For a development TTY session, `./run-tty` builds the normal binary
 and launches foot with the actual config/theme, a private bus and IPC socket.
 It preserves the login runtime directory and records the trial directory in
 `build/last-tty-trial`. Read the checkout's `TESTING.md` before physical tests;
