@@ -10,7 +10,7 @@ A running kiln is scriptable from the outside: it loads its config from a fixed 
 
 ```bash
 # ask a running kiln a question from a shell
-scripts/kiln-eval 'return #client.all()'
+kiln-odin-client eval 'return #client.all()'
 ```
 
 ## Environment variables
@@ -29,7 +29,7 @@ Set for child processes (everything launched via `core.spawn` and friends):
 | Variable | Description |
 |---|---|
 | `WAYLAND_DISPLAY` | The compositor's Wayland socket, so spawned clients connect to this kiln. |
-| `DISPLAY` | The Xwayland display, when kiln is built with Xwayland (the X server itself starts lazily on the first X client). |
+| `DISPLAY` | The Xwayland display, when XWayland is available (the X server itself starts lazily on the first X client). |
 | `XDG_ACTIVATION_TOKEN` | Set only for `core.spawn_with_token` children, so the launched client can raise itself as user-initiated. |
 
 Read by the default config, not the compositor:
@@ -44,8 +44,8 @@ First hit wins:
 
 1. `KILN_RC` (used verbatim if set and non-empty)
 2. `$XDG_CONFIG_HOME/kiln/rc.lua` when `XDG_CONFIG_HOME` is set, otherwise `~/.config/kiln/rc.lua`
-3. The installed default, `<prefix>/share/kiln/rc.lua`
-4. `rc.lua` in the working directory (how kiln runs from a source tree)
+3. The compiled installed default, `<datadir>/kiln-odin/rc.lua`
+4. `kilnrc.lua` in the working directory
 
 ## Flags
 
@@ -54,7 +54,7 @@ First hit wins:
 | `-s <command>` | Run a startup command once the compositor is up. |
 
 ```bash
-kiln -s 'foot'
+kiln-odin -s 'foot'
 ```
 
 ## IPC: the eval socket
@@ -67,14 +67,15 @@ The protocol:
 2. Half-close the write side (send EOF). The compositor evaluates on half-close.
 3. Read one reply, then the connection closes.
 
-Evaluation tries expression form first (so `1+1` answers `2`), then statement form, so both expressions and statements work. The reply is the results tab-joined through `tostring` with a trailing newline, or `ERROR: <msg>` on a load or runtime error, capped at 4096 bytes.
+Evaluation tries expression form first (so `1+1` answers `2`), then statement form, so both expressions and statements work. The reply is the results tab-joined through `tostring` with a trailing newline, or `ERROR: <msg>` on a load or runtime error, without the historical 4096-byte reply cap. Partial writes are drained asynchronously. The CLI’s `eval` verb takes a Lua chunk, so write `eval 'return 6*7'` there; the raw socket evaluator and stock Lua prompt accept `6*7`.
 
-`scripts/kiln-eval` in the source tree wraps this with `nc`:
+Use the installed CLI (or `./build/kiln-client` in the source tree). Set
+`KILN_SOCK` or pass `-s PATH` to select the intended instance:
 
 ```bash
-scripts/kiln-eval 'return core.output.list()[1].name'
-scripts/kiln-eval 'core.spawn({ "foot" })'
-echo 'require("kiln").notify{ title = "hi", message = "from IPC" }' | scripts/kiln-eval
+kiln-odin-client eval 'return core.output.list()[1].name'
+kiln-odin-client eval 'core.spawn({ "foot" })'
+kiln-odin-client eval 'require("kiln").notify{ title = "hi", message = "from IPC" }'
 ```
 
 :::warning

@@ -6,7 +6,17 @@ sidebar_position: 10
 
 # Lockscreen and Idle
 
-kiln locks the session itself, in the compositor core rather than in a client drawing over the screen. Nothing in your config can see input or lift the lock while it holds, so a broken keybinding cannot lock you out or let someone else in.
+Kiln implements a native compositor lock and the external session-lock
+protocol. The Odin implementation uses asynchronous PAM authentication for the
+native lock. The operator reported successful physical lock/unlock after being
+instructed to check coverage, rejected credentials, normal login-password
+unlock and restored input. Those individual substeps and every output were not
+independently instrumented. External physical locking remains pending; automated
+authentication uses a separate compile-time fixture. See
+[Limitations](/kiln/concepts/limitations).
+
+Keep an independent recovery connection for physical trials. Protocol and
+software tests are not a security guarantee for every hardware configuration.
 
 ## 1. The lock model
 
@@ -84,7 +94,10 @@ end)
 
 ## 5. External lockers
 
-Lockers that speak the ext-session-lock protocol (swaylock and friends) work as-is: they engage the same compositor-side quarantine, draw their own surface, and the native lockscreen stays out of the way. Point `idle::start` at the locker instead:
+The ext-session-lock protocol has isolated software coverage. A compatible
+external locker engages compositor-side quarantine and supplies its own surface
+and authentication; physical deployment must still be tested with recovery
+available. Point `idle::start` at the locker instead:
 
 ```lua
 kiln.on("idle::start", function()

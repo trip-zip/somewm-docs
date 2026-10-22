@@ -8,7 +8,10 @@ sidebar_position: 2
 
 kiln embeds Clay's own debug panel. Not a reimplementation and not a screenshot tool: `Clay_SetDebugModeEnabled` turns on the inspector that ships inside `clay.h`, walking the same tree the solver just used to lay out the screen you are looking at. It is the same panel you can try on [nicbarker.com/clay](https://www.nicbarker.com/clay), pointed at a desktop instead of a website.
 
-![Clay's debug inspector open over the kiln desktop](/img/kiln/inspector.png)
+![Historical C Kiln inspector capture](/img/kiln/inspector.png)
+
+This image is from C Kiln. The Odin inspector uses the pinned upstream Clay
+panel and its default palette; a new physical Odin capture is pending.
 
 ## Open it
 
@@ -25,7 +28,7 @@ kiln.key {
 or over [IPC](/kiln/guides/ipc-and-scripting), which is the one to reach for when a keybinding is the thing you are debugging:
 
 ```bash
-scripts/kiln-eval 'require("kiln").inspector()'
+kiln-odin-client eval 'require("kiln").inspector()'
 ```
 
 `kiln.inspector(s)` takes an optional screen and defaults to the focused one. Close it with the same key or the `x` in its header.
@@ -78,16 +81,19 @@ for i, c in ipairs(t.clients) do
 end
 ```
 
-Two elements sharing an id in one frame is fatal in Clay, so a bare `id = "task"` inside a loop takes the session down. A non-numeric second field is caught earlier and reported as a config error with a stack trace.
+Do not reuse an id in one frame. A bare `id = "task"` inside a loop conflicts
+with its siblings. Odin rejects a failed declaration and keeps the previous
+published scene; it does not promise private inspector rollback. A non-numeric
+second field is rejected as a config error.
 
 ## Restyle it
 
-Panel width and colours go through `core.inspector`, which also reads the current state back:
+Panel width and enabled state go through `core.inspector`, which also reads
+the current state back. Custom colours are unsupported and raise an error:
 
 ```lua
 core.inspector("eDP-1", {
 	width = 520,
-	highlight = { r = 255, g = 200, b = 0, a = 80 },
 	enabled = true,
 })
 ```
@@ -101,7 +107,10 @@ core.inspector("eDP-1")        --> true
 core.inspector("eDP-1", false) --> false
 ```
 
-Clay holds its debug style in process-wide globals, so the style keys apply to every screen regardless of the one named. See the [core reference](/kiln/reference/core) for the full set.
+The width is process-wide and affects all inspected outputs. Palette styling
+is deferred because the pinned upstream public binding does not expose the
+required private colours. A rejected raster may advance private selection,
+and a rejected toggle needs retry. See the [core reference](/kiln/reference/core).
 
 ## See also
 

@@ -13,14 +13,22 @@ explore. Launched from a bare TTY it runs directly on DRM as your session.
 ## Starting kiln
 
 ```bash
-dbus-run-session ./build/kiln     # or simply: make run
+kiln_demo=$(mktemp -d /tmp/kiln-demo.XXXXXX)
+KILN_SOCK="$kiln_demo/eval.sock" KILN_RC="$PWD/kilnrc.lua" \
+  dbus-run-session -- ./build/kiln-odin -s foot
 ```
 
 Run it under a session bus. The bus serves two things: clients you spawn
 (portals, apps that expect D-Bus), and kiln's own D-Bus integrations, which is
 how desktop notifications and system tray items reach the compositor. Without
-a bus, apps still run but anything D-Bus-shaped is missing. `make run` wraps
-this for you and logs to `~/.cache/kiln.log`.
+a bus, apps still run but anything D-Bus-shaped is missing. The command above creates a private bus and IPC path. `make run` does not
+wrap D-Bus or rotate logs in the Odin build. Run from the source checkout.
+
+For the maintainer’s physical TTY session, `./run-tty` builds the normal binary
+and launches foot with the actual config/theme, a private bus and IPC socket.
+It preserves the login runtime directory and records the trial directory in
+`build/last-tty-trial`. Read the checkout’s `TTY-TRIAL.md` before physical tests;
+this launcher is for a free seat, not a second desktop on an occupied seat.
 
 Flags and environment:
 
@@ -64,6 +72,12 @@ which is generated from the live bindings and always complete. The essentials:
 | `mod+p` | app launcher: every installed `.desktop` app, type to filter |
 | `mod+shift+c` | close the focused client |
 | `mod+1` .. `mod+9` | view tag by index |
+| `mod+j` / `mod+k` | focus next / previous client |
+| `mod+space` | next layout |
+| `mod+f` / `mod+m` | toggle fullscreen / maximised |
+| `mod+n` / `mod+ctrl+n` | minimise / restore |
+| `mod+shift+i` | open or close the Clay inspector |
+| `mod+x` | Lua prompt; try `6*7` |
 | `mod+ctrl+r` | reload the config |
 | `mod+shift+q` | quit kiln |
 
@@ -82,13 +96,13 @@ Mouse bindings:
 
 ## Make it yours
 
-Copy the default config into place and edit it:
+Keep an existing config. For a new one, copy the default without overwriting:
 
 ```bash
 mkdir -p ~/.config/kiln
-cp kilnrc.lua ~/.config/kiln/rc.lua     # from the source tree
+cp -n kilnrc.lua ~/.config/kiln/rc.lua  # a new config only
 # or, after make install:
-cp /usr/local/share/kiln/rc.lua ~/.config/kiln/rc.lua
+cp -n /usr/local/share/kiln-odin/rc.lua ~/.config/kiln/rc.lua
 ```
 
 Everything above (keys, tags, layouts, the bar, the wallpaper, the theme) is

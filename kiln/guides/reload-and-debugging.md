@@ -21,7 +21,7 @@ kiln.key {
 or trigger it from your editor via [IPC](/kiln/guides/ipc-and-scripting):
 
 ```bash
-scripts/kiln-eval 'require("kiln").reload()'
+kiln-odin-client eval 'require("kiln").reload()'
 ```
 
 A reload only re-executes the config file. The library itself is not re-required, so editing your config is instant, while changes to kiln's own code need a compositor restart.
@@ -55,22 +55,17 @@ Put this near the top of your config and mistakes surface as notifications inste
 
 ## 4. Logs
 
-kiln logs to stderr. The standard make targets from the kiln repo capture it:
+The Odin compositor logs to stdout and stderr. `make run` does not capture or
+rotate them. The TTY launcher records both in `server.log` under the directory
+listed in `build/last-tty-trial`. For a nested trial, capture both streams:
 
-- `make run` (the daily session) writes the log to `~/.cache/kiln.log`, keeping the previous run as `kiln.log.old`.
-- `make dev` and `make headless` write to a private per-instance file like `/tmp/kiln-dev-1.log` and print the path at startup.
-
-`print()` from your config goes to stdout, line-buffered so it appears immediately; when you launch kiln by hand and want everything in one file, redirect both streams:
-
-```bash
-./build/kiln > /tmp/kiln.log 2>&1
+```sh
+kiln_demo=$(mktemp -d /tmp/kiln-demo.XXXXXX)
+KILN_SOCK="$kiln_demo/eval.sock" KILN_RC="$PWD/kilnrc.lua" \
+  dbus-run-session -- ./build/kiln-odin >"$kiln_demo/server.log" 2>&1
 ```
 
-Follow the log while reloading:
-
-```bash
-tail -f ~/.cache/kiln.log
-```
+Follow that exact log from another terminal while the trial is running.
 
 ## 5. See what your config actually built
 
@@ -78,19 +73,15 @@ Errors and logs tell you what broke. Clay's debug inspector tells you what your 
 
 ## 6. Test changes in a nested instance
 
-Run a second instance in a window to test config changes:
+Use the private nested command above or
+[First launch](/kiln/getting-started/first-launch). Set `KILN_RC` to a reviewed
+test config, and pass that trial's socket explicitly to each client command.
+Do not guess `WAYLAND_DISPLAY`; use `kiln-odin-client -s PATH exec foot` to
+spawn through the trial's own environment. The Odin build has no `make dev`.
 
-```bash
-make dev
-```
-
-This starts a fresh compositor in a nested window with a private IPC socket and log file, both printed at startup. Your real session is untouched. From there:
-
-- Point it at an experimental config with `KILN_RC`: `KILN_RC=/path/to/test-rc.lua make dev`.
-- Drive it over its own socket: `KILN_SOCK=/tmp/kiln-dev-1.sock scripts/kiln-eval 'require("kiln").reload()'`.
-- Launch test clients into it by setting `WAYLAND_DISPLAY` to the display name in its boot log, for example `WAYLAND_DISPLAY=wayland-1 foot`.
-
-For fully headless (invisible) instances for automated tests, see [Testing Headless](/kiln/guides/testing-headless).
+For full HOME/config/cache isolation, use
+[Testing headless](/kiln/guides/testing-headless). A private bus and socket alone
+do not isolate side effects of arbitrary config code.
 
 ## See also
 

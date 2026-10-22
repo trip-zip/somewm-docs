@@ -22,17 +22,20 @@ Not as drawing primitives. The paint vocabulary is rectangles, corner radius, bo
 
 ## How do I script or query kiln from the shell?
 
-kiln listens on a unix socket (`$XDG_RUNTIME_DIR/kiln.sock`, overridable with `KILN_SOCK`). Send Lua text, get the result back: it is a live REPL into the config VM, so everything in these docs is drivable from a script. The `scripts/kiln-eval` wrapper does the socket dance for you:
+kiln listens on a unix socket (`$XDG_RUNTIME_DIR/kiln.sock`, overridable with `KILN_SOCK`). Send Lua text, get the result back: it is a live REPL into the config VM, so everything in these docs is drivable from a script. The installed `kiln-odin-client` command handles the socket protocol:
 
 ```bash
-scripts/kiln-eval 'require("kiln").notify{title = "hello", message = "from the shell"}'
+kiln-odin-client eval 'require("kiln").notify{title = "hello", message = "from the shell"}'
 ```
 
 See [IPC and Scripting](/kiln/guides/ipc-and-scripting).
 
 ## Do screen sharing, screenshots, and recording work?
 
-Yes. kiln ships the screencopy protocol, so the standard wlroots tools work: `grim` for screenshots, `slurp` for region selection, `wf-recorder` for recording, and OBS with wlroots capture for streaming. Gamma control is also shipped, so `wlsunset` and `gammastep` work. See [Screenshots](/kiln/guides/screenshots).
+Kiln implements screencopy and internal screenshots, with isolated capture
+coverage. Recorder/portal integration needs its own verification. Gamma control
+is present but physical gamma testing remains pending. See
+[Screenshots](/kiln/guides/screenshots) and [Limitations](/kiln/concepts/limitations).
 
 ## Do display-configuration GUIs like wdisplays work?
 
@@ -57,10 +60,14 @@ kiln only redraws a screen when something marks it dirty. Most stdlib property w
 
 ## Can I log into kiln from a display manager?
 
-Nothing is documented for display managers today. The two supported ways to run kiln are from a bare TTY, where it drives DRM directly, or nested inside an existing Wayland or X session, where it opens as a window. Either way, launch it under a session bus so spawned clients have D-Bus:
+Installation supplies `kiln-odin.desktop`, named **kiln Odin**. A system
+installation can be discovered by a display manager; user-prefix discovery
+depends on that manager. Kiln also runs from a free TTY or nested inside an
+existing desktop. For a nested session from the Odin checkout:
 
 ```bash
-dbus-run-session ./build/kiln
+kiln_demo=$(mktemp -d /tmp/kiln-demo.XXXXXX)
+KILN_SOCK="$kiln_demo/eval.sock" dbus-run-session -- ./build/kiln-odin
 ```
 
 See [First Launch](/kiln/getting-started/first-launch).
@@ -74,7 +81,7 @@ See [First Launch](/kiln/getting-started/first-launch).
 Call `kiln.reload()`. It re-runs your config in the live compositor: clients, tags, and screens survive. Bind it to a key, or trigger it over IPC:
 
 ```bash
-scripts/kiln-eval 'require("kiln").reload()'
+kiln-odin-client eval 'require("kiln").reload()'
 ```
 
 (Over the socket, use `require("kiln")`: the `kiln` variable is local to your

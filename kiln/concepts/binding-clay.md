@@ -6,6 +6,19 @@ sidebar_position: 2
 
 # Binding Clay
 
+:::info Historical C implementation
+
+This engineering account describes the preserved C baseline and its vendored
+Clay v0.14. It remains reference material, not the Odin implementation recipe.
+Odin uses unmodified upstream Clay `e6cc369` and its matching official binding,
+one desktop tree per output, public declaration APIs and explicit ownership.
+It does not use `clay_impl.c`, private context reads or the C FFI storage layout.
+Failed declarations retain the last published scene. Inspector palette styling
+and private-selection recovery limits are described in
+[the current inspector guide](/kiln/guides/inspector).
+
+:::
+
 kiln vendors [Clay](https://github.com/nicbarker/clay) at `third_party/clay.h`, v0.14, byte for byte identical to upstream. Nothing in the header is patched, and there is no fork. Everything that would normally be a patch is done around the header instead.
 
 This page is the engineering detail: how a Lua config ends up calling Clay's element API, and how solved boxes become windows on a screen. For why the whole screen is one tree in the first place, see [The Clay Bet](/kiln/concepts/the-clay-bet).

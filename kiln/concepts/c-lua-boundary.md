@@ -1,14 +1,18 @@
 ---
-title: The C/Lua Boundary
-description: How the C core handles protocols and rendering while Lua defines window management and UI behaviour.
+title: The Native/Lua Boundary
+description: How the native core handles protocols and rendering while Lua defines window management and UI behaviour.
 sidebar_position: 6
 ---
 
-# The C/Lua Boundary
+# The Native/Lua Boundary {#the-clua-boundary}
 
-## C core {#what-c-owns}
+The route and explicit anchor IDs retain their historical C names for stable
+links. Odin now occupies the native side of the same policy boundary; wlroots,
+Clay, rendering libraries and LuaJIT remain C dependencies.
 
-The C core handles wlroots, input devices, client buffers, scene rendering, and PAM authentication. It exposes operations such as focusing a surface and configuring an output.
+## Native core {#what-c-owns}
+
+The Odin core handles wlroots, input devices, client buffers, scene rendering, and PAM authentication. It exposes operations such as focusing a surface and configuring an output.
 
 ## Lua configuration {#what-lua-owns}
 
@@ -16,9 +20,9 @@ Lua defines focus behaviour, tags, layouts, rules, keybindings, menus, and notif
 
 ## Events and function calls {#one-event-stream-in-verbs-out}
 
-C sends events as tables to a single handler in the standard library, which emits object signals. For example, a C `map` event creates a client object and emits its `map` signal. See the [events reference](/kiln/reference/events).
+Odin sends events as tables to a single handler in the standard library, which emits object signals. For example, a native `map` event creates a client object and emits its `map` signal. See the [events reference](/kiln/reference/events).
 
-Lua calls C functions to focus clients, configure surfaces, and set output modes.
+Lua calls native functions to focus clients, configure surfaces, and set output modes.
 
 ## Defaults are policy you can replace
 
@@ -33,13 +37,13 @@ end)
 
 Removing a handler without a replacement leaves the request unhandled. See [defaults](/kiln/reference/defaults) and [Replacing default policies](/kiln/guides/replace-default-policies).
 
-## Direct C access {#core-is-real-but-not-the-surface}
+## Direct core access {#core-is-real-but-not-the-surface}
 
-The [`core` global](/kiln/reference/core) exposes the C API used by the standard library. It bypasses the object model, signals, and policies. Use objects and `kiln.*` for configuration; use `core` when extending the library, such as for [output configuration](/kiln/guides/multi-monitor).
+The [`core` global](/kiln/reference/core) exposes the native API used by the standard library. It bypasses the object model, signals, and policies. Use objects and `kiln.*` for configuration; use `core` when extending the library, such as for [output configuration](/kiln/guides/multi-monitor).
 
 ## Why the line is drawn here
 
-Lua configuration can be reloaded without rebuilding C. It uses the same public API as the default desktop.
+Lua configuration can be reloaded without rebuilding the compositor. It uses the same public API as the default desktop.
 
 ## See also
 

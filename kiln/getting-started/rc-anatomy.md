@@ -18,9 +18,10 @@ desktop in about 1300 lines of Lua, written against the public API only: one
 
 This page walks the file top to bottom, in its own order, section by section.
 Open your copy alongside (see [First Launch](/kiln/getting-started/first-launch)
-for where it lives). Every screenshot on this page is a real headless kiln
-running this exact config, rendered by `npm run generate:figures` in the docs
-repo.
+for where it lives). The screenshots on this page are historical C Kiln headless figures from
+`npm run generate:figures`. They illustrate the shared config design, not new
+Odin runtime evidence. The generator still depends on C internals and has not
+yet been migrated. The examples retain the original config’s structure.
 
 ## The require line and the globals
 
@@ -44,7 +45,7 @@ spec below. The stdlib default is `alt`; the shipped config picks `super`.
 
 Beyond the module, a config sees seven globals: `client`, `screen`, `tag`,
 `layer`, `drag`, `notification` (the object classes and buses), and `core`
-(the raw C boundary, which a normal config never needs). See
+(the native compositor boundary, which a normal config never needs). See
 [The object model](/kiln/concepts/object-model).
 
 ## Errors first

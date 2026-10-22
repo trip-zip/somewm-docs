@@ -6,11 +6,44 @@ sidebar_position: 8
 
 # Limitations
 
-kiln is a proof of concept with three honest kinds of gaps: things the model excludes on purpose, things simply not built yet, and things external tools expect that the protocol list does not grant. Where a workaround exists, it is linked.
+Kiln's Odin implementation runs the maintainer's desktop, but the API is still
+experimental. Software fixtures, reported physical use and untested hardware
+paths have different evidence levels.
+
+## Current evidence and accepted defects
+
+The operator reported a working gruvbox physical desktop with foot and xterm,
+keyboard/pointer input, tags/layout/focus cycling, fullscreen/maximise/restore,
+reload, inspector selection/scroll/close and VT return. Native lock/unlock was
+reported successful after instructions to check coverage, wrong-password
+rejection, normal login-password unlock and restored input. Each substep and
+every output were not independently instrumented.
+
+Physical hotplug, DPMS, VRR/gamma, external locking and systematic mixed-scale
+testing remain pending. Automated authentication uses a fixture and does not
+prove physical-seat security. A brief client-placement observation across VT
+switching remains unresolved; it is not classified as a proven shared bug.
+
+The implementation retains these documented limits:
+
+- Clay hit testing misses a visible child in a horizontal-only clip and accepts
+  a hit outside a nested outer clip. Exact inherited capture/scissor fingerprints
+  are retained in the source repository's `PARITY.md` and baseline JSON files.
+- Inspector custom palette styling is deferred. Rejected raster work can advance
+  private inspector selection; a rejected toggle needs retry. There is no claim
+  of private Clay state rollback.
+- Incoming X11-to-Wayland drag-and-drop is unsupported.
+- A slow incoming X11 INCR transfer can truncate on EAGAIN.
+- Incoming INCR owner death can leave no EOF and retain one pipe FD.
+
+The three XWayland classifications are guarded against wlroots 0.20.2 and
+XWayland 24.1.14. Supported-path soak success does not erase them. The source
+checkout's `AUDIT-20.md` and coverage matrix retain exact strict failures,
+partial original test legs and independent software receipts.
 
 ## The drawing vocabulary
 
-kiln draws rectangles, rounded corners, borders, images, text, and color. That is the complete list, and it is deliberate: the vocabulary is what Clay declares and the C renderer reconciles, with no escape hatch into arbitrary painting.
+kiln draws rectangles, rounded corners, borders, images, text, and color. That is the complete list, and it is deliberate: the vocabulary is what Clay declares and the retained renderer reconciles, with no escape hatch into arbitrary painting.
 
 Not available as drawing primitives: gradients, arcs, rings, and circles (so no radial progress bars or pie charts), rotation and mirroring, drop shadows, shapes beyond the rounded rectangle, and per-window opacity. There is no Lua canvas and no cairo access; a config cannot paint pixels, only declare nodes. The escape hatch is an image: `kiln.asset` renders SVG (including [`kiln.asset.gradient`](/kiln/reference/kiln)) to cached PNGs, which is how the default desktop gets its gradient wallpaper and its glyphs. A surprising number of widgets fit the vocabulary directly, but if your aesthetic depends on painting at declare time, kiln cannot draw it today.
 
@@ -20,15 +53,15 @@ These are unbuilt, not refused:
 
 - **No pointer warp.** A config cannot move the cursor, so focus-follows policies that warp the pointer to the focused client are not expressible.
 - **Floating clients do not honor size hints.** Min, max, and increment size hints are not read: a floating terminal resizes freely instead of in cell steps, a dialog can be squeezed below its minimum, and the only floor is the uniform `theme.min_size`.
-- **Bars are full-width top or bottom struts.** No vertical bars, no floating pill bars, no margins or partial width. A pill can be declared as a float, but a float reserves no workarea. See [A bar from scratch](/kiln/tutorials/a-bar-from-scratch) for what bars can do.
+- **Bars reserve workarea at an output edge.** All four edges are supported. A decorative floating pill can be declared as a float, but a float reserves no workarea. See [A bar from scratch](/kiln/tutorials/a-bar-from-scratch).
 
 ## Protocol support for external tools
 
 What works, today, with stock tools:
 
-- **Screen capture**: screencopy is implemented, so grim, slurp, wf-recorder, and OBS's wlroots capture all work. See [Screenshots](/kiln/guides/screenshots).
-- **Color temperature**: gamma control is implemented; wlsunset and gammastep work.
-- **Session locking**: external lockers work via the session lock protocol, alongside kiln's native lock. See [Lockscreen and idle](/kiln/guides/lockscreen-and-idle).
+- **Screen capture**: screencopy and internal screenshots are implemented and tested in isolated runs. This is not a blanket validation of every recorder/portal integration. See [Screenshots](/kiln/guides/screenshots).
+- **Colour temperature**: the gamma control protocol is implemented; physical gamma/driver behaviour remains pending.
+- **Session locking**: native lock and the external session-lock protocol have software coverage. Physical external-locker coverage remains pending. See [Lockscreen and idle](/kiln/guides/lockscreen-and-idle).
 - **Layer-shell** (panels, launchers, OSDs), **xdg-activation** (focus handoff), and **foreign-toplevel** (taskbars, window switchers).
 
 What does not:
