@@ -4,11 +4,11 @@ title: awful.input
 description: Runtime input device configuration
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # awful.input <SomewmOnly />
 
-`awful.input` applies pointer and keyboard settings at runtime. This API is unique to SomeWM and not available in AwesomeWM.
+`awful.input` sets global keyboard and pointer settings. Device rules override individual pointer settings.
 
 ## Usage
 
@@ -46,7 +46,7 @@ print(awful.input.accel_speed)
 | `click_method` | string | nil | Click method: `"none"`, `"button_areas"`, `"clickfinger"` |
 | `send_events_mode` | string | nil | Send events mode: `"enabled"`, `"disabled"`, `"disabled_on_external_mouse"` |
 
-For Boolean number arguments (0/1) a value of -1 means leave it untouched (i.e., at the device default).
+The table lists initial `awful.input` values before configuration. For 0/1 settings, `-1` leaves the device setting untouched. It does not undo a value already applied. Unsupported settings depend on the device and installed libinput version.
 
 ### Button Maps
 
@@ -59,19 +59,21 @@ The `tap_button_map` and `clickfinger_button_map` settings control which mouse b
 
 ### Scroll Button
 
-The `scroll_button` setting specifies which button activates scroll-on-button mode. Common values:
+`scroll_button` uses Linux evdev button codes, not `awful.button` numbers:
 
 | Value | Button |
 |-------|--------|
-| 0 | Device default |
+| 0 | Do not override the scroll button |
 | 274 | Middle mouse button (common for TrackPoints) |
-| 8 | Back/thumb button |
+| 275 | Side/thumb button (`BTN_SIDE`) |
+| 278 | Back button (`BTN_BACK`) |
 
 ### Scroll Methods
 
 | Value | Method |
 |-------|--------|
-| `nil` | Default (device-dependent) |
+| `nil` | Do not override the method |
+| `"no_scroll"` | Disable scrolling |
 | `"two_finger"` | Two-finger scrolling |
 | `"edge"` | Edge scrolling |
 | `"button"` | Button scrolling |
@@ -95,9 +97,7 @@ The `scroll_button` setting specifies which button activates scroll-on-button mo
 | `keyboard_repeat_rate` | number | 25 | Key repeat rate (keys per second) |
 | `keyboard_repeat_delay` | number | 600 | Delay before repeat starts (milliseconds) |
 
-:::note Repeat timing vs. the keymap
-`keyboard_repeat_rate` and `keyboard_repeat_delay` are sent to clients, which perform the repeating themselves. The keymap carries a separate per-key flag deciding whether a key may repeat at all, and a key that defines an explicit action has that flag off. These two properties do not override it. See [Key Repeat Is Client-Side](../../concepts/wayland-vs-x11.md#what-changes-in-somewm).
-:::
+Repeat rate and delay are sent to clients. They do not override the keymap's per-key repeat flag. See [Key Repeat](../../concepts/wayland-vs-x11.md#key-repeat-is-client-side).
 
 ### Common XKB Options
 
@@ -109,17 +109,17 @@ The `scroll_button` setting specifies which button activates scroll-on-button mo
 | `grp:alt_shift_toggle` | Alt+Shift switches layouts |
 | `grp:win_space_toggle` | Super+Space switches layouts |
 
-:::warning Wayland Limitation
-`grp:*` toggle options do not automatically switch layouts on Wayland. Use explicit keybindings instead. See [Keyboard Layout Switching](../../guides/keyboard-layouts.md) for workarounds.
+:::warning Layout switching in 2.1
+SomeWM 2.1 does not switch layout groups through `grp:*` options. Use explicit keybindings instead. See [Keyboard Layout Switching](/docs/guides/keyboard-layouts) for workarounds.
 :::
 
 ## Input Rules
 
-Per-device input configuration using the same `{ rule, properties }` pattern as [client rules](../../guides/client-rules.md). Rules let you apply different settings to different devices, for example enabling natural scrolling on your touchpad but not your mouse.
+Per-device input configuration using the same `{ rule, properties }` pattern as [client rules](/docs/guides/client-rules). Rules let you apply different settings to different devices, for example enabling natural scrolling on your touchpad but not your mouse.
 
 ### How Rules Work
 
-Each rule has a **condition** that matches devices and **properties** to apply. Rules are evaluated in order; later matches override earlier ones per property. Global `awful.input.*` settings act as defaults when no rule matches.
+Each rule has a **condition** that matches devices and **properties** to apply. Rules are evaluated in order. Later matches override earlier ones per property. Properties absent from matching rules retain their global settings.
 
 ```lua
 awful.input.rules = {
@@ -135,19 +135,23 @@ awful.input.rules = {
 | Field | Type | Description |
 |-------|------|-------------|
 | `type` | string | Device type: `"touchpad"` or `"pointer"` (mice, trackballs, trackpoints) |
-| `name` | string | Substring match against the device name (e.g., `"Logitech G502"`) |
+| `name` | string | Case-sensitive substring match against the device name (e.g., `"Logitech G502"`) |
 
-Both fields are optional. Omitting a field matches all devices. When both are present, both must match.
+Both fields are optional. An empty `rule` matches all pointer devices. When both fields are present, both must match.
 
-Device names match the names libinput reports; the [Input Devices guide](../../guides/input-devices.md) shows how to discover them.
+### Finding Device Names
+
+Device names are listed by:
+
+```bash
+libinput list-devices
+```
 
 ### Rule Properties
 
 Rules accept any [pointer property](#pointer-properties) listed above. Keyboard properties are not per-device and cannot be used in rules.
 
 ### Per-Device Override
-
-Target a specific device by name:
 
 ```lua
 awful.input.rules = {
@@ -158,27 +162,11 @@ awful.input.rules = {
 }
 ```
 
-### Precedence
-
-1. Start with global defaults (`awful.input.*` properties)
-2. Apply each matching rule in order
-3. Last matching rule wins for any given property
-
-```lua
--- Global default: natural scrolling on for everything
-awful.input.natural_scrolling = 1
-
--- Override: turn it off for mice only
-awful.input.rules = {
-    { rule = { type = "pointer" },
-      properties = { natural_scrolling = 0 } },
-}
--- Result: touchpads get natural scrolling (global), mice don't (rule override)
-```
+<span id="precedence" />
 
 ### Clearing Rules
 
-Set to `nil` to remove all rules and revert to global-only behavior:
+Assigning `rules` reapplies settings to connected devices and affects newly connected devices. Set it to `nil` to remove all rules:
 
 ```lua
 awful.input.rules = nil
@@ -186,37 +174,10 @@ awful.input.rules = nil
 
 ## Example Configuration
 
-```lua
--- In rc.lua
-local awful = require("awful")
-
--- Global defaults (apply to all devices unless overridden by rules)
-awful.input.disable_while_typing = 1
-awful.input.keyboard_repeat_rate = 30
-awful.input.keyboard_repeat_delay = 300
-awful.input.xkb_layout = "us"
-awful.input.xkb_options = "ctrl:nocaps,compose:ralt"
-
--- Per-device rules
-awful.input.rules = {
-    { rule = { type = "touchpad" },
-      properties = {
-          natural_scrolling = 1,
-          tap_to_click = 1,
-          tap_3fg_drag = 1,
-          accel_speed = 0.3,
-          dwtp = 1,  -- Disable touchpad while using trackpoint (ThinkPad)
-      } },
-    { rule = { type = "pointer" },
-      properties = {
-          natural_scrolling = 0,
-          accel_profile = "flat",
-      } },
-}
-```
+See [Input devices](../../guides/input-devices.md) for a complete configuration and [Keyboard layouts](../../guides/keyboard-layouts.md) for layout switching and NumLock. `numlock` is not an `awful.input` property in 2.1.
 
 ## See Also
 
-- [Input Device Configuration Guide](../../guides/input-devices.md)
-- [Client Rules Guide](../../guides/client-rules.md) - Same `{ rule, properties }` pattern for windows
-- [somewm-client input commands](../somewm-client.md)
+- [Input Device Configuration Guide](/docs/guides/input-devices)
+- [Client Rules Guide](/docs/guides/client-rules) - Same `{ rule, properties }` pattern for windows
+- [somewm-client input commands](/docs/reference/somewm-client)

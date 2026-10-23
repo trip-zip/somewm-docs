@@ -1,74 +1,115 @@
 ---
 sidebar_position: 4
 title: Autostart Applications
-description: "awful.spawn.once runs a command once per session, spawn.single_instance once per running process, spawn.with_shell when a shell is needed. When to use a systemd user service instead."
+description: Start apps automatically when SomeWM launches
 ---
 
 # Autostart Applications
 
-A plain `awful.spawn("nm-applet")` at the end of `rc.lua` runs again on every reload and leaves duplicates. Three variants fix that:
+Add startup commands near the end of `rc.lua`. Use `awful.spawn` for an executable and arguments, or `awful.spawn.with_shell` when the command needs shell syntax.
 
-| Call | Runs | Use for |
-| --- | --- | --- |
-| `awful.spawn.once(cmd)` | once per session, by command string; a reload skips it | tray applets, agents |
-| `awful.spawn.single_instance(cmd)` | only if no client of that command is running | apps you restart by hand or that may crash |
-| `awful.spawn.with_shell(cmd)` | through `$SHELL -c` (`/bin/sh` if unset), every time | pipes, `&&`, redirects, `sleep` |
+## Basic Autostart
 
-`once` and `single_instance` match the spawned client through startup notification, which a shell does not pass on, so a shell command guards itself:
+<span id="a-typical-block" />
 
 ```lua
-awful.spawn.with_shell("pgrep -x swaybg > /dev/null || swaybg -i ~/.wallpaper.jpg -m fill")
+local awful = require("awful")
+awful.spawn({ "nm-applet" })
 ```
 
-A command that needs the session fully up waits a moment:
+This runs on every config load, including a Lua reload. For a background service, use its own single-instance support or a service manager to avoid duplicates.
 
-```lua
-awful.spawn.with_shell("sleep 2 && waybar")
-gears.timer.start_new(2, function() awful.spawn.once("waybar"); return false end)
-```
+## Avoid Duplicate Services
 
-## A typical block
+<span id="systemd-user-services" />
 
-```lua
-awful.spawn.once("nm-applet")
-awful.spawn.once("blueman-applet")
-awful.spawn.once("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")   -- or lxpolkit, polkit-kde
-awful.spawn.once("gnome-keyring-daemon --start --components=secrets")
-awful.spawn.once("wl-paste --watch cliphist store")
-awful.spawn.single_instance("swaybg -i " .. os.getenv("HOME") .. "/.wallpaper.jpg -m fill")
-```
-
-Notifications need no daemon: `naughty` is one. Running dunst or mako alongside it takes the D-Bus name away.
-
-Environment variables for a spawned app go in the command, `awful.spawn.with_shell("GTK_THEME=Adwaita:dark my-gtk-app")`. `os.execute("export ...")` sets nothing: it runs in a child shell that exits. Session-wide variables belong in `~/.profile` or `environment.d`.
-
-## systemd user services
-
-For restart on crash, ordering between services, or `systemctl` control, a user unit beats a spawn:
+A systemd user service gives a background application one managed process. Create `~/.config/systemd/user/my-app.service`, replacing the executable path:
 
 ```ini
-# ~/.config/systemd/user/my-app.service
 [Unit]
-Description=My Application
-After=graphical-session.target
+Description=My background application
 
 [Service]
 ExecStart=/usr/bin/my-app
 Restart=on-failure
 RestartSec=5
-
-[Install]
-WantedBy=graphical-session.target
 ```
+
+Start it from `rc.lua`:
+
+```lua
+awful.spawn({ "systemctl", "--user", "start", "my-app.service" })
+```
+
+Starting an already active service does not launch another process. GUI services also need the session's display variables in the user manager's environment. If your session launcher does not import them, run this from a terminal inside SomeWM before starting the service:
 
 ```bash
-systemctl --user enable --now my-app.service
+systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP
+systemctl --user start my-app.service
+systemctl --user status my-app.service
+journalctl --user -u my-app.service
 ```
 
-`awful.spawn("systemctl --user restart my-app.service")` from `rc.lua` restarts it on reload.
+Import only variables set in your session. Tie service shutdown to your session manager if the application should stop on logout.
 
-## When an app does not start
+## Window-Based Spawn Helpers
 
-`which my-app` and running it from a terminal come first. The compositor's log, `journalctl --user -u somewm.service` under `somewm-session`, has the spawn error. An X11 app runs through XWayland and needs no `DISPLAY` set by you; a Wayland app needs `WAYLAND_DISPLAY`, which every spawned process inherits.
+`awful.spawn.once` and `awful.spawn.single_instance` track application windows through startup notification or a supplied client matcher. They do not search the process table. They are unsuitable as general duplicate guards for tray apps, agents or shell commands.
 
-[awful.spawn upstream](https://awesomewm.org/doc/api/libraries/awful.spawn.html) has the full API.
+For a windowed application, supply a matcher using the class reported by `somewm-client client list`:
+
+```lua
+awful.spawn.single_instance("firefox", nil, function(c)
+    return c.class == "firefox"
+end)
+```
+
+`once` also records that it launched a command in the current Lua state. That state is rebuilt on reload, so do not assume it prevents a background service from starting again. `single_instance` permits another launch after the matched window closes. Calling it repeatedly before a window appears can still launch duplicates.
+
+## Shell Commands and Delays
+
+Use a shell for redirection, pipes or shell operators:
+
+```lua
+awful.spawn.with_shell("my-app > ~/.cache/my-app.log 2>&1")
+```
+
+For a one-time delay within each config load:
+
+```lua
+local gears = require("gears")
+gears.timer.start_new(2, function()
+    awful.spawn({ "systemctl", "--user", "start", "my-app.service" })
+    return false
+end)
+```
+
+## Environment Variables
+
+Pass environment variables to the application you launch:
+
+```lua
+awful.spawn({ "env", "GTK_THEME=Adwaita:dark", "my-gtk-app" })
+```
+
+Running `export` in a separate shell cannot change SomeWM's environment or that of later launches. Set session-wide variables in the launcher that starts SomeWM. Inherit `DISPLAY` and `WAYLAND_DISPLAY` from the session rather than hardcoding display numbers.
+
+## Choose Session Services
+
+- Start one notification provider. The default config already uses `naughty`.
+- Use a Wayland clipboard manager, or one that explicitly supports your session.
+- Start one Polkit authentication agent at the path supplied by your distribution.
+- Let your session manager initialise SSH and keyring agents when available.
+- Set wallpapers through SomeWM's [wallpaper API](multi-monitor.md#different-wallpaper-per-screen). X11 root-window tools such as `feh` and `nitrogen` do not set the Wayland desktop background.
+- SomeWM renders its own effects. Do not start `picom` for SomeWM windows.
+
+## Troubleshooting
+
+<span id="when-an-app-does-not-start" />
+
+Run the application in a terminal first. Check its output, then the service log or the terminal that launched SomeWM. For duplicate processes, check both `rc.lua` and your session manager's autostart entries.
+
+## See Also
+
+- [CLI Control](cli-control.md)
+- [AwesomeWM Spawn API](https://awesomewm.org/doc/api/libraries/awful.spawn.html)

@@ -1,27 +1,23 @@
 ---
 sidebar_position: 9
 title: Screenshots
-description: root.content() composes a capture by walking the scene in draw order, at logical resolution. The interactive selection is a wibox over that capture, and the crop lands on the capture, not the overlay.
+description: How desktop, screen and client captures use the rendered scene and logical coordinates.
 ---
 
 # Screenshots
 
-Every screenshot goes through `root.content()`. On Wayland the compositor owns every buffer, so SomeWM composes the capture itself: it walks [the scene](./scene-graph.md) once in draw order, paints each rectangle, copies each text and image raster, and reads each client buffer back from the GPU or shared memory. Nothing is read from a widget or a wibox, because no widget holds a surface; what the renderer holds for it is what the capture copies.
+`root.content()` captures the desktop by walking the rendered scene in drawing order. It copies rectangles, text and image rasters, and reads application buffers from GPU or shared memory. Widgets do not supply screenshot surfaces of their own.
 
-The result is a cairo image surface at logical resolution, the size of `root.size()`. `root.content(true)` leaves the wallpaper out and the ground transparent, so a transparent window keeps its alpha.
+The result is a Cairo image surface at logical resolution, the size of `root.size()`. `root.content(true)` omits the wallpaper and starts with a transparent background. Other opaque content still covers that background.
+
+`screen.content` captures a single screen. `client.content` captures an application's content without compositor titlebars or borders. `awful.screenshot` selects among these sources according to its options.
 
 ## HiDPI
 
-On a scaled output a client at logical 800 by 600 has a 1600 by 1200 buffer at scale 2. The capture reads each buffer at its physical size and scales it to its logical box while painting, so one pixel of the result is one logical pixel, which is what `awful.screenshot` crops in. Text and image rasters are already at the output's scale and are copied the same way.
+At scale 2, an application's logical 800-by-600 surface can have a 1600-by-1200 buffer. Capture scales that buffer into its logical box. The resulting image and the crop coordinates both use logical pixels.
 
 ## Interactive selection
 
-`awful.screenshot { interactive = true }`:
+For an interactive `awful.screenshot`, `:refresh()` captures the image before showing the selection overlay. The overlay displays that saved capture and a selection rectangle. Dragging changes the rectangle. Accepting crops the saved image, so the screenshot does not include its own selection overlay.
 
-1. **Capture.** `root.content()` runs before anything is shown, so the overlay is never in the picture.
-2. **Overlay.** A fullscreen wibox holds an imagebox with the capture, one image element the size of the screen, and a second widget for the selection, placed and sized by a manual layout at the drag's coordinates. The capture's content never changes, so it is rastered once; a pointer move resizes the selection's box and rasters nothing else.
-3. **Crop.** On release, the capture is cropped at the selection, not the overlay.
-
-`root.size()`, the capture, mousegrabber coordinates, the overlay and the crop are all in logical pixels, which is why the crop lands on the right ones.
-
-[Screenshots guide](../guides/screenshots.md) has the setup; [awful.screenshot](../reference/awful/screenshot.md) is the API.
+The [screenshot guide](../guides/screenshots.md) shows commands and bindings. See [awful.screenshot](../reference/awful/screenshot.md) for options and methods.

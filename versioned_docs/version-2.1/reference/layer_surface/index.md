@@ -4,11 +4,11 @@ title: layer_surface
 description: Layer shell surface API reference
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # layer_surface <SomewmOnly />
 
-Lua class for Wayland layer shell surfaces (panels, launchers, lock screens).
+`layer_surface` exposes surfaces created by external layer-shell applications, such as panels and launchers. Session locking uses the separate [Lock API](../lock.md).
 
 ## Class Methods
 
@@ -57,7 +57,7 @@ Lua class for Wayland layer shell surfaces (panels, launchers, lock screens).
 | `background` | lowest | Wallpaper widgets |
 | `bottom` | - | Desktop icons |
 | `top` | - | Panels, docks |
-| `overlay` | highest | Launchers, lock screens |
+| `overlay` | highest | Launchers and overlays |
 
 ## ruled.layer_surface
 
@@ -74,6 +74,7 @@ Lua class for Wayland layer shell surfaces (panels, launchers, lock screens).
 ### Rule example
 
 ```lua
+local ruled = require("ruled")
 ruled.layer_surface.append_rule {
     rule_any = { namespace = { "rofi", "wofi" } },
     properties = { has_keyboard_focus = true },
@@ -88,5 +89,5 @@ ruled.layer_surface.append_rule {
 
 ## See Also
 
-- [Signals Reference](../signals.md) - Layer surface signals
+- [Signals Reference](/docs/reference/signals) - Layer surface signals
 - [wlr-layer-shell protocol](https://wayland.app/protocols/wlr-layer-shell-unstable-v1)

@@ -1,30 +1,74 @@
 ---
 sidebar_position: 23
 title: Defer startup with request::rules
-description: "ruled.client requests rules during client scanning; ruled.notification requests them at startup."
+description: Register startup rules from modules and control their order
 ---
 
 # Defer startup with `request::rules`
 
-A module that appends to `ruled.client.rules` at load time depends on the order it is required in, and breaks when another module does the same or when it is required after clients were scanned. `ruled.client` emits `request::rules` on `client.scanning`; `ruled.notification` emits it on `awesome`’s `startup` signal, after `client.scanned`. Append from there:
+Connect to `request::rules` when a module adds startup rules. Require the module from `rc.lua` so its handler is registered before startup reaches that stage.
+
+## The pattern
+
+Save this as `~/.config/somewm/rules/browser.lua`:
 
 ```lua
--- my_module.lua
 local ruled = require("ruled")
-
 ruled.client.connect_signal("request::rules", function()
-    ruled.client.append_rule { rule = { class = "Firefox" }, properties = { tag = "web" } }
-end)
-
-ruled.notification.connect_signal("request::rules", function()
-    ruled.notification.append_rule { rule = { app_name = "spotify" }, properties = { ignore = true } }
+    ruled.client.append_rule {
+        rule = { class = "^firefox$" },
+        properties = { tag = "web" },
+    }
 end)
 ```
 
-Every module's handler runs, in connect order, and the rules table is complete before the first client is managed. A `require` from inside a callback still works as long as it happens before scanning.
+Then load it from `rc.lua`:
 
-The signal fires once. A rule added at runtime, from a setting the user toggles, goes through `ruled.client.append_rule` directly and applies to clients managed from then on; existing clients are not re-evaluated.
+```lua
+require("rules.browser")
+```
 
-Client rules run during scanning; notification rules run on the subsequent `startup` signal ([Signals](../concepts/signals.md#startup-order)).
+The `web` tag must exist when a client matches. Check the application's actual class with `somewm-client client list`.
 
-[Client Rules](client-rules.md), [Notifications](notifications.md), [ruled.client signals](../reference/signals.md#ruledclient-signals).
+## For notifications
+
+Register notification rules the same way:
+
+```lua
+local ruled = require("ruled")
+ruled.notification.connect_signal("request::rules", function()
+    ruled.notification.append_rule {
+        rule = { app_name = "^Spotify$" },
+        properties = { ignore = true },
+    }
+end)
+```
+
+These are separate startup events. `ruled.client` requests rules during `client.scanning`, before existing clients are managed. `ruled.notification` requests them on `awesome`'s `startup` signal. Connecting after the relevant event does not replay it.
+
+## Multiple handlers compose
+
+Each module can register a handler. Rules are appended when those handlers run, so separate handlers do not make overlapping rules independent of order. Later matching rules replace earlier values for the same property.
+
+Keep defaults before exceptions. When order must be explicit, append those rules together in one handler. Deferring registration does not make conflicting rules independent of order.
+
+## Add rules at runtime
+
+For a module loaded after startup, append directly instead of waiting for `request::rules`:
+
+```lua
+local ruled = require("ruled")
+ruled.client.append_rule {
+    id = "chat-placement",
+    rule = { class = "^Slack$" },
+    properties = { tag = "chat" },
+}
+```
+
+This affects clients managed afterward. It does not move existing windows. If a setting can change repeatedly, remove its previous rule with `ruled.client.remove_rule("chat-placement")` before appending a replacement.
+
+## See also
+
+- [Client Rules](client-rules.md)
+- [Notifications](notifications.md)
+- [Startup Ordering](../concepts/signals.md#startup-order)

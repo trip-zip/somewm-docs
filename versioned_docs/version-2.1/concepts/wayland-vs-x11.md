@@ -1,36 +1,62 @@
 ---
 sidebar_position: 2
 title: Wayland vs X11
-description: On Wayland the compositor owns drawing, input and placement, so some AwesomeWM features change shape or go away. The list, with what SomeWM does instead.
+description: Display-server differences that affect an AwesomeWM configuration on SomeWM 2.1.
 ---
 
 # Wayland vs X11
 
-| | X11 | Wayland |
+On X11, AwesomeWM manages windows served by a separate X server. SomeWM is both the window manager and the Wayland compositor, so it owns display connections, input routing and scene composition.
+
+## Fundamental Differences
+
+| Area | X11 | Wayland |
 | --- | --- | --- |
-| window management | clients set hints, the WM interprets them | the compositor decides everything |
-| drawing | server-side or client-side | client-side only; the compositor composes buffers |
-| input | any client can see or inject it | per surface; only the compositor injects |
-| screenshots | any app can grab the screen | compositor support required |
-| tray icons | `_NET_SYSTEMTRAY` embeds windows | StatusNotifierItem over D-Bus |
+| Application drawing | Clients can submit buffers or use X drawing operations | Clients submit buffers for the compositor to display |
+| Window placement | Window manager interprets X properties and requests | Compositor applies placement policy |
+| Input and capture | X clients have broad access through the X server | Access depends on compositor-supported protocols and policy |
+| Traditional tray icons | XEmbed windows | Usually StatusNotifierItem over D-Bus |
+
+Wayland clients can use shared-memory buffers as well as GPU rendering. EGL or Vulkan is not required for every application.
 
 ## What changes in SomeWM
 
-- **Restart.** The compositor is the display server, so it cannot exec itself without dropping every client. `awesome.restart()` rebuilds the Lua state in process instead; Mod4+Ctrl+r in the default config calls it.
-- **Systray.** Icons come over StatusNotifierItem. NetworkManager, Bluetooth applets, Discord and Steam work; XEmbed-only apps show nothing.
-- **Input injection.** `xdotool` cannot reach other apps. `root.fake_input()` works because the compositor itself injects through `wlr_seat`.
-- **Key repeat.** The compositor sends the repeat rate and delay with the keymap, and each application repeats on its own, asking the keymap whether the held key repeats. `keyboard_repeat_rate` and `keyboard_repeat_delay` set the timing; a layout can mark a key non-repeating and no property overrides it ([troubleshooting](../troubleshooting.md#a-key-doesnt-repeat-when-held)).
-- **X properties.** Wayland has no shared X11 property store. The [compatibility reference](../reference/deviations.md#stubbed-apis) distinguishes absent global calls from client-local storage.
-- **Borders.** The border is a scene rect around the client geometry. `c:geometry()` excludes it, as in AwesomeWM; titlebars sit inside the geometry and start inside the border.
-- **XKB toggle options.** `grp:alt_shift_toggle` and the other `grp:*` options need an X server to act on the key. On any Wayland compositor they do nothing. Bind the switch yourself ([Keyboard Layout Switching](../guides/keyboard-layouts.md)):
+### Reloading configuration {#no-wm-restart}
 
-```lua
-awful.key({ "Mod1", "Shift" }, "space", function()
-    local current = awesome.xkb_get_layout_group()
-    awesome.xkb_set_layout_group((current + 1) % 2)
-end)
-```
+Restarting the compositor process disconnects Wayland applications. SomeWM's `awesome.restart()` instead rebuilds Lua configuration inside the running compositor. **Mod4 + Ctrl + r** invokes that reload in the default config. It does not load a newly installed compositor binary.
 
-Static options such as `ctrl:nocaps` and `compose:ralt` work as on X11.
+### Different Systray
 
-[AwesomeWM Compatibility](./awesomewm-compat.md) has the compatibility contract; [Tag Persistence](./tag-persistence.md) covers hotplug, which Wayland makes routine.
+SomeWM's tray uses StatusNotifierItem over D-Bus. Applications that only provide XEmbed tray windows do not appear. XWayland support for application windows does not add XEmbed tray support.
+
+### No Global Input Injection
+
+Native Wayland clients cannot use X11 tools to control other native clients. Input injection needs a supported compositor interface. Inside SomeWM configuration, `root.fake_input()` provides synthetic key, pointer and button events.
+
+### Key Repeat Is Client-Side
+
+Native Wayland applications generate key repeats using the rate and delay sent by SomeWM and the per-key repeat flag in the keymap. Changing `keyboard_repeat_rate` or `keyboard_repeat_delay` does not make a non-repeating key eligible. See [key-repeat troubleshooting](../troubleshooting.md#a-key-doesnt-repeat-when-held).
+
+### No X Properties
+
+X properties belong to X server objects. They can survive a window-manager restart while the X server and windows remain alive. Native Wayland clients have no equivalent general X-property store.
+
+SomeWM 2.1 leaves some compatibility methods as stubs and omits others. Check the [X-property reference](../reference/deviations.md#stubbed-apis) before calling them.
+
+### Titlebar Border Positioning
+
+`c:geometry()` excludes the border. A border of width `b` adds `b` to each side of the client's visible footprint. Compositor-drawn titlebars occupy space inside the decorated client geometry. Application-drawn decorations belong to the application's own buffer.
+
+## Partially Working Features
+
+### XKB Layout Toggle
+
+In SomeWM 2.1, `grp:*` options do not reliably switch the compositor's active keyboard group. This is an implementation limitation, not a rule of the Wayland protocol. Static options such as `ctrl:nocaps` and `compose:ralt` work.
+
+Use an explicit binding that calls `awesome.xkb_set_layout_group()`. The [keyboard layout guide](../guides/keyboard-layouts.md) shows configuration and cycling between groups.
+
+## See Also
+
+- [Migrating from AwesomeWM](../getting-started/migrating.md)
+- [AwesomeWM Compatibility](awesomewm-compat.md)
+- [Tag Persistence](tag-persistence.md)

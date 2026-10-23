@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
 title: Documentation
-description: SomeWM is a wlroots compositor that runs AwesomeWM's Lua API on Wayland. SomeWM 2.1 is the newest release.
+description: Build your own Wayland desktop with Lua widgets, window layouts, tags and rules.
 ---
 
 # SomeWM Documentation
 
-SomeWM is a Wayland compositor configured in Lua. You can build your own bars, widgets, popups and window layouts. In 2.1, widgets describe their content and sizing rules. SomeWM calculates placement and draws them. Your Lua code controls their data and behaviour.
+SomeWM 2.1 is a programmable Wayland compositor built on AwesomeWM's Lua configuration model. Its widget system lets you build the desktop itself: bars, launchers, popups, titlebars and notifications. Make a clock open a calendar, build a control panel for your system, or write your own window layout. Start with the supplied configuration and add what you need.
 
 ## Start here
 

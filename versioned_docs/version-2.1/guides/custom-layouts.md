@@ -1,99 +1,116 @@
 ---
 sidebar_position: 2.5
 title: Custom Layouts
-description: "A layout is a table with a name and an arrange(p) function that writes a geometry per client into p.geometries. Register it, read the workarea and tag properties, and skip gaps where they make no sense."
+description: Create your own tiling layout from scratch
 ---
 
 # Custom Layouts
 
-A layout is a table with a `name` and an `arrange(p)` function. SomeWM calls `arrange` whenever tiled clients need placing and expects a rectangle for each client in `p.geometries`; borders and gaps are applied afterwards. A layout written this way declares each client floating at the box you computed, with its numbers marked `legacy` in the dump; the stock suites declare Clay trees instead ([Clients and layouts in the same tree](../concepts/clients-in-the-tree.md#a-layout-is-a-tree)).
+Create a Lua table with a `name` and an `arrange(p)` function. In SomeWM 2.1, the function assigns rectangles to `p.geometries[client]`. The layout library applies borders and gaps afterward. SomeWM converts these rectangles to Clay elements labelled `legacy`. Built-in layouts instead supply Clay descriptions. See [client layouts](../concepts/clients-in-the-tree.md#a-layout-is-a-tree).
+
+## A Practical Example: Centered Column
+
+<span id="a-centred-split" />
+
+Save this as `~/.config/somewm/layouts/centered_column.lua`. It stacks tiled clients in one centred column:
 
 ```lua
-local my_max = {
-    name = "my_max",
-    arrange = function(p)
-        for _, c in ipairs(p.clients) do
-            p.geometries[c] = {
-                x = p.workarea.x, y = p.workarea.y,
-                width = p.workarea.width, height = p.workarea.height,
-            }
-        end
-    end,
-}
+local centered_column = { name = "centered_column" }
+
+function centered_column.arrange(p)
+    local n = #p.clients
+    if n == 0 then return end
+
+    local wa = p.workarea
+    local t = screen[p.screen].selected_tag
+    local fraction = t and t.master_width_factor or 0.6
+    local width = math.floor(wa.width * fraction)
+    local x = wa.x + math.floor((wa.width - width) / 2)
+
+    for i, c in ipairs(p.clients) do
+        local top = math.floor((i - 1) * wa.height / n)
+        local bottom = math.floor(i * wa.height / n)
+        p.geometries[c] = {
+            x = x,
+            y = wa.y + top,
+            width = width,
+            height = bottom - top,
+        }
+    end
+end
+
+return centered_column
 ```
 
-Every client gets the workarea; the focused one is on top.
+Rounding each boundary, rather than rounding one shared height, keeps division remainders from leaving unused space at the bottom.
 
-## Register it
+## Register and Use It
+
+<span id="register-it" />
+
+Require the module near the top of `rc.lua`, then add it to the existing `request::default_layouts` handler:
 
 ```lua
+local centered_column = require("layouts.centered_column")
+
 tag.connect_signal("request::default_layouts", function()
     awful.layout.append_default_layouts({
-        awful.layout.suit.tile, awful.layout.suit.floating, awful.layout.suit.max, my_max,
+        awful.layout.suit.tile,
+        awful.layout.suit.floating,
+        centered_column,
     })
 end)
-
-awful.screen.focused().selected_tag.layout = my_max     -- or on one tag
-awful.tag({ "1", "2", "3" }, s, my_max)                 -- or at creation
 ```
 
-Mod4 + Space cycles to it.
-
-## What `p` holds
-
-| Field | Contents |
-| --- | --- |
-| `p.workarea` | `x`, `y`, `width`, `height` of the usable screen: bars, struts and padding already subtracted; borders and gaps not yet |
-| `p.clients` | the tiled clients in creation order |
-| `screen[p.screen].selected_tag` | the tag, with `master_count`, `master_width_factor`, `column_count` and the rest |
-| `p.geometries` | the table you fill, one rectangle per client |
-
-## A centred split
-
-Master column centred at `master_width_factor` of the width, the stack below it full width. Mod4 + l and h, and Mod4 + Shift + l and h, then work as in `tile`:
+Replace the existing handler rather than adding another copy of the default layouts. Select the layout with **Mod4+Space**, or assign it directly:
 
 ```lua
-local centered_split = {
-    name = "centered_split",
-    arrange = function(p)
-        local wa, n = p.workarea, #p.clients
-        if n == 0 then return end
-        local t = screen[p.screen].selected_tag
-        local nmaster = math.min(t.master_count, n)
-        local nstack = n - nmaster
-
-        local master_w = math.floor(wa.width * t.master_width_factor)
-        local master_x = wa.x + math.floor((wa.width - master_w) / 2)
-        local h = math.floor(wa.height / nmaster)
-        for i = 1, nmaster do
-            p.geometries[p.clients[i]] = { x = master_x, y = wa.y + (i - 1) * h, width = master_w, height = h }
-        end
-
-        if nstack > 0 then
-            local sh = math.floor(wa.height / nstack)
-            for i = 1, nstack do
-                p.geometries[p.clients[nmaster + i]] = { x = wa.x, y = wa.y + (i - 1) * sh, width = wa.width, height = sh }
-            end
-        end
-    end,
-}
+local t = awful.screen.focused().selected_tag
+if t then
+    t.layout = require("layouts.centered_column")
+    t.master_width_factor = 0.6
+end
 ```
 
-## Gaps
+## Read the Workarea
 
-With `gap_single_client = false`, `skip_gap(nclients, tag)` returns true to suppress gaps:
+<span id="what-p-holds" />
+
+`p.workarea` contains `x`, `y`, `width` and `height` after struts are removed. In 2.1, the screen method ignores the requested padding and outer gap margin. Write rectangles within that area. The layout library then insets each rectangle by `p.useless_gap` and subtracts borders and gaps from its size.
+
+`p.clients` contains tiled clients in layout order. `p.screen` is the screen index. There is no `p.tag` field in 2.1. Use `screen[p.screen].selected_tag` to read tag settings.
+
+## Using Tag Properties
+
+<span id="rules" />
+
+The example reads `master_width_factor` as its column width. The default **Mod4+h** and **Mod4+l** bindings adjust it.
+
+A layout with a master section can also read `master_count`. The default **Mod4+Shift+h** increases that count and **Mod4+Shift+l** decreases it. This centred-column example has no separate master section, so it does not use the count. See [Master and Stack](../concepts/master-and-stack.md) for those properties.
+
+## Skipping Gaps
+
+<span id="gaps" />
+
+Add a `skip_gap` function to your layout to suppress gaps for a single client:
 
 ```lua
-my_max.skip_gap = function() return true end                             -- clients overlap
-centered_split.skip_gap = function(nclients) return nclients == 1 end
+local centered_column = require("layouts.centered_column")
+centered_column.skip_gap = function(nclients)
+    return nclients == 1
+end
 ```
 
-## Rules
+This takes effect only when the tag's `gap_single_client` is `false`. If that setting is `true`, the layout library keeps gaps regardless of `skip_gap`.
 
-- Write only to `p.geometries`. No `c:geometry()`, no signals.
-- Return early on zero clients.
-- `math.floor` every coordinate; a fraction leaves a one-pixel gap or overlap.
-- `awful.layout.arrange(s)` re-runs the layout without opening windows.
-- Try one, two and many clients, a screen resize, and odd `master_count` and `master_width_factor` values.
+## Test the Layout
 
-[Layout reference](../reference/awful/layout.md) has the full `arrange(p)` contract and every built-in layout; [Master and Stack](../concepts/master-and-stack.md) the tag properties.
+Use a [nested compositor](testing-with-nested-compositor.md). Open zero, one, two and several windows. Change the screen size, gap, border width and column fraction. Check that rectangles stay inside the workarea and do not overlap.
+
+Keep `arrange` limited to computing `p.geometries`. To request another arrangement during development, call `awful.layout.arrange(s)` for the screen being tested.
+
+## See Also
+
+- [Layout Protocol Reference](../reference/awful/layout.md)
+- [Master and Stack](../concepts/master-and-stack.md)
+- [AwesomeWM Layout API](https://awesomewm.org/apidoc/libraries/awful.layout.html)

@@ -1,19 +1,85 @@
 ---
 sidebar_position: 21
 title: Replace a default handler
-description: "Disconnect the awful.permissions handler of a request::* signal and connect your own. The same function reference is required, and the table of which handler serves which signal."
+description: Disconnect and replace the default behavior on request::* signals
 ---
 
 # Replace a default handler
 
-Each `request::*` signal has a default handler in `awful.permissions`, exported as a named function so it can be disconnected. Replacing it is two calls with the same function reference:
+Disconnect the existing function before connecting its replacement. Passing a new function with the same body does not disconnect the old one. Keep the function reference if you will need to remove it later.
+
+The examples below belong in `rc.lua` after `local awful = require("awful")`.
+
+## Example 1: custom border colors
+
+<span id="borders" />
+
+To give focused floating clients red borders, replace the default border handler:
 
 ```lua
-client.disconnect_signal("request::tag", awful.permissions.tag)
+local beautiful = require("beautiful")
+local function my_border_handler(c)
+    if c.fullscreen or c.maximized then
+        c.border_width = 0
+    else
+        c.border_width = beautiful.border_width or 1
+    end
+    if c.floating and c.active then
+        c.border_color = "#ff5555"
+    elseif c.active then
+        c.border_color = beautiful.border_color_active or "#ffffff"
+    else
+        c.border_color = beautiful.border_color_normal or "#333333"
+    end
+end
+client.disconnect_signal("request::border", awful.permissions.update_border)
+client.connect_signal("request::border", my_border_handler)
+```
+
+This replaces the whole border policy, including theme handling for urgency. If only the normal focus colours need changing, set the theme's `border_focus` and `border_normal` instead.
+
+## Example 2: pin everything to tag 1
+
+<span id="tags" />
+
+For clients that need a tag but have no explicit request, choose the primary screen's first tag:
+
+```lua
+local default_tag = awful.permissions.tag
+local function my_tag_handler(c, t, hints)
+    if t or #c:tags() > 0 then
+        default_tag(c, t, hints)
+        return
+    end
+    local first = screen.primary and screen.primary.tags[1]
+    default_tag(c, first, hints)
+end
+client.disconnect_signal("request::tag", default_tag)
 client.connect_signal("request::tag", my_tag_handler)
 ```
 
-Connecting without disconnecting adds to the default instead. For observation signals (`focus`, `property::*`) that is right; for a `request::*` that places, tags or draws borders, two handlers fight.
+The default handles explicit tag objects and `t = true`, which requests a sticky client. Existing tag membership is preserved. Rules or later handlers can still move the window. This example also replaces the default transient-parent placement when an untagged client has no explicit request.
+
+## Example 3: keep the default and add your own
+
+When extra work must run after a default handler, call it from one wrapper:
+
+```lua
+local default_border = awful.permissions.update_border
+client.disconnect_signal("request::border", default_border)
+client.connect_signal("request::border", function(c, context, hints)
+    default_border(c, context, hints)
+    if c.floating and c.active then
+        c.border_color = "#ff5555"
+    end
+end)
+```
+
+Use this as an alternative to the first example. It preserves the default border width and other theme rules. Two independent class signal handlers do not guarantee this execution order.
+
+For client setup after rules, use a [rule callback](client-rules.md#using-callbacks).
+
+## Finding the default handler
 
 | Signal | Default handler |
 | --- | --- |
@@ -21,42 +87,19 @@ Connecting without disconnecting adds to the default instead. For observation si
 | `client` `request::tag` | `awful.permissions.tag` |
 | `client` `request::border` | `awful.permissions.update_border` |
 | `client` `request::geometry` | `awful.permissions.geometry` |
-| `tag` `request::screen` | `awful.permissions.tag_screen` |
 | `screen` `request::focus_restore` | `awful.permissions.focus_restore` |
+| `tag` `request::screen` | `awful.permissions.tag_screen` |
 
-`request::manage`'s default is connected when `ruled.client` is required. [Signals Reference](../reference/signals.md) names the rest.
-
-## Borders
-
-`context` says why the signal fired: `"added"`, `"active"`, `"inactive"`, `"floating"`, `"urgent"`.
-
-```lua
-local function my_border_handler(c, context, hints)
-    c.border_width = (c.fullscreen or c.maximized) and 0 or beautiful.border_width
-    if c.floating and c.active then
-        c.border_color = "#ff5555"
-    else
-        c.border_color = c.active and beautiful.border_focus or beautiful.border_normal
-    end
-end
-
-client.disconnect_signal("request::border", awful.permissions.update_border)
-client.connect_signal("request::border", my_border_handler)
-```
-
-## Tags
-
-`hints.reason` is `"screen"` (the client has no tag), `"screen-removed"`, or `"rules"` (a rule's `tag` function returned nothing).
-
-```lua
-client.disconnect_signal("request::tag", awful.permissions.tag)
-client.connect_signal("request::tag", function(c, t, hints)
-    c:move_to_tag(t or screen.primary.tags[1])
-end)
-```
+Other defaults may belong to another module or to your config. Check the [signal reference](../reference/signals.md) before replacing one.
 
 ## Pitfalls
 
-- An anonymous function cannot be disconnected; keep it in a local.
-- Disconnecting the wrong reference is a silent no-op.
-- Two modules replacing the same default: the later `require` wins. For rules, connect from `request::rules` instead ([Defer startup with request::rules](./defer-startup-with-request-rules.md)).
+- Disconnect the exact function that was connected, including a wrapper if you installed one.
+- If two modules each disconnect the same original and add a replacement, both replacements remain connected. Choose one owner for that policy.
+- Do not run all three examples together. The first and third are alternative border policies.
+
+## See also
+
+- [Signals](../concepts/signals.md)
+- [Control Where Focus Goes](focus.md)
+- [React to Client Lifecycle](react-to-client-lifecycle.md)

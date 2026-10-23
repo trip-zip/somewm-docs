@@ -1,50 +1,53 @@
 ---
 sidebar_position: 3
 title: Client Stacking
-description: One global stack orders clients within a band. Raise and lower change it; focus, swap and tag switches do not. Layouts use creation order, not the stack.
+description: How visual stacking differs from focus and tiling order.
 ---
 
 # Client Stacking
 
-There is one client stack for the whole compositor, not one per tag or per screen. Switching tags changes what is visible, not the order: raise a window on tag 2, switch away and back, and it is still on top.
+Stacking controls which overlapping clients appear in front. SomeWM keeps one client stack across screens and tags. Switching tags changes visibility without resetting that order.
 
 ## Stack, focus and layout are separate
 
-| Concept | Controls | Ordered by |
+| State | Controls | Changed by |
 | --- | --- | --- |
-| Stack | which overlapping client is in front | `c:raise()` and `c:lower()` |
-| Focus | which client gets keyboard input | one focused client |
-| Layout | position and size of tiled clients | creation order |
+| Client list | Order used by layouts and the default tasklist | Mapping, removal, swaps and section helpers |
+| Stack | Visual overlap within band constraints | Mapping, removal, `raise` and `lower` |
+| Focus | Keyboard input destination | Focus assignment or activation requests |
 
-Layouts read creation order and ignore the stack, so raising a window never makes it master ([Master and Stack](./master-and-stack.md)).
+Mapping appends clients to the client list. Rules and methods such as `c:swap(other)` can reorder it. Raising a client does not make it master. See [master and stack](master-and-stack.md).
 
-The stack orders clients within a band. `c.below`, `c.above`, `c.ontop` and `c.fullscreen` move a client to another band, and no stack position puts a normal client above an ontop one ([the bands](./scene-graph.md#bands)). Two exceptions: under `max` and `magnifier`, a floating client is above the layout's clients whatever the raise order, and a transient of such a client is above every client of that layout.
+## Bands constrain the stack
+
+`below`, `above`, `ontop` and fullscreen state determine the client's band. Raising a normal client cannot put it above an `ontop` client.
+
+Within a band, clients follow stack order, with exceptions for `max` and `magnifier`: floating clients appear above the layout's tiled clients, and transients of those tiled clients also appear above the layout. See [scene order](scene-graph.md#stacking-within-a-band).
 
 ## What changes the stack
 
-| Action | Stack changes | Notes |
-| --- | --- | --- |
-| a new client maps | yes | added at the top of its band |
-| a client closes | yes | removed |
-| `c:raise()` | yes | to the top of its band; emits `raised` |
-| `c:lower()` | yes | to the bottom of its band; emits `lowered` |
-| focusing a client | no | add a `focus` handler that calls `c:raise()` if you want auto-raise |
-| `c:swap(other)` | no | swaps positions in the clients array, which layouts read |
-| switching tags | no | |
+<span id="two-arrays" />
+<span id="signals" />
 
-Raising or lowering a client also raises or lowers its transients.
+| Action | Effect |
+| --- | --- |
+| New client maps | Added to the stack |
+| Client closes | Removed |
+| `c:raise()` | Raise within band constraints, account for transients, emit `raised` |
+| `c:lower()` | Lower within band constraints, account for transients, emit `lowered` |
+| `client.focus = c` | Change focus without explicitly raising |
+| `c:swap(other)` | Swap client-list positions, leaving the stack unchanged |
 
-## Two arrays
+A configuration can couple these operations. For example, a `focus` handler that calls `c:raise()` makes focus changes raise clients too.
 
-| Array | Order | Read it |
-| --- | --- | --- |
-| clients | creation | `client.get(s)`, `awful.client.tiled(s)`; what layouts and the tasklist use |
-| stack | back to front | `client.get(s, true)` |
-
-## Signals
+## Reading each order
 
 ```lua
-client.connect_signal("raised", function(c) end)
-client.connect_signal("lowered", function(c) end)
-client.connect_signal("property::ontop", function(c) end)   -- also above, below, fullscreen
+local awful = require("awful")
+local s = awful.screen.focused()
+local layout_order = client.get(s)
+local stack_order = client.get(s, true)
+local tiled = awful.client.tiled(s)
 ```
+
+`client.get(s, true)` returns the stack from top to bottom. `awful.client.tiled(s)` filters the client list to visible clients eligible for tiling. Neither list is [focus history](focus-history.md).

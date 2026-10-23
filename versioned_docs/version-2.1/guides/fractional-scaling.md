@@ -1,67 +1,100 @@
 ---
 sidebar_position: 7
 title: Fractional Scaling
-description: Set screen.scale per screen from rc.lua or somewm-client, keep the theme DPI-aware, and handle apps that render blurry at a fractional scale.
+description: Configure HiDPI displays with fractional scaling
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Fractional Scaling <SomewmOnly />
 
-`screen.scale` is a writable property, accepting values from 0.1 to 10.0; [Display Scaling](../concepts/display-scaling.md) explains what it does.
+Increase `screen.scale` to make content larger on a high-resolution output. Start with a value such as `1.25`, `1.5` or `2.0`, then check text and widget sizes on that display.
 
-| Panel | Scale |
-| --- | --- |
-| 1080p or 1440p at 24 to 27 inches | 1.0, 1440p up to 1.25 |
-| 4K at 27 inches | 1.5 to 2.0 |
-| 4K at 32 inches | 1.25 to 1.5 |
-| 2880x1800 laptop | 1.5 to 2.0 |
+## Setting Scale from CLI
+
+```bash
+somewm-client screen list
+somewm-client screen scale
+somewm-client screen scale 1 1.5
+```
+
+The last command sets screen 1 to `1.5`. With one argument, a decimal such as `1.5` sets the focused screen, while an existing integer screen index queries that screen. Use two arguments when setting scale to avoid ambiguity. Runtime changes are not saved to `rc.lua`.
+
+## Setting Scale from Lua
+
+Set persistent scale by connector name:
 
 ```lua
-awful.screen.connect_for_each_screen(function(s)
-    s.scale = s.geometry.width > 3000 and 1.5 or s.geometry.width > 2000 and 1.25 or 1.0
-end)
+local awful = require("awful")
+local scales = { ["eDP-1"] = 1.5, ["DP-1"] = 1.0 }
 
+awful.screen.connect_for_each_screen(function(s)
+    local name = s.output and s.output.name
+    s.scale = scales[name] or 1.0
+end)
+```
+
+Replace the connector names with those from your setup. The callback handles existing screens and screens added later.
+
+### Dynamic Adjustment
+
+```lua
 awful.keyboard.append_global_keybindings({
-    awful.key({ modkey }, "equal", function() local s = awful.screen.focused(); s.scale = s.scale + 0.25 end,
-        { description = "increase scale", group = "screen" }),
-    awful.key({ modkey }, "minus", function() local s = awful.screen.focused(); s.scale = math.max(0.5, s.scale - 0.25) end,
-        { description = "decrease scale", group = "screen" }),
+    awful.key({ modkey }, "equal", function()
+        local s = awful.screen.focused()
+        s.scale = math.min(3, s.scale + 0.25)
+    end, { description = "increase scale", group = "screen" }),
+    awful.key({ modkey }, "minus", function()
+        local s = awful.screen.focused()
+        s.scale = math.max(0.5, s.scale - 0.25)
+    end, { description = "decrease scale", group = "screen" }),
 })
 ```
 
-`connect_for_each_screen` also covers a monitor plugged in later. To set the scale before the screen exists, use the output's `added` signal ([Multi-Monitor](./multi-monitor.md#configure-by-output)).
+## Workarea and Geometry
 
-```bash
-somewm-client screen scale          # read
-somewm-client screen scale 1.5      # the focused screen
-somewm-client screen scale 2 1.0    # screen 2
-```
+`screen.geometry` and `screen.workarea` use logical coordinates. At a fixed physical mode, increasing scale reduces the available logical area. For example, a 3840×2160 output at scale `2` has a 1920×1080 logical area.
 
-After a change, `s.geometry` reports the new logical size and `s.workarea` follows.
+Do not choose a persistent scale by testing `s.geometry.width` against a physical resolution. The width already reflects the current scale.
 
-## Theme sizes
+## Making Themes DPI-Aware
 
-`dpi()` scales theme sizes by the configured DPI, independently of `screen.scale`:
+<span id="theme-sizes" />
+
+Output scale and widget DPI are separate settings. `beautiful.xresources.apply_dpi(value, s)` multiplies a logical size by `s.dpi / 96` and rounds it. It does not follow `s.scale` or update a value after the call.
+
+Inside a screen's decoration handler, use it when you intentionally want dimensions based on that screen's DPI:
 
 ```lua
 local dpi = require("beautiful.xresources").apply_dpi
-theme.useless_gap = dpi(4)
-theme.border_width = dpi(2)
-theme.wibar_height = dpi(24)
-theme.notification_width = dpi(300)
-theme.menu_height = dpi(20)
+s.mywibar = awful.wibar {
+    screen = s,
+    position = "top",
+    height = dpi(24, s),
+}
 ```
 
-Changing `screen.scale` leaves both bare numbers and `dpi()` results unchanged; the output scales their logical pixels when drawing.
+Output scaling already enlarges logical widget dimensions on the physical display. Multiplying them by `s.scale` again can make them too large. Pango font sizes also use DPI, so avoid applying a pixel-scaling helper to the numeric part of a font string without checking the result.
 
-## Blurry apps
+## App Compatibility
 
-| App | Fix |
-| --- | --- |
-| XWayland | integer scale only; `GDK_SCALE=2` or `QT_SCALE_FACTOR=1.5` per app, or a Wayland-native build |
-| GTK3 | `GDK_BACKEND=wayland` in the environment; renders at the next integer and is downscaled |
-| Qt | `QT_QPA_PLATFORM=wayland`, `QT_SCALE_FACTOR=1.5` |
-| Electron | `ELECTRON_OZONE_PLATFORM_HINT=wayland` |
+<span id="blurry-apps" />
+<span id="troubleshooting" />
 
-GTK4 and Qt6 apps support `wp_fractional_scale_v1` and are crisp at any scale. `for s in screen do print(s.index, s.scale) end` shows which screen got which scale when one looks wrong.
+Check the application's Wayland backend and fractional-scale support if its text looks blurry. XWayland applications can be resampled, and integer output scale alone does not guarantee sharp text.
+
+For a GTK or Qt application that supports Wayland, test its backend on that launch:
+
+```bash
+GDK_BACKEND=wayland my-gtk-app
+QT_QPA_PLATFORM=wayland my-qt-app
+```
+
+Replace the executable names. These variables affect only that launch. Check output scaling before adding toolkit scale overrides.
+
+## See Also
+
+- [Screen Reference](../reference/screen.md)
+- [Display Scaling](../concepts/display-scaling.md)
+- [Multi-Monitor Setup](multi-monitor.md)
+- [Theme Tutorial](../tutorials/theme.md)

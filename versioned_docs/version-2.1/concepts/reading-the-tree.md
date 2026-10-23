@@ -6,11 +6,9 @@ description: Find which sizing rule makes a widget wrap, grow or leave space by 
 
 # Reading the tree
 
-Use the tree dump when a widget has an unexpected size or position. It puts the sizing rules supplied by your configuration next to the rectangles Clay calculated. This lets you trace a visible result back to the widget or container that caused it.
+The tree dump shows your widget's sizing rules beside the rectangles Clay calculated. Use it to find what makes a widget wrap, grow or leave space. The inspector lets you select elements visually.
 
-For example, a label can wrap inside a wide bar because its immediate parent limits it to 60 pixels. The dump shows both that limit and the label's resulting width. The inspector lets you select elements visually instead of searching the text dump.
-
-If you want to build your first widget, start with [Build a clock widget](../tutorials/widgets.md). This page is for inspecting an existing layout. The [custom-widget comparison](../guides/custom-widgets.md#register-a-clay-description) shows how to port a widget implementation to 2.1.
+To build a widget, start with [the clock tutorial](../tutorials/widgets.md) or [custom-widget guide](../guides/custom-widgets.md).
 
 ## Why does this label wrap? {#a-worked-example}
 
@@ -41,9 +39,9 @@ somewm-client clay tree
 Search the output for `text "capped at sixty"`. Read its line and the parent lines immediately above it. This abbreviated excerpt omits element IDs and unrelated fields:
 
 ```text
-wibox.container.constraint w=fit<=60 user h=grow box 247,100 60x48
-  wibox.widget.textbox w=fit h=grow box 247,100 60x48
-    text "capped at sixty" box 247,107 60x34
+wibox.container.constraint w=fit<=60 user h=grow box 250,100 60x48
+  wibox.widget.textbox w=fit h=grow box 250,100 60x48
+    text "capped at sixty" box 250,110 60x28
 ```
 
 Read it from the parent down:
@@ -51,20 +49,20 @@ Read it from the parent down:
 | What the dump shows | What it tells you |
 | --- | --- |
 | Constraint: `w=fit<=60 user` | The parent fits its content up to a maximum of 60 pixels. `user` points to a value from the configuration. Here it is the constraint's `width = 60`. |
-| Textbox: `box 247,100 60x48` | Clay allocated the textbox 60 pixels of width and the full 48 pixels of wibox height. |
-| Text: `box 247,107 60x34` | The text occupies two lines within that allocation, centred vertically. |
+| Textbox: `box 250,100 60x48` | Clay allocated the textbox 60 pixels of width and the full 48 pixels of wibox height. |
+| Text: `box 250,110 60x28` | The text occupies two lines within that allocation, centred vertically. |
 
-The text measurements and coordinates above come from one session. Your font, output scale and configuration can change them. The important relationship is the parent's 60-pixel limit and the child's resulting 60-pixel width.
+Exact measurements depend on your font and scale. Here the parent's 60-pixel limit sets the child's width.
 
 Change the constraint's `width = 60` to `width = 180`, reload, and dump again. In this example the relevant lines become:
 
 ```text
-wibox.container.constraint w=fit<=180 user h=grow box 247,100 75x48
-  wibox.widget.textbox w=fit h=grow box 247,100 75x48
-    text "capped at sixty" box 247,116 75x17
+wibox.container.constraint w=fit<=180 user h=grow box 250,100 89x48
+  wibox.widget.textbox w=fit h=grow box 250,100 89x48
+    text "capped at sixty" box 250,117 89x14
 ```
 
-The label now fits on one line. Its text still says “capped at sixty” because only the constraint property changed. `fit<=180` allows up to 180 pixels, while the text needs just 75 in this font. Clay therefore gives it 75. Increasing the whole wibox's width would have left the original 60-pixel limit in place.
+The unchanged text now fits on one line. `fit<=180` allows 180 pixels, but this font needs only 89. Widening the whole wibox would not remove the original 60-pixel constraint.
 
 The other labels demonstrate two related checks:
 
@@ -98,8 +96,6 @@ output HEADLESS-1 scale 1.00 inspector on frames 9 elements 663/65536 map 663 fr
 | A client is misplaced | Find its `CLIENT` line under `WORKAREA`, or its `SURFACE` root, and inspect the geometry and source labels. [Client layouts](./clients-in-the-tree.md) explains their declarations. |
 
 The dump describes compiled elements. SomeWM can combine compatible containers into one element, so it need not contain a separate line for every Lua widget. A missing class name alone does not prove the widget was rejected. An explicit warning ending `is left out of the tree` identifies a rejected widget and its reason. See [unsupported widget callbacks](./widgets-in-the-tree.md#a-widget-that-paints-itself).
-
-The remaining sections explain the sizing labels and dump fields in detail.
 
 ## Sizing
 

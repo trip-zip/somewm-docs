@@ -1,136 +1,159 @@
 ---
 sidebar_position: 8
 title: Widget Timers and Updates
-description: Update a widget on a gears.timer, from a signal, or from an async command. Intervals that fit each kind of data, why io.popen is never acceptable, caching and debouncing, and a complete battery widget.
+description: Keep widgets updated with timers and signals
 ---
 
 # Widget Timers and Updates
 
-Setting a widget property (`text`, `value`, `image`) marks it for the next frame; there is nothing to redraw by hand. The question is only when to set it: on a timer, when a signal says something changed, or when an asynchronous command returns.
+Use a timer for periodic data and a signal when the producer can report changes. Built-in property setters request layout and rendering updates. Keep command execution asynchronous so a slow command does not block the compositor.
 
-## Timers
+## Basic Timer
+
+<span id="timers" />
 
 ```lua
+local gears = require("gears")
+local wibox = require("wibox")
 local clock = wibox.widget.textbox()
-
-gears.timer {
-    timeout = 60,
-    autostart = true,     -- without it the timer never runs
-    call_now = true,      -- run the callback once immediately
-    callback = function() clock.text = os.date("%H:%M") end,
+local timer = gears.timer {
+    timeout = 1,
+    autostart = true,
+    call_now = true,
+    callback = function()
+        clock.text = os.date("%H:%M:%S")
+    end,
 }
+```
 
-gears.timer.start_new(3, function()        -- once, after 3 seconds
-    naughty.notification { title = "Delayed" }
+Add `clock` to your wibar. `timeout` is in seconds, `autostart` starts periodic updates and `call_now` runs the callback immediately. Use `wibox.widget.textclock()` if you only need a standard clock.
+
+Call `timer:stop()` when removing a dynamically created widget. `timer:start()` starts a stopped timer, and `timer:again()` restarts its countdown.
+
+## One-Shot Timer
+
+```lua
+gears.timer.start_new(3, function()
+    require("naughty").notification { title = "Delayed notification" }
     return false
 end)
 ```
 
-`timer:start()`, `:stop()` and `:again()` control it later, and `single_shot = true` is the one-off form ([gears.timer upstream](https://awesomewm.org/apidoc/core_components/gears.timer.html)). A timer created repeatedly must stop the previous one or they accumulate.
+Returning `false` stops a timer created by `start_new`. Alternatively, construct a `gears.timer` with `single_shot = true` and `autostart = true`.
 
-| Data | Interval |
-| --- | --- |
-| clock to the minute | 60 s |
-| clock to the second | 1 s |
-| CPU, memory | 2 to 5 s |
-| battery | 30 to 60 s |
-| network status | 5 to 10 s |
-| weather, an external API | 5 to 10 min |
+## Choosing Update Intervals
 
-## Signals
+Match the interval to the data. Battery readings may only need a check every 30 seconds. CPU usage needs two samples over a shorter interval. Network services may impose rate limits. Avoid starting another command while the previous read is still running.
 
-A signal fires only on change, so prefer it to polling where a change has a known source:
+## Async Updates
 
-```lua
-awesome.connect_signal("volume::changed", function(value) volume_widget.text = value .. "%" end)
+<span id="commands" />
+<span id="a-battery-widget" />
 
-awful.key({}, "XF86AudioRaiseVolume", function()
-    awful.spawn.easy_async("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+", function()
-        awful.spawn.easy_async("wpctl get-volume @DEFAULT_AUDIO_SINK@", function(out)
-            awesome.emit_signal("volume::changed", math.floor(out:match("Volume: (%d+%.?%d*)") * 100))
-        end)
-    end)
-end)
-```
-
-`client` `focus`, `tag` `property::selected` and `screen` `property::workarea` are the built-in ones widgets most often react to.
-
-## Commands
-
-Never `io.popen` in the compositor: it blocks every frame until the command exits. `awful.spawn.easy_async` and `easy_async_with_shell` call back with the output:
-
-```lua
-awful.spawn.easy_async_with_shell("cat /sys/class/power_supply/BAT1/capacity",
-    function(stdout, stderr, reason, exit_code)
-        battery_widget.text = stdout:gsub("%s+", "") .. "%"
-    end)
-```
-
-Skip the update when the value did not change, and debounce a burst of triggers:
-
-```lua
-local last
-local function set(value)
-    if value ~= last then last = value; widget.text = value end
-end
-
-local pending
-local function debounced_update()
-    if pending then pending:stop() end
-    pending = gears.timer.start_new(0.1, function() do_actual_update(); return false end)
-end
-```
-
-## A battery widget
+Save this battery widget as `~/.config/somewm/widgets/battery.lua`. Replace `BAT0` with the battery directory on your machine:
 
 ```lua
 local awful = require("awful")
-local wibox = require("wibox")
 local gears = require("gears")
+local wibox = require("wibox")
 local naughty = require("naughty")
-
-local battery_icon = wibox.widget.imagebox()
-local battery_text = wibox.widget.textbox()
-local battery_widget = wibox.widget {
-    battery_icon, battery_text, spacing = 4,
-    layout = wibox.layout.fixed.horizontal,
-}
+local widget = wibox.widget.textbox()
+local base = "/sys/class/power_supply/BAT0/"
+local busy = false
 local last_warning
 
-local function update_battery()
-    awful.spawn.easy_async_with_shell([[
-        cat /sys/class/power_supply/BAT1/capacity
-        cat /sys/class/power_supply/BAT1/status
-    ]], function(stdout)
-        local lines = {}
-        for line in stdout:gmatch("[^\n]+") do lines[#lines + 1] = line end
-        local capacity, status = tonumber(lines[1]) or 0, lines[2] or "Unknown"
-
-        battery_text.text = capacity .. "%"
-        local icon = status == "Charging" and "battery-charging"
-            or capacity > 80 and "battery-full"
-            or capacity > 50 and "battery-good"
-            or capacity > 20 and "battery-low"
-            or "battery-empty"
-        battery_icon.image = require("menubar").utils.lookup_icon_uncached(icon .. "-symbolic") or require("beautiful").awesome_icon
-
-        if status == "Charging" then
-            last_warning = nil
-        elseif capacity <= 10 and last_warning ~= 10 then
-            naughty.notification { title = "Battery Critical", message = capacity .. "%", urgency = "critical" }
-            last_warning = 10
-        elseif capacity <= 20 and last_warning ~= 20 then
-            naughty.notification { title = "Battery Low", message = capacity .. "%" }
-            last_warning = 20
-        end
-    end)
+local function update()
+    if busy then return end
+    busy = true
+    awful.spawn.easy_async({ "cat", base .. "capacity", base .. "status" },
+        function(stdout, _, _, code)
+            busy = false
+            local percent, status = stdout:match("^(%d+)%s*\n([^\n]+)")
+            percent = tonumber(percent)
+            if code ~= 0 or not percent then
+                widget.text = "Battery unavailable"
+                return
+            end
+            widget.text = percent .. "% " .. status
+            local level = status == "Discharging"
+                and (percent <= 10 and 10 or percent <= 20 and 20) or nil
+            if level and level ~= last_warning then
+                naughty.notification {
+                    title = level == 10 and "Battery critical" or "Battery low",
+                    message = "Battery at " .. percent .. "%",
+                    urgency = level == 10 and "critical" or "normal",
+                }
+            end
+            last_warning = level
+        end)
 end
 
-gears.timer { timeout = 30, autostart = true, call_now = true, callback = update_battery }
-
-return battery_widget
+local timer = gears.timer {
+    timeout = 30,
+    autostart = true,
+    call_now = true,
+    callback = update,
+}
+widget.stop_updates = function() timer:stop() end
+return widget
 ```
 
-A CPU widget is the same shape with `head -1 /proc/stat` and the difference between two readings; a network widget pairs a 10-second timer with a `network::connected` signal you emit from the script that connects.
+Require `widgets.battery` and add the returned widget to your bar. The example displays a read failure instead of treating it as a zero-percent battery. It warns when entering each low-battery band, then resets when charging or recovering above the threshold.
 
-A timer can update built-in widget properties or assign a newly drawn Cairo surface to an imagebox. The unsupported part is a widget with its own `draw`, `fit` or `layout` callback. See [Create or port a custom widget](./custom-widgets.md) for examples, or [Widgets](../tutorials/widgets.md) for an introduction to composition.
+Do not use `io.popen`, `os.execute` or sleeps for slow work in a widget callback. For commands that require pipes or redirection, use `awful.spawn.easy_async_with_shell`.
+
+## Signal-Based Updates
+
+<span id="signals" />
+
+For data your config controls, emit a custom signal after a successful change:
+
+```lua
+local volume_widget = wibox.widget.textbox()
+awesome.connect_signal("volume::changed", function(percent)
+    volume_widget.text = percent .. "%"
+end)
+```
+
+A producer would call `awesome.emit_signal("volume::changed", percent)` after reading the new value. This is a custom signal, so changes made by other programs will not emit it automatically. Use a subscription to the audio service or polling if those changes must be reflected too.
+
+Built-in signals such as client `focus`, tag `property::selected` and screen `property::workarea` can update widgets without polling.
+
+## Caching and Debouncing
+
+For several rapid events, restart one timer and update after the events settle:
+
+```lua
+local focused_title = wibox.widget.textbox()
+local update_timer = gears.timer {
+    timeout = 0.1,
+    single_shot = true,
+    callback = function()
+        focused_title.text = client.focus and client.focus.name or ""
+    end,
+}
+local function queue_update()
+    update_timer:again()
+end
+client.connect_signal("focus", queue_update)
+client.connect_signal("unfocus", queue_update)
+client.connect_signal("property::name", queue_update)
+queue_update()
+```
+
+When removing this widget, stop the timer and disconnect these handlers. For expensive updates, keep the last successful value and skip rebuilding content when it has not changed.
+
+## Troubleshooting
+
+- **No updates:** start the timer, or set `autostart = true`. Inspect the compositor log for callback errors.
+- **Blank initial value:** use `call_now = true`, or set placeholder text while waiting for the first sample.
+- **Custom content does not refresh:** emit `widget::redraw_needed` after changing custom state. If its requested size changes, emit `widget::layout_changed` too.
+- **Updates continue after removing a widget:** stop its timer and disconnect its signal handlers. Removing it from the layout does not stop those producers.
+
+For custom content, use a [widget composition, Clay description or image surface](custom-widgets.md). Widget `draw`, `fit` and `layout` callbacks are not supported in 2.1.
+
+## See Also
+
+- [Widgets Tutorial](../tutorials/widgets.md)
+- [Signals](../concepts/signals.md)
+- [AwesomeWM Timer API](https://awesomewm.org/doc/api/libraries/gears.timer.html)

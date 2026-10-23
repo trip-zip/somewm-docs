@@ -1,29 +1,32 @@
 ---
 sidebar_position: 1
 title: Why somewm
-description: SomeWM is a wlroots compositor that runs AwesomeWM's Lua configuration model on Wayland. 1.4 mirrors AwesomeWM master; 2.x develops the API independently where Wayland or design asks for it.
+description: A Wayland desktop built from Lua widgets, layouts, tags and rules.
 ---
 
 # Why somewm
 
-SomeWM is a Wayland compositor built on [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots) that runs AwesomeWM's Lua configuration model: `awful`, `gears`, `wibox`, `naughty`, `beautiful` and `ruled`, the same objects, properties, signals and declarative widget tables. Two release lines:
+<span id="not-part-of-the-api" />
+<span id="where-wayland-forces-a-difference" />
 
-| Line | Relationship to AwesomeWM |
-| --- | --- |
-| 1.4 | mirrors AwesomeWM master and is maintained indefinitely as the compatible line |
-| 2.x | keeps the configuration model and develops the libraries and compositor independently; public Lua APIs can change, and deprecated ones are removed |
+SomeWM combines a Wayland compositor with AwesomeWM's Lua configuration model. You build the desktop from widgets, layouts, tags, rules and signal handlers in your own configuration.
 
-A shared name does not promise identical behaviour, defaults or signal timing. Check the SomeWM reference for your release; the [AwesomeWM API docs](https://awesomewm.org/apidoc/) explain inherited APIs but also describe ones SomeWM changed or removed. [Migrating](../getting-started/migrating.md#deprecated-apis-removed-in-somewm-20) lists the replacements, and [Compatibility reference](../reference/deviations.md) every behavioural difference.
+The widget system supplies the content of panels, launchers, popups, titlebars and notifications. Custom widgets can combine built-in components with their own state, methods, timers and input handling. For new visual content, they can supply a Clay description or an image surface. Start with [a clock widget](../tutorials/widgets.md), or read [how custom widgets work](widgets-in-the-tree.md).
 
-## Not part of the API
+## Why change the drawing model?
 
-The C source, the internals of the Lua libraries, Wayland protocol handling, the scene, the build and file layout, and any signal or helper not documented as public. These change between releases.
+In 2.1, widgets describe their content and sizing rules. Clay calculates their sizes and positions, and SomeWM renders the resulting tree. Giving one layout system responsibility for geometry lets changes propagate through parents and neighbours without each widget implementing measurement and drawing callbacks.
 
-## Where Wayland forces a difference
+This requires migration work for widgets that used `fit`, `layout` or `draw`. Their state and behaviour can remain, while their visual implementation changes. The [upgrade guide](../getting-started/upgrading-from-2.0.md) identifies affected widgets and links to replacements.
 
-- **Mapping.** A client commits before it receives a configure, so the compositor cannot pre-tile the way X11 did.
-- **Tray.** `_NET_SYSTEMTRAY` is X11; SomeWM uses StatusNotifierItem over D-Bus.
-- **Restart.** `awesome.restart()` rebuilds the Lua state in process while wlroots keeps running, because GPU state cannot survive an exec.
-- **Scale.** Wayland scales per output, so `screen.scale` is a writable property.
+## Compatibility and release lines
 
-[AwesomeWM Compatibility](./awesomewm-compat.md) is the compatibility contract; [Wayland vs X11](./wayland-vs-x11.md) the protocol background.
+The 1.4 line focuses on AwesomeWM compatibility. SomeWM 2.x retains the Lua configuration model but develops its APIs independently. Shared names do not guarantee identical arguments, defaults or signal timing.
+
+Use the documentation for your installed release. Linked AwesomeWM documentation explains inherited APIs but can also describe behaviour SomeWM has changed or removed. See the [compatibility policy](awesomewm-compat.md) and [compatibility reference](../reference/deviations.md).
+
+## What Wayland changes
+
+Some differences come from being the display server. SomeWM manages outputs and input, uses StatusNotifierItem for tray icons, and reloads Lua in the existing process to keep application connections alive.
+
+[Wayland vs X11](wayland-vs-x11.md) explains these platform differences. Internal helpers, scene details and undocumented signals can also change between releases. Use documented interfaces when extending the desktop.

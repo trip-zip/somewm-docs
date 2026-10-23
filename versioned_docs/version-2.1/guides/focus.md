@@ -1,53 +1,70 @@
 ---
 sidebar_position: 23
 title: Control where focus goes
-description: "Toggle between the two most recent windows, replace the request::focus_restore handler to choose the fallback, prefer a kind of window, filter what can be chosen, pause history tracking, and print the history."
+description: Jump to recent windows, choose the fallback when something closes, and keep utility windows from stealing focus
 ---
 
 # Control where focus goes
 
-Every recipe here reads or shapes the focus history, the most-recent-first list of focused clients ([Focus History](../concepts/focus-history.md)).
+Use `awful.client.focus.history` to return to a recent visible window. The examples assume `local awful = require("awful")` in `rc.lua`.
 
-## The two most recent windows
+## Jump between your two most recent windows
+
+<span id="the-two-most-recent-windows" />
 
 ```lua
-awful.key {
-    modifiers = { "Mod1" }, key = "Tab",
-    on_press = function() awful.client.focus.history.previous() end,
-    description = "focus previous client (history)", group = "client",
-},
+awful.keyboard.append_global_keybindings({
+    awful.key({ "Mod1" }, "Tab", function()
+        awful.client.focus.history.previous()
+    end, { description = "focus previous client", group = "client" }),
+})
 ```
 
-`awful.client.focus.byidx(1)` cycles visible clients in index order instead.
+This searches the current screen. To cycle visible clients in client-list order instead, call `awful.client.focus.byidx(1)` for next or `byidx(-1)` for previous.
 
-## The fallback when something closes
+## Choose who gets focus when a window closes
 
-A client closing, a layer-shell launcher dismissing, an unlock and a monitor disconnect all emit `request::focus_restore` on the screen. The default handler, `awful.permissions.focus_restore`, activates the most recently focused client still visible there. Replace it to change the policy:
+<span id="the-fallback-when-something-closes" />
+
+The default `request::focus_restore` handler chooses a recent visible, focusable client on the affected screen. To prefer its first tiled client, replace the handler:
 
 ```lua
 screen.disconnect_signal("request::focus_restore", awful.permissions.focus_restore)
 screen.connect_signal("request::focus_restore", function(s)
     local master = s.tiled_clients[1]
-    if master then master:emit_signal("request::activate", "focus_restore", { raise = false }) end
+    if master and awful.client.focus.filter(master) then
+        master:emit_signal("request::activate", "focus_restore", { raise = false })
+    else
+        awful.permissions.focus_restore(s)
+    end
 end)
 ```
 
-If the handler focuses nobody, C focuses the topmost client on that screen, so a broken handler never strands focus ([the pattern's pitfalls](./replace-default-handler.md)).
+This handles screen focus-restoration requests, including those after a window or launcher closes. It does not replace every focus path. The C restore path also tries a topmost-client fallback if Lua leaves no client focused, but cannot focus a client when none is eligible.
 
-## Prefer a kind of window
+## Prefer a specific kind of window
 
-`awful.client.focus.history.get(s, idx, filter)` returns the `idx`-th most recent client visible on `s` that passes `filter`, 0 being the most recent:
+<span id="prefer-a-kind-of-window" />
+
+Search for a visible terminal on the focused screen:
 
 ```lua
-local term = awful.client.focus.history.get(s, 0, function(c) return c.class == "Alacritty" end)
-if term then term:emit_signal("request::activate", "focus_switch", { raise = true }) end
+local s = awful.screen.focused()
+local term = awful.client.focus.history.get(s, 0, function(c)
+    return c.class == "Alacritty" and awful.client.focus.filter(c)
+end)
+if term then
+    term:emit_signal("request::activate", "focus_switch", { raise = true })
+end
 ```
 
-In the handler above, that is "when the editor closes, go back to the last terminal".
+Replace the class with the value from `somewm-client client list`. The second argument is the number of matching history entries to skip. If history has no match, `get` can fall back to a visible client outside the history.
 
-## Keep utility windows out
+## Keep utility windows from taking fallback focus
 
-`awful.client.focus.filter` decides which clients fallback and directional focus may choose; the default rejects desktop, dock, splash and unfocusable windows. Extend it, returning the client to allow and nil to reject:
+<span id="keep-utility-windows-out" />
+
+Extend the default eligibility filter:
 
 ```lua
 local default_filter = awful.client.focus.filter
@@ -57,22 +74,30 @@ awful.client.focus.filter = function(c)
 end
 ```
 
-Every focused client still enters the history; the filter only limits who can be chosen.
+Return the client to allow it or `nil` to reject it. This affects focus helpers that consult the filter. It does not prevent direct focus assignments or stop focused utility clients entering history.
 
-## Pause tracking
+## Pause history tracking
 
-```lua
-awful.client.focus.history.disable_tracking()
--- walk through clients without rewriting the order
-awful.client.focus.history.enable_tracking()
-```
+<span id="pause-tracking" />
 
-Calls nest, one `enable` per `disable`; `is_enabled()` reports the state.
+`disable_tracking()` pauses history updates until a matching `enable_tracking()`. Calls nest, and `is_enabled()` reports whether tracking is active.
 
-## Print the history
+Focus events can be queued in 2.1. Tracking must remain disabled when those events are delivered. Disabling, changing focus and immediately enabling in one callback does not reliably exclude that change. See [Focus History](../concepts/focus-history.md) before using this for a window-preview mode.
+
+## Debug where focus went
+
+<span id="print-the-history" />
+
+Inspect history from a terminal:
 
 ```bash
-somewm-client eval 'local awful = require("awful"); local out = {}; for i, c in ipairs(awful.client.focus.history.list) do out[#out + 1] = i .. "  " .. (c.name or c.class or "?") end; return table.concat(out, "\n")'
+somewm-client eval 'local out = {} for i, c in ipairs(require("awful").client.focus.history.list) do out[#out + 1] = i .. "  " .. (c.name or c.class or "?") end return table.concat(out, "\n")'
 ```
 
-The top entry is who fallback picks first. If the order is right and the wrong client wins, the filter rejected the expected one, or it is not visible on the screen that emitted the signal.
+The list is most-recent-first. A fallback search also checks screen, visibility and eligibility, so the first entry is not necessarily the next focus target. A launcher or wibar can hold keyboard focus without appearing in client history.
+
+## See also
+
+- [Focus History](../concepts/focus-history.md)
+- [Replace a Default Handler](replace-default-handler.md)
+- [Signals Reference](../reference/signals.md)

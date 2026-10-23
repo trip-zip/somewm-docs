@@ -16,7 +16,7 @@ Each built-in widget has a *describer*: a function that converts its properties 
 
 SomeWM combines these descriptions and passes them to Clay, the library that calculates sizes and positions. The renderer then draws the text, backgrounds and images in those positions. The same process also places application windows. [How SomeWM draws](./how-somewm-draws.md) explains that part.
 
-For a textbox inside a margin and a background, Clay measures the text, adds the margins, and determines the background's size from the result and the space its parent gives it. Setting `textbox.text` requests an update. You do not have to measure the new text or repaint the background yourself.
+For a textbox inside a margin and a background, Clay sizes the text and containers together within the parent's constraints. Setting `textbox.text` requests an update.
 
 | Widget | What its description supplies |
 | --- | --- |

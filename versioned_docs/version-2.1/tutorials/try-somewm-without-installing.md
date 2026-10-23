@@ -1,60 +1,75 @@
 ---
 sidebar_position: 0
 title: Try SomeWM Without Logging Out
-description: Start a nested SomeWM in a window on your current desktop with somewm-client test, spawn a terminal into it, reload a config, and stop it cleanly.
+description: Run a nested SomeWM in a window from your current desktop. No reboot, no logout.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Try SomeWM Without Logging Out <SomewmOnly />
 
-You need the SomeWM binary [installed](../getting-started/installation.md) and a graphical session of any kind. You do not need to log into SomeWM.
+Run SomeWM in a window, open a terminal inside it, and stop the nested session. You need SomeWM 2.1 and `somewm-client` on your `PATH`, a graphical session, and a terminal emulator such as Alacritty.
 
-## Start
+The nested compositor has its own windows and configuration. It still runs as your user and shares your files and services, so it is not a sandbox.
+
+## Start a nested instance
+
+<span id="start" />
+
+From a terminal in a Wayland session, run:
 
 ```bash
 somewm-client test start
 ```
 
-A window opens with SomeWM running the bundled config inside it, titled `somewm:test:test`, and the terminal prints:
+On an X11 desktop, use `somewm-client test start --host x11` instead.
 
-```
-test 'test': pid 12345 on wayland-3 (host: wayland), config (default)
-  keybinds: shortcut inhibitor ACTIVE on outer compositor, Mod4 passes through
-  log:      /run/user/1000/somewm-test/test/log
-  socket:   /run/user/1000/somewm-test/test/ipc.sock
-  next:     somewm-client test run  --name test -- alacritty
-            somewm-client test eval --name test 'return mouse.coords()'
-            somewm-client test stop --name test
-```
+A window titled `somewm:test:test` opens. Without `--config`, it uses the normal config search path, including your existing user config. The steps below assume the shipped default. The command prints the instance's PID, socket and log paths, and shortcut handling. Read its `keybinds:` line. If the host cannot forward Super shortcuts, the nested session remaps Mod4 to Mod1 (Alt).
 
-## Use it
+## Open a terminal
+
+<span id="use-it" />
+
+Run this from your outer terminal, substituting a terminal you have installed:
 
 ```bash
-somewm-client test run -- alacritty      # any terminal you have
+somewm-client test run -- alacritty
 ```
 
-Click into the window and press Mod4 + Return: the bundled config spawns another terminal inside. If nothing happens, read the `keybinds:` line. A host that does not forward shortcuts (GNOME, X11) gets `Mod4` remapped to `Mod1`, so press Alt + Return.
+Click inside the nested window, then press **Mod4+Return**, or **Alt+Return** if remapped. The default config starts `foot`, so install it if you want that shortcut to open a second terminal.
 
-## Your own config
+Press **Mod4+Space** to change the layout. The default starts tiled. The next layout puts the master area on the right.
 
-```bash
-somewm-client test stop
-somewm-client test start --config ~/dev/somewmrc.lua
-somewm-client test reload                # after editing, without restarting
-```
+## Try a configuration change {#reload-after-editing}
 
-## Stop
+<span id="your-own-config" />
+
+Make a separate copy of your `rc.lua`, for example `~/somewm-test/rc.lua`. If you do not have one, copy the shipped default using the paths in [First Launch](../getting-started/first-launch.md).
+
+Stop the default instance and start one with your copy:
 
 ```bash
 somewm-client test stop
+somewm-client test start --config ~/somewm-test/rc.lua
 ```
 
-The state directory and log are removed.
+Add `--host x11` to the start command on X11. In the copied file, change `local terminal = "foot"` to an installed terminal, save, then run:
 
-## Next
+```bash
+somewm-client test reload
+```
 
-- [Testing with a nested compositor](../guides/testing-with-nested-compositor.md#iterative-dev): the edit and reload loop against your real `rc.lua`
-- [Test Mode](../concepts/test-mode.md): what nesting is and is not, and the keybind handoff
-- [Installation](../getting-started/installation.md) when you want it as your session
-- [Basics](basics.md): the desktop, tags and layouts
+Press the terminal shortcut inside the nested window. It should launch your chosen terminal. If loading fails, inspect the log with `somewm-client test logs`.
+
+## Stop the instance
+
+<span id="stop" />
+<span id="next" />
+
+```bash
+somewm-client test stop
+```
+
+The nested window closes and its state directory and log are removed. Copy the log first if you need it for troubleshooting.
+
+Continue with [Basics](basics.md), or use the [nested testing guide](../guides/testing-with-nested-compositor.md) for named instances, headless tests, and command-line inspection.

@@ -6,58 +6,57 @@ description: Start SomeWM from a display manager or a TTY, where it looks for rc
 
 # Launch
 
-`sudo make install` adds a Wayland session, so SomeWM appears in GDM, SDDM and the like. From a TTY:
+After installation, select SomeWM in your display manager. From a TTY, start it with a session bus:
 
 ```bash
 dbus-run-session somewm
-dbus-run-session somewm -s 'alacritty'   # with a startup command
 ```
 
-`dbus-run-session` gives notifications and media keys a session bus; inside a display manager's session, plain `somewm` is enough.
+To try it inside your current desktop, use [a nested session](../tutorials/try-somewm-without-installing.md).
 
 ## Configuration
 
-SomeWM loads the first of:
+SomeWM tries these locations in order, using the first configuration that loads successfully:
 
-1. `~/.config/somewm/rc.lua`
-2. `~/.config/awesome/rc.lua`, so an existing AwesomeWM config is used as is
-3. the bundled default
+1. `$XDG_CONFIG_HOME/somewm/rc.lua`, or `~/.config/somewm/rc.lua` when that variable is unset
+2. `~/.config/awesome/rc.lua`
+3. `<sysconfdir>/xdg/somewm/rc.lua`
+4. `./somewmrc.lua`
+5. `<datadir>/somewm/somewmrc.lua`
 
-To start from the default:
+For a default source installation, `sysconfdir` is `/usr/local/etc` and `datadir` is `/usr/local/share`. Distribution packages may use `/etc` and `/usr/share`. Nix installs the default and Lua libraries under the package's store path.
+
+From the source checkout, copy the bundled default to your configuration directory:
 
 ```bash
-mkdir -p ~/.config/somewm
-cp /etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua    # ~/.local/etc/xdg/somewm/rc.lua for a local install
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/somewm"
+cp somewmrc.lua "${XDG_CONFIG_HOME:-$HOME/.config}/somewm/rc.lua"
 ```
 
-On NixOS `nix-build` installs only binaries; take the default from [the repository](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua).
+With a package installation, copy its installed default instead. `somewm -c /path/to/rc.lua` selects a specific file. `somewm -c NONE` selects the bundled default. An AwesomeWM configuration may need [migration](migrating.md), especially for custom widgets.
 
 ## Keybindings
 
-Mod4 is the Super key.
+The bundled config uses **Mod4**, usually the Super key, and `foot` as its terminal. Install `foot` or change the config's `terminal` variable.
 
 | Keys | Action |
 | --- | --- |
-| Mod4 + Return | terminal |
-| Mod4 + Shift + c | close the focused client |
-| Mod4 + 1 to 5 | view a tag; the default config makes five |
-| Mod4 + Ctrl + r | reload the config |
-| Mod4 + Shift + q | quit |
+| Mod4 + Return | Open the terminal |
+| Mod4 + Shift + c | Close the focused client |
+| Mod4 + 1 to 5 | View a tag |
+| Mod4 + Ctrl + r | Reload the configuration |
+| Mod4 + Shift + q | Quit |
 
-Mod4 + s shows every binding; [Default Keybindings](../reference/default-keybindings.md) lists them.
+**Mod4 + s** shows bindings. See [Default Keybindings](../reference/default-keybindings.md) for the full list.
 
 ## If it does not start
 
-| Symptom | Cause and fix |
+| Symptom | Check |
 | --- | --- |
-| `FATAL: no working Lua config found!` | the Lua libraries are not installed; run `sudo make install`, the build directory alone does not work |
-| the config loads and it crashes | `somewm -d 2>&1 \| tee somewm.log`, or `WLR_DEBUG=1 somewm` for wlroots output; look for `error loading` or `error executing` |
-| a widget is missing | a widget with its own `draw` or `fit` method is left out of the tree; the log has `wibox.clay: <class> draws itself (...) and is left out of the tree`, `somewm-client clay tree` prints what was drawn, and [Upgrading from 2.0 to 2.1](./upgrading-from-2.0.md#what-you-will-see) has the cases |
+| `FATAL: no working Lua config found!` | Read the preceding errors. Check the configuration path and Lua library installation. From a source checkout, run `./build/somewm` in the repository root. |
+| Configuration errors or a crash | Run `somewm -d 2>&1 \| tee somewm.log`. `WLR_DEBUG=1 somewm` adds wlroots diagnostics. |
+| A widget is missing | Look for a warning ending `is left out of the tree`. Widgets with old drawing or sizing callbacks need [porting](upgrading-from-2.0.md#port-a-custom-widget). |
 
 ## Next
 
-To make your first visible addition to the desktop, [build a clock widget](../tutorials/widgets.md). The example includes a preview before adding it to the bar.
-
-- an AwesomeWM config: [Migrating from AwesomeWM](migrating.md)
-- a SomeWM 2.0 config: [Upgrading from 2.0 to 2.1](./upgrading-from-2.0.md)
-- from scratch: [Basics](../tutorials/basics.md)
+[Build a clock widget](../tutorials/widgets.md) to add something to the desktop. For an existing configuration, read [Migrating from AwesomeWM](migrating.md) or [Upgrading from 2.0](upgrading-from-2.0.md). [Basics](../tutorials/basics.md) starts a configuration from scratch.

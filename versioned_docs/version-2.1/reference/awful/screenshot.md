@@ -29,7 +29,7 @@ s:refresh()
 ## Constructor
 
 ```lua
-awful.screenshot(args) -> screenshot
+local s = awful.screenshot({ screen = screen.primary })
 ```
 
 | Argument | Type | Default | Description |
@@ -44,17 +44,17 @@ awful.screenshot(args) -> screenshot
 | `file_name` | string | auto | Override filename (within `directory`) |
 | `date_format` | string | `"%Y%m%d%H%M%S"` | Date format for auto-generated filenames |
 | `cursor` | string | `"crosshair"` | Cursor shape during interactive mode |
-| `frame_color` | color | `nil` | Selection rectangle color |
-| `frame_shape` | shape | `nil` | Selection rectangle shape |
-| `auto_save_delay` | integer | `nil` | Seconds to wait before capture (`nil` = no delay) |
+| `frame_color` | color | `"#ff0000"` | Selection rectangle color |
+| `frame_shape` | shape | `rectangle` | Selection rectangle shape |
+| `auto_save_delay` | integer | `nil` | Delay before automatic capture. Leave unset for manual capture, or use `0` to capture immediately |
 | `auto_save_tick_duration` | number | `1.0` | Seconds between `timer::tick` signals |
 | `minimum_size` | table/integer | `{width=3, height=3}` | Minimum selection size (rejects smaller) |
 | `accept_buttons` | table | `{awful.button({}, 1)}` | Mouse buttons to confirm selection |
-| `accept_keys` | table | `{awful.key({}, "Return")}` | Keys that confirm selection |
-| `reject_keys` | table | `{awful.key({}, "Escape")}` | Keys that cancel selection |
 | `reject_buttons` | table | `{awful.button({}, 3)}` | Mouse buttons to cancel selection |
+| `accept_keys` | table | `{awful.key({}, "Return")}` | Keys to accept selection |
+| `reject_keys` | table | `{awful.key({}, "Escape")}` | Keys to cancel selection |
 
-If none of `screen`, `client`, or `geometry` are set, captures the entire desktop via `root.content()`.
+Use one of `screen`, `client`, or `geometry`. With none set, capture uses `root.content()` for the entire desktop. A nil `client`, including an absent `client.focus`, therefore captures the desktop. Coordinates are logical pixels.
 
 ## Methods
 
@@ -63,14 +63,14 @@ If none of `screen`, `client`, or `geometry` are set, captures the entire deskto
 Captures the screenshot. In interactive mode, this also starts the snipping overlay.
 
 ```lua
-s:refresh() -> table
+local surfaces = s:refresh()
 ```
 
 Returns a table of `{method = surface}` pairs.
 
 ### save(file_path)
 
-Saves the captured screenshot to disk.
+Writes a PNG. The directory must already exist. In 2.1, `save()` does not check Cairo’s write status, so neither its return nor `file::saved` proves that the file exists.
 
 ```lua
 s:save()                    -- Use default path
@@ -84,10 +84,10 @@ In interactive mode, `save()` is called automatically after `accept()`.
 Confirms the interactive selection and saves the screenshot. Called automatically when the user releases the accept button.
 
 ```lua
-s:accept() -> boolean  -- true if saved, false if rejected
+local accepted = s:accept()
 ```
 
-Returns `false` if the selection is below `minimum_size` or empty.
+Returns `false` if the selection is below `minimum_size` or empty. Outside interactive mode it returns `true` without saving.
 
 ### reject(reason)
 
@@ -124,25 +124,25 @@ s:reject("mouse_button") -- With reason
 | `frame_color` | color | Selection rectangle color |
 | `frame_shape` | shape | Selection rectangle shape |
 | `minimum_size` | table/integer | Minimum selection dimensions |
-| `auto_save_delay` | integer | Delay before capture |
+| `auto_save_delay` | integer | Delay before capture. Setting nil raises an error in 2.1 |
+| `auto_save_tick_duration` | number | Seconds between timer ticks, set before starting the delay |
 | `accept_buttons` | table | Confirm buttons |
-| `accept_keys` | table | `{awful.key({}, "Return")}` | Keys that confirm selection |
-| `reject_keys` | table | `{awful.key({}, "Escape")}` | Keys that cancel selection |
 | `reject_buttons` | table | Cancel buttons |
+| `accept_keys`, `reject_keys` | table | Accept and cancel key bindings |
 
 ## Signals
 
 | Signal | Arguments | Description |
 |--------|-----------|-------------|
 | `snipping::start` | `self` | Interactive overlay is shown |
-| `snipping::success` | `self` | Selection accepted, screenshot saved |
-| `snipping::cancelled` | `self, reason` | Selection cancelled (reason: `"mouse_button"`, `"key"`, `"no_selection"`, `"too_small"`, `"reject_called"`) |
-| `file::saved` | `self, file_path, method` | File written to disk |
+| `snipping::success` | `self` | Selection accepted, immediately before `save()` |
+| `snipping::cancelled` | `self, reason` | Selection cancelled (reason: `"mouse_button"`, `"key"`, `"no_selection"`, `"too_small"`, or `"reject_called"`) |
+| `file::saved` | `self, file_path, method` | PNG write attempted. The Cairo status is not checked |
 | `timer::started` | `self` | Auto-save delay timer started |
 | `timer::tick` | `self, remaining` | Timer tick (seconds remaining) |
 | `timer::timeout` | `self` | Timer expired, capture starting |
 
-All properties also emit `property::<name>` signals.
+Writable properties emit `property::<name>` with the new value. Interactive selection also emits `property::selected_geometry`.
 
 ## Theme Variables
 
@@ -153,23 +153,9 @@ All properties also emit `property::<name>` signals.
 
 ## Interactive Mode Internals
 
-When `interactive = true` and `refresh()` is called:
+`refresh()` captures the image, shows an overlay, and starts mouse and keyboard grabbers. Releasing the accept button or pressing Return crops and saves the selection. Escape or the reject button cancels it.
 
-1. The appropriate capture method runs (default: `root.content()` for full desktop)
-2. A wibox covers the pointer’s screen with the captured image and selection widget
-3. A mousegrabber tracks mouse position and button state
-4. A keygrabber handles accept/reject keys (Return/Escape by default)
-5. On accept: the captured surface is cropped to the selection and saved
-
-Key internal fields available in signal handlers:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `self._private.frame` | wibox | The overlay wibox covering the pointer’s screen |
-| `self._private.imagebox` | wibox.widget.imagebox | The screenshot background widget |
-| `self._private.selection_widget` | wibox.widget.separator | The selection rectangle |
-
-The frame is a wibox like any other: its imagebox is one image element the renderer rasters once, and the selection widget is placed and sized by the frame's manual layout at the drag's coordinates, so there is nothing to tune for HiDPI. See the [Screenshots guide](../../guides/screenshots.md).
+The overlay displays a saved capture while Clay positions the selection rectangle. See [capture behaviour](../../concepts/screenshots.md) for logical coordinates and output scaling.
 
 ## Examples
 
@@ -186,7 +172,8 @@ s:save("/tmp/screen.png")
 
 ```lua
 -- Screenshot of the focused client
-local s = awful.screenshot({ client = client.focus })
+local c = assert(client.focus, "No focused client")
+local s = awful.screenshot({ client = c })
 s:refresh()
 s:save("/tmp/window.png")
 ```
@@ -216,6 +203,6 @@ local popup = awful.popup {
 
 ## See Also
 
-- [Screenshots Guide](../../guides/screenshots.md) - Practical setup and keybindings
-- [Screenshots Concepts](../../concepts/screenshots.md) - How the capture pipeline works
-- [Display Scaling](../../concepts/display-scaling.md) - HiDPI and logical vs physical pixels
+- [Screenshots Guide](/docs/guides/screenshots) - Practical setup and keybindings
+- [Screenshots Concepts](/docs/concepts/screenshots) - How the capture pipeline works
+- [Display Scaling](/docs/concepts/display-scaling) - HiDPI and logical vs physical pixels

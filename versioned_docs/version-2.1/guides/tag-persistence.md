@@ -1,79 +1,155 @@
 ---
 sidebar_position: 9
 title: Tag Persistence
-description: Replace the default save and restore handlers to persist more tag properties, key saved state by monitor identity instead of connector, give new outputs their own tags, or turn persistence off.
+description: Customize tag save and restore across monitor hotplug
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Tag Persistence <SomewmOnly />
 
-Two handlers do the work ([how it works](../concepts/tag-persistence.md)). `awful.permissions.tag_screen`, connected to `tag` `request::screen` when `awful.permissions` loads, saves each tag of a removed screen into `awful.permissions.saved_tags[connector]`. The `request::desktop_decoration` handler in `somewmrc.lua` restores from that table when a screen appears, and creates the default tags otherwise. Customising means replacing one or both.
+Keep the default save and restore handlers to recover tags when a monitor reconnects. Replace both when you need additional properties or a different monitor key.
 
-## Save more properties
+## How the Default Config Works
 
-Replace the save handler with one that records extra fields, here `column_count` and `volatile`:
+`awful.permissions.tag_screen` saves tag state on `request::screen` with context `"removed"`. It stores names, selection, layout, master width and count, gap and client membership in `awful.permissions.saved_tags`, keyed by connector name.
+
+The default `request::desktop_decoration` handler restores that state when the connector returns. This table is in memory only and is lost when the Lua state is rebuilt. Active-tag restoration during hot-reload is separate from this table. See [Tag Persistence](../concepts/tag-persistence.md#limits).
+
+## Save Additional Properties
+
+<span id="save-more-properties" />
+
+To also preserve `column_count` and `volatile`, replace the default save handler with this one:
 
 ```lua
-tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
+local awful = require("awful")
+local function output_key(s)
+    return s and s.output and s.output.name
+end
 
-tag.connect_signal("request::screen", function(t, reason)
-    if reason ~= "removed" then return end
-    local name = t.screen and t.screen.output and t.screen.output.name
-    if not name then return end
-    awful.permissions.saved_tags[name] = awful.permissions.saved_tags[name] or {}
-    table.insert(awful.permissions.saved_tags[name], {
-        name = t.name, selected = t.selected, layout = t.layout,
-        master_width_factor = t.master_width_factor, master_count = t.master_count,
-        column_count = t.column_count, gap = t.gap, volatile = t.volatile,
+tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
+tag.connect_signal("request::screen", function(t, context)
+    if context ~= "removed" then return end
+    local key = output_key(t.screen)
+    if not key then return end
+    local saved = awful.permissions.saved_tags
+    saved[key] = saved[key] or {}
+    table.insert(saved[key], {
+        name = t.name,
+        selected = t.selected,
+        layout = t.layout,
+        master_width_factor = t.master_width_factor,
+        master_count = t.master_count,
+        column_count = t.column_count,
+        gap = t.gap,
+        volatile = t.volatile,
         clients = t:clients(),
     })
 end)
 ```
 
-And restore them. Two passes keep a client that was on several tags on all of them:
+In the same file, define the matching restore function:
 
 ```lua
-screen.connect_signal("request::desktop_decoration", function(s)
-    local name = s.output and s.output.name
-    local restore = name and awful.permissions.saved_tags[name]
-    if restore then
-        awful.permissions.saved_tags[name] = nil
-        local client_tags = {}
-        for _, td in ipairs(restore) do
-            local t = awful.tag.add(td.name, {
-                screen = s, layout = td.layout, selected = td.selected,
-                master_width_factor = td.master_width_factor, master_count = td.master_count,
-                column_count = td.column_count, gap = td.gap, volatile = td.volatile,
-            })
-            for _, c in ipairs(td.clients) do
-                if c.valid then
-                    client_tags[c] = client_tags[c] or {}
-                    table.insert(client_tags[c], t)
-                end
+local function restore_tags(s)
+    local key = output_key(s)
+    local saved = key and awful.permissions.saved_tags[key]
+    if not saved then return false end
+    awful.permissions.saved_tags[key] = nil
+    local client_tags = {}
+    for _, data in ipairs(saved) do
+        local t = awful.tag.add(data.name, {
+            screen = s,
+            layout = data.layout,
+            selected = data.selected,
+            master_width_factor = data.master_width_factor,
+            master_count = data.master_count,
+            column_count = data.column_count,
+            gap = data.gap,
+            volatile = data.volatile,
+        })
+        for _, c in ipairs(data.clients) do
+            if c.valid then
+                client_tags[c] = client_tags[c] or {}
+                table.insert(client_tags[c], t)
             end
         end
-        for c, tags in pairs(client_tags) do
-            c:move_to_screen(s)
-            c:tags(tags)
-        end
-    else
-        awful.tag({ "dev", "web", "chat", "files", "media" }, s, awful.layout.layouts[1])
     end
-    -- wibar and the rest
-end)
+    for c, tags in pairs(client_tags) do
+        c:move_to_screen(s)
+        c:tags(tags)
+    end
+    return true
+end
 ```
 
-## Variations
+Replace only the tag-creation portion of the existing decoration handler with this body. Keep its wibar and other widget setup afterward:
 
-- **Different defaults per output.** In the `else` branch, test the connector: `name:match("^eDP")` gets the laptop's tags, anything else the external monitor's. Saved state still wins when it exists.
-- **Key by monitor identity.** On a dock whose connector names move, key both handlers by `o.make .. ":" .. o.model .. ":" .. o.serial`, falling back to `o.name` when a field is nil, as virtual and older outputs report.
-- **Turn it off.** Disconnect `awful.permissions.tag_screen` and create fresh tags unconditionally in `request::desktop_decoration`. Disconnected tags are dropped, as in AwesomeWM.
+```lua
+if not restore_tags(s) then
+    awful.tag({ "dev", "web", "chat", "files", "media" }, s, awful.layout.suit.tile)
+end
+```
 
-## When tags do not come back
+The two-pass restoration collects every saved tag for each client before assigning membership. Otherwise, a client on several tags would end up on only the last one. Closed clients are skipped. The example restores saved clients even if they moved elsewhere while the output was absent.
 
-- The connector name changed: `somewm-client eval "return screen.primary.output.name"` shows the current one, and the state is under the old one.
-- A client that exited while the monitor was away has `valid == false` and is skipped; one you moved by hand is not on the restored tag.
-- State is in memory. A compositor restart starts fresh.
+## Persist Different Tags Per Output
 
-[Tag Persistence reference](../reference/tag-persistence.md) has the signals and the saved-state table; [output reference](../reference/output.md) the identity fields.
+<span id="variations" />
+
+In that final block, replace the default `awful.tag` call with connector-specific names:
+
+```lua
+local name = output_key(s) or ""
+local names = name:match("^eDP")
+    and { "code", "web", "chat", "music" }
+    or { "dev", "web", "chat", "files", "media" }
+awful.tag(names, s, awful.layout.suit.tile)
+```
+
+This runs only when no saved state exists.
+
+## Match by Monitor Identity Instead of Connector
+
+Replace `output_key` in the paired example above with:
+
+```lua
+local function output_key(s)
+    local o = s and s.output
+    if not o then return nil end
+    if o.make and o.make ~= "" and o.model and o.model ~= ""
+        and o.serial and o.serial ~= "" then
+        return o.make .. ":" .. o.model .. ":" .. o.serial
+    end
+    return o.name
+end
+```
+
+Both save and restore must use the same key. Some monitors omit a serial or report identical identity fields. In that case, use connector names or your own explicit mapping.
+
+## Disable Tag Persistence
+
+Disconnect the save handler:
+
+```lua
+tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
+```
+
+Then replace the restoration branch in your existing decoration handler with ordinary tag creation. This disables unplug/replug restoration, not the C core's active-tag preservation during hot-reload.
+
+## Troubleshooting
+
+<span id="when-tags-do-not-come-back" />
+
+- **Tags do not return:** check that save and restore use the same connector or identity key and that both handlers are installed.
+- **Only one membership returns:** collect all restored tags before calling `c:tags`, as above.
+- **State disappears after reload:** entries for disconnected outputs are Lua state and are not preserved.
+- **A client returns to a rule-selected tag:** rules run during management, including after reload.
+
+## See Also
+
+- [Tag Persistence Concepts](../concepts/tag-persistence.md)
+- [Tag Persistence Reference](../reference/tag-persistence.md)
+- [Multi-Monitor Setup](multi-monitor.md)
+- [Output Reference](../reference/output.md)

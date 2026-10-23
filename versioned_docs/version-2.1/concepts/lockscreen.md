@@ -1,31 +1,67 @@
 ---
 sidebar_position: 6
 title: Session Locking
-description: Locking is a compositor feature on Wayland. SomeWM has a Lua lock API whose authentication and input isolation are enforced in C, and accepts ext-session-lock-v1 clients; the two are mutually exclusive.
+description: Built-in and external session locks, input routing and failure behaviour.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Session Locking <SomewmOnly />
 
-On Wayland a client cannot grab input or cover the screen on its own, so a locker cannot be an application trick as it is on X11. Locking is a compositor feature, and SomeWM offers it two ways.
+<span id="what-c-guarantees" />
+<span id="idle-and-dpms" />
 
-| Mechanism | Who draws the lock screen | Who enforces |
-| --- | --- | --- |
-| the Lua lock API: `awesome.lock()`, `awesome.unlock()`, `awesome.authenticate()` | Lua widgets in the compositor; the bundled `lockscreen` module draws a clock, password dots and a status line, themed from `beautiful` | C: input routing, PAM, the authenticated flag |
-| `ext-session-lock-v1` | an external client such as swaylock | C: the compositor routes input only to the lock surfaces once they cover every output |
+SomeWM supports a built-in Lua lockscreen and external lockers using `ext-session-lock-v1`. The compositor controls which surfaces are visible and receive input while locked.
 
-They are mutually exclusive. While an ext-session-lock client is active, `awesome.lock()` is refused, and the reverse.
+## What a session lock does {#the-problem-locking-on-wayland}
 
-## What C guarantees
+A fullscreen application window alone is not a session lock. The compositor must keep ordinary applications from receiving input or appearing over the lock surfaces.
 
-- `awesome.unlock()` checks a flag that only a successful `pam_authenticate_user()` sets. Lua cannot set it. It resets on every `awesome.lock()`.
-- While locked, only lock surfaces receive keyboard and pointer events, keybindings are skipped, and VT switching is blocked.
-- If the lock surface is destroyed while locked, for example by a Lua error, the compositor force-unlocks rather than leaving a session that accepts no input.
-- The password is copied to a heap buffer, handed to PAM, then zeroed through a volatile pointer.
+## Two Lock Mechanisms
 
-## Idle and DPMS
+### Lua Lock API
 
-`awesome.set_idle_timeout(name, seconds, callback)` registers a named timeout. Several coexist, for example `dim` at 2 minutes and `lock` at 5. Any input resets all of them and emits `idle::stop`; `awesome.dpms_off()` and `awesome.dpms_on()` sleep and wake the outputs, and `dpms::on` fires on wake. A client holding an idle inhibitor through the idle-inhibit protocol, as video players do, stops the timeouts. Timeouts live in memory and do not survive a compositor restart.
+The `lockscreen` module builds widgets for the clock, password entry and status. It registers an interactive lock surface and cover surfaces for other outputs. `awesome.lock()` activates them, and SomeWM renders them in the lock bands above ordinary desktop content.
 
-[Lock, Idle, and DPMS](../reference/lock.md) is the API; [Lockscreen module](../reference/lockscreen.md) is the bundled UI; [Lockscreen guide](../guides/lockscreen.md) has the recipes.
+`awesome.authenticate()` checks the password through PAM. A successful check sets the flag required by `awesome.unlock()`. Starting a new lock resets that flag.
+
+A lock surface must be registered before locking. The Lua UI and configuration remain trusted code inside the compositor process.
+
+### ext-session-lock-v1
+
+An external locker creates protocol lock surfaces and performs its own authentication. SomeWM routes input to those surfaces and hides ordinary desktop content. If the locker disconnects without unlocking, the session remains locked.
+
+Lua locking and an external session lock cannot be active together.
+
+## Lock Enforcement {#security-guarantees}
+
+| Mechanism | Behaviour |
+| --- | --- |
+| Authentication | `awesome.unlock()` requires successful authentication since the latest Lua lock |
+| Input routing | Ordinary client input and compositor shortcuts are blocked while locked |
+| VT switching | SomeWM's VT-switch shortcut handling is disabled while locked |
+| Password buffer | The C copy passed to PAM is cleared after use. This does not describe every copy held by Lua or PAM. |
+| Lock surface destruction | Destroying the registered Lua lock surface forces an unlock |
+| Lua reload | Reloading while Lua-locked forces an unlock before rebuilding the UI |
+
+The last two behaviours are recovery paths, not guarantees that the session stays locked after UI failure. They differ from an external lock client's disconnect behaviour.
+
+## Idle and DPMS Integration
+
+Named idle timers run callbacks after their configured inactivity period. The configuration chooses whether a callback locks, dims or turns off displays. Locking and DPMS are separate actions, so switching displays off does not by itself lock the session.
+
+User activity resets timers and wakes displays. `idle::start`, `idle::stop` and DPMS signals let configuration react. Timers can be inhibited by `awesome.idle_inhibit` or an active client idle inhibitor. Fullscreen alone is not an automatic inhibitor.
+
+## AwesomeWM vs SomeWM
+
+SomeWM's lock, idle and DPMS APIs run in the compositor. AwesomeWM configurations generally launch external X11 tools for these functions. See the [compatibility reference](../reference/deviations.md) when porting those commands.
+
+## Limitations
+
+The built-in UI can be replaced with custom lockscreen widgets, but the registered surfaces must cover the outputs correctly. The compositor does not treat arbitrary Lua configuration as untrusted code. Idle timers are held in memory and must be configured again after the compositor process restarts.
+
+## See Also
+
+- [Lock, Idle and DPMS Reference](../reference/lock.md)
+- [Default Lockscreen Module](../reference/lockscreen.md)
+- [Lockscreen Guide](../guides/lockscreen.md)

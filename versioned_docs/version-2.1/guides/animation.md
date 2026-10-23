@@ -1,16 +1,16 @@
 ---
 sidebar_position: 11
 title: Animation
-description: Ease layout changes, client appearance, focus borders, wibox visibility and widget properties from the theme, a rule or one field, and turn any of it off.
+description: Configure layout, client, popup and widget animations.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
-import AnimationDemo from '@site/src/components/AnimationDemo';
-import AnimationComparison from '@site/src/components/AnimationComparison.mdx';
+import SomewmOnly from '@site/src/components/SomewmOnly'
+import AnimationDemo from '@site/src/components/AnimationDemo'
+import AnimationComparison from '@site/src/components/AnimationComparison.mdx'
 
 # Animation <SomewmOnly />
 
-Set a duration to enable animation; 0 disables it. SomeWM uses Clay transitions for layout, visibility and widget-property changes.
+Set a duration in seconds to enable animation. Use 0 to disable it. SomeWM uses Clay transitions for layout, visibility and widget-property changes.
 
 Use `.animation` for a persistent policy and `widget:animate{...}` for a single change. See [Updating a policy](#updating-a-policy) to edit an existing policy.
 
@@ -38,7 +38,7 @@ A client reads its durations and entrances from `c.animation`, a table with one 
 | --- | --- | --- | --- |
 | `appear` | the client maps | `animation_appear_duration` | `animation_appear` |
 | `disappear` | the client closes | `animation_disappear_duration` | `animation_disappear` |
-| `tag` | the client enters or leaves the view with a tag switch | `animation_tag_duration` | `animation_tag`; default `grow` |
+| `tag` | the client enters or leaves the view with a tag switch | `animation_tag_duration` | `animation_tag`. Default `grow` |
 | `focus` | the border colour changes with focus | `animation_focus_duration` | |
 | `maximize` | maximized or fullscreen toggles | `animation_maximize_duration` | |
 | `floating` | floating toggles | `animation_floating_duration` | |
@@ -56,7 +56,7 @@ Choose an entrance effect:
 | Effect | Behaviour |
 | --- | --- |
 | `grow` | Increases the frame’s layout size from zero. |
-| `scale`, `scale_top`, `scale_bottom`, `scale_left`, `scale_right` | Scales the rendered image around its centre or an edge midpoint; layout size stays unchanged. See [Scale](#scale). |
+| `scale`, `scale_top`, `scale_bottom`, `scale_left`, `scale_right` | Scales the rendered image around its centre or an edge midpoint. Layout size stays unchanged. See [Scale](#scale). |
 | `slide_left`, `slide_right`, `slide_up`, `slide_down` | Slides from that screen edge. |
 | `fade` | Increases opacity from transparent. |
 
@@ -112,7 +112,7 @@ policy.focus = 0.3
 c.animation = policy
 ```
 
-Tag transitions default to `grow`; override the effect with `c.animation.tag` or `theme.animation_tag`. On exit, the frame, border and titlebars animate, but the application’s pixels disappear on the first frame.
+Tag transitions default to `grow`. Override the effect with `c.animation.tag` or `theme.animation_tag`. On exit, the frame, border and titlebars animate, but the application’s pixels disappear on the first frame.
 
 <AnimationDemo name="grow-shrink" title="Grow and shrink">
   Growing entrances and shrinking exits on clients, tag changes and a popup, shown with different durations.
@@ -137,6 +137,7 @@ A popup can scale and fade in together and scale out from its bottom edge:
 
 ```lua
 local popup = awful.popup {
+    visible = false,
     widget = wibox.widget.textbox("hello"),
     placement = awful.placement.centered,
     animation = { visible = { duration = 1, enter = { "scale", "fade" }, exit = "scale_bottom" } },
@@ -144,7 +145,7 @@ local popup = awful.popup {
 popup.visible = true
 ```
 
-The dump reports both `fade_alpha` and `scale`; they complete together. `grow` and `scale` conflict, so only the first effect is used.
+The dump reports both `fade_alpha` and `scale`. They complete together. `grow` and `scale` conflict, so only the first effect is used.
 
 ## Wiboxes and popups
 
@@ -152,9 +153,11 @@ A wibox or `awful.popup` animates its visibility:
 
 ```lua
 local popup = awful.popup {
+    visible = false,
     widget = require("wibox").widget.textbox("hello"),
     animation = { visible = { duration = 0.2, enter = "fade", exit = "fade" } },
 }
+popup.visible = true
 ```
 
 `enter` and `exit` take the same words and lists as a client. Setting `visible` then eases the box in or out. A wibox leaving the screen keeps its box and border for the duration, and its shadow goes on the first frame.
@@ -196,7 +199,7 @@ For a single change:
 box:animate { bg = "#ff0000", duration = 0.3 }
 ```
 
-It sets each named property and eases it once; the next plain assignment snaps again.
+It sets each named property and eases it once. The next plain assignment snaps again.
 
 <AnimationDemo name="widgets" title="Widget timing and pulse">
   Three widgets change size and colour at different speeds. The heart then grows and shrinks twice to make a gentle pulse.
@@ -220,7 +223,7 @@ Assigning an edited policy notifies `property::animation` observers and schedule
 
 ## Disabling animation
 
-Assign `.animation = false` to disable an object and its descendants, including a client’s titlebar widgets. This overrides descendant policies. Assign `nil` to remove the override; theme defaults and descendant policies then apply, unless an ancestor still disables them.
+Assign `.animation = false` to disable an object and its descendants, including a client’s titlebar widgets. This overrides descendant policies. Assign `nil` to remove the override. Theme defaults and descendant policies then apply, unless an ancestor still disables them.
 
 Disable all transitions with:
 
@@ -228,6 +231,6 @@ Disable all transitions with:
 require("somewm.animation").enabled = false
 ```
 
-Active transitions finish on the next rendered frame, including retained exits. Setting `enabled = true` enables future changes; it does not restart completed transitions or alter stored policies. A running `mousegrabber` also suppresses transitions during a drag.
+Active transitions finish on the next rendered frame, including retained exits. Setting `enabled = true` enables future changes. It does not restart completed transitions or alter stored policies. A running `mousegrabber` also suppresses transitions during a drag.
 
-[Clients in the Tree](../concepts/clients-in-the-tree.md) for the frame these transitions move.
+See [Clients in the Tree](../concepts/clients-in-the-tree.md) for the geometry these transitions change.

@@ -1,141 +1,163 @@
 ---
 sidebar_position: 4
 title: Testing with a Nested Compositor
-description: "Recipes for somewm-client test: iterate on rc.lua with reload, review someone else's config, bisect a regression, sandbox a widget, assert in headless CI, test a local build, and compare two configs side by side."
+description: Test configuration changes in a separate compositor instance.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Testing with a Nested Compositor <SomewmOnly />
 
-`somewm-client test start` runs a second somewm in a window on your session; a crash in it leaves your desktop alone ([Test Mode](../concepts/test-mode.md) has what it is and is not).
+Run `somewm-client test` to try configuration changes in a separate compositor. A crash there leaves your desktop running. The instance still shares your user account, files and D-Bus session, so it is not a security sandbox.
+
+## Quick start
 
 ```bash
-somewm-client test start --name work --config ~/dev/somewmrc.lua
+somewm-client test start --name work --config ~/dev/rc.lua
+somewm-client test run --name work -- alacritty
+somewm-client test logs --name work -f
 ```
 
-```
-test 'work': pid 12345 on wayland-3 (host: wayland), config /home/you/dev/somewmrc.lua
-  keybinds: shortcut inhibitor ACTIVE on outer compositor, Mod4 passes through
-  log:      /run/user/1000/somewm-test/work/log
-  socket:   /run/user/1000/somewm-test/work/ipc.sock
-  next:     somewm-client test run  --name work -- alacritty
-            somewm-client test eval --name work 'return mouse.coords()'
-            somewm-client test stop --name work
-```
+Replace the config path and terminal command. `--config` takes a file. The startup output reports the IPC socket, log path and whether shortcuts pass through from the host.
 
-Each instance has its own directory under `$XDG_RUNTIME_DIR/somewm-test/<name>/` with runtime dir, IPC socket, pid file, log and an `info` snapshot ([layout](../reference/somewm-client.md#test-state-dir)). `--config` takes the `rc.lua` file, not a directory.
+Each instance has a directory at `$XDG_RUNTIME_DIR/somewm-test/<name>/`. See the [state directory reference](../reference/somewm-client.md#test-state-dir) for its contents.
 
-| Flag | Values |
+## Choosing a host
+
+| `--host` | Environment |
 | --- | --- |
-| `--host` | `wayland` (default), `x11` for an X11 session including AwesomeWM on Xorg, `headless` for CI. It does not guess: on X11 without it, `Error: WAYLAND_DISPLAY not set`. |
-| `--name` | the instance; every other `test` verb takes it |
-| `--force` | stop and replace a running instance of that name in one command |
-| `--keybinds` | `remap` forces the Mod4 to Mod1 remap, `none` disables it |
+| `wayland` (default) | A Wayland desktop |
+| `x11` | An X11 desktop |
+| `headless` | No graphical host |
 
-## Verbs
+The command does not infer X11 from the environment. Select it explicitly:
 
 ```bash
-somewm-client test run    --name work -- alacritty            # spawn inside
-somewm-client test eval   --name work 'return mouse.coords()' # Lua in the nested VM
-somewm-client test reload --name work                         # re-run rc.lua
-somewm-client test logs   --name work -f                      # tail the log
-somewm-client test list                                       # running and (stale) instances
-somewm-client test stop   --name work                         # SIGTERM, 5 s, SIGKILL; removes the directory
+somewm-client test start --name work --host x11 --config ~/.config/awesome/rc.lua
 ```
 
-Arguments after `--` in `test run` are re-split on spaces on the receiving side, so a command with embedded spaces or `;` goes in a script: `test run --name work -- /path/to/script.sh`.
+## Drive commands into the nested instance
 
-## Recipes
-
-### Iterate on your config {#iterative-dev}
+<span id="verbs" />
 
 ```bash
-somewm-client test start --name dev --config ~/.config/somewm/rc.lua
-$EDITOR ~/.config/somewm/rc.lua
+somewm-client test eval --name work 'return #client.get()'
+somewm-client test reload --name work
+somewm-client test logs --name work -f
+```
+
+Use the same `--name` on each command. `test run` forwards a command through line-based IPC. For arguments containing embedded spaces or shell syntax, put the command in an executable script and run its absolute path.
+
+## Workflows
+
+<span id="recipes" />
+
+### Iterative widget development {#iterative-dev}
+
+<span id="sandbox" />
+
+```bash
+somewm-client test start --name dev --config ~/dev/rc.lua
+$EDITOR ~/dev/rc.lua
 somewm-client test reload --name dev
 ```
 
-`reload` re-runs the Lua only. A syntax error shows in the log and touches nothing else. For a change the C layer reads at startup, `stop` and `start`.
+Exercise the changed widget and read the log. Reload rebuilds Lua state and its widgets, bindings and handlers. Restart the test instance when changing the compositor binary or startup environment.
 
-### Review someone else's rc.lua {#pr-review}
+### Reviewing someone else's rc.lua {#pr-review}
 
-```bash
-cd ~/.config/somewm && git fetch origin pull/123/head:pr-123 && git checkout pr-123
-somewm-client test start --name pr --config ./rc.lua --force
-```
-
-It runs against your installed binary, so an error that depends on their build does not reproduce; read `test logs --name pr`.
-
-### Bisect a regression {#bisect}
+Keep the config and its modules in a separate directory, then run:
 
 ```bash
-cd ~/.config/somewm
-git bisect start && git bisect bad HEAD && git bisect good <known-good>
-somewm-client test start --name bisect --config ./rc.lua --force   # each step, then bad or good
+somewm-client test start --name review --config ~/dev/example-config/rc.lua
 ```
 
-Modules and themes the config requires must be in the same history.
+It runs against your installed SomeWM binary unless you select another one. Check API version, theme and external command dependencies before interpreting errors.
 
-### Sandbox an unproven widget {#sandbox}
+### Bisecting which change broke your config {#bisect}
+
+In a clean checkout of your config repository:
 
 ```bash
-cat > /tmp/scratch-rc.lua <<'EOF'
-dofile(os.getenv("HOME") .. "/.config/somewm/rc.lua")
-require("the-suspicious-widget")
-EOF
-somewm-client test start --name sandbox --config /tmp/scratch-rc.lua
+git bisect start
+git bisect bad HEAD
+git bisect good KNOWN_GOOD_COMMIT
+somewm-client test start --name bisect --config ./rc.lua --force
 ```
 
-If it locks up, `test stop --name sandbox` still works: the orchestrator runs in your real session. It shares your home, so a widget that writes `~/.config/somewm/state.json` writes the real file. Hostile code needs a VM or another user.
+Replace `KNOWN_GOOD_COMMIT` with a working revision. Test the behaviour, mark the revision with `git bisect good` or `git bisect bad`, then repeat `test start --force` at the next revision. Finish with `git bisect reset`.
 
-### Assert in CI {#headless-ci}
+Keep required widget modules and themes in the same checkout so each tested revision has its dependencies.
+
+### Headless integration testing for CI {#headless-ci}
 
 ```bash
-WLR_RENDERER=pixman somewm-client test start --name ci --host headless --config ./rc.lua
-somewm-client test eval --name ci 'return tostring(screen.count()) == "1"' | grep -q '^true$' || exit 1
-somewm-client test eval --name ci 'return type(require("awful").layout.layouts) == "table"' | grep -q '^true$' || exit 1
-somewm-client test stop --name ci
+WLR_RENDERER=pixman somewm-client test start \
+    --name ci --host headless --config ./rc.lua
+trap 'somewm-client test stop --name ci' EXIT
+
+somewm-client test eval --name ci 'assert(screen.count() == 1)' || exit 1
+somewm-client test eval --name ci \
+    'assert(type(require("awful").layout.layouts) == "table")' || exit 1
 ```
 
-`eval` prints the return value and exits non-zero on a Lua error. Headless has no input and no pixels, so assert on what the Lua VM owns.
+Assertions make `test eval` return a failure status. Returning `false` alone is a successful Lua evaluation. Library locals from `rc.lua` are not in scope, so require modules inside the expression.
 
-### Test a local build {#custom-binary}
+Headless tests can inspect Lua state and captured pixels. They do not reproduce physical output modes, real touchpad input or host shortcut interception.
+
+### Testing a custom build without installing {#custom-binary}
+
+From the SomeWM source checkout:
 
 ```bash
-cd ~/tools/some && make build-test
-SOMEWM_BINARY=~/tools/some/build-test/somewm somewm-client test start --name dev --force --config ~/.config/somewm/rc.lua
+make
+SOMEWM_BINARY="$PWD/build/somewm" ./build/somewm-client test start \
+    --name dev --force --config ~/.config/somewm/rc.lua
+./build/somewm-client test eval --name dev 'return #client.get()'
 ```
 
-If the branch changes the IPC protocol, use its own `build-test/somewm-client` too.
+Use the matching `somewm-client` binary when testing IPC changes. `make` creates the normal release build without installing it.
 
-### Compare two configs {#side-by-side}
+### Side-by-side comparison of two configs {#side-by-side}
 
 ```bash
-somewm-client test start --name a --config ~/dev/rc-before.lua --force
-somewm-client test start --name b --config ~/dev/rc-after.lua  --force
-somewm-client test run  --name a -- alacritty; somewm-client test run --name b -- alacritty
-somewm-client test eval --name a 'return #client.get()'; somewm-client test eval --name b 'return #client.get()'
+somewm-client test start --name a --config ~/dev/rc-before.lua
+somewm-client test start --name b --config ~/dev/rc-after.lua
+somewm-client test run --name a -- alacritty
+somewm-client test run --name b -- alacritty
+somewm-client test eval --name a 'return #client.get()'
+somewm-client test eval --name b 'return #client.get()'
+somewm-client test stop --name a
+somewm-client test stop --name b
 ```
 
-Both share your D-Bus session and home, so first-write-wins state is visible across them.
+The instances share files and session services. Account for that when comparing autostart or saved state.
 
-## Keybindings per host
+## Keybind behaviour on each host {#keybindings-per-host}
 
-| Host | Mod4 | Status line |
-| --- | --- | --- |
-| Sway, KDE, Hyprland, recent niri | forwarded through `zwp_keyboard_shortcuts_inhibit_manager_v1` while the window has focus | `shortcut inhibitor ACTIVE on outer compositor` |
-| GNOME, any host without the protocol | every `Mod4` binding remapped to `Mod1` for this instance | `! outer compositor did not advertise shortcut inhibitor` |
-| X11 | same remap | `host=x11, no shortcut-inhibitor negotiation needed` |
+On a Wayland host with shortcut-inhibitor support, SomeWM requests that shortcuts reach the nested window. The status block reports whether inhibition is active. Host-reserved shortcuts may still be intercepted.
 
-Even with the inhibitor, a host-reserved combo such as Super+L may still be taken by the host.
+Without inhibitor support, including an X11 host, test mode remaps `Mod4` bindings to `Mod1` for that instance. Use **Alt** where your config normally uses **Super**. Bindings without `Mod4` are unchanged.
 
-## When start fails
+Override this with `--keybinds=remap` to force remapping, or `--keybinds=none` to disable it. See [Test Mode](../concepts/test-mode.md) for the input path.
 
-A `test start` that fails before the socket comes up (broken `rc.lua`, missing module, backend error) leaves the state directory and names the log:
+## Replace a running instance
+
+`test start` refuses to replace a running instance with the same name unless you pass `--force`. That flag stops the old instance and creates a fresh state directory.
+
+## Stop and clean up
+
+<span id="when-start-fails" />
 
 ```bash
-cat "$XDG_RUNTIME_DIR/somewm-test/broken/log"
+somewm-client test stop --name work
+somewm-client test list
 ```
 
-The next `start` under that name clears it. `test list` marks an instance whose socket is gone `(stale)`; `test stop` by name cleans it.
+Stopping sends `SIGTERM`, waits up to five seconds for the IPC socket to disappear, then sends `SIGKILL` if needed. It removes the state directory, including the log. Copy logs you want to keep before stopping.
+
+If startup fails, the state directory remains for inspection. The error prints the log path. Starting again with the same name clears that directory. `test list` marks unreachable entries as stale.
+
+## Credit
+
+Test mode is inspired by [AWMTT](https://github.com/serialoverflow/awmtt), an AwesomeWM test wrapper around Xephyr.

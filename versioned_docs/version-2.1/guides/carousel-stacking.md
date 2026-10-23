@@ -1,39 +1,68 @@
 ---
 sidebar_position: 2.9
 title: "Carousel: Stacking"
-description: "consume_window pulls a neighbour's window into the focused column, expel_window splits one out, push_window does whichever fits, and move_column reorders the strip."
+description: Stack, split, and rearrange windows across carousel columns
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Carousel: Stacking <SomewmOnly />
 
-Each window starts in its own column. Four functions on `awful.layout.suit.carousel` group and reorder them. Direction `1` is right, `-1` left; in the vertical variant, down and up.
+Group windows into columns or move them between columns using the operations below. They act on the focused client and require carousel on the focused screen.
 
-| Function | Does |
-| --- | --- |
-| `consume_window(dir)` | pulls the first client of the neighbouring column into the focused column, below its clients; an emptied column is removed |
-| `expel_window()` | moves the focused client out of a stacked column into a new column after it, with the same width; a no-op when the client is alone |
-| `push_window(dir)` | a client alone in its column merges into the neighbour in that direction (no neighbour, no-op); a stacked client is expelled into a new column on that side |
-| `move_column(dir)` | swaps the focused column with its neighbour; focus and the viewport follow it |
+## Consume: Pull a Window In
+
+`consume_window(dir)` takes the first window from a neighbouring column and appends it below the focused column's existing windows. It removes the neighbour if that column becomes empty.
+
+Direction `-1` means left and `1` means right. For the vertical variant, they mean up and down, and windows within a row sit side by side.
+
+## Push: Consume or Expel
+
+`push_window(dir)` moves the focused window:
+
+- If it is alone, it joins the neighbouring column in that direction. With no neighbour, nothing happens.
+- If it shares a column, it moves into a new column in that direction. The new column inherits its width.
+
+## Expel: Split into a New Column
+
+`expel_window()` moves the focused window into a new column after the current one, retaining its width. A window already alone stays where it is.
+
+## Reorder Columns
+
+`move_column(dir)` swaps the focused column with its neighbour. Focus stays on the moved column, and the viewport follows it.
+
+## Register Keybindings
+
+This example uses arrow keys to avoid the default master-width bindings on `h` and `l`:
 
 ```lua
 local carousel = awful.layout.suit.carousel
-
-awful.key({ modkey, "Shift" }, "l", function() carousel.consume_window(1) end,
-    { description = "consume window from right", group = "carousel" })
-awful.key({ modkey, "Shift" }, "h", function() carousel.consume_window(-1) end,
-    { description = "consume window from left", group = "carousel" })
-awful.key({ modkey, "Shift" }, "e", function() carousel.expel_window() end,
-    { description = "expel window to new column", group = "carousel" })
-awful.key({ modkey, "Control" }, "l", function() carousel.push_window(1) end,
-    { description = "push window right", group = "carousel" })
-awful.key({ modkey, "Control" }, "h", function() carousel.push_window(-1) end,
-    { description = "push window left", group = "carousel" })
-awful.key({ modkey, "Mod1" }, "l", function() carousel.move_column(1) end,
-    { description = "move column right", group = "carousel" })
-awful.key({ modkey, "Mod1" }, "h", function() carousel.move_column(-1) end,
-    { description = "move column left", group = "carousel" })
+awful.keyboard.append_global_keybindings({
+    awful.key({ modkey, "Control" }, "Right", function()
+        carousel.consume_window(1)
+    end, { description = "consume from right", group = "carousel" }),
+    awful.key({ modkey, "Control" }, "Left", function()
+        carousel.consume_window(-1)
+    end, { description = "consume from left", group = "carousel" }),
+    awful.key({ modkey, "Control", "Shift" }, "Right", function()
+        carousel.push_window(1)
+    end, { description = "push right", group = "carousel" }),
+    awful.key({ modkey, "Control", "Shift" }, "Left", function()
+        carousel.push_window(-1)
+    end, { description = "push left", group = "carousel" }),
+    awful.key({ modkey, "Shift" }, "e", carousel.expel_window,
+        { description = "expel window", group = "carousel" }),
+    awful.key({ modkey, "Mod1" }, "Right", function()
+        carousel.move_column(1)
+    end, { description = "move column right", group = "carousel" }),
+    awful.key({ modkey, "Mod1" }, "Left", function()
+        carousel.move_column(-1)
+    end, { description = "move column left", group = "carousel" }),
+})
 ```
 
-[Carousel reference](../reference/awful/carousel.md), [Column widths](carousel-column-widths.md), [Scrollable Tiling](../concepts/scrollable-tiling.md).
+## See Also
+
+- [Carousel API](../reference/awful/carousel.md)
+- [Column Widths](carousel-column-widths.md)
+- [Scrollable Tiling](../concepts/scrollable-tiling.md)

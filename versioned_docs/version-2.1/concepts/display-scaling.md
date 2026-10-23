@@ -1,61 +1,51 @@
 ---
 sidebar_position: 7
 title: Display Scaling
-description: Each output has its own scale. The tree is solved in logical pixels, clients render at the scale they are told, and only rasters are redone when the scale changes.
+description: How output scale, logical geometry and theme DPI differ.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Display Scaling <SomewmOnly />
 
-Every output has a scale, and `screen.scale` is `output.scale` on the screen's backing [output](../reference/output.md). At scale 2, one logical pixel is a 2 by 2 block of physical pixels. SomeWM solves the whole tree in logical pixels; the output's scale is applied when rasters are drawn and when client buffers are placed. An output's logical size is its mode divided by its scale, and that is what `screen.geometry` reports.
+<span id="setting-the-scale" />
 
-Wayland clients are told the scale and render at it, so text is crisp at any scale. Fractional scales go through `wp_fractional_scale_v1`, which SomeWM advertises; a client without it renders at the next integer and is downscaled. XWayland clients only ever get an integer.
+Output scale maps logical coordinates to physical pixels. At scale 2, one logical pixel occupies a 2-by-2 block of physical pixels. A 3840-by-2160 output therefore has a logical size of 1920 by 1080, reported by `screen.geometry`.
 
-## Setting the scale
+SomeWM calculates layout in logical pixels. It applies the output scale when rasterising widget content and placing application buffers.
 
-```lua
--- Per screen, once the screen exists
-awful.screen.connect_for_each_screen(function(s)
-    s.scale = s.geometry.width > 3000 and 1.5 or 1.0
-end)
+## Changing scale
 
--- Per output, before its screen is created
-output.connect_signal("added", function(o)
-    if o.name:match("^eDP") then o.scale = 1.5 end
-end)
-```
+`screen.scale` controls the associated `output.scale`. Changing it changes the output's logical size, so layouts can move and resize. Text, images and paths are rasterised as needed at the new scale. Client surfaces receive scale information so they can redraw.
 
-A scale change emits `property::scale` and rasters every text, image and path on that output again at the new scale. The tree is solved in logical pixels, so no box moves and nothing in Lua repaints ([How SomeWM draws](./how-somewm-draws.md)). A client moving between outputs of different scale is told the new scale and re-renders.
+Use connector names or physical output modes for automatic scaling. `screen.geometry` is already scaled, so testing its width as if it were a physical resolution can produce the wrong result. See [fractional scaling configuration](../guides/fractional-scaling.md).
+
+## How applications respond
+
+Clients supporting `wp_fractional_scale_v1` can render for the fractional scale requested by the compositor. Other Wayland clients may render at an integer scale and be resampled. XWayland applications have their own scaling limits. Sharpness depends on the application's toolkit and rendering behaviour, not only SomeWM's scale setting.
 
 ## Scale and DPI
 
-| | Scale | DPI |
-| --- | --- | --- |
-| What it is | the output's logical-to-physical ratio | pixels per inch, from the mode and the panel's physical size |
-| Set by | `screen.scale`, `output.scale` | `beautiful.xresources.set_dpi`, or `awful.screen.set_auto_dpi_enabled(true)` to compute it from EDID |
-| Used by | clients, rasters, buffer placement | `beautiful.xresources.apply_dpi`, the `dpi()` in themes |
+<span id="mixed-dpi-setups" />
+<span id="blurry-apps" />
 
-Theme sizes go through `dpi()` so they follow the output:
+| Setting | Used for |
+| --- | --- |
+| `screen.scale`, `output.scale` | Logical-to-physical conversion for an output |
+| `screen.dpi`, `beautiful.xresources` | Values used by Lua theme and widget code |
+| `beautiful.xresources.apply_dpi(value, screen)` | Convert a theme size using a DPI value at the time of the call |
 
 ```lua
 local dpi = require("beautiful.xresources").apply_dpi
-theme.wibar_height = dpi(24)
-theme.useless_gap  = dpi(4)
+local height = dpi(24, screen.primary)
 ```
 
-A size written as a bare number stays that many logical pixels at every DPI.
+`height` is a number, not a live binding. A later DPI change does not recompute it. Without a screen argument, `apply_dpi` uses the configured global DPI. Bare numbers also remain fixed in logical pixels, while output scaling still changes how many physical pixels they occupy.
 
-## Mixed-DPI setups
+Automatic DPI can derive values from display metadata, but that is separate from choosing an output scale. Avoid applying both adjustments unintentionally.
 
-Screens can use different scales, such as 1.5 on a 4K panel and 1.0 on a 1080p panel. The compositor translates coordinates between them.
+## Mixed-scale outputs
 
-## Blurry apps
+Outputs can use different scales. Moving a client between them changes the scale information sent to that client. SomeWM also uses each output's scale for the widget content rendered there.
 
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| a Wayland app is blurry at 1.5 | it lacks `wp_fractional_scale_v1` (GTK3, some Electron) | use an integer scale, or `GDK_SCALE=2` and let the compositor downscale; `ELECTRON_OZONE_PLATFORM_HINT=wayland` for Electron |
-| an X11 app is blurry | XWayland gets an integer scale and its buffer is scaled | `GDK_SCALE=2` or `QT_SCALE_FACTOR=1.5` for that app, or a Wayland-native build |
-| widgets did not follow a scale change | a theme size written without `dpi()` | wrap it |
-
-[Fractional Scaling](../guides/fractional-scaling.md) has the per-app configuration.
+If an application is blurry, check whether it is running through XWayland and whether its toolkit supports fractional scaling. Changing a theme's `dpi()` calls does not fix an application's buffer resolution.

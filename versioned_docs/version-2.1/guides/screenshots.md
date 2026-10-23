@@ -1,115 +1,158 @@
 ---
 sidebar_position: 6
 title: Screenshots
-description: "Three tools: awful.screenshot for interactive snipping with no dependencies, somewm-client screenshot from a shell, and grim with slurp for pipelines and the clipboard. Bindings, a window capture, a delay, a module, annotation."
+description: Taking screenshots with SomeWM
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Screenshots
 
-| Tool | Use it for |
-| --- | --- |
-| `awful.screenshot` | interactive region selection from a keybinding, no external programs |
-| `somewm-client screenshot` <SomewmOnly /> | a capture from a shell or a script |
-| `grim` and `slurp` | pipelines, the clipboard, annotation |
+Use `somewm-client` for a direct capture, `awful.screenshot` for Lua integration, or `grim` with `slurp` for shell-based region selection.
 
-## Interactive snipping
+## Method 1: awful.screenshot (Interactive)
 
-```lua
-awful.key({ modkey }, "Print", function()
-    local s = awful.screenshot {
-        interactive = true,
-        directory = os.getenv("HOME") .. "/Pictures/screenshots/",   -- default $HOME; prefix= names the file
-    }
-    s:connect_signal("file::saved", function(_, path)
-        naughty.notification { title = "Screenshot saved", message = path, timeout = 3 }
-    end)
-    s:refresh()
-end, { description = "interactive screenshot", group = "screenshot" }),
-```
+<span id="interactive-snipping" />
 
-HiDPI needs nothing: the capture is one image element of the overlay and the selection a box Clay places ([how it works](../concepts/screenshots.md)). For menus that close on focus loss, `auto_save_delay = 3` counts down first, and `timer::tick` carries the remaining seconds for a notification.
-
-## From a shell
+Create the destination directory first:
 
 ```bash
-somewm-client screenshot save ~/Pictures/shot.png        # every output; --transparent keeps alpha
-somewm-client screenshot screen ~/Pictures/shot.png 1    # one screen
-somewm-client screenshot client ~/Pictures/shot.png      # the focused window
-somewm-client screenshot interactive ~/Pictures/shot.png
+mkdir -p ~/Pictures/screenshots
 ```
 
-The path is required and is resolved by the compositor, so make it absolute.
-
-```bash
-grim ~/Pictures/screenshot.png                     # full screen
-grim -g "$(slurp)" ~/Pictures/screenshot.png       # a region
-grim -o DP-1 ~/Pictures/screenshot.png             # one output; grim -l lists them
-grim - | wl-copy                                   # to the clipboard
-grim -g "$(slurp)" - | wl-copy
-grim -g "$(slurp)" - | swappy -f -                 # annotate before saving
-sleep 3 && grim ~/Pictures/screenshot.png
-```
-
-`grim`, `slurp`, `wl-clipboard` and `swappy` are in every distribution's repositories.
-
-## A module on keys
-
-`~/.config/somewm/screenshot.lua`:
+Add one binding to `rc.lua`:
 
 ```lua
 local awful = require("awful")
 local naughty = require("naughty")
-
-local screenshot = { directory = os.getenv("HOME") .. "/Pictures" }
-
-local function filename()
-    return screenshot.directory .. "/" .. os.date("screenshot_%Y%m%d_%H%M%S.png")
-end
-
-local function notify(message)
-    return function() naughty.notification { title = "Screenshot", message = message, timeout = 3 } end
-end
-
-function screenshot.full()
-    local f = filename()
-    awful.spawn.easy_async_with_shell("grim " .. f, notify("Saved: " .. f))
-end
-
-function screenshot.region()
-    awful.spawn.with_shell('grim -g "$(slurp)" ' .. filename())
-end
-
-function screenshot.full_clipboard()
-    awful.spawn.easy_async_with_shell("grim - | wl-copy", notify("Copied to clipboard"))
-end
-
-function screenshot.region_clipboard()
-    awful.spawn.with_shell('grim -g "$(slurp)" - | wl-copy')
-end
-
-function screenshot.window()
-    local c = client.focus
-    if not c then return end
-    local g = c:geometry()
-    awful.spawn.with_shell(string.format('grim -g "%d,%d %dx%d" %s', g.x, g.y, g.width, g.height, filename()))
-end
-
-return screenshot
-```
-
-```lua
-local screenshot = require("screenshot")
 awful.keyboard.append_global_keybindings({
-    awful.key({}, "Print", screenshot.full),
-    awful.key({ "Shift" }, "Print", screenshot.region),
-    awful.key({ "Control" }, "Print", screenshot.full_clipboard),
-    awful.key({ "Control", "Shift" }, "Print", screenshot.region_clipboard),
-    awful.key({ modkey }, "Print", screenshot.window),
+    awful.key({ modkey }, "Print", function()
+        local shot = awful.screenshot {
+            interactive = true,
+            directory = os.getenv("HOME") .. "/Pictures/screenshots/",
+            prefix = "shot",
+        }
+        shot:connect_signal("file::saved", function(_, path)
+            naughty.notification { title = "Screenshot saved", message = path }
+        end)
+        shot:refresh()
+    end, { description = "select screenshot region", group = "screenshot" }),
 })
 ```
 
-If `grim` fails to create a screenshot, `echo $WAYLAND_DISPLAY` should name a socket; if `wl-copy` does nothing, `echo test | wl-copy && wl-paste` tests the clipboard.
+The `file::saved` signal reports that saving was attempted, but 2.1 does not check Cairo's write status before emitting it. Check the destination file if nothing appears.
 
-[awful.screenshot reference](../reference/awful/screenshot.md) has every option and signal.
+Drag a rectangle to select the crop. Accepting the selection saves it. Escape cancels. Without `directory`, the default destination is `$HOME`.
+
+The capture and selection use logical pixels at every output scale. See [capture behaviour](../concepts/screenshots.md).
+
+### Delayed Capture
+
+To wait three seconds before selection:
+
+```lua
+local shot = awful.screenshot {
+    interactive = true,
+    auto_save_delay = 3,
+}
+```
+
+For a noninteractive capture, call `shot:save(path)` rather than only `refresh()`. `refresh()` captures the image without saving it.
+
+## Method 2: somewm-client <SomewmOnly />
+
+<span id="from-a-shell" />
+
+Every command requires a destination path:
+
+```bash
+somewm-client screenshot save ~/Pictures/screenshot.png
+somewm-client screenshot save ~/Pictures/transparent.png --transparent
+somewm-client screenshot screen ~/Pictures/screen.png 1
+somewm-client screenshot client ~/Pictures/window.png
+somewm-client screenshot interactive ~/Pictures/region.png
+```
+
+`interactive` waits until you accept or cancel the selection. Cancellation returns an error status.
+
+`save` captures the combined desktop. `screen` takes a screen index. `client` uses the focused window unless you append a client ID from `client list`.
+
+Use absolute paths. Relative paths are resolved in the compositor's working directory. A shell expands unquoted `~`, but an `awful.spawn` argument table does not:
+
+```lua
+awful.spawn({ "somewm-client", "screenshot", "save",
+    os.getenv("HOME") .. "/Pictures/screenshot.png" })
+```
+
+## Method 3: grim + slurp
+
+Install `grim`, `slurp` and `wl-clipboard` from your distribution. Run these inside the Wayland session:
+
+```bash
+# Whole desktop
+grim ~/Pictures/screenshot.png
+
+# A selected region
+grim -g "$(slurp)" ~/Pictures/region.png
+
+# One output, using its connector name
+grim -o DP-1 ~/Pictures/output.png
+
+# Copy a capture to the clipboard
+grim - | wl-copy
+
+# Select a region and copy it
+grim -g "$(slurp)" - | wl-copy
+```
+
+Use `wlr-randr` to find output names. `grim -l` sets PNG compression level, so it is not an output-listing command.
+
+### Keybinding Setup
+
+<span id="a-module-on-keys" />
+
+For a full capture, an argument table avoids shell quoting problems in paths:
+
+```lua
+awful.keyboard.append_global_keybindings({
+    awful.key({}, "Print", function()
+        local path = os.getenv("HOME") .. "/Pictures/"
+            .. os.date("screenshot_%Y%m%d_%H%M%S.png")
+        awful.spawn.easy_async({ "grim", path }, function(_, stderr, _, code)
+            naughty.notification {
+                title = code == 0 and "Screenshot saved" or "Screenshot failed",
+                message = code == 0 and path or stderr,
+            }
+        end)
+    end, { description = "capture desktop", group = "screenshot" }),
+})
+```
+
+For a pipeline, use `awful.spawn.with_shell`, such as `awful.spawn.with_shell('grim -g "$(slurp)" - | wl-copy')`. A geometry crop captures what is visible in that rectangle, including overlapping windows. Use `screenshot client` when you want the client's own content.
+
+## Screenshot with Delay
+
+```bash
+sleep 3 && grim ~/Pictures/screenshot.png
+```
+
+## Annotating Screenshots
+
+With `swappy` installed:
+
+```bash
+grim -g "$(slurp)" - | swappy -f -
+```
+
+## Troubleshooting
+
+- **Capture fails:** check the command's error output, destination directory and `WAYLAND_DISPLAY`.
+- **No output with the requested name:** check the current connector names with `wlr-randr`.
+- **Clipboard is empty:** test `printf 'test' | wl-copy`, then `wl-paste`.
+- **Wrong dimensions or missing areas:** see [Screenshots](../concepts/screenshots.md) for the built-in capture's logical-coordinate and output-layout limits.
+
+## See Also
+
+- [Screenshot API](../reference/awful/screenshot.md)
+- [CLI Control](cli-control.md)
+- [Keybindings](../tutorials/keybindings.md)

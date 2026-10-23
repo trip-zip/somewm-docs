@@ -1,50 +1,64 @@
 ---
 sidebar_position: 12
 title: Test Mode
-description: somewm-client test starts a real somewm in a window on your current session, with its own runtime dir and sockets. No VM, no sandbox; a fast loop for trusted rc.lua, with named instances and a headless host for CI.
+description: What nested and headless test instances isolate, and how their lifecycle works.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Test Mode <SomewmOnly />
 
-`somewm-client test start` runs a second somewm as a window on your current Wayland or X11 session. It is the same binary with four environment variables set:
+`somewm-client test` runs another SomeWM process in a window or with a headless backend. It gives that process separate runtime and IPC sockets so you can test a configuration without replacing your desktop session.
 
-| Variable | Value |
+## What it actually is
+
+The test instance runs as your user with access to the same files, libraries and services. It is not a VM or a filesystem sandbox. Configuration and spawned applications can still change your real files.
+
+The orchestrator sets:
+
+| Variable | Purpose |
 | --- | --- |
-| `XDG_RUNTIME_DIR` | a per-instance directory under `$XDG_RUNTIME_DIR/somewm-test/<name>/` |
-| `WLR_BACKENDS` | `wayland` or `x11`, so wlroots opens a window instead of taking a TTY; `headless` with `--host headless` |
-| `SOMEWM_SOCKET` | a per-instance IPC socket, so `somewm-client test eval --name <n>` reaches the right one |
-| `SOMEWM_TEST_NAME` | the instance name, read by the keybind remap shim |
+| `XDG_RUNTIME_DIR` | Per-instance runtime directory under `$XDG_RUNTIME_DIR/somewm-test/<name>/` |
+| `WLR_BACKENDS` | Wayland, X11 or headless backend |
+| `SOMEWM_SOCKET` | Per-instance IPC socket |
+| `SOMEWM_TEST_NAME` | Instance identity used by test-specific behaviour |
 
-Test mode shares your files, user account, Lua libraries and D-Bus session. Use it with trusted configs; use a VM or another user for isolation.
+## When to reach for it
 
-| You want to | Use |
+| Task | Tool |
 | --- | --- |
-| catch a syntax error or an X11 idiom without running anything | `somewm --check` ([Debugging](../guides/debugging.md#check-before-loading)) |
-| see `rc.lua` behave: widgets, signals, layouts, keybinds | test mode |
-| run `rc.lua` assertions in CI with no display | test mode with `--host headless` ([recipe](../guides/testing-with-nested-compositor.md#headless-ci)) |
-| isolation from your files | a VM |
+| Check syntax and known compatibility patterns without loading the config | `somewm --check path/to/rc.lua` |
+| Exercise widgets, layouts, signals and shortcuts | A nested test instance |
+| Run Lua assertions without a graphical display | `--host headless` |
+| Isolate configuration from personal files | A VM or separate user account |
+| Check physical display modes, input hardware or direct-session behaviour | A session on the relevant hardware |
+
+See [Testing with a nested compositor](../guides/testing-with-nested-compositor.md) for commands, or [Try SomeWM](../tutorials/try-somewm-without-installing.md) for a walkthrough.
+
+## How the nesting works
+
+The Wayland backend creates a surface on the host compositor. The X11 backend creates an X window and requires `--host x11`. Host input is forwarded into the nested compositor, which runs its own clients, layouts and widget rendering.
+
+The headless backend creates virtual outputs without host windows. It still runs the compositor and Lua environment, but does not exercise physical display hardware.
 
 ## Lifecycle
 
-`test start` validates the flags, creates the state directory, forks and execs somewm, then polls the instance's IPC socket every 50 ms and sends `ping` once it connects. If the socket answers within 30 seconds it prints a status block and exits. If the child exits first, the deadline passes, or a `FATAL:` line appears in the log, it reports the failure and leaves the state directory so the log survives.
+<span id="keybindings" />
 
-`test stop` sends `SIGTERM`, waits up to 5 seconds, then `SIGKILL`, and removes the state directory. `test list` connects to every state directory's socket; one whose process is gone is reported `(stale)`, and `test stop --name <stale>` cleans its directory up.
+`test start` creates the state directory and starts the compositor. It polls for the IPC socket every 50 milliseconds, for up to 30 seconds. A successful connection and ping confirm that IPC is available. They do not prove that the requested configuration loaded, since SomeWM may have fallen back to another config. Read the log for load errors. If the child exits, reports a fatal error or misses the deadline, the log is retained.
 
-Any number of instances run at once, each addressed by `--name`. Exit codes distinguish already running, not found and crashed on startup ([table](../reference/somewm-client.md#test-exit-codes)), and `test list --json` is for scripts.
+`test stop` sends SIGTERM and waits up to five seconds before using SIGKILL. It then removes the instance state directory, including the log.
 
-## Keybindings
+`test list` probes instance sockets and marks unreachable entries as stale. `test stop --name <name>` also removes stale state. Named instances have separate sockets, so several can run at once.
 
-The outer compositor sees your keys first, so by default `Mod4+Return` fires on the host. Two paths:
+## The keybind problem
 
-1. **Shortcut inhibitor.** When the host supports `zwp_keyboard_shortcuts_inhibit_manager_v1` (Sway, KDE, Hyprland, recent niri), it forwards shortcuts while the test window has focus, and the nested somewm gets `Mod4+Return` as written.
-2. **Modifier remap.** Otherwise (GNOME, X11), the instance rewrites every `Mod4` in your config to `Mod1` at load time. `Mod4+Return` becomes `Alt+Return` for the life of the instance; your real `rc.lua` is untouched.
+The host sees keyboard input first and may consume shortcuts such as **Mod4 + Return**.
 
-The status block says which path you got.
+If the host supports shortcut inhibition, the focused test window requests that shortcuts be forwarded. Otherwise, the test shim remaps Mod4 bindings to Mod1, so the nested shortcut becomes **Alt + Return**. The config file is not rewritten.
+
+The startup status reports which mode is active. Availability depends on the host and its policy, so use that status rather than assuming a particular desktop forwards shortcuts.
 
 ## Credit
 
-Test mode was inspired by [AWMTT](https://github.com/serialoverflow/awmtt) by serialoverflow, which runs AwesomeWM in Xephyr. See [attribution](https://github.com/trip-zip/somewm-docs/blob/main/ATTRIBUTION.md).
-
-[Testing with a nested compositor](../guides/testing-with-nested-compositor.md) is the how-to; [Try SomeWM without installing](../tutorials/try-somewm-without-installing.md) is the first run.
+The workflow was inspired by [AWMTT](https://github.com/serialoverflow/awmtt), which uses Xephyr for AwesomeWM. SomeWM uses wlroots backends and adds named instances, headless operation and IPC evaluation. See [attribution](https://github.com/trip-zip/somewm-docs/blob/main/ATTRIBUTION.md) and the [test command reference](../reference/somewm-client.md#test-exit-codes).

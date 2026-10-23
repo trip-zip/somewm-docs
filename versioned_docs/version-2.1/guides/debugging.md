@@ -1,80 +1,133 @@
 ---
 sidebar_position: 3
 title: Debugging Your Config
-description: Check a config before loading, read the error notification, the Lua mistakes that account for most failures, log levels, printing from Lua, and inspecting the running compositor with somewm-client.
+description: Find and fix errors in your Lua configuration
 ---
 
 # Debugging Your Config
 
-A config error tries alternate configs; if none loads, the log reports a fatal error. Only `somewm-client reload` checks syntax first. Read the trace from the bottom: the last line is where it failed. Other reloads discard the old Lua state.
+Check the config, reproduce the error in a nested compositor, then inspect its log and runtime state.
 
-## Before loading {#check-before-loading}
+## Check Before Loading
 
 ```bash
 somewm --check ~/.config/somewm/rc.lua
 ```
 
-Reports syntax errors, missing modules and X11-only patterns by severity ([Migrating](../getting-started/migrating.md#check-first) explains the report). A runtime crash reproduces safely in a nested instance:
+The checker parses Lua and scans for recognised compatibility problems and missing imports. It does not execute the config, so a successful check does not prove that widgets, callbacks or application commands work.
+
+The default exit threshold is `warning`. To return a nonzero status only for critical findings:
 
 ```bash
-somewm-client test start --config ~/.config/somewm/rc.lua
-somewm-client test logs -f
+somewm --check ~/.config/somewm/rc.lua --check-level=critical
 ```
 
-## The usual mistakes
+## Reproduce a Crash in Isolation
 
-| Error | Cause | Fix |
-| --- | --- | --- |
-| `'}' expected (to close '{' at line N) near '"4"'` | a missing comma in a table | `{ "1", "2", "web", "4" }` |
-| `module 'beautful' not found` | a misspelled `require` | |
-| `attempt to index a nil value (global 'beautiful')` | used before `require` | `local beautiful = require("beautiful")` first |
-| `module 'widgets/clock' not found` | a slash in a module path | `require("widgets.clock")`, relative to the config directory |
-| `attempt to call a nil value (field 'onse')` | a misspelled function | `awful.spawn.once` |
-| no error; a widget ignores the theme | its module was required before `beautiful.init()`, so every theme value it read is nil | move the `require` below `init`; `print(beautiful.bg_normal)` at the module's top confirms it |
+```bash
+somewm-client test start --name debug --config ~/.config/somewm/rc.lua
+somewm-client test logs --name debug -f
+```
 
-## Log levels
+Use [test mode](testing-with-nested-compositor.md) to keep a compositor crash separate from your desktop. The test config still runs as your user and can modify your files.
 
-| Flag | Shows |
+## Read Error Notifications
+
+The default config uses `naughty` to display errors. Start with the file, line number and traceback. If configuration fails before notifications are available, inspect the compositor's terminal output or test log.
+
+## Common Lua Mistakes
+
+<span id="the-usual-mistakes" />
+
+| Error or symptom | Check |
 | --- | --- |
-| none | errors |
-| `--verbose` | plus info |
-| `-d` | everything |
+| `'}' expected` near a table entry | Missing comma or closing brace |
+| `module '…' not found` | Module spelling, file location and Lua search path |
+| `attempt to index a nil value` | The object exists and the module was required |
+| `attempt to call a nil value` | Function spelling and availability in 2.1 |
+| Theme values unexpectedly `nil` | `beautiful.init()` ran before the widget module copied those values |
+
+For a file at `~/.config/somewm/widgets/clock.lua`, use:
+
+```lua
+local clock = require("widgets.clock")
+```
+
+Check `client.focus` before reading a focused window's properties because focus can be `nil`.
+
+## Use Log Levels
+
+<span id="log-levels" />
+
+Start a separate instance to change logging flags:
 
 ```bash
 somewm --verbose 2>&1 | tee somewm.log
-WLR_DEBUG=1 somewm -d 2>&1 | tee somewm.log     # wlroots too: outputs, input devices, rendering
+somewm -d 2>&1 | tee somewm-debug.log
 ```
 
-`awesome.log_level = "debug"` sets it from `rc.lua`. Under `somewm-session` the log is `journalctl --user -u somewm.service`.
-
-## From Lua
+No flag uses error logging. `--verbose` adds informational messages, and `-d` enables debug logging, including wlroots output. To change the level in a running instance:
 
 ```lua
-naughty.notification { title = "Debug", message = tostring(client.focus and client.focus.class) }
-print("Tag count: " .. #root.tags())        -- stdout, so the terminal or the journal
-gears.debug.dump(client.focus)              -- pretty-prints a table
+awesome.log_level = "debug"
+```
+
+Other accepted values are `"error"` and `"info"`.
+
+## Debug from Lua
+
+<span id="from-lua" />
+
+Print values to the compositor log:
+
+```lua
+local gears = require("gears")
+print("Tag count: " .. #root.tags())
+gears.debug.dump({ focused = client.focus and client.focus.name })
+```
+
+For a temporary error logger:
+
+```lua
 awesome.connect_signal("debug::error", function(err)
-    naughty.notification { preset = naughty.config.presets.critical, title = "Error", message = tostring(err) }
+    print("Lua error: " .. tostring(err))
 end)
 ```
 
-## The running compositor
+Remove temporary handlers when finished. Adding another notification handler alongside the default one can produce duplicate alerts.
+
+## Inspect at Runtime
+
+<span id="the-running-compositor" />
 
 ```bash
-somewm-client client info focused     # every property of the focused window
+somewm-client client info focused
 somewm-client tag list
 somewm-client screen focused
 somewm-client eval "return type(require('beautiful'))"
+somewm-client eval "return client.focus and client.focus.name or 'none'"
 ```
 
-`eval` runs one line in the global environment; require libraries that the config keeps local ([CLI Control](cli-control.md)).
+`eval` accepts one line. Library locals from `rc.lua` are not in scope, so require modules explicitly. See [CLI Control](cli-control.md) for reply formatting and scripting.
 
-## Narrowing it down
+## Safe Reload Workflow
 
-Edit, `somewm --check`, Mod4 + Ctrl + r, watch for the notification. If the error is not obvious, comment out half the config with `--[[ ... --]]`, reload, and halve again until the line is found.
+1. Edit the config and run `somewm --check`.
+2. Load it in the test instance with `somewm-client test reload --name debug`.
+3. Exercise the changed widget, rule or binding and read the log.
+4. Reload your desktop with **Mod4+Ctrl+r** after the test succeeds.
 
-- Your customisations gone after a reload: the config failed and the bundled one loaded. Start with `--verbose` to see why.
-- No notification at all: the config failed before `naughty` loaded. Run from a terminal.
-- `module not found` for your own file: it must be under the config directory and required with dots.
+Reload rebuilds the Lua state. Do not rely on it to keep the old configuration if the new one fails. The config loader may try fallback configurations, so a changed wallpaper or missing custom bindings can indicate fallback.
 
-[Troubleshooting](../troubleshooting.md) has specific known issues.
+### Bisecting Errors
+
+<span id="narrowing-it-down" />
+
+Temporarily disable half the relevant code, reload the test instance and repeat with the half containing the failure. Keep required imports and initialisation in place. If the config is version-controlled, use the [test-mode bisect workflow](testing-with-nested-compositor.md#bisect).
+
+## See Also
+
+- [Troubleshooting](../troubleshooting.md)
+- [Migrating from AwesomeWM](../getting-started/migrating.md)
+- [CLI Control](cli-control.md)
+- [FAQ](../faq.md)
