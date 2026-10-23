@@ -6,16 +6,19 @@ description: Wibar configuration options reference
 
 # Wibar Properties
 
-Reference for `awful.wibar` configuration options.
+`awful.wibar` attaches a wibox to a screen edge. By default it reserves workarea space, so tiled clients do not cover it. Constructor arguments override `beautiful.wibar_*` theme values.
 
 ## Basic Properties
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `position` | string | `"top"` | Bar position: `"top"`, `"bottom"`, `"left"`, `"right"` |
-| `screen` | screen | - | Screen to attach the wibar to |
-| `height` | number | - | Bar height (for top/bottom bars) |
-| `width` | number | - | Bar width (for left/right bars) |
+| `screen` | screen/number | `1` | Screen to attach the wibar to |
+| `height` | number | Theme or font-based | Thickness for top/bottom bars |
+| `width` | number | Theme or font-based | Thickness for left/right bars |
+| `stretch` | boolean | `true` unless length is specified | Fill the screen edge |
+| `align` | string | `"centered"` | Alignment when not stretched: `"left"`, `"right"`, `"top"`, `"bottom"`, or `"centered"` |
+| `restrict_workarea` | boolean | `true` | Reserve space for the bar |
 | `visible` | boolean | `true` | Whether the wibar is visible |
 
 ## Appearance
@@ -25,26 +28,26 @@ Reference for `awful.wibar` configuration options.
 | `bg` | color | `beautiful.wibar_bg` | Background color |
 | `fg` | color | `beautiful.wibar_fg` | Foreground/text color |
 | `bgimage` | surface/string/function | `beautiful.wibar_bgimage` | Background image, drawn over `bg`. See [Background Image](#background-image) |
-| `opacity` | number | `1` | Opacity (0.0 to 1.0) |
-| `shape` | function | - | Shape function (e.g., `gears.shape.rounded_rect`) |
+| `opacity` | number | `beautiful.wibar_opacity` or `1` | Opacity (0.0 to 1.0) |
+| `shape` | function | `beautiful.wibar_shape` | Shape function (e.g., `gears.shape.rounded_rect`) |
 
 ## Borders
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `border_width` | number | `0` | Border width in pixels |
-| `border_color` | color | - | Border color |
+| `border_width` | number | `beautiful.wibar_border_width` or `0` | Border width in pixels |
+| `border_color` | color | `beautiful.wibar_border_color` | Border color |
 
 ## Margins
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `margins` | table/number | `0` | Margins around the wibar |
+| `margins` | table/number | `beautiful.wibar_margins` or `0` | Margins around the wibar |
 
 Margins can be a number (all sides) or a table:
 
 ```lua
-margins = {
+local margins = {
     top = 8,
     bottom = 0,
     left = 8,
@@ -58,84 +61,45 @@ margins = {
 |----------|------|---------|-------------|
 | `widget` | widget | - | The widget tree to display |
 
+If no thickness is supplied by the arguments or theme, it is `ceil(1.5 * beautiful.get_font_height(font))`. A horizontal bar’s width or a vertical bar’s height sets its length and disables stretching by default. At construction, length can be a percentage string when `screen` is explicitly supplied.
+
 ## Examples
 
 ### Basic Wibar
 
 ```lua
-awful.wibar {
+local awful = require("awful")
+local wibox = require("wibox")
+
+local bar = awful.wibar {
+    screen = screen.primary,
     position = "top",
-    screen = s,
-    widget = {
-        layout = wibox.layout.align.horizontal,
-        { -- Left
-            layout = wibox.layout.fixed.horizontal,
-            s.mytaglist,
-        },
-        s.mytasklist, -- Center
-        { -- Right
-            layout = wibox.layout.fixed.horizontal,
-            wibox.widget.textclock(),
-        },
-    },
+    height = 32,
+    widget = wibox.widget.textclock(),
 }
 ```
 
 ### Floating Wibar
 
-```lua
-awful.wibar {
-    position = "top",
-    screen = s,
-    height = 32,
-    margins = {
-        top = 8,
-        left = 8,
-        right = 8,
-    },
-    shape = function(cr, w, h)
-        gears.shape.rounded_rect(cr, w, h, 8)
-    end,
-}
-```
+`margins = 8` leaves space around the bar. A shape changes its outline. See the [wibar tutorial](../../tutorials/wibar.md) for composition examples.
 
 ### Transparent Wibar
 
-```lua
-awful.wibar {
-    position = "top",
-    screen = s,
-    bg = beautiful.wibar_bg .. "cc", -- Add alpha
-    border_width = 1,
-    border_color = beautiful.border_color_normal,
-}
-```
+Use a colour with alpha, such as `bg = "#222222cc"`, or set `opacity` for the entire bar. Appending alpha to an arbitrary theme value is unsafe because colours can already include alpha or be Cairo patterns.
 
 ### Vertical Sidebar
 
+<span id="visibility" />
+
+Use `position = "left"` or `"right"` and specify `width` for thickness.
+
+## Controlling Visibility
+
 ```lua
-awful.wibar {
-    position = "left",
-    screen = s,
-    width = 48,
-    widget = {
-        layout = wibox.layout.align.vertical,
-        { -- Top
-            layout = wibox.layout.fixed.vertical,
-            s.mytaglist,
-        },
-        nil, -- Middle (empty)
-        { -- Bottom
-            layout = wibox.layout.fixed.vertical,
-            s.mylayoutbox,
-        },
-    },
-}
+bar.visible = not bar.visible
 ```
 
-## Visibility
-
-`visible` is a plain read/write boolean; writing it shows or hides the wibar and updates the screen's workarea.
+Changing `visible` updates the screen’s reserved workarea.
 
 ## Background Image
 
@@ -145,35 +109,13 @@ awful.wibar {
 |-------|----------|
 | File path (string) | Loaded with `gears.surface` and cached. A bad path is not an error: it logs a message and draws nothing |
 | Cairo surface | Used as-is |
-| Function | Called on every repaint as `f(context, cr, width, height)`; draw whatever you want with the cairo context |
+| Function | Called on every repaint as `f(context, cr, width, height)`. Draw whatever you want with the cairo context |
 
-A surface or path is painted **once, at its native pixel size, anchored at the top-left corner**. It is not tiled and not stretched; the rest of the bar shows the plain `bg` color. A small texture PNG therefore appears only in the corner. To tile it, use the function form and a repeating cairo pattern:
+A path or surface is painted once at native size, from the top-left corner. It is neither tiled nor stretched. The remaining area shows `bg`.
 
-```lua
-local cairo = require("lgi").cairo
-local gsurface = require("gears.surface")
+`beautiful.wibar_bgimage` is read at construction when no explicit `bgimage` is supplied. Later changes require assigning `bar.bgimage`. The property is write-only in 2.0.
 
-local texture = gsurface.load(os.getenv("HOME") .. "/.config/somewm/theme/bar-texture.png")
-
-s.mywibox = awful.wibar {
-    position = "top",
-    screen = s,
-    bgimage = function(_, cr, width, height)
-        local pattern = cairo.Pattern.create_for_surface(texture)
-        pattern.extend = cairo.Extend.REPEAT
-        cr:set_source(pattern)
-        cr:rectangle(0, 0, width, height)
-        cr:fill()
-    end,
-}
-```
-
-Notes:
-
-- `beautiful.wibar_bgimage` is read once, when the wibar is constructed, and only if you did not pass `bgimage` yourself. Setting the theme variable after the bar exists does nothing; assign `s.mywibox.bgimage = ...` instead.
-- `bgimage` is write-only: reading `s.mywibox.bgimage` does not return the value you set.
-
-For a step-by-step walkthrough (native, tiled, and stretched variants), see [Put a PNG texture on your wibar](/docs/guides/wibar-background-image).
+See [wibar background images](../../guides/wibar-background-image.md) for tiled and stretched images.
 
 ## Theme Variables
 
@@ -184,11 +126,14 @@ These `beautiful` variables provide defaults for wibars:
 | `wibar_bg` | Default background |
 | `wibar_fg` | Default foreground |
 | `wibar_bgimage` | Default background image (surface, path, or function) |
-| `wibar_height` | Default height |
+| `wibar_height`, `wibar_width` | Default dimensions |
+| `wibar_shape`, `wibar_opacity` | Shape and opacity |
+| `wibar_margins`, `wibar_align`, `wibar_stretch` | Placement |
+| `wibar_shadow` | Shadow override |
 | `wibar_border_color` | Default border color |
 | `wibar_border_width` | Default border width |
 
 ## See Also
 
-- [Wibar Tutorial](/docs/tutorials/wibar) - Learn how to build wibars
+- [Wibar Tutorial](/docs/2.0/tutorials/wibar) - Learn how to build wibars
 - [awful.wibar (AwesomeWM docs)](https://awesomewm.org/apidoc/classes/awful.wibar.html) - Complete API reference

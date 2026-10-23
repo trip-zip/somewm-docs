@@ -6,7 +6,7 @@ description: Theming and appearance configuration
 
 # beautiful
 
-The `beautiful` library handles theming in AwesomeWM/SomeWM. It loads theme files and provides access to theme variables throughout your configuration.
+`beautiful` loads a theme table and exposes its values as properties.
 
 **Upstream documentation:** [awesomewm.org/apidoc/theme_related_libraries/beautiful.html](https://awesomewm.org/apidoc/theme_related_libraries/beautiful.html)
 
@@ -15,8 +15,7 @@ The `beautiful` library handles theming in AwesomeWM/SomeWM. It loads theme file
 ```lua
 local beautiful = require("beautiful")
 
--- Load a theme
-beautiful.init(os.getenv("HOME") .. "/.config/somewm/theme.lua")
+beautiful.init({ bg_normal = "#222222", font = "sans 10" })
 
 -- Access theme variables
 local bg = beautiful.bg_normal
@@ -25,14 +24,11 @@ local font = beautiful.font
 
 ## Initialization Order
 
-`beautiful.init()` must run before anything reads theme variables. The rules:
+`beautiful.init(table_or_path)` replaces the theme table. A file must return a nonempty table. The function returns `true` on success or `nil` on failure.
 
-- Before `init()`, every theme variable is `nil`. Reading one produces no warning and no error.
-- `init()` replaces the internal theme table. Values copied into locals before `init()` (for example `local bg = beautiful.bg_normal` at the top of a widget module) stay `nil`; a later `init()` does not update them. This is the usual cause of a custom widget that ignores the theme.
-- Writes before `init()` are discarded: `beautiful.foo = x` lands in the table that `init()` throws away.
-- The default font is `sans 8`. `init()` only changes it if the theme table defines `font`, and widgets built before `init()` keep the font they were built with.
+Load the theme before constructing widgets or requiring modules that copy theme values. Existing locals and widgets do not automatically update when the table changes. Assignments made before `init()` are replaced by the loaded theme.
 
-Practical rule for `rc.lua`: call `beautiful.init()` early, and require modules that read theme variables (widgets, bars, `lockscreen.init()`) after it.
+The font starts as `sans 8`. A theme’s `font` changes that default for subsequent widget construction.
 
 ## Reference
 

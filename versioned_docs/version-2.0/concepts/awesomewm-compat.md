@@ -6,7 +6,7 @@ description: The compatibility policy for SomeWM 2.0 and how versioned reference
 
 # AwesomeWM compatibility
 
-SomeWM 2.0 develops independently of AwesomeWM. Shared Lua names do not guarantee identical behaviour; the reference for this version defines the supported API.
+SomeWM 2.0 develops independently of AwesomeWM. Use this version’s reference for supported arguments, defaults and signal timing.
 
 <span id="version-targets" />
 
@@ -14,9 +14,9 @@ SomeWM 2.0 develops independently of AwesomeWM. Shared Lua names do not guarante
 
 ## The 1.4 and 2.x lines
 
-The 1.4 line follows AwesomeWM master. Its purpose is to preserve the upstream configuration API on Wayland. Features developed for 2.x are not routinely backported; parity with AwesomeWM is the reason for an exception.
+The 1.4 line follows AwesomeWM master. Its purpose is to preserve the upstream configuration API on Wayland. Features developed for 2.x are not routinely backported unless needed for that compatibility.
 
-The 2.x line keeps the Lua configuration model while developing its libraries and compositor independently. Existing configurations are preserved where possible, but a shared name is not a promise of identical arguments, defaults or signal timing.
+The 2.x line retains Lua widgets, themes, rules and signals while allowing API changes. In 2.0, deprecated APIs are removed and some C-generated signals are queued. Custom widgets still support `fit`, `layout` and Cairo `draw` methods.
 
 <span id="documentation-promise" />
 

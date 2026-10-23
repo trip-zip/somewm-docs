@@ -4,28 +4,27 @@ title: Lockscreen
 description: Set up and customize session locking, idle timeouts, and DPMS
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Lockscreen <SomewmOnly />
 
-This guide covers setting up and customizing session locking, from basic usage to building a fully custom lockscreen.
+<span id="using-the-default-lockscreen" />
 
-## Using the Default Lockscreen
-
-The default configuration includes a lockscreen out of the box. In `rc.lua`:
+Initialise the bundled lockscreen after `beautiful.init()` in `rc.lua`. The default config already does this:
 
 ```lua
--- After beautiful.init()
 require("lockscreen").init()
 ```
 
-Press `Mod4 + Shift + Escape` to lock. Enter your password and press Return to unlock.
+With the default bindings, **Mod4+Shift+Escape** locks the session. Enter your password and press Return to unlock.
 
 ## Customizing Colors and Fonts
 
-### Via theme.lua
+<span id="via-themelua" />
+<span id="via-the-opts-table" />
+<span id="choosing-the-lock-screen" />
 
-Add `lockscreen_*` variables to your theme:
+Add settings to your theme before initialisation:
 
 ```lua
 theme.lockscreen_bg_color = "#000000"
@@ -37,154 +36,82 @@ theme.lockscreen_font = "monospace 14"
 theme.lockscreen_font_large = "monospace bold 64"
 ```
 
-### Via the opts table
-
-Pass options directly to override theme values:
+Alternatively, replace the `init()` call with an options table. Options take priority over theme values:
 
 ```lua
-require("lockscreen").init({
+require("lockscreen").init {
     bg_color = "#1e1e2e",
     fg_color = "#cdd6f4",
-    error_color = "#f38ba8",
     clock_format = "%I:%M %p",
     date_format = "%a, %b %d",
-})
-```
-
-## Choosing the Lock Screen
-
-By default, the interactive UI appears on `screen.primary`. Use `lock_screen` to change this:
-
-```lua
--- Always use screen 1
-require("lockscreen").init({
-    lock_screen = screen[1],
-})
-
--- Dynamic: use the currently focused screen
-require("lockscreen").init({
     lock_screen = function()
         return awful.screen.focused()
     end,
-})
+}
 ```
+
+Without `lock_screen`, the interactive UI uses `screen.primary`. The option also accepts a screen object.
 
 ## Setting Up Idle Timeouts
 
-Use `awesome.set_idle_timeout()` to trigger actions after periods of inactivity:
+Lock after five minutes of inactivity and turn off displays after six:
 
 ```lua
--- Dim displays after 2 minutes
-awesome.set_idle_timeout("dim", 120, function()
-    awesome.dpms_off()
-end)
-
--- Lock after 5 minutes
 awesome.set_idle_timeout("lock", 300, function()
     awesome.lock()
 end)
+awesome.set_idle_timeout("dpms", 360, function()
+    awesome.dpms_off()
+end)
 ```
 
-Multiple timeouts run independently. Each fires once per idle period and resets on activity.
+Each named timeout fires once per idle period and resets on activity. DPMS turns displays off, rather than dimming them, and does not itself lock the session. Displays wake on activity.
 
-To remove a timeout:
+Remove a timeout, or all configured timeouts:
 
 ```lua
-awesome.clear_idle_timeout("dim")
-
--- Or remove all
+awesome.clear_idle_timeout("dpms")
 awesome.clear_all_idle_timeouts()
 ```
 
 ## Inhibiting Idle
 
-Set `awesome.idle_inhibit = true` to suppress idle timeouts from Lua. This is OR-ed with Wayland protocol inhibitors (e.g., from media players), so both sources must be inactive for idle to resume.
+<span id="inhibit-while-fullscreen" />
+<span id="inhibit-for-specific-apps" />
+<span id="keybinding-toggle" />
 
-### Inhibit while fullscreen
-
-```lua
-client.connect_signal("property::fullscreen", function()
-    local dominated = false
-    for _, c in ipairs(client.get()) do
-        if c.fullscreen then dominated = true; break end
-    end
-    awesome.idle_inhibit = dominated
-end)
-```
-
-### Inhibit for specific apps
+`awesome.idle_inhibit` suppresses idle timeouts requested through Lua. Active Wayland protocol inhibitors can also suppress them. `awesome.idle_inhibited` reports their combined effect.
 
 ```lua
-client.connect_signal("property::fullscreen", function()
-    local dominated = false
-    for _, c in ipairs(client.get()) do
-        if c.fullscreen and (c.class == "firefox" or c.class == "okular") then
-            dominated = true
-            break
-        end
-    end
-    awesome.idle_inhibit = dominated
-end)
+awful.keyboard.append_global_keybindings({
+    awful.key({ modkey }, "F8", function()
+        awesome.idle_inhibit = not awesome.idle_inhibit
+    end, { description = "toggle idle inhibition", group = "screen" }),
+    awful.key({ modkey }, "F7", function()
+        awesome.dpms_off()
+    end, { description = "turn off displays", group = "screen" }),
+})
 ```
 
-### Keybinding toggle
-
-```lua
-awful.key({ modkey }, "F8", function()
-    awesome.idle_inhibit = not awesome.idle_inhibit
-end, {description = "toggle idle inhibition", group = "screen"})
-```
+A fullscreen window alone does not inhibit idle. If you add a fullscreen-based policy, update it on client removal and visibility changes too, so it cannot leave inhibition enabled after the window closes or becomes hidden.
 
 ### Wibar idle status widget
 
-Use `property::idle_inhibited` to build a reactive widget that shows whether idle is inhibited and by what:
+<span id="dpms-control" />
+<span id="keybinding" />
+<span id="combining-with-idle" />
 
 ```lua
+local wibox = require("wibox")
 local idle_widget = wibox.widget.textbox()
-
 local function update_idle_widget()
-    if not awesome.idle_inhibited then
-        idle_widget.text = " "
-        return
-    end
-
-    -- Show which app is inhibiting (if any)
-    local inhibitors = awesome.inhibitors
-    if #inhibitors > 0 and inhibitors[1].client then
-        idle_widget.text = "  " .. inhibitors[1].client.class
-    else
-        idle_widget.text = " "
-    end
+    idle_widget.text = awesome.idle_inhibited and "Idle paused" or ""
 end
-
 update_idle_widget()
 awesome.connect_signal("property::idle_inhibited", update_idle_widget)
 ```
 
-## DPMS Control
-
-### Keybinding
-
-```lua
-awful.key({ modkey }, "F7", function()
-    awesome.dpms_off()
-end, {description = "turn off displays", group = "screen"})
-```
-
-### Combining with Idle
-
-```lua
--- Turn off displays after 3 minutes, lock after 5
-awesome.set_idle_timeout("dpms", 180, function()
-    awesome.dpms_off()
-end)
-
-awesome.set_idle_timeout("lock", 300, function()
-    awesome.lock()
-end)
-```
-
-Displays automatically wake on user activity.
+Add `idle_widget` to the existing bar. Inspect `awesome.inhibitors` for protocol-inhibitor details.
 
 ## Locking from the Command Line
 
@@ -192,127 +119,48 @@ Displays automatically wake on user activity.
 somewm-client lock
 ```
 
-This triggers `awesome.lock()` via IPC. Requires a lock surface to be registered (i.e., `lockscreen.init()` must have been called).
+The bundled lockscreen must already be initialised. `awesome.lock()` returns false if no lock surface is registered, the session is already locked or an external lock client is active.
 
 ## Locking on Suspend
 
-Connect to the `logind::prepare_sleep` signal to lock before the system suspends:
-
 ```lua
 awesome.connect_signal("logind::prepare_sleep", function(going_to_sleep)
-    if going_to_sleep then
-        awesome.lock()
-    end
+    if going_to_sleep then awesome.lock() end
 end)
 ```
+
+Test suspend and resume on your machine after configuring this handler.
 
 ## Building a Custom Lockscreen
 
-For full control over the lock UI, use the raw Lock API instead of the default module:
+Use the bundled `lockscreen` module as the implementation example. A complete replacement must register a lock surface and covers, size them for outputs, handle hotplug, collect input with a keygrabber and stop that keygrabber on deactivation. Call `awesome.unlock()` only after `awesome.authenticate(password)` succeeds.
 
-```lua
-local wibox = require("wibox")
-local awful = require("awful")
-
--- Create lock surfaces
-local lock_wb = wibox({
-    visible = false,
-    ontop = true,
-    type = "desktop",
-})
-
--- Register as lock surface
-awesome.set_lock_surface(lock_wb)
-
--- Handle multi-monitor: add covers for other screens
-for s in screen do
-    if s ~= screen.primary then
-        local cover = wibox({
-            screen = s,
-            visible = false,
-            ontop = true,
-            bg = "#000000",
-            x = s.geometry.x,
-            y = s.geometry.y,
-            width = s.geometry.width,
-            height = s.geometry.height,
-        })
-        awesome.add_lock_cover(cover)
-    end
-end
-
--- React to lock activation
-awesome.connect_signal("lock::activate", function()
-    -- Show your surfaces, start keygrabber
-    lock_wb.visible = true
-    local password = ""
-
-    awful.keygrabber {
-        autostart = true,
-        keypressed_callback = function(_, _, key)
-            if key == "Return" then
-                awesome.authenticate(password)
-                awesome.unlock()
-                password = ""
-            elseif key == "BackSpace" then
-                password = password:sub(1, -2)
-            elseif #key == 1 then
-                password = password .. key
-            end
-        end,
-    }
-end)
-
-awesome.connect_signal("lock::deactivate", function()
-    lock_wb.visible = false
-end)
-```
+The [lock API](../reference/lock.md) documents those operations. Lua lock surfaces are part of the trusted configuration. Destroying them or rebuilding the Lua state during reload releases the built-in lock, so do not reload while relying on it to secure the session.
 
 ## Using an External Lock Client
 
-SomeWM supports the ext-session-lock-v1 Wayland protocol, which lets external lockers like swaylock manage the lock session:
+SomeWM also supports `ext-session-lock-v1` clients:
 
 ```bash
 swaylock -c 000000
 ```
 
-When an ext-session-lock client is active, `awesome.lock()` is blocked to prevent conflicts. Only one lock mechanism can be active at a time.
+Only one locking mechanism can be active at a time. An active external locker blocks `awesome.lock()`.
 
 ## Troubleshooting
 
-### Lock fails silently
+<span id="lock-fails-silently" />
+<span id="wrong-password-accepted-or-rejected" />
+<span id="displays-wont-wake" />
+<span id="idle-timeouts-not-firing" />
 
-`awesome.lock()` returns false if:
-- No lock surface is registered (call `lockscreen.init()` first)
-- Already locked
-- An ext-session-lock client is active
-
-Check with: `somewm-client eval "return awesome.locked, awesome.lock_mechanism"`
-
-### Wrong password accepted or rejected
-
-Authentication uses PAM with the `"login"` service. Verify your PAM configuration:
-
-```bash
-# Test PAM outside SomeWM
-su - $USER
-```
-
-### Displays won't wake
-
-Activity should auto-wake displays. If not:
-- Check DPMS state: `somewm-client eval "return awesome.dpms_state"`
-- Force wake: `somewm-client eval "awesome.dpms_on()"`
-
-### Idle timeouts not firing
-
-- Check Lua inhibition: `somewm-client eval "return awesome.idle_inhibit"`
-- Check overall state: `somewm-client eval "return awesome.idle_inhibited"`
-- Fullscreen clients with protocol inhibitors also suppress idle
-- List active timeouts: `somewm-client eval "return awesome.idle_timeouts"`
+- **Lock does not activate:** initialise the module once and inspect `awesome.locked` and `awesome.lock_mechanism`.
+- **Authentication fails:** the built-in lock uses PAM's `login` service. Inspect its authentication log and configuration.
+- **Displays remain off:** inspect `awesome.dpms_state` and try `somewm-client eval "awesome.dpms_on()"`.
+- **Idle timeouts do not fire:** inspect `awesome.idle_inhibit`, `awesome.idle_inhibited` and `awesome.idle_timeouts`.
 
 ## See Also
 
-- [Lock, Idle, and DPMS Reference](/docs/reference/lock) - Complete API
-- [Default Lockscreen Module](/docs/reference/lockscreen) - Module configuration
-- [Session Locking Concepts](/docs/concepts/lockscreen) - Architecture and design
+- [Lock, Idle and DPMS API](../reference/lock.md)
+- [Default Lockscreen Module](../reference/lockscreen.md)
+- [Session Locking](../concepts/lockscreen.md)

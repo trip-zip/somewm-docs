@@ -4,366 +4,187 @@ title: Multi-Monitor Setup
 description: Configure multiple screens and outputs
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Multi-Monitor Setup
 
-SomeWM handles multiple monitors automatically. Each monitor becomes a `screen` object with its own tags, wibar, and workspace.
+Use a screen decoration handler to create tags and a wibar for each active screen. Configure physical displays through their `output` objects.
 
 ## Screen Detection
 
-When SomeWM starts, it automatically detects all connected monitors. Each becomes a screen:
+<span id="accessing-screens" />
+
+Inspect the active screens and their connectors:
 
 ```lua
--- Print all connected screens
 for s in screen do
-    print("Screen " .. s.index .. ": " .. s.geometry.width .. "x" .. s.geometry.height)
+    print(s.index, s.output and s.output.name, s.geometry.width, s.geometry.height)
 end
 ```
 
-The recipes below use three idioms: `screen.primary`, `awful.screen.focused()`, and iterating every screen with `for s in screen do ... end`. The [Screen Reference](/docs/reference/screen) covers the full screen API.
+`screen[1]` is the first screen, `screen.primary` is the designated primary screen and `awful.screen.focused()` follows the screen focus policy. Screen indices can change when outputs are added or removed.
 
 ## Per-Screen Setup
 
-The default config uses `connect_for_each_screen` to set up tags and wibars for every screen. This runs once for each existing screen, and again whenever a new screen is added.
+<span id="why-connect_for_each_screen" />
+
+The default config already handles `request::desktop_decoration`. Edit that handler rather than registering a second one that creates duplicate tags and bars.
+
+For a minimal config without a decoration handler, this creates tags and a clock bar for every screen:
 
 ```lua
-awful.screen.connect_for_each_screen(function(s)
-    -- Create tags for this screen
-    awful.tag({"1", "2", "3", "4", "5"}, s, awful.layout.suit.tile)
+local awful = require("awful")
+local wibox = require("wibox")
 
-    -- Create a wibar for this screen
+awful.screen.connect_for_each_screen(function(s)
+    awful.tag({ "dev", "web", "chat", "files", "media" }, s, awful.layout.suit.tile)
     s.mywibar = awful.wibar {
-        position = "top",
         screen = s,
-        widget = {
-            layout = wibox.layout.align.horizontal,
-            { -- Left
-                layout = wibox.layout.fixed.horizontal,
-                s.mytaglist,
-            },
-            s.mytasklist, -- Middle
-            { -- Right
-                layout = wibox.layout.fixed.horizontal,
-                wibox.widget.textclock(),
-            },
-        },
+        position = "top",
+        widget = wibox.widget.textclock(),
     }
 end)
 ```
 
-### Why `connect_for_each_screen`?
-
-Using this pattern instead of a simple loop ensures:
-- Each screen gets set up once
-- New screens (hotplug) automatically get configured
-- The setup code stays DRY
+`connect_for_each_screen` calls the function for existing screens and for screens added later. It does not provide the default config's tag restoration logic. Keep that logic when editing the shipped config.
 
 ## Moving Windows Between Screens
 
-### Via Keybindings
+<span id="via-keybindings" />
+<span id="programmatically" />
 
-The default config includes keybindings to move windows between screens:
+Add bindings if your config does not already provide them:
 
 ```lua
 awful.keyboard.append_global_keybindings({
-    -- Move focused window to next screen
-    awful.key({ modkey, "Shift" }, "o", function()
-        if client.focus then
-            client.focus:move_to_screen()
-        end
-    end, { description = "move to next screen", group = "screen" }),
-
-    -- Focus next screen
     awful.key({ modkey }, "o", function()
+        if client.focus then client.focus:move_to_screen() end
+    end, { description = "move to next screen", group = "screen" }),
+    awful.key({ modkey, "Control" }, "j", function()
         awful.screen.focus_relative(1)
     end, { description = "focus next screen", group = "screen" }),
 })
 ```
 
-### Programmatically
+To move the focused client to a screen on its right:
 
 ```lua
--- Move client to a specific screen
-c:move_to_screen(screen[2])
-
--- Move client to next screen (cycles)
-c:move_to_screen()
-
--- Move client to screen by direction
-c:move_to_screen(c.screen:get_next_in_direction("right"))
+local c = client.focus
+if c then
+    local destination = c.screen:get_next_in_direction("right")
+    if destination then c:move_to_screen(destination) end
+end
 ```
+
+Passing a specific screen to `c:move_to_screen(s)` selects that screen. With no argument, the method cycles to the next screen.
+
+## Screen Geometry
+
+`screen.geometry` describes the full logical rectangle. `screen.workarea` excludes panel struts. Both have `x`, `y`, `width` and `height` fields. Screen padding is a separate layout constraint.
 
 ## Handling Hotplug
 
-When monitors are connected or disconnected, SomeWM emits signals:
+<span id="screen-added" />
+<span id="screen-removed" />
 
-### Screen Added
+`screen` emits `added` and `removed` as displays become available or unavailable. The default `awful.permissions.tag_screen` handler saves tag state when a screen disappears, and the default decoration handler restores it when the connector returns.
 
-When a new monitor is connected:
-
-```lua
-screen.connect_signal("added", function(s)
-    -- Set up the new screen
-    -- Note: connect_for_each_screen handles this automatically
-    print("New screen: " .. s.index)
-end)
-```
-
-### Screen Removed
-
-When a monitor is disconnected, windows need somewhere to go:
-
-```lua
-screen.connect_signal("removed", function(s)
-    -- Windows are automatically moved to another screen
-    print("Screen removed: " .. s.index)
-end)
-```
-
-By default, windows from a removed screen migrate to another available screen via `awful.permissions.tag_screen`, which saves tag state for later restoration. You can replace this with custom migration logic:
-
-```lua
--- Disconnect the default save handler
-tag.disconnect_signal("request::screen", awful.permissions.tag_screen)
-
--- Custom handling for screen removal
-tag.connect_signal("request::screen", function(t)
-    -- Called when a tag's screen is removed
-    -- Find a new home for this tag
-    for s in screen do
-        if s ~= t.screen then
-            t.screen = s
-            return
-        end
-    end
-end)
-```
+To change that behaviour, use the paired save and restore examples in [Tag Persistence](tag-persistence.md). Client rules run when clients are managed, so an initial `screen` rule alone does not control every later hotplug migration.
 
 ## Using the Output Object <SomewmOnly />
 
-Every screen has a backing `output` object representing the physical monitor connector. Unlike screens (which are destroyed when a monitor is disabled), output objects persist from plug to unplug.
-
-Access it via `s.output`:
-
-```lua
-local s = screen.primary
-print(s.output.name)   -- "HDMI-A-1"
-print(s.output.make)   -- "Dell" or nil
-print(s.output.model)  -- "U2723QE" or nil
-```
+An output survives being disabled and enabled. Unplugging the display invalidates it, so keep persistent preferences by connector name or hardware identity rather than by the object itself.
 
 ### Configure by Hardware
 
-Use output properties to identify monitors reliably, instead of guessing by geometry or index:
+<span id="persistent-per-output-config" />
+
+The `added` handler also receives outputs already present when it is connected:
 
 ```lua
 output.connect_signal("added", function(o)
     if o.name:match("^eDP") then
-        o.scale = 1.5  -- Laptop panel
+        o.scale = 1.5
     elseif o.make == "Dell" and o.model == "U2723QE" then
-        o.scale = 1.25  -- Known external monitor
-    end
-end)
-```
-
-### Persistent Per-Output Config
-
-The output object persists across enable/disable, making it a stable key for configuration. This pattern survives monitor sleep, docking, and undocking:
-
-```lua
-local output_config = {}
-
-output.connect_signal("added", function(o)
-    if o.name:match("^eDP") then
-        output_config[o] = { tags = {"1","2","3","4","5"}, scale = 1.5 }
-    else
-        output_config[o] = { tags = {"web","code","docs"}, scale = 1.0 }
-    end
-    o.scale = output_config[o].scale
-end)
-
-screen.connect_signal("request::desktop_decoration", function(s)
-    local config = output_config[s.output]
-    if config then
-        awful.tag(config.tags, s, awful.layout.suit.tile)
+        o.scale = 1.25
     end
 end)
 ```
 
 ### Set Resolution and Transform
 
+Look up the connector and check that it exists before assigning settings:
+
 ```lua
--- Set resolution
-output.get_by_name("DP-1").mode = { width = 2560, height = 1440 }
+local o = output.get_by_name("DP-1")
+if o then
+    o.mode = { width = 2560, height = 1440 }
+end
 
--- Rotate a portrait monitor
-output.get_by_name("DP-2").transform = "90"
-
--- Position monitors side by side
-output.get_by_name("DP-2").position = { x = 2560, y = 0 }
+local portrait = output.get_by_name("DP-2")
+if portrait then
+    portrait.transform = "90"
+    portrait.position = { x = 2560, y = 0 }
+end
 ```
 
-For more details, see the [output reference](/docs/reference/output).
+Choose a mode supported by the output. Positions are logical coordinates, so account for the neighbouring output's scale. See the [output reference](../reference/output.md) for available modes and configuration properties.
 
 ## Different Configurations Per Screen
 
-### Different Tags Per Screen
+<span id="different-tags-per-screen" />
+<span id="different-layouts-per-screen" />
+<span id="wibar-on-primary-only" />
+<span id="common-multi-monitor-patterns" />
+<span id="laptop--external-monitor" />
+<span id="spawn-apps-on-specific-screen" />
+<span id="focus-follows-monitor" />
+
+Inside the existing decoration handler, choose default tag names by connector:
 
 ```lua
-awful.screen.connect_for_each_screen(function(s)
-    if s == screen.primary then
-        -- Primary screen: work-focused tags
-        awful.tag({"code", "web", "mail", "chat", "music"}, s, awful.layout.suit.tile)
-    else
-        -- Secondary screen: reference/monitoring
-        awful.tag({"docs", "term", "logs"}, s, awful.layout.suit.tile)
-    end
-end)
+local name = s.output and s.output.name or ""
+local names = name:match("^eDP")
+    and { "code", "web", "chat" }
+    or { "docs", "term", "logs" }
+awful.tag(names, s, awful.layout.suit.tile)
 ```
 
-### Different Layouts Per Screen
+Use this in the branch that creates new tags, after checking for saved tags. To show a bar only on the primary screen, wrap the bar creation in `if s == screen.primary then ... end`.
+
+## Different Wallpaper Per Screen
+
+Edit the existing `request::wallpaper` handler. Use `awful.wallpaper` in 2.0:
 
 ```lua
-awful.screen.connect_for_each_screen(function(s)
-    local layouts = s == screen.primary
-        and { awful.layout.suit.tile, awful.layout.suit.max }
-        or { awful.layout.suit.fair, awful.layout.suit.floating }
-
-    awful.tag({"1", "2", "3"}, s, layouts)
-end)
-```
-
-### Wibar on Primary Only
-
-```lua
-awful.screen.connect_for_each_screen(function(s)
-    awful.tag({"1", "2", "3"}, s, awful.layout.suit.tile)
-
-    if s == screen.primary then
-        s.mywibar = awful.wibar {
-            position = "top",
-            screen = s,
-            -- ...
-        }
-    end
-end)
-```
-
-### Different Wallpaper Per Screen
-
-Replace the default `request::wallpaper` handler with one that picks by screen index:
-
-```lua
-local wallpapers = {
-    "/home/user/wallpapers/primary.jpg",
-    "/home/user/wallpapers/secondary.jpg",
-}
-
+local gears = require("gears")
 screen.connect_signal("request::wallpaper", function(s)
+    local name = s.output and s.output.name or ""
+    local file = name:match("^eDP") and "laptop.png" or "desktop.png"
     awful.wallpaper {
         screen = s,
         widget = {
-            {
-                image     = wallpapers[s.index] or wallpapers[1],
-                upscale   = true,
-                downscale = true,
-                widget    = wibox.widget.imagebox,
-            },
-            valign = "center",
-            halign = "center",
-            tiled  = false,
-            widget = wibox.container.tile,
-        }
+            image = gears.filesystem.get_configuration_dir() .. file,
+            resize = true,
+            widget = wibox.widget.imagebox,
+        },
     }
 end)
 ```
 
-## Common Multi-Monitor Patterns
-
-### Laptop + External Monitor
-
-```lua
-awful.screen.connect_for_each_screen(function(s)
-    -- Assume laptop is smaller, use it for monitoring
-    local is_laptop = s.geometry.width < 1920
-
-    if is_laptop then
-        awful.tag({"term", "logs"}, s, awful.layout.suit.tile.bottom)
-    else
-        awful.tag({"1", "2", "3", "4", "5"}, s, awful.layout.suit.tile)
-    end
-end)
-```
-
-### Spawn Apps on Specific Screen
-
-```lua
--- Rule to start Firefox on screen 2
-ruled.client.append_rule {
-    rule = { class = "firefox" },
-    properties = {
-        screen = 2,
-        tag = "web",
-    },
-}
-```
-
-### Focus Follows Monitor
-
-When switching to a tag, also focus its screen:
-
-```lua
-tag.connect_signal("property::selected", function(t)
-    if t.selected then
-        t.screen:emit_signal("request::activate", "tag_switch", { raise = false })
-    end
-end)
-```
+Place the images beside `rc.lua`. Each handler uses the screen's current connector, so it also works when outputs reconnect.
 
 ## Troubleshooting
 
-### Screens Not Detected
+<span id="screens-not-detected" />
+<span id="wrong-screen-order" />
+<span id="windows-on-wrong-screen-after-hotplug" />
 
-Check that your displays are connected and recognized by the system:
-
-```bash
-# Check Wayland outputs
-somewm-client screen list
-
-# Or use wlr-randr
-wlr-randr
-```
-
-### Wrong Screen Order
-
-Screen indices are assigned in the order they're detected. Use geometry or names to identify specific screens:
-
-```lua
--- Find screen by position (leftmost)
-local left_screen = nil
-for s in screen do
-    if not left_screen or s.geometry.x < left_screen.geometry.x then
-        left_screen = s
-    end
-end
-```
-
-### Windows on Wrong Screen After Hotplug
-
-Use rules to ensure specific apps always start on the right screen:
-
-```lua
-ruled.client.append_rule {
-    rule = { class = "Slack" },
-    properties = { screen = screen.primary },
-}
-```
+Run `somewm-client screen list` to check active screens, or `wlr-randr` to inspect output configuration. Identify monitors by connector or hardware properties when screen order changes. If windows return to the wrong tags after reconnecting, check the save/restore logic described in [Tag Persistence](tag-persistence.md).
 
 ## See Also
 
-- **[Tag Persistence](/docs/guides/tag-persistence)** - Save and restore tags across hotplug
-- **[output Reference](/docs/reference/output)** - Output object API (hardware identification, display configuration)
-- **[The Object Model](/docs/concepts/object-model)** - Understanding screens, outputs, and clients
-- **[Fractional Scaling](/docs/guides/fractional-scaling)** - HiDPI configuration per screen
-- **[AwesomeWM Screen Docs](https://awesomewm.org/doc/api/classes/screen.html)** - Full screen API
+- [Output Reference](../reference/output.md)
+- [Object Model](../concepts/object-model.md)
+- [Fractional Scaling](fractional-scaling.md)
+- [AwesomeWM Screen API](https://awesomewm.org/doc/api/classes/screen.html)

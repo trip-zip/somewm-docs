@@ -6,119 +6,98 @@ description: Disconnect and replace the default behavior on request::* signals
 
 # Replace a default handler
 
-Most `request::*` signals come with a sensible default handler from `awful.permissions`. When the default doesn't fit (you want different border colors, custom tag selection, alternate placement), the pattern is:
+<span id="the-general-shape" />
 
-1. `disconnect_signal` to remove the default
-2. `connect_signal` your replacement
+Disconnect the existing function before connecting its replacement. Passing a new function with the same body does not disconnect the old one. Keep the function reference if you will need to remove it later.
 
-This guide walks through the pattern with three concrete examples. For background on what `request::*` signals are, see [Signals (concepts)](../concepts/signals.md).
-
-## The general shape
-
-```lua
--- What's currently connected:
-client.connect_signal("request::tag", awful.permissions.tag)
-
--- Replace it:
-client.disconnect_signal("request::tag", awful.permissions.tag)
-client.connect_signal("request::tag", my_tag_handler)
-```
-
-The function reference passed to `disconnect_signal` must be the same value that was connected. `awful.permissions` exposes its handlers as named module functions exactly so user code can disconnect them.
+The examples below belong in `rc.lua` after `local awful = require("awful")`.
 
 ## Example 1: custom border colors
 
-The default `request::border` handler sets borders to the active/inactive colors from your theme. If you want different colors for floating clients (say, red borders so they stand out), replace it:
+To give focused floating clients red borders, replace the default border handler:
 
 ```lua
-local function my_border_handler(c, context, hints)
-    -- Width: don't show borders on maximized/fullscreen clients
+local beautiful = require("beautiful")
+local function my_border_handler(c)
     if c.fullscreen or c.maximized then
         c.border_width = 0
     else
-        c.border_width = beautiful.border_width
+        c.border_width = beautiful.border_width or 1
     end
-
-    -- Color: red if floating and active, otherwise theme defaults
     if c.floating and c.active then
         c.border_color = "#ff5555"
     elseif c.active then
-        c.border_color = beautiful.border_focus
+        c.border_color = beautiful.border_focus or "#ffffff"
     else
-        c.border_color = beautiful.border_normal
+        c.border_color = beautiful.border_normal or "#333333"
     end
 end
-
 client.disconnect_signal("request::border", awful.permissions.update_border)
 client.connect_signal("request::border", my_border_handler)
 ```
 
-The `context` argument tells you why the signal fired (`"added"`, `"active"`, `"inactive"`, `"floating"`, `"urgent"`, `"maximized"`, `"fullscreen"`). You can branch on it if you only want to override specific cases.
+This replaces the whole border policy, including theme handling for urgency. If only the normal focus colours need changing, set the theme's `border_focus` and `border_normal` instead.
 
 ## Example 2: pin everything to tag 1
 
-The default `request::tag` handler picks a tag based on the client's hints and the current selection. If you want every new client on tag 1 of the primary screen instead, replace it:
+For clients that need a tag but have no explicit request, choose the primary screen's first tag:
 
 ```lua
-client.disconnect_signal("request::tag", awful.permissions.tag)
-
-client.connect_signal("request::tag", function(c, t, hints)
-    if t then
-        -- Caller already specified a tag; honor it
-        c:move_to_tag(t)
+local default_tag = awful.permissions.tag
+local function my_tag_handler(c, t, hints)
+    if t or #c:tags() > 0 then
+        default_tag(c, t, hints)
         return
     end
-
-    c:move_to_tag(screen.primary.tags[1])
-end)
+    local first = screen.primary and screen.primary.tags[1]
+    default_tag(c, first, hints)
+end
+client.disconnect_signal("request::tag", default_tag)
+client.connect_signal("request::tag", my_tag_handler)
 ```
 
-The `hints.reason` field tells you why the tag is being requested:
-- `"screen"`: client appeared with no tag
-- `"screen-removed"`: client's screen was disconnected
-- `"rules"`: `ruled.client` set `tag = somefunction` and the function returned nothing
+The default handles explicit tag objects and `t = true`, which requests a sticky client. Existing tag membership is preserved. Rules or later handlers can still move the window. This example also replaces the default transient-parent placement when an untagged client has no explicit request.
 
-Branch on `hints.reason` if you want different behavior in different cases.
+## Example 3: keep the default and add your own
 
-## Example 3: keep the default *and* add your own
-
-Sometimes you don't want to replace the default; you want to run additionally. Just connect without disconnecting:
+When extra work must run after a default handler, call it from one wrapper:
 
 ```lua
--- The default handler still runs. Your handler runs after it.
-client.connect_signal("request::manage", function(c)
-    if c.class == "Firefox" then
-        c.maximized = true
+local default_border = awful.permissions.update_border
+client.disconnect_signal("request::border", default_border)
+client.connect_signal("request::border", function(c, context, hints)
+    default_border(c, context, hints)
+    if c.floating and c.active then
+        c.border_color = "#ff5555"
     end
 end)
 ```
 
-Handler order is the order they were connected. The `request::manage` default is connected at `require "ruled.client"` time (other defaults come from `require "awful.permissions"`), so any handler you connect after that will run after the default.
+Use this as an alternative to the first example. It preserves the default border width and other theme rules. Two independent class signal handlers do not guarantee this execution order.
 
-For `request::*` signals where the default is doing something specific (placing, tagging, drawing borders), additive isn't always what you want; your handler might fight the default. For pure observation (`focus`, `property::*`), additive is almost always right.
+For client setup after rules, use a [rule callback](client-rules.md#using-callbacks).
 
 ## Finding the default handler
 
-The defaults live in `awful.permissions`. The standard ones:
-
 | Signal | Default handler |
-|--------|-----------------|
+| --- | --- |
 | `client` `request::activate` | `awful.permissions.activate` |
 | `client` `request::tag` | `awful.permissions.tag` |
 | `client` `request::border` | `awful.permissions.update_border` |
 | `client` `request::geometry` | `awful.permissions.geometry` |
+| `screen` `request::focus_restore` | `awful.permissions.focus_restore` |
 | `tag` `request::screen` | `awful.permissions.tag_screen` |
 
-If a signal has a default handler that isn't in `awful.permissions`, the [Signals Reference](../reference/signals.md) names it.
+Other defaults may belong to another module or to your config. Check the [signal reference](../reference/signals.md) before replacing one.
 
 ## Pitfalls
 
-- **Disconnecting an anonymous function won't work.** You need the same reference back: store the function in a local first, or use a named module function.
-- **Disconnecting the wrong reference silently no-ops.** If you copy a handler from a guide, make sure you're disconnecting the actual function name, not a similarly-named one.
-- **Order matters across modules.** If two modules both replace the same default and one is `require`-d after the other, only the second replacement wins. For rule-style signals, prefer connecting from inside `request::rules` (see [Defer startup with `request::rules`](./defer-startup-with-request-rules.md)).
+- Disconnect the exact function that was connected, including a wrapper if you installed one.
+- If two modules each disconnect the same original and add a replacement, both replacements remain connected. Choose one owner for that policy.
+- Do not run all three examples together. The first and third are alternative border policies.
 
 ## See also
 
-- [Signals (concepts)](../concepts/signals.md)
-- [Signals Reference](../reference/signals.md)
-- [React to client lifecycle](./react-to-client-lifecycle.md)
+- [Signals](../concepts/signals.md)
+- [Control Where Focus Goes](focus.md)
+- [React to Client Lifecycle](react-to-client-lifecycle.md)

@@ -4,28 +4,24 @@ title: Carousel Layout
 description: Your first session with the scrollable tiling carousel
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
-import YouWillLearn from '@site/src/components/YouWillLearn';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Carousel Layout <SomewmOnly />
 
-<YouWillLearn>
+<span id="1-enable-the-carousel-layout" />
+<span id="2-open-windows" />
+<span id="3-navigate-between-columns" />
+<span id="4-resize-columns" />
+<span id="5-stack-windows-vertically" />
+<span id="6-set-up-gesture-scrolling" />
+<span id="7-choose-a-centering-mode" />
+<span id="whats-next" />
 
-- How to enable the carousel layout
-- How columns work instead of master/stack splitting
-- How to navigate between columns with auto-scrolling
-- How to resize columns
-- How to stack windows vertically
-- How to set up gesture scrolling
-- How to choose a centering mode
+Set up a scrollable row of window columns, then resize and stack three terminals. Start with the default 2.0 `rc.lua` and an installed terminal.
 
-</YouWillLearn>
+## Enable the layout
 
-The carousel is a scrollable tiling layout. Instead of dividing your screen into fixed regions, it places each window in its own column on an infinite horizontal strip. You see one or two columns at a time, and the viewport scrolls to follow your focus.
-
-## 1. Enable the Carousel Layout
-
-Add the carousel to your layout list in `rc.lua`:
+In the existing `request::default_layouts` handler, replace the layout list with:
 
 ```lua
 tag.connect_signal("request::default_layouts", function()
@@ -38,114 +34,60 @@ tag.connect_signal("request::default_layouts", function()
 end)
 ```
 
-The carousel is now the first layout in the cycle. Switch to it on any tag with your layout-cycle keybinding (default: **Mod4+Space**).
+Replace the handler rather than adding a second one. Reload with **Mod4+Ctrl+r**, then cycle with **Mod4+Space** until carousel is selected. Reload can preserve an existing tag's layout.
 
-## 2. Open Windows
+## Open three terminals
 
-Open a terminal. It fills the entire screen, just like any layout with one window.
+Press **Mod4+Return** three times. Each terminal gets a column, one viewport wide by default. The viewport scrolls to the focused column, so earlier terminals move offscreen.
 
-Open a second terminal. Instead of splitting the screen into master and stack, the carousel creates a second column. The new column appears after the focused column, and the viewport scrolls to show it.
+Use **Mod4+j** and **Mod4+k** to change focus. Focusing an offscreen column brings it into view.
 
-Open a third terminal. A third column appears. Now the first terminal is offscreen to the left. You can't see it, but it's still there on the strip.
+## Add controls
 
-## 3. Navigate Between Columns
-
-Use your standard focus keys (**Mod4+j** / **Mod4+k** in the default `rc.lua`) to move focus between clients. When focus lands on a client in a column that's offscreen, the viewport scrolls to bring it into view.
-
-Try jumping to the edges:
+Add this block after `modkey` is defined:
 
 ```lua
--- Add to rc.lua
-awful.key({ modkey }, "Home", function()
-    awful.layout.suit.carousel.focus_first_column()
-end, { description = "focus first column", group = "carousel" })
-
-awful.key({ modkey }, "End", function()
-    awful.layout.suit.carousel.focus_last_column()
-end, { description = "focus last column", group = "carousel" })
+local carousel = awful.layout.suit.carousel
+awful.keyboard.append_global_keybindings({
+    awful.key({ modkey }, "Home", carousel.focus_first_column,
+        { description = "first column", group = "carousel" }),
+    awful.key({ modkey }, "End", carousel.focus_last_column,
+        { description = "last column", group = "carousel" }),
+    awful.key({ modkey }, "bracketright", function()
+        carousel.cycle_column_width()
+    end, { description = "cycle column width", group = "carousel" }),
+    awful.key({ modkey, "Control" }, "bracketright", function()
+        carousel.consume_window(1)
+    end, { description = "stack from right", group = "carousel" }),
+    awful.key({ modkey, "Control" }, "bracketleft", function()
+        carousel.expel_window()
+    end, { description = "separate window", group = "carousel" }),
+})
 ```
 
-## 4. Resize Columns
+Reload and select carousel again if needed.
 
-Each column has its own width. The default is 1.0 (full viewport width). Add a keybinding to cycle through presets:
+1. Press **Mod4+Home** to focus the first column.
+2. Press **Mod4+]** several times. Its width cycles through one-third, one-half, two-thirds, and full viewport width. Narrow columns reveal neighbours.
+3. With a column to its right, press **Mod4+Ctrl+]**. A window from that column joins the focused column, stacked vertically.
+4. Focus either stacked window, then press **Mod4+Ctrl+[**. It moves into its own column.
+
+For exact widths and more stacking actions, see [column widths](../guides/carousel-column-widths.md) and [stacking](../guides/carousel-stacking.md).
+
+## Try centring and gestures
+
+Add this after the controls:
 
 ```lua
-awful.key({ modkey }, "bracketright", function()
-    awful.layout.suit.carousel.cycle_column_width()
-end, { description = "cycle column width", group = "carousel" })
+beautiful.carousel_center_mode = "always"
 ```
 
-Press it a few times. The focused column cycles through 1/3, 1/2, 2/3, and full width. When a column is narrower than the viewport, you can see parts of adjacent columns.
+Reload, make a column half-width, and focus it. It should remain centred. The default `"on-overflow"` mode scrolls when part of the focused column is outside the viewport. The theme value overrides `carousel.center_mode`.
 
-For finer control, add incremental resize keys:
-
-```lua
-awful.key({ modkey, "Control" }, "l", function()
-    awful.layout.suit.carousel.adjust_column_width(0.05)
-end, { description = "widen column", group = "carousel" })
-
-awful.key({ modkey, "Control" }, "h", function()
-    awful.layout.suit.carousel.adjust_column_width(-0.05)
-end, { description = "narrow column", group = "carousel" })
-```
-
-## 5. Stack Windows Vertically
-
-Sometimes you want two windows side by side in the same column. Use consume to pull a window from an adjacent column:
-
-```lua
-awful.key({ modkey, "Shift" }, "l", function()
-    awful.layout.suit.carousel.consume_window(1)
-end, { description = "consume window from right", group = "carousel" })
-
-awful.key({ modkey, "Shift" }, "h", function()
-    awful.layout.suit.carousel.consume_window(-1)
-end, { description = "consume window from left", group = "carousel" })
-```
-
-Open three terminals, then press **Mod4+Shift+l** on the first one. The second terminal is pulled into the first column, and they stack vertically. The third terminal is still in its own column.
-
-To split them back apart, use expel:
-
-```lua
-awful.key({ modkey, "Shift" }, "e", function()
-    awful.layout.suit.carousel.expel_window()
-end, { description = "expel window to new column", group = "carousel" })
-```
-
-Focus the stacked window you want to separate and press the expel key. It gets its own column again.
-
-## 6. Set Up Gesture Scrolling
-
-If you have a touchpad, one line enables 3-finger swipe to pan the viewport:
+If you have a touchpad, add:
 
 ```lua
 awful.layout.suit.carousel.make_gesture_binding()
 ```
 
-Swipe three fingers left or right to scroll through your columns. When you lift your fingers, the viewport snaps to the nearest column.
-
-## 7. Choose a Centering Mode
-
-The default mode (`"on-overflow"`) only scrolls when the focused column would be offscreen. Try `"always"` to keep your focused column centered at all times:
-
-```lua
-awful.layout.suit.carousel.center_mode = "always"
-```
-
-Or switch modes at runtime:
-
-```lua
-awful.layout.suit.carousel.set_center_mode("edge")
-```
-
-See the [centering modes guide](/docs/guides/carousel-centering) for a full comparison.
-
-## What's Next?
-
-- **[Column Widths Guide](/docs/guides/carousel-column-widths)** - Customize presets, set exact widths, maximize
-- **[Stacking Guide](/docs/guides/carousel-stacking)** - Consume, push, expel, and reorder columns
-- **[Gesture Scrolling Guide](/docs/guides/carousel-gestures)** - Gesture details and vertical variant setup
-- **[Centering Modes Guide](/docs/guides/carousel-centering)** - All four modes, peek width, programmatic scrolling
-- **[Scrollable Tiling](/docs/concepts/scrollable-tiling)** - The mental model behind the carousel
-- **[Carousel API Reference](/docs/reference/awful/carousel)** - Complete function and property reference
+Reload and swipe horizontally with three fingers. The viewport pans, then snaps when the gesture ends. See [gesture scrolling](../guides/carousel-gestures.md) for custom bindings and [centring modes](../guides/carousel-centering.md) for the other modes.

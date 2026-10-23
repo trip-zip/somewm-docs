@@ -6,141 +6,108 @@ description: Run code when clients appear, gain focus, change state, or close
 
 # React to client lifecycle
 
-A common task: do something when a client appears, when focus changes, when a window closes. The mechanism is `client.connect_signal`. This guide shows the most useful client signals, with worked examples and gotchas.
-
-For the full list, see [`client` signals](../reference/signals.md#client-signals). For the conceptual model, see [Signals (concepts)](../concepts/signals.md).
+Use `client.connect_signal` for lifecycle and property changes. Use a rule callback when your operation needs properties assigned by client rules.
 
 ## Run code when a client appears
 
-`request::manage` fires when a new client appears. It's the standard hook for "do X to new windows".
+Add this rule inside your existing `ruled.client` `request::rules` handler to centre floating windows after rule properties have been applied:
 
 ```lua
-client.connect_signal("request::manage", function(c, context, hints)
-    -- Center floating windows on the focused screen
-    if c.floating then
-        awful.placement.centered(c)
-    end
-end)
+ruled.client.append_rule {
+    rule = {},
+    callback = function(c)
+        if c.floating then awful.placement.centered(c) end
+    end,
+}
 ```
 
-`context` is `"new"` for a window that just opened, or `"startup"` for one that already existed when SomeWM started. `hints` is reserved and currently empty.
+`request::manage` is also available, but connecting a handler after requiring `ruled.client` does not guarantee that it runs after the rules. Class signal handlers do not promise connection order.
 
-Connect-order decides what state you see. `ruled.client` connects its rule handler when the module is first required, so a handler you connect *after* that (the normal case in `rc.lua`) sees the client with rules already applied. Connect before `ruled.client` is required if you need the pre-rule state.
+`request::manage` passes `(c, context, hints)`. The context is `"new"` for a new window or `"startup"` when managing an existing one. The hints table is currently empty.
 
-:::note SomeWM 2.0 removed the bare `manage` signal
-AwesomeWM also emits a plain `manage` signal after rules are applied. SomeWM 2.0 removed it along with `unmanage`. Handlers connected to those names never fire, and SomeWM logs a warning at startup telling you to switch. Use `request::manage` and `request::unmanage`.
-:::
+SomeWM 2.0 uses `request::manage` and `request::unmanage`. The old `manage` and `unmanage` signals do not fire.
 
 ## Pin a scratchpad
 
-A scratchpad is a window you toggle in and out, always on the same tag, always floating, ignored by tasklists. Set it up on `request::manage`:
+Put window properties in a rule. Replace the class with the value reported by `somewm-client client list`, and create the `scratch` tag first:
 
 ```lua
-client.connect_signal("request::manage", function(c)
-    if c.instance == "scratchpad" then
-        c.floating = true
-        c.skip_taskbar = true
-        c.sticky = false
-        c:move_to_tag(screen.primary.tags[5])
-        awful.placement.centered(c)
-    end
-end)
+ruled.client.append_rule {
+    rule = { class = "^scratchpad$" },
+    properties = {
+        floating = true,
+        skip_taskbar = true,
+        sticky = false,
+        tag = "scratch",
+        placement = awful.placement.centered,
+    },
+}
 ```
 
-Better: do this with a `ruled.client` rule. The signal works, but rules are the structured way to express "every Foo client gets these properties". Use `request::manage` when the logic doesn't fit a rule (depends on runtime state, needs to read other clients).
+This assigns the window to a tag. A show/hide toggle needs a separate binding.
 
 ## React to focus changes
 
-```lua
--- Highlight the focused client with a colored border
-client.connect_signal("focus", function(c)
-    c.border_color = "#88c0d0"
-end)
+For focused and unfocused border colours, set `beautiful.border_focus` and `beautiful.border_normal` in your theme. The default border handler already responds to focus changes.
 
-client.connect_signal("unfocus", function(c)
-    c.border_color = "#3b4252"
+For another action, connect to `focus` or `unfocus`:
+
+```lua
+client.connect_signal("focus", function(c)
+    if c.valid and c == client.focus then
+        print("Focused: " .. (c.name or c.class or "?"))
+    end
 end)
 ```
 
-`focus` fires *after* the new client has focus; `unfocus` fires *before* `focus` on the new client. So `unfocus(old) → focus(new)` is the order.
-
-A note on the border-color example: if `awful.permissions` is handling borders for you, this fights with `request::border`. Either don't connect `focus`/`unfocus` for borders (let `request::border` do it), or replace the default `request::border` handler. See [Replace a default handler](./replace-default-handler.md).
+Focus signals can be queued. By delivery time, a client may have lost focus or closed. Check its current state when the action depends on it still being focused.
 
 ## React to property changes
 
-Each property has its own signal. Read the new value off the client inside the handler:
+Read the current value inside the callback. A property signal reports changes in both directions:
 
 ```lua
--- Log title changes
-client.connect_signal("property::name", function(c)
-    print(c.name)
-end)
-
--- React to floating toggle
-client.connect_signal("property::floating", function(c)
-    if c.floating then
-        awful.placement.centered(c)
-    end
-end)
-
--- Show a notification when a client becomes urgent
+local naughty = require("naughty")
 client.connect_signal("property::urgent", function(c)
-    if c.urgent then
+    if c.valid and c.urgent then
         naughty.notification {
             title = "Urgent: " .. (c.class or "?"),
-            message = c.name,
+            message = c.name or "",
         }
     end
 end)
 ```
 
-`property::urgent` fires for *both* `urgent = true` and `urgent = false`. Always check `c.urgent` inside the handler.
+Use `property::name` for title updates or `property::floating` to react when a window becomes floating. These handlers also need validity checks if they access clients after queued delivery.
 
 ## Run code when a client closes
 
-`request::unmanage` fires when a client is gone. Don't access geometry, screen, or tags inside the handler. They may already be invalid.
+<span id="common-patterns" />
+
+`request::unmanage` runs before the client is invalidated. Its geometry and screen are still readable, but its tags have already been detached. Copy values you need before passing work to a timer or asynchronous callback.
+
+To track time spent managed, keep state keyed by client and remove it on unmanage:
 
 ```lua
-client.connect_signal("request::unmanage", function(c)
-    print("Closed: " .. (c.class or "?"))
-end)
-```
-
-If you need state from the client at close time, save it on `request::manage`:
-
-```lua
-local client_data = {}
-
+local opened = {}
 client.connect_signal("request::manage", function(c)
-    client_data[c] = { class = c.class, opened_at = os.time() }
+    opened[c] = os.time()
 end)
-
 client.connect_signal("request::unmanage", function(c)
-    local data = client_data[c]
-    if data then
-        print(string.format("%s ran for %d seconds", data.class, os.time() - data.opened_at))
-        client_data[c] = nil
+    local started = opened[c]
+    opened[c] = nil
+    if started then
+        print(string.format("%s managed for %d seconds",
+            c.class or "?", os.time() - started))
     end
 end)
 ```
 
-Tables keyed by client object are safe. Once the client is unmanaged, drop your entry to avoid leaking.
-
-## Common patterns
-
-| Want | Signal | Notes |
-|------|--------|-------|
-| Do X to new windows | `request::manage` | Use `ruled.client` rules where they fit |
-| Do X *before* rules apply | `request::manage` | Connect before `ruled.client` is required |
-| Highlight focused window | `focus` / `unfocus` | Or replace `request::border` |
-| React to title changes | `property::name` | Useful for tasklists |
-| Save / restore window state | `request::manage` + `request::unmanage` | Stash data keyed by client |
-| Notify on urgent | `property::urgent` | Check `c.urgent` inside |
-| Flash on first paint | `property::geometry` | Filter on first emit per client |
+Reload re-manages existing clients, so this measures time in the current Lua state, not the application's total lifetime.
 
 ## See also
 
-- [`client` signals](../reference/signals.md#client-signals)
-- [Signals (concepts)](../concepts/signals.md)
-- [Replace a default handler](./replace-default-handler.md)
-- [Client Rules](/docs/guides/client-rules)
+- [Client Signals](../reference/signals.md#client-signals)
+- [Signals](../concepts/signals.md)
+- [Replace a Default Handler](replace-default-handler.md)
+- [Client Rules](client-rules.md)

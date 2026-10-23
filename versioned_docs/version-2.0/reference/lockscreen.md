@@ -4,19 +4,16 @@ title: lockscreen (module)
 description: Default lockscreen module reference
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # lockscreen (module) <SomewmOnly />
 
-The default lockscreen module provides a ready-to-use lock screen UI built on top of the [Lock API](/docs/reference/lock). It handles password entry, multi-monitor coverage, screen hotplug, and theming.
+`lockscreen.init()` creates a password prompt and cover surfaces using the [Lock API](lock.md). The default config calls it after loading the theme.
 
 ## Usage
 
 ```lua
 -- In rc.lua, after beautiful.init()
-require("lockscreen").init()
-
--- Or with custom options
 require("lockscreen").init({
     bg_color = "#000000",
     font_large = "monospace bold 64",
@@ -24,9 +21,7 @@ require("lockscreen").init({
 })
 ```
 
-:::warning
-`lockscreen.init()` must be called **after** `beautiful.init()`, since it reads `beautiful.lockscreen_*` theme variables as fallbacks.
-:::
+Call `init()` once, after `beautiful.init()`. Omit its argument to use theme defaults. Later calls are ignored, including their options.
 
 ## Configuration Options
 
@@ -45,20 +40,18 @@ require("lockscreen").init({
 
 ### Config Resolution Order
 
-For each option, the module checks in order:
+For colour and font options, the module checks in order:
 
 1. `opts.option` (passed to `init()`)
 2. `beautiful.lockscreen_option` (theme variable)
 3. Core `beautiful` variable (e.g., `beautiful.bg_normal` for `bg_color`)
 4. Built-in default
 
-For fonts specifically: `opts.font` > `beautiful.lockscreen_font` > `beautiful.font` > `"sans 14"`.
-
 ## Keyboard Input
 
 | Key | Action |
 |-----|--------|
-| Printable characters | Append to password (max 256 characters) |
+| Printable characters | Append one UTF-8 character. Further input is ignored once the password exceeds 256 bytes |
 | `Return` | Submit password for PAM verification |
 | `BackSpace` | Delete last character (UTF-8 aware) |
 | `Escape` | Clear entire password |
@@ -91,10 +84,10 @@ The module connects to these signals internally:
 
 ## Double-Init Guard
 
-Calling `lockscreen.init()` more than once is safe. The second call is silently ignored. This prevents duplicate signal handlers and surfaces.
+Subsequent `init()` calls do not rebuild surfaces or change the configuration.
 
 ## See Also
 
-- [Lock, Idle, and DPMS Reference](/docs/reference/lock) - Core API
-- [Lockscreen Guide](/docs/guides/lockscreen) - Task-oriented examples
-- [Theme Variables](/docs/reference/beautiful/theme-variables) - `lockscreen_*` variables
+- [Lock, Idle, and DPMS Reference](/docs/2.0/reference/lock) - Core API
+- [Lockscreen Guide](/docs/2.0/guides/lockscreen) - Task-oriented examples
+- [Theme Variables](/docs/2.0/reference/beautiful/theme-variables) - `lockscreen_*` variables

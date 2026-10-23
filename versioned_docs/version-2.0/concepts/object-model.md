@@ -1,149 +1,80 @@
 ---
 sidebar_position: 0
 title: The Object Model
-description: Understanding outputs, screens, tags, clients, and widgets
+description: How outputs, screens, tags, clients and widgets relate.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # The Object Model
 
-Understanding SomeWM's object model is the foundation for everything else. Once you grasp how outputs, screens, tags, clients, and widgets relate, configuration becomes intuitive.
+Outputs describe connected displays. Screens hold tags and panels. Tags select which application windows are visible, and widgets provide the content of panels, popups and titlebars.
 
 ## The Core Objects
 
 ### Output <SomewmOnly />
 
-An **output** represents a physical monitor connector (HDMI-A-1, DP-2, eDP-1). Output objects persist from the moment a monitor is plugged in until it is physically disconnected, even if the display is temporarily disabled.
+An `output` represents a display connector such as `HDMI-A-1` or `eDP-1`. It exposes hardware information and display settings, including mode, position, scale and enabled state.
+
+Disabling an output removes its screen but keeps the output object. Re-enabling it creates a screen again. Disconnecting the display invalidates the output object.
 
 ```lua
--- Iterate outputs
 for o in output do
     print(o.name, o.make, o.enabled)
 end
-
--- Find by connector name
-local hdmi = output.get_by_name("HDMI-A-1")
-
--- Access from a screen
-local o = screen.primary.output
 ```
 
-Each output has:
-- **Hardware info** - make, model, serial, physical size
-- **Display state** - scale, transform, mode, position, enabled
-- **Screen link** - the associated screen object (nil when disabled)
-
-The distinction from screens: a screen is destroyed when a monitor is disabled and recreated when re-enabled. The output object survives that cycle, making it a stable key for per-monitor configuration.
+Use `output.get_by_name("HDMI-A-1")` to find a connector. `o.screen` is its active screen, or `nil` when disabled.
 
 ### Screen
 
-A **screen** represents a physical or virtual display. If you have two monitors, you have two screens.
+A `screen` represents an active display area, including a virtual output in a nested session. `s.geometry` gives its logical position and size. `s.workarea` excludes reserved panel space.
 
-```lua
--- Get the primary screen
-local s = screen.primary
-
--- Get all screens
-for s in screen do
-    print(s.index, s.geometry.width .. "x" .. s.geometry.height)
-end
-
--- Get the currently focused screen
-local focused = awful.screen.focused()
-```
-
-Each screen has:
-- **Geometry** - position and size (`s.geometry`)
-- **Workarea** - usable space after subtracting panels (`s.workarea`)
-- **Tags** - the virtual workspaces for this screen
-- **Wibars** - the panels attached to this screen
+`s.tags` lists its tags, and `s.selected_tags` lists those currently shown. `screen.primary` identifies the primary screen. `awful.screen.focused()` selects a screen using the focus policy.
 
 ### Tag
 
-A **tag** is a virtual workspace. Windows are assigned to tags, and you view tags to see those windows. Unlike traditional workspaces, a window can belong to *multiple* tags simultaneously.
+A tag is a label assigned to clients on a screen. A client can have several tags, and a screen can display several selected tags at once. Each tag belongs to one screen.
 
-```lua
--- Get tags for a screen
-local tags = screen.primary.tags
-
--- View a specific tag
-tags[2]:view_only()
-
--- Toggle a tag's visibility (show multiple tags at once)
-awful.tag.viewtoggle(tags[3])
-
--- Create tags for a screen
-awful.tag({"1", "2", "3", "web", "code"}, s, awful.layout.suit.tile)
-```
-
-Key tag concepts:
-- **Selected** tags are currently visible on their screen
-- A screen can show multiple selected tags at once
-- Each screen has its own independent set of tags
+`t:view_only()` selects one tag. `awful.tag.viewtoggle(t)` toggles its selection without clearing the others. Layout settings such as `master_width_factor` belong to tags.
 
 ### Client
 
-A **client** is a window - any application window you can see and interact with. Terminals, browsers, editors - they're all clients.
+A `client` represents a managed application window. It has a screen, tag membership and properties such as `name`, `class`, `floating`, `minimized` and `fullscreen`.
+
+`client.get()` lists managed clients. `client.focus` is the client selected for keyboard focus, or `nil`. Layer-shell panels and launchers are separate surfaces, not clients.
 
 ```lua
--- Get the focused client
 local c = client.focus
-
--- Get all clients
-for _, c in ipairs(client.get()) do
-    print(c.name)
+if c then
+    print(c.name, c.screen.index)
+    for _, t in ipairs(c:tags()) do
+        print(t.name)
+    end
 end
-
--- Common client properties
-c.floating = true      -- float above tiled windows
-c.maximized = true     -- fill the screen
-c.minimized = true     -- hide from view
-c.ontop = true         -- stay above other windows
 ```
 
-Clients belong to:
-- **One screen** - the display they're on
-- **One or more tags** - the workspaces they appear in
-
-Clients also have ordering in:
-- **[The stack](/docs/concepts/client-stack)** - z-order for visual overlap
-- **[Focus history](/docs/concepts/focus-history)** - determines what gets focus when you close a window
+Client layout order, [visual stacking](client-stack.md) and [focus history](focus-history.md) are separate.
 
 ### Wibox and Wibar
 
-A **wibox** is a box that holds widgets. A **wibar** is a wibox that's docked to a screen edge (top, bottom, left, or right).
-
-```lua
--- Create a wibar at the top of a screen
-s.mywibar = awful.wibar {
-    position = "top",
-    screen = s,
-}
-
--- Create a floating wibox anywhere
-local popup = wibox {
-    width = 200,
-    height = 100,
-    visible = true,
-}
-```
+A `wibox` is a compositor-owned window containing a widget. An `awful.wibar` attaches a wibox to a screen edge and normally reserves space in the workarea. An `awful.popup` sizes and positions a wibox around its content.
 
 ### Widget
 
-A **widget** is a visual element inside a wibox. Widgets come in three flavors:
+You can build custom widgets by composing existing widgets or by implementing measurement, child layout and Cairo drawing with `wibox.widget.base.make_widget`. Both approaches are supported in 2.0.
+
+Widgets compose by nesting content inside containers and layouts:
 
 | Type | Purpose | Examples |
-|------|---------|----------|
-| **Primitives** | Display content | `textbox`, `imagebox`, `progressbar` |
-| **Containers** | Modify one widget | `background`, `margin`, `constraint` |
-| **Layouts** | Arrange multiple widgets | `fixed`, `flex`, `align` |
-
-Widgets compose by nesting:
+| --- | --- | --- |
+| Content | Display text, images or values | `textbox`, `imagebox`, `progressbar` |
+| Container | Wrap a child | `background`, `margin`, `constraint` |
+| Layout | Arrange children | `fixed`, `flex`, `align` |
 
 ```lua
--- A textbox inside a margin inside a background
-wibox.widget {
+local wibox = require("wibox")
+local greeting = wibox.widget {
     {
         {
             text = "Hello",
@@ -157,172 +88,61 @@ wibox.widget {
 }
 ```
 
+Assign `greeting` to a wibox's `widget` property to display it. The [widget tutorial](../tutorials/widgets.md) covers creating and updating widgets.
+
 ## The Hierarchy
 
-Here's how everything fits together:
+An enabled output has a screen. The screen owns tags and may have wibars. Clients belong to a screen and can share several of its tags. Wibars and other wiboxes contain widget trees.
 
-```
-Output "HDMI-A-1"                 Output "DP-2"
-└── Screen 1                      └── Screen 2
-    ├── Tag "1" (selected)            ├── Tag "1"
-    │   ├── Client: Firefox           │   └── Client: Slack
-    │   └── Client: Terminal          │
-    ├── Tag "2"                       ├── Tag "2" (selected)
-    │   └── Client: VS Code           │   └── Client: Spotify
-    ├── Tag "3" (empty)               │
-    │                                 └── Wibar (top)
-    └── Wibar (top)                       └── [widgets...]
-        ├── Taglist widget
-        ├── Tasklist widget
-        └── Clock widget
-```
-
-Key points:
-- Each **output** has zero or one screen (zero when disabled)
-- Each **screen** has its own tags and wibars
-- Each **tag** belongs to exactly one screen
-- Each **client** belongs to one screen but can have multiple tags
-- **Wibars** are attached to a screen edge
-- **Widgets** live inside wibars (or standalone wiboxes)
+Tags therefore do not form an exclusive parent-child tree of windows. The same client can appear in several tag lists.
 
 ## Focus vs Selection
 
-These terms are easy to confuse but mean different things:
+| Term | Meaning |
+| --- | --- |
+| Focused client | The client selected to receive keyboard input |
+| Selected tag | A tag whose clients are shown on its screen |
+| Stacking order | Which overlapping window appears in front |
 
-| Term | Applies to | Meaning |
-|------|-----------|---------|
-| **Focused** | Clients | Receives keyboard input. Only ONE client is focused globally. |
-| **Selected** | Tags | Currently visible. Multiple tags can be selected per screen. |
-
-```lua
--- The focused client (receives keyboard input)
-local c = client.focus
-
--- Selected tags on a screen (currently visible)
-local selected = screen.primary.selected_tags
-
--- The focused screen (where the focused client is)
-local s = awful.screen.focused()
-```
+Selecting tags changes visibility. Focusing a client and raising it are separate operations, although activation helpers can request both.
 
 ### Focus flow
 
-When you type, keystrokes go to:
-1. The **focused client** (if any)
-2. Global keybindings (if not consumed by the client)
-
-The focused client is always on a selected tag of some screen.
+The compositor checks input handlers and keybindings before forwarding unhandled events to the focused application. Keygrabbers, session locks and layer-shell surfaces can receive input instead of a client.
 
 ## Common Operations
 
-Now that you understand the objects, here's how common operations map to them:
-
-| "I want to..." | Object | API |
-|----------------|--------|-----|
-| Switch workspace | Tag | `tag:view_only()` |
-| View multiple workspaces | Tag | `awful.tag.viewtoggle(tag)` |
-| Move window to workspace | Client + Tag | `c:move_to_tag(tag)` |
-| Move window to screen | Client + Screen | `c:move_to_screen(s)` |
-| Close window | Client | `c:kill()` |
-| Toggle floating | Client | `c.floating = not c.floating` |
-| Add widget to bar | Wibar | Modify wibar's widget property |
-| Focus next window | Client | `awful.client.focus.byidx(1)` |
-| Focus next screen | Screen | `awful.screen.focus_relative(1)` |
+| Action | API |
+| --- | --- |
+| Select one tag | `t:view_only()` |
+| Toggle a tag's visibility | `awful.tag.viewtoggle(t)` |
+| Move a client to a tag | `c:move_to_tag(t)` |
+| Move a client to a screen | `c:move_to_screen(s)` |
+| Request that a client close | `c:kill()` |
+| Toggle floating | `c.floating = not c.floating` |
+| Focus the next client in client order | `awful.client.focus.byidx(1)` |
+| Focus the next screen | `awful.screen.focus_relative(1)` |
 
 ## Accessing Objects
 
-### From anywhere
+<span id="from-anywhere" />
+<span id="from-a-client" />
+<span id="from-a-screen" />
+<span id="from-a-tag" />
 
-```lua
--- All clients
-client.get()
-
--- All screens
-for s in screen do ... end
-
--- All outputs
-for o in output do ... end
-
--- Primary screen
-screen.primary
-
--- Currently focused
-client.focus
-awful.screen.focused()
-```
-
-### From a client
-
-```lua
-local c = client.focus
-
-c.screen          -- the screen this client is on
-c:tags()          -- tags this client belongs to
-c.first_tag       -- the first tag (useful for single-tag clients)
-```
-
-### From a screen
-
-```lua
-local s = awful.screen.focused()
-
-s.output          -- the backing output object (SomeWM only)
-s.tags            -- all tags for this screen
-s.selected_tags   -- currently visible tags
-s.clients         -- all clients on this screen
-s.geometry        -- screen dimensions
-s.workarea        -- usable area (minus panels)
-```
-
-### From a tag
-
-```lua
-local t = awful.screen.focused().selected_tag
-
-t.screen          -- the screen this tag belongs to
-t:clients()       -- clients with this tag
-t.selected        -- is this tag currently visible?
-t.layout          -- current layout for this tag
-```
+| Starting point | Related objects |
+| --- | --- |
+| Global | `client.get()`, `client.focus`, `screen.primary`, `output.get_by_name(name)` |
+| Client `c` | `c.screen`, `c:tags()`, `c.first_tag` |
+| Screen `s` | `s.output`, `s.tags`, `s.selected_tags`, `s.clients` |
+| Tag `t` | `t.screen`, `t:clients()`, `t.layout` |
 
 ## Signals: Reacting to Changes
 
-Objects emit **signals** when things change. Connect to signals to react:
-
-```lua
--- React when a client is created
-client.connect_signal("request::manage", function(c)
-    -- c is the new client
-    print("New client: " .. c.name)
-end)
-
--- React when focus changes
-client.connect_signal("focus", function(c)
-    c.border_color = "#ff0000"
-end)
-
--- React when a screen is added (monitor plugged in)
-screen.connect_signal("added", function(s)
-    -- Set up tags and wibar for new screen
-end)
-```
-
-Common signals:
-
-| Object | Signal | When |
-|--------|--------|------|
-| output | `added` / `removed` | Monitor plugged/unplugged |
-| output | `property::scale` | Display scale changed |
-| screen | `added` / `removed` | Screen created/destroyed |
-| client | `manage` | New client created |
-| client | `focus` / `unfocus` | Focus changes |
-| client | `property::name` | Window title changes |
-| tag | `property::selected` | Tag visibility changes |
+Objects emit signals for events such as `request::manage`, `focus`, `property::name` and `property::selected`. Handlers receive the emitting object for instance signals. Global signals have their own argument lists. See [Signals](signals.md).
 
 ## Next Steps
 
-Now that you understand the object model:
-
-- **[Architecture](/docs/concepts/architecture)** - How the layers communicate
-- **[Basics](/docs/tutorials/basics)** - Hands-on practice with these concepts
-- **[Widgets](/docs/tutorials/widgets)** - Build widgets that use these objects
+- [Architecture](architecture.md)
+- [Basics](../tutorials/basics.md)
+- [Widgets](../tutorials/widgets.md)

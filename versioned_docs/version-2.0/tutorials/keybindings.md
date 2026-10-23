@@ -4,111 +4,53 @@ title: Keybindings
 description: Add custom keyboard shortcuts to SomeWM
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Keybindings
 
-<YouWillLearn>
+<span id="your-first-keybinding" />
+<span id="what-you-just-wrote" />
+<span id="a-keybinding-that-acts-on-a-window" />
+<span id="see-your-bindings-in-the-help-popup" />
+<span id="whats-next" />
+<span id="troubleshooting" />
+<span id="keybinding-not-working" />
+<span id="callback-errors" />
 
-- The four parts of an `awful.key` binding
-- How to add a global keybinding and verify it works
-- How to add a per-client keybinding
-- How your bindings show up in the help popup
+Add a browser shortcut and a window-opacity toggle to the default 2.0 config. Keep its existing bindings.
 
-</YouWillLearn>
+Open your `rc.lua`. The default file already imports `awful` and defines `modkey = "Mod4"`. Install Firefox for the browser example, or substitute an application you have.
 
-We will add two keybindings to your config: one that opens a browser from anywhere, and one that changes the focused window. By the end you will have pressed both and seen them listed in the built-in help popup.
+## Add a global shortcut
 
-## Your First Keybinding
-
-Open your `rc.lua` and find the keybindings section (search for `append_global_keybindings`). Add a new binding:
+After the `modkey` definition, add:
 
 ```lua
 awful.keyboard.append_global_keybindings({
-    -- Your existing keybindings...
-
-    -- Add a new one:
     awful.key({ modkey }, "b", function()
         awful.spawn("firefox")
     end, { description = "open browser", group = "launcher" }),
 })
 ```
 
-Press **Mod4 + Ctrl + r** to reload, then press **Mod4 + b**. Firefox opens and tiles into the current tag. That's the whole loop: edit, reload, press, observe.
+Reload with **Mod4+Ctrl+r**, then press **Mod4+b**. Firefox should open. Press **Mod4+s** and find “open browser” in the launcher group.
 
-## What You Just Wrote
+`awful.key` creates a binding. `append_global_keybindings` registers it. The arguments specify modifiers, key, callback, and help text. `{}` means no modifiers, and `{ modkey, "Shift" }` requires both keys.
 
-Every binding has the same four parts:
+## Add a shortcut for the focused window
 
-```lua
-awful.key(
-    { modkey },           -- 1. Modifiers (a table; empty {} means none)
-    "b",                  -- 2. Key
-    function()            -- 3. Callback, runs on press
-        awful.spawn("firefox")
-    end,
-    { description = "open browser", group = "launcher" }  -- 4. Metadata
-)
-```
-
-The metadata is not decoration; you will see what it does in a moment. For the full list of key and modifier names, see the [Key Names Reference](/docs/reference/key-names).
-
-## A Keybinding That Acts on a Window
-
-Global bindings work anywhere. Client bindings only fire when a window is focused, and that window (`c`) is passed to your callback. Find the client keybindings section in your `rc.lua`:
+Find the existing `request::default_keybindings` handler. Add this entry inside its `awful.keyboard.append_client_keybindings({ ... })` table:
 
 ```lua
-client.connect_signal("request::default_keybindings", function()
-    awful.keyboard.append_client_keybindings({
-        -- Existing keybindings...
-
-        -- Toggle window opacity:
-        awful.key({ modkey }, "o", function(c)
-            if c.opacity == 1 then
-                c.opacity = 0.8
-            else
-                c.opacity = 1
-            end
-        end, { description = "toggle opacity", group = "client" }),
-    })
-end)
+awful.key({ modkey, "Shift" }, "o", function(c)
+    c.opacity = c.opacity == 1 and 0.8 or 1
+end, { description = "toggle opacity", group = "client" }),
 ```
 
-Reload with **Mod4 + Ctrl + r**, focus a terminal, and press **Mod4 + o**. The window turns translucent; whatever is behind it shows through. Press **Mod4 + o** again and it turns solid. Notice that pressing it with a different window focused affects *that* window: the `c` in your callback is always the focused client.
+Reload, focus a window, and press **Mod4+Shift+o** twice. The window should become translucent, then opaque again. The callback receives the focused client as `c`.
 
-## See Your Bindings in the Help Popup
+The unmodified **Mod4+o** already moves a window to another screen, so this example adds Shift to avoid that conflict.
 
-Press **Mod4 + s**.
+For another key, use the `sym:` name reported by `wev` on Wayland. See [key names](../reference/key-names.md) and [default bindings](../reference/default-keybindings.md) before assigning a shortcut.
 
-{/* TODO: Screenshot needed
-   - Hotkeys popup showing custom keybinding groups
-   - Should show the "launcher" group with custom shortcuts
-*/}
+If a shortcut does nothing, check the key name, reload the saved file, and look for duplicate bindings or an error notification. Test the application command in a terminal too.
 
-In the popup, find the **launcher** group: your "open browser" binding is listed there, next to the defaults. The **client** group now shows "toggle opacity". That is what the `description` and `group` metadata are for: every binding you write documents itself.
-
-Press any key to dismiss the popup.
-
-## What's Next?
-
-You now know the edit-reload-press-observe loop and both binding kinds. From here:
-
-- **[Keybinding patterns](../guides/keybinding-patterns.md)** - Media keys, binding the whole number row at once, mouse bindings, and organizing bindings as data or a module
-- **[Key Names Reference](/docs/reference/key-names)** - Complete list of key names and modifiers
-- **[Widgets](/docs/tutorials/widgets)** - Create custom widgets
-
-## Troubleshooting
-
-### Keybinding not working
-
-1. Check for typos in key names (they're case-sensitive for modifiers)
-2. Look for conflicts with existing keybindings
-3. Make sure you reloaded config with **Mod4 + Ctrl + r**
-
-### Callback errors
-
-Check the notification for error messages. Common issues:
-
-- Missing `local` for variables
-- Typos in function names
-- Missing `end` for functions
+To move bindings into a separate module, see [Keybinding Patterns](../guides/keybinding-patterns.md).
