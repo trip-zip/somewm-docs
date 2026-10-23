@@ -4,87 +4,65 @@ title: "Carousel: Stacking"
 description: Stack, split, and rearrange windows across carousel columns
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
-import YouWillLearn from '@site/src/components/YouWillLearn';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Carousel: Stacking <SomewmOnly />
 
-<YouWillLearn>
-
-- How to pull a window from an adjacent column (consume)
-- How to push the focused window into an adjacent column
-- How to split a stacked window into its own column (expel)
-- How to reorder columns on the strip
-
-</YouWillLearn>
-
-By default, each window gets its own column. You can group windows vertically within a single column using consume, push, and expel operations.
+Group windows into columns or move them between columns using the operations below. They act on the focused client and require carousel on the focused screen.
 
 ## Consume: Pull a Window In
 
-`consume_window(dir)` pulls the first client from an adjacent column into the focused column. The consumed window stacks below existing windows in the column. If the source column becomes empty, it is removed.
+`consume_window(dir)` takes the first window from a neighbouring column and appends it below the focused column's existing windows. It removes the neighbour if that column becomes empty.
 
-```lua
--- Consume from the right
-awful.key({ modkey, "Shift" }, "l", function()
-    awful.layout.suit.carousel.consume_window(1)
-end, { description = "consume window from right", group = "carousel" })
-
--- Consume from the left
-awful.key({ modkey, "Shift" }, "h", function()
-    awful.layout.suit.carousel.consume_window(-1)
-end, { description = "consume window from left", group = "carousel" })
-```
-
-Direction `-1` means left (or up in the vertical variant), `1` means right (or down).
+Direction `-1` means left and `1` means right. For the vertical variant, they mean up and down, and windows within a row sit side by side.
 
 ## Push: Consume or Expel
 
-`push_window(dir)` is a context-sensitive operation. Its behavior depends on whether the focused client is alone in its column:
+`push_window(dir)` moves the focused window:
 
-- **Solo window** (only client in the column): The focused client merges into the adjacent column's stack in the given direction. This is equivalent to being consumed by the neighbor. If there is no neighbor in that direction, the push is a no-op.
-- **Stacked window** (multiple clients in the column): The focused client is expelled into a new column inserted in the given direction. The new column inherits the source column's width.
-
-```lua
--- Push right: merge into right neighbor (solo) or expel rightward (stacked)
-awful.key({ modkey, "Control" }, "l", function()
-    awful.layout.suit.carousel.push_window(1)
-end, { description = "push window right", group = "carousel" })
-
--- Push left: merge into left neighbor (solo) or expel leftward (stacked)
-awful.key({ modkey, "Control" }, "h", function()
-    awful.layout.suit.carousel.push_window(-1)
-end, { description = "push window left", group = "carousel" })
-```
+- If it is alone, it joins the neighbouring column in that direction. With no neighbour, nothing happens.
+- If it shares a column, it moves into a new column in that direction. The new column inherits its width.
 
 ## Expel: Split into a New Column
 
-`expel_window()` moves the focused client out of a stacked column into a new column inserted after the current one. The new column inherits the source column's width. This is a no-op if the column contains only one client.
-
-```lua
-awful.key({ modkey, "Shift" }, "e", function()
-    awful.layout.suit.carousel.expel_window()
-end, { description = "expel window to new column", group = "carousel" })
-```
+`expel_window()` moves the focused window into a new column after the current one, retaining its width. A window already alone stays where it is.
 
 ## Reorder Columns
 
-`move_column(dir)` swaps the focused column with its neighbor:
+`move_column(dir)` swaps the focused column with its neighbour. Focus stays on the moved column, and the viewport follows it.
+
+## Register Keybindings
+
+This example uses arrow keys to avoid the default master-width bindings on `h` and `l`:
 
 ```lua
-awful.key({ modkey, "Mod1" }, "l", function()
-    awful.layout.suit.carousel.move_column(1)
-end, { description = "move column right", group = "carousel" })
-
-awful.key({ modkey, "Mod1" }, "h", function()
-    awful.layout.suit.carousel.move_column(-1)
-end, { description = "move column left", group = "carousel" })
+local carousel = awful.layout.suit.carousel
+awful.keyboard.append_global_keybindings({
+    awful.key({ modkey, "Control" }, "Right", function()
+        carousel.consume_window(1)
+    end, { description = "consume from right", group = "carousel" }),
+    awful.key({ modkey, "Control" }, "Left", function()
+        carousel.consume_window(-1)
+    end, { description = "consume from left", group = "carousel" }),
+    awful.key({ modkey, "Control", "Shift" }, "Right", function()
+        carousel.push_window(1)
+    end, { description = "push right", group = "carousel" }),
+    awful.key({ modkey, "Control", "Shift" }, "Left", function()
+        carousel.push_window(-1)
+    end, { description = "push left", group = "carousel" }),
+    awful.key({ modkey, "Shift" }, "e", carousel.expel_window,
+        { description = "expel window", group = "carousel" }),
+    awful.key({ modkey, "Mod1" }, "Right", function()
+        carousel.move_column(1)
+    end, { description = "move column right", group = "carousel" }),
+    awful.key({ modkey, "Mod1" }, "Left", function()
+        carousel.move_column(-1)
+    end, { description = "move column left", group = "carousel" }),
+})
 ```
-
-This changes the column's position on the strip. Focus stays on the moved column, and the viewport follows it.
 
 ## See Also
 
-- **[Carousel API Reference](/docs/reference/awful/carousel)** - Full property and function documentation
-- **[Column Widths Guide](/docs/guides/carousel-column-widths)** - Resize columns
-- **[Scrollable Tiling](/docs/concepts/scrollable-tiling)** - How the column data model works
+- [Carousel API](../reference/awful/carousel.md)
+- [Column Widths](carousel-column-widths.md)
+- [Scrollable Tiling](../concepts/scrollable-tiling.md)

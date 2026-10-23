@@ -6,7 +6,7 @@ description: Window management, keybindings, layouts, and client rules
 
 # awful
 
-The `awful` library is the core of AwesomeWM's window management functionality. It handles keybindings, mouse bindings, client rules, layouts, tags, and more.
+`awful` provides client and tag operations, layouts, input bindings, and application launching.
 
 **Upstream documentation:** The `awful` library spans multiple sections in the AwesomeWM docs:
 - [input_handling](https://awesomewm.org/apidoc/input_handling/awful.key.html) - keybindings, mouse bindings
@@ -19,7 +19,7 @@ The `awful` library is the core of AwesomeWM's window management functionality. 
 |--------|---------|
 | `awful.key` | Define keyboard shortcuts |
 | `awful.button` | Define mouse bindings |
-| `awful.rules` | Automatic client rules |
+| `ruled.client` | [Client rules](../../guides/client-rules.md). Replaces deprecated `awful.rules` |
 | [awful.layout](./layout) | Tiling layouts |
 | `awful.tag` | Tag (workspace) management |
 | `awful.client` | Client (window) operations |
@@ -34,7 +34,8 @@ The `awful` library is the core of AwesomeWM's window management functionality. 
 | Module | Description |
 |--------|-------------|
 | [awful.input](./input) | Runtime input device configuration (pointer, keyboard) |
+| [Carousel](./carousel) | Horizontal and vertical scrollable tiling |
 
 ## Behavioral Notes
 
-SomeWM's `awful` implementation is fully compatible with AwesomeWM. See [Wayland vs X11](/docs/concepts/wayland-vs-x11) for platform-specific differences that may affect some operations.
+See [deviations](../deviations.md) for APIs that are changed, stubbed, or unavailable on Wayland.

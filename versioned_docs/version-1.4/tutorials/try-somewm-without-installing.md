@@ -4,89 +4,69 @@ title: Try SomeWM Without Logging Out
 description: Run a nested SomeWM in a window from your current desktop. No reboot, no logout.
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Try SomeWM Without Logging Out <SomewmOnly />
 
-If you want to kick the tires on SomeWM without committing your daily-driver desktop to it, run a nested instance in a window. wlroots handles the nesting; `somewm-client` handles the rest. Your real session stays untouched.
+<span id="prerequisites" />
 
-<YouWillLearn>
+Run SomeWM in a window, open a terminal inside it, and stop the nested session. You need SomeWM 1.4 and `somewm-client` on your `PATH`, a graphical session, and a terminal emulator such as Alacritty.
 
-- Launch a nested SomeWM in a window from any Wayland or X11 session
-- Spawn a terminal inside it and use a real SomeWM keybinding
-- Edit `rc.lua` and reload without restarting the nested instance
-- Stop the nested instance cleanly and leave no debris
-
-</YouWillLearn>
-
-## Prerequisites
-
-- SomeWM [installed](/docs/getting-started/installation) (the binary needs to be on `$PATH`, but you don't need to log into it)
-- You are in a graphical session right now (any Wayland compositor, or X11)
+The nested compositor has its own windows and configuration. It still runs as your user and shares your files and services, so it is not a sandbox.
 
 ## Start a nested instance
 
-You don't need to write a config first. SomeWM ships a fallback `rc.lua` that's enough to play with. Open a terminal and run:
+<span id="try-a-keybinding" />
+<span id="clean-up" />
+<span id="what-next" />
+
+From a terminal in a Wayland session, run:
 
 ```bash
 somewm-client test start
 ```
 
-The status block tells you what happened:
+On an X11 desktop, use `somewm-client test start --host x11` instead.
 
-```
-test 'test': pid 12345 on wayland-3 (host: wayland), config (default)
-  keybinds: shortcut inhibitor ACTIVE on outer compositor, Mod4 passes through
-  log:      /run/user/1000/somewm-test/test/log
-  socket:   /run/user/1000/somewm-test/test/ipc.sock
-  next:     somewm-client test run  --name test -- alacritty
-            somewm-client test eval --name test 'return mouse.coords()'
-            somewm-client test stop --name test
-```
+A window titled `somewm:test:test` opens with the default bar. The command prints the instance's PID, socket and log paths, and shortcut handling. Read its `keybinds:` line. If the host cannot forward Super shortcuts, the nested session remaps Mod4 to Mod1 (Alt).
 
-A new window opens with the nested SomeWM rendering inside it. The window title says `somewm:test:test`.
+## Open a terminal
 
-## Try a keybinding
-
-The nested instance is empty until you spawn something into it. Drop a terminal in:
+Run this from your outer terminal, substituting a terminal you have installed:
 
 ```bash
 somewm-client test run -- alacritty
 ```
 
-(Replace `alacritty` with whatever terminal you have installed.)
+Click inside the nested window, then press **Mod4+Return**, or **Alt+Return** if remapped. The default config starts `xterm`, so install it if you want that shortcut to open a second terminal.
 
-Click into the nested window, then press `Mod4 + Return` (Super + Return). The default rc.lua spawns another terminal inside the nested instance. If `Mod4` doesn't work, look at the `keybinds:` line in the start block: on hosts that don't forward shortcuts (GNOME, X11), the nested instance auto-remaps `Mod4` to `Mod1` (Alt). Try `Alt + Return` instead.
+Press **Mod4+Space** to change the layout. The default starts floating. The next layout tiles your terminals.
 
-## Reload after editing
+## Try a configuration change {#reload-after-editing}
 
-If you want to try your own `rc.lua`, stop the current instance and start a new one pointed at it:
+Make a separate copy of your `rc.lua`, for example `~/somewm-test/rc.lua`. If you do not have one, copy the shipped default using the paths in [First Launch](../getting-started/first-launch.md).
+
+Stop the default instance and start one with your copy:
 
 ```bash
 somewm-client test stop
-somewm-client test start --config ~/dev/somewmrc.lua
+somewm-client test start --config ~/somewm-test/rc.lua
 ```
 
-After editing the file, reload without restarting:
+Add `--host x11` to the start command on X11. In the copied file, change `terminal = "xterm"` to an installed terminal, save, then run:
 
 ```bash
 somewm-client test reload
 ```
 
-## Clean up
+Press the terminal shortcut inside the nested window. It should launch your chosen terminal. If loading fails, inspect the log with `somewm-client test logs`.
+
+## Stop the instance
 
 ```bash
 somewm-client test stop
 ```
 
-The state directory and log are removed.
+The nested window closes and its state directory and log are removed. Copy the log first if you need it for troubleshooting.
 
-## What next?
-
-You've got the loop. From here:
-
-- **Keep iterating.** Point a test instance at your real `rc.lua` and use the [iterative widget development recipe](../guides/testing-with-nested-compositor.md#iterative-dev) for the edit / reload cycle.
-- **Understand what just happened.** [Test Mode](../concepts/test-mode.md) covers what nesting is, what it isn't (not a VM, not a sandbox), and how the keybind handoff works.
-- **Commit to it.** [Install SomeWM as your daily driver](/docs/getting-started/installation) when you're ready to log in.
-- **Learn the desktop.** [Basics tutorial](/docs/tutorials/basics) walks through keybindings, tags, and layouts.
+Continue with [Basics](basics.md), or use the [nested testing guide](../guides/testing-with-nested-compositor.md) for named instances, headless tests, and command-line inspection.

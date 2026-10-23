@@ -4,173 +4,120 @@ title: Input Device Configuration
 description: Configure pointer and keyboard settings at runtime
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Input Device Configuration <SomewmOnly />
 
-## Overview
+<span id="overview" />
 
-SomeWM provides `awful.input` for runtime input device configuration, a feature not available in AwesomeWM. You can set global defaults that apply to all devices, and use rules to configure specific device types or individual devices differently.
+Set pointer and keyboard defaults through `awful.input` in `rc.lua`. Use per-device rules when a mouse and touchpad need different settings.
 
 ## Global Settings
 
-Global settings apply to all connected devices. Set them directly on `awful.input`:
-
 ```lua
 local awful = require("awful")
-
--- Touchpad settings
 awful.input.tap_to_click = 1
 awful.input.natural_scrolling = 1
 awful.input.accel_speed = 0.3
-
--- Keyboard settings
 awful.input.xkb_layout = "us"
 awful.input.xkb_options = "ctrl:nocaps"
 awful.input.keyboard_repeat_rate = 30
 awful.input.keyboard_repeat_delay = 300
 ```
 
-A value of `-1` means "leave at device default." A value of `0` disables the feature, `1` enables it.
+For on/off pointer settings, `0` disables, `1` enables and `-1` leaves the device default. Acceleration speed instead ranges from `-1.0` to `1.0`. Keyboard repeat rate is in keys per second and delay is in milliseconds.
 
 ## Per-Device Configuration with Rules
 
-If you use both a touchpad and an external mouse, you probably want different settings for each. Input rules let you do this using the same `{ rule, properties }` pattern as [client rules](/docs/guides/client-rules):
+<span id="targeting-a-specific-device" />
+<span id="how-globals-and-rules-interact" />
 
 ```lua
 awful.input.rules = {
-    { rule = { type = "touchpad" },
-      properties = {
-          natural_scrolling = 1,
-          tap_to_click = 1,
-          tap_3fg_drag = 1,
-      } },
-    { rule = { type = "pointer" },
-      properties = {
-          natural_scrolling = 0,
-          accel_profile = "flat",
-      } },
+    {
+        rule = { type = "touchpad" },
+        properties = { natural_scrolling = 1, tap_to_click = 1 },
+    },
+    {
+        rule = { type = "pointer" },
+        properties = { natural_scrolling = 0, accel_profile = "flat" },
+    },
+    {
+        rule = { name = "Logitech G502" },
+        properties = { accel_speed = -0.5 },
+    },
 }
 ```
 
-Two device types are available:
+`touchpad` matches devices that support tapping. `pointer` matches other pointing devices. `name` is a case-sensitive substring match. When a rule specifies both fields, both must match.
 
-- **`touchpad`** - Touchpads (any device that supports tap gestures)
-- **`pointer`** - Everything else: mice, trackballs, trackpoints
+Global settings supply the baseline. Matching rules override individual properties in list order, with the last matching value winning. Assigning `awful.input.rules` replaces the entire rule list. Unsupported device features have no effect.
 
-### Targeting a Specific Device
-
-Use the `name` field to match a specific device by name (substring match):
-
-```lua
-awful.input.rules = {
-    { rule = { type = "touchpad" },
-      properties = { natural_scrolling = 1 } },
-    { rule = { name = "Logitech G502" },
-      properties = { accel_speed = -0.5, accel_profile = "flat" } },
-}
-```
-
-To find device names on your system:
+Find device names with:
 
 ```bash
-libinput list-devices | grep "Device:"
+libinput list-devices
 ```
 
-### How Globals and Rules Interact
-
-Global `awful.input.*` settings are the baseline. Rules override them per-property, per-device. Later rules take priority over earlier ones:
-
-```lua
--- Global: natural scrolling on for everything
-awful.input.natural_scrolling = 1
-
--- Rule: turn it off for mice
-awful.input.rules = {
-    { rule = { type = "pointer" },
-      properties = { natural_scrolling = 0 } },
-}
--- Touchpads get natural scrolling (global default), mice don't (rule override)
-```
+This command may require permission to read input devices.
 
 ## All Properties
 
-See [awful.input Reference](/docs/reference/awful/input) for the complete property list and rule API.
+See the [input reference](../reference/awful/input.md) for settings such as scroll method, three-finger drag and button mapping. Three-finger drag requires a supporting libinput build and device.
 
 ## Cursor Theming {#cursor-theming}
 
 ### Setting the Cursor Theme
 
-Cursor themes can be configured via environment variables before launching SomeWM:
+Set these variables in the environment that launches SomeWM:
 
 ```bash
-export XCURSOR_THEME="Adwaita"  # Theme name (from /usr/share/icons/)
-export XCURSOR_SIZE="24"        # Size in pixels
+export XCURSOR_THEME=Adwaita
+export XCURSOR_SIZE=24
 somewm
 ```
 
-You can also set these in your shell profile (`~/.bashrc`, `~/.zshrc`) or in a wrapper script.
+A display manager may not read your interactive shell's startup files. Use its session configuration or a launcher script in that case.
 
 ### Runtime Cursor Theme Changes <SomewmOnly />
 
-You can change the cursor theme and size at runtime without restarting:
-
 ```lua
--- In rc.lua or via somewm-client eval
-root.cursor_theme("Adwaita")  -- Change theme
-root.cursor_theme()           -- Returns current theme name
-
-root.cursor_size(32)          -- Change size in pixels
-root.cursor_size()            -- Returns current size
+root.cursor_theme("Adwaita")
+root.cursor_size(32)
 ```
 
-Via CLI:
+Query the current settings from a terminal:
+
 ```bash
-somewm-client eval 'root.cursor_theme("Adwaita")'
-somewm-client eval 'root.cursor_size(48)'
 somewm-client eval 'return root.cursor_theme(), root.cursor_size()'
 ```
 
-:::note Fallback Behavior
-If a cursor theme cannot be loaded (e.g., theme not installed), wlroots provides built-in fallback cursors. These are basic black-and-white cursors that ensure your mouse always works, even on minimal systems.
-:::
+Install the named cursor theme before selecting it. If cursors fail to load, check the compositor log and try an installed theme.
 
 ### Cursor APIs
 
-SomeWM supports AwesomeWM's cursor APIs:
+Set the desktop cursor by name:
 
 ```lua
--- Set the root/desktop cursor
 root.cursor("left_ptr")
-
--- Set cursor for a wibox (changes when mouse hovers over it)
-mywibox.cursor = "hand1"
 ```
+
+For a panel, set its `cursor` property, such as `s.mywibox.cursor = "hand1"` after creating the wibar. Common names include `left_ptr`, `hand1`, `watch`, `xterm`, `fleur` and `crosshair`.
 
 ### Theme Variables
 
-Customize cursors for specific operations in your theme:
+<span id="common-cursor-names" />
+<span id="awesomewm-reference" />
+<span id="next-steps" />
 
 ```lua
--- In theme.lua
-theme.cursor_mouse_move = "fleur"      -- During window move
-theme.cursor_mouse_resize = "cross"    -- During window resize
-theme.enable_spawn_cursor = true       -- Show "watch" during app startup
+theme.cursor_mouse_move = "fleur"
+theme.cursor_mouse_resize = "cross"
 ```
 
-See [Theme Variables: Cursors](/docs/reference/beautiful/theme-variables#cursors) for all options.
+## See Also
 
-### Common Cursor Names
-
-Standard X cursor names include: `left_ptr`, `right_ptr`, `hand1`, `hand2`, `watch`, `xterm`, `crosshair`, `fleur`, `sb_h_double_arrow`, `sb_v_double_arrow`, `top_left_corner`, `top_right_corner`, `bottom_left_corner`, `bottom_right_corner`.
-
-### AwesomeWM Reference
-
-For complete API documentation, see the AwesomeWM docs:
-- [root.cursor()](https://awesomewm.org/apidoc/core_components/root.html#cursor)
-- [wibox.cursor](https://awesomewm.org/apidoc/popups_and_layered_windows/wibox.html#cursor)
-- [Appearance](https://awesomewm.org/apidoc/documentation/06-appearance.md.html) - All theme variables including cursors
-
-## Next Steps
-
-- [CLI Control](/docs/guides/cli-control) - Control SomeWM from scripts
+- [Keyboard Layout Switching](keyboard-layouts.md)
+- [Input Reference](../reference/awful/input.md)
+- [CLI Control](cli-control.md)
+- [AwesomeWM Cursor API](https://awesomewm.org/apidoc/core_components/root.html#cursor)

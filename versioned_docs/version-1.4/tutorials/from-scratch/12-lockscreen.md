@@ -1,6 +1,6 @@
 ---
 title: "Lock Screen"
-description: Build a SomeWM lock screen with a UTF-8 password prompt, PAM authentication, and covers for every monitor.
+description: Build a SomeWM lock screen with a password prompt, PAM authentication, and monitor covers.
 sidebar_label: "12 · Lock Screen"
 ---
 
@@ -12,15 +12,15 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="12" />
 
-## Where We Are
+<span id="where-we-are" />
 
 Build a SomeWM lock screen with a password prompt and covers for every monitor. Start from [chapter 11](./11-dashboard.md): `git checkout 11-dashboard`.
 
 ## Why Lock Screens Are Different
 
-SomeWM controls rendering and input while locked; this Lua module builds the prompt and checks the password through PAM.
+SomeWM controls rendering and input while locked. This Lua module builds the prompt and checks the password through PAM.
 
-This chapter uses SomeWM’s in-process Lua lock API, not an external `ext-session-lock` client. Keep the registered interactive surface alive while locked: SomeWM 1.4 forces an unlock if that surface is destroyed.
+This chapter uses SomeWM’s in-process Lua lock API, not an external `ext-session-lock` client. Keep the registered interactive surface alive while locked. SomeWM 1.4 forces an unlock if that surface is destroyed, and reloading tears down Lua lock state.
 
 :::warning AwesomeWM users: use an external locker
 AwesomeWM does not provide these lock APIs. Use a dedicated X11 locker, such as `i3lock` with `xss-lock` or `xsecurelock`. An ordinary fullscreen widget is not a secure lock screen.
@@ -30,9 +30,9 @@ AwesomeWM does not provide these lock APIs. Use a dedicated X11 locker, such as 
 
 The module uses these SomeWM APIs:
 
-- `awesome.set_lock_surface(wibox)` registers the interactive surface; `awesome.clear_lock_surface()` unregisters it.
+- `awesome.set_lock_surface(wibox)` registers the interactive surface. `awesome.clear_lock_surface()` unregisters it.
 - `awesome.add_lock_cover(wibox)` and `awesome.remove_lock_cover(wibox)` register and unregister covers for other monitors.
-- `awesome.lock()` locks the session; `awesome.unlock()` unlocks after successful authentication. `awesome.locked` reports the state.
+- `awesome.lock()` locks the session. `awesome.unlock()` unlocks after successful authentication. `awesome.locked` reports the state.
 - `awesome.authenticate(password)` checks the current user’s password through PAM and returns a boolean.
 - `lock::activate`, `lock::deactivate`, and `lock::auth_failed` report locking, unlocking, and rejected authentication.
 
@@ -40,7 +40,6 @@ Load `lockscreen` through the existing `try()` guard so a module-loading error d
 
 ```lua
 -- rc.lua
--- Lockscreen: somewm's built-in session lock support.
 try("lockscreen", function()
   require("lockscreen").init()
 end)
@@ -76,7 +75,6 @@ Keep widget references in module-local variables so input and signal handlers ca
 
 ```lua
 -- lockscreen/init.lua
-  -- Store status container for color changes
   status_container = layout:get_children_by_id("status_container")[1]
 ```
 
@@ -86,7 +84,6 @@ Store surfaces in a table keyed by screen. Give the primary screen the prompt an
 
 ```lua
 -- lockscreen/init.lua
--- Create the interactive wibox for the password screen
 local function create_interactive(s)
   local wb = wibox({
     visible = false,
@@ -103,14 +100,13 @@ local function create_interactive(s)
 end
 ```
 
-`create_cover(s)` omits the widget and registers with `awesome.add_lock_cover`. Create both kinds with `visible = false`; the activation handler shows them. `M.init()` creates the surfaces and connects their handlers:
+`create_cover(s)` omits the widget and registers with `awesome.add_lock_cover`. Create both kinds with `visible = false`. The activation handler shows them. `M.init()` creates the surfaces and connects their handlers:
 
 ```lua
 -- lockscreen/init.lua
 function M.init()
   build_ui()
 
-  -- Build surfaces for all screens
   interactive_screen = screen.primary
   for s in screen do
     if s == interactive_screen then
@@ -132,13 +128,11 @@ When a monitor appears, create a cover and show it if `awesome.locked`. If the p
 
 ```lua
 -- lockscreen/init.lua
-  -- Interactive screen removed during lock - migrate
   awesome.clear_lock_surface()
   surfaces[s] = nil
   interactive_screen = screen.primary or screen[1]
   if interactive_screen then
     if surfaces[interactive_screen] then
-      -- Convert existing cover to interactive
       awesome.remove_lock_cover(surfaces[interactive_screen])
     end
     surfaces[interactive_screen] = create_interactive(interactive_screen)
@@ -148,7 +142,7 @@ When a monitor appears, create a cover and show it if `awesome.locked`. If the p
   end
 ```
 
-In a nested test session with multiple outputs, remove the prompt’s output while locked and check that the prompt appears on a remaining output.
+The module creates surfaces from the geometry available at that moment. It does not register a `property::geometry` handler to resize them later. Test monitor removal and resolution or scale changes before using this custom lockscreen on your desktop.
 
 ## Activation
 
@@ -161,10 +155,8 @@ local function on_lock_activate()
   password_dots.text = ""
   caps_warning.markup = ""
 
-  -- Update greeting (in case time changed)
   greeting.text = get_greeting()
 
-  -- Update battery and caps lock state
   update_battery()
   read_caps_lock_state()
 
@@ -196,11 +188,10 @@ end
 
 `stop_key = nil` prevents a key from automatically stopping the grabber. Escape clears the input without releasing the keyboard. `mask_modkeys` filters bare modifier presses such as Shift and Ctrl.
 
-`handle_key` receives strings such as `"a"`, `"é"`, and `"Shift_R"`. LuaJIT lacks a `utf8` library, so count codepoints by counting bytes that are not UTF-8 continuation bytes:
+The handler accepts single-codepoint strings and rejects named keys. Count codepoints by counting bytes that are not UTF-8 continuation bytes:
 
 ```lua
 -- lockscreen/init.lua
--- Count UTF-8 codepoints in a string (LuaJIT lacks the utf8 library)
 local function utf8_len(s)
   local count = 0
   for i = 1, #s do
@@ -213,7 +204,7 @@ local function utf8_len(s)
 end
 ```
 
-Accept single-codepoint keys: `"é"` adds one dot; `"Shift_R"` adds nothing.
+SomeWM 1.4 sends printable keys as UTF-8 text and control keys as names. `"é"` adds one dot, while a named key such as `"Shift_R"` adds nothing.
 
 ```lua
 -- lockscreen/init.lua
@@ -221,7 +212,6 @@ Accept single-codepoint keys: `"é"` adds one dot; `"Shift_R"` adds nothing.
     if #password > 256 then
       return
     end
-    -- Only append single-codepoint keys; reject named keys like "Shift_R"
     if utf8_len(key) > 1 then
       return
     end
@@ -236,7 +226,6 @@ Display one `●` (`"\xE2\x97\x8F"`) per codepoint. BackSpace must remove a whol
 -- lockscreen/init.lua
   elseif key == "BackSpace" then
     if #password > 0 then
-      -- Walk backwards past UTF-8 continuation bytes
       local i = #password
       while i > 1 and password:byte(i) >= 0x80 and password:byte(i) < 0xC0 do
         i = i - 1
@@ -257,7 +246,6 @@ Escape resets `password` and the dots to empty. Return is where authentication h
         failed_attempts = 0 -- Reset on success
         awesome.unlock()
       else
-        -- Just reset input; lock::auth_failed handles the rest
         password = ""
         password_dots.text = ""
       end
@@ -265,7 +253,7 @@ Escape resets `password` and the dots to empty. Return is where authentication h
     end)
 ```
 
-`awesome.authenticate` blocks while PAM runs. The 50 ms timer gives the status line time to render first; it does not make authentication asynchronous. Success resets the counter and calls `awesome.unlock()`, which emits `lock::deactivate`.
+`awesome.authenticate` blocks while PAM runs. The 50 ms timer gives the status line time to render first. It does not make authentication asynchronous. Success resets the counter and calls `awesome.unlock()`, which emits `lock::deactivate`.
 
 ## Counting Failed Attempts {#failure-is-a-signal-not-a-return-value}
 
@@ -273,7 +261,6 @@ Count failures in the `lock::auth_failed` handler:
 
 ```lua
 -- lockscreen/init.lua
--- Sole owner of the failed_attempts counter
 local function on_auth_failed()
   failed_attempts = failed_attempts + 1
   local plural = failed_attempts == 1 and "attempt" or "attempts"
@@ -300,9 +287,6 @@ Read the initial Caps Lock state when locking:
 
 ```lua
 -- lockscreen/init.lua
--- Read the kernel LED state once (when the lock activates); afterwards the
--- keygrabber tracks Caps_Lock presses itself instead of spawning a shell
--- process for every character typed.
 local function read_caps_lock_state()
 ```
 
@@ -380,11 +364,8 @@ In the nested session, press Super+Shift+E, then `l`. Check that every output is
 
 The finished code is on [the `12-lockscreen` branch](https://github.com/trip-zip/awesome-from-scratch/tree/12-lockscreen).
 
-```bash
-git checkout 12-lockscreen
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 11-dashboard 12-lockscreen`
+Compare your work: `git diff origin/11-dashboard origin/12-lockscreen`
 
 <NextChapter chapter="12" />

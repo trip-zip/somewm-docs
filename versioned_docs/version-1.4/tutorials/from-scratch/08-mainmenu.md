@@ -1,6 +1,6 @@
 ---
 title: "Main Menu"
-description: Replace awful.menu with a data-driven, fully themed main menu built on the modal pattern.
+description: Build a themed application and session menu with mouse and keyboard controls.
 sidebar_label: "08 · Main Menu"
 ---
 
@@ -11,7 +11,7 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="08" />
 
-## Where We Are
+<span id="where-we-are" />
 
 Replace the stock right-click menu with `widgets/mainmenu.lua`, using the [modal controller](./07-exitscreen.md) for visibility and dismissal.
 
@@ -33,7 +33,6 @@ Define the application commands at the top of `widgets/mainmenu.lua`:
 
 ```lua
 -- widgets/mainmenu.lua
--- Application commands
 local apps = {
   file_manager = "thunar",
   terminal = "ghostty",
@@ -41,12 +40,10 @@ local apps = {
 }
 ```
 
-Second, the menu itself:
+Define the menu entries:
 
 ```lua
 -- widgets/mainmenu.lua
--- Menu items definition
--- type: "item" | "separator"
 local menu_items = {
   { type = "item", icon = "󰙀", label = "File Manager", command = apps.file_manager },
   { type = "item", icon = "", label = "Terminal", command = apps.terminal },
@@ -61,7 +58,7 @@ local menu_items = {
 
 The icons are Nerd Font glyphs rendered in JetBrainsMono Nerd Font. They use `fg` for their colour.
 
-`command` is passed to `awful.spawn`; `action` selects an internal operation:
+`command` is passed to `awful.spawn`. `action` selects an internal operation:
 
 ```lua
 -- widgets/mainmenu.lua
@@ -90,7 +87,6 @@ Build a list of selectable items at load time so keyboard navigation skips separ
 
 ```lua
 -- widgets/mainmenu.lua
--- Store an index on each selectable item for comparison with selected_index.
 local selectable_items = {}
 for _, item in ipairs(menu_items) do
   if item.type == "item" then
@@ -110,7 +106,7 @@ local function create_menu_item(item)
   local is_selected = item.selectable_index == selected_index
 ```
 
-and further down, the container that uses it:
+Use it to set the row colours:
 
 ```lua
 -- widgets/mainmenu.lua
@@ -142,10 +138,6 @@ Store the mouse position when the menu opens. Use `place` to position the popup 
 
 ```lua
 -- widgets/mainmenu.lua
--- Where the menu opens: the mouse position at show time. One placement
--- function, installed on the popup (so awful.popup re-applies it whenever
--- the popup is resized, covering the not-yet-measured first show) and called
--- from on_show (so a new anchor takes effect even when the size is unchanged).
 local anchor = { x = 0, y = 0 }
 
 local function place(d)
@@ -216,12 +208,34 @@ Create `widgets/menubutton.lua` to open the menu from the wibar:
 ```lua
 -- widgets/menubutton.lua
 local awful = require("awful")
+local wibox = require("wibox")
 local beautiful = require("beautiful")
-local wrappers = require("widgets.wrappers")
 local mainmenu = require("widgets.mainmenu")
 
-local menubutton = wrappers.image_widget("/grid.svg", beautiful.bg_normal)
-local menubutton_widget = wrappers.square_icon(menubutton, beautiful.primary_color, beautiful.primary_color_hover)
+local menubutton_widget = wibox.widget({
+  {
+    {
+      image = beautiful.icon("grid.svg", beautiful.bg_normal),
+      halign = "center",
+      valign = "center",
+      widget = wibox.widget.imagebox,
+    },
+    margins = beautiful.widget_icon_margins,
+    widget = wibox.container.margin,
+  },
+  bg = beautiful.primary_color,
+  fg = beautiful.fg_normal,
+  shape = beautiful.shape,
+  widget = wibox.container.background,
+})
+
+menubutton_widget:connect_signal("mouse::enter", function(w)
+  w.bg = beautiful.primary_color_hover
+end)
+menubutton_widget:connect_signal("mouse::leave", function(w)
+  w.bg = beautiful.primary_color
+end)
+
 menubutton_widget:add_button(awful.button({}, 1, function()
   mainmenu.toggle()
 end))
@@ -250,7 +264,7 @@ This binding applies to the desktop background. Add Super+W in `keybindings.lua`
   {{ modkey }, "w",                     function () mainmenu.toggle() end,                        "show main menu",                        "awesome"  },
 ```
 
-Restart with Super+Ctrl+R and try all three. Right-click the desktop near a screen edge to watch the clamping work, then drive the menu entirely with j/k and Return.
+Reload with Super+Ctrl+r. Open the menu with the bar button, Super+w, and a desktop right-click. Try opening near a screen edge, then use j/k and Return to launch an installed application.
 
 ## Try It
 
@@ -263,11 +277,8 @@ Restart with Super+Ctrl+R and try all three. Right-click the desktop near a scre
 
 The finished code is on [the `08-mainmenu` branch](https://github.com/trip-zip/awesome-from-scratch/tree/08-mainmenu):
 
-```bash
-git checkout 08-mainmenu
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 07-exitscreen 08-mainmenu`
+Compare your work: `git diff origin/07-exitscreen origin/08-mainmenu`
 
 <NextChapter chapter="08" />

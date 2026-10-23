@@ -13,9 +13,9 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 Read the stock `rc.lua` and run it in a nested session before editing it in later chapters.
 
-## Where We Are
+<span id="where-we-are" />
 
-Clone the companion repository and check out the baseline:
+Clone the companion repository and check out the baseline. If you already cloned it from the overview, run only the checkout command from that directory:
 
 ```bash
 git clone https://github.com/trip-zip/awesome-from-scratch.git
@@ -29,11 +29,11 @@ The branch contains a README and the stock `rc.lua`, formatted with `stylua`. Co
 
 `rc.lua` is a Lua program executed at startup. It configures the desktop and registers callbacks for later events. Reload with `Mod4+Control+r` to read it again.
 
-SomeWM looks for your config at `$XDG_CONFIG_HOME/somewm/rc.lua` (`~/.config/somewm/rc.lua` by default); AwesomeWM uses `~/.config/awesome/rc.lua`. This series points the nested session at the checkout’s `rc.lua` instead.
+SomeWM looks for your config at `$XDG_CONFIG_HOME/somewm/rc.lua` (`~/.config/somewm/rc.lua` by default). AwesomeWM uses `~/.config/awesome/rc.lua`. This series points the nested session at the checkout’s `rc.lua` instead.
 
 ## A Tour of the File
 
-Open `rc.lua` alongside this section. Comments such as `-- {{{ Menu` mark sections; `-- @DOC_WIBAR@` markers are for API documentation generation.
+Open `rc.lua` alongside this section. Comments such as `-- {{{ Menu` mark sections. `-- @DOC_WIBAR@` markers are for API documentation generation.
 
 ### Libraries and Error Handling
 
@@ -50,7 +50,7 @@ naughty.connect_signal("request::display_error", function(message, startup)
 end)
 ```
 
-A **signal** is a named event. `connect_signal` registers a callback; this one shows a critical notification when `naughty` reports an error.
+A **signal** is a named event. `connect_signal` registers a callback. This one shows a critical notification when `naughty` reports an error.
 
 :::note
 The SomeWM config also includes an X11-only-code warning, tag persistence across monitor hotplug, and built-in lockscreen setup.
@@ -66,12 +66,10 @@ error: rc.lua:72: module 'lockscreen' not found
 Comment out the require before running this branch on AwesomeWM:
 
 ```lua
--- rc.lua
--- Initialize lockscreen (must be after beautiful.init)
 -- require("lockscreen").init()
 ```
 
-`Mod4+Shift+Escape` also calls the SomeWM-only `awesome.lock()`; avoid that binding on AwesomeWM. Chapter 01 removes the require and chapter 02 replaces the bindings. Chapter 12 explains locking on each.
+`Mod4+Shift+Escape` also calls the SomeWM-only `awesome.lock()`. Avoid that binding on AwesomeWM. Chapter 01 removes the require and chapter 02 replaces the bindings. Chapter 12 explains locking on each.
 :::
 
 ### Theme and Variables
@@ -116,7 +114,7 @@ Right-click the desktop to open the menu. Chapter 08 replaces it.
 
 ### Layouts, Wallpaper, and Tags
 
-`request::default_layouts` sets the layouts cycled with `Mod4+Space`; `request::wallpaper` sets each screen’s wallpaper. Each screen also gets nine **tags** (workspaces), selected with `Mod4+1` through `Mod4+9`. A window, called a **client**, can belong to several tags. Selecting a tag shows its clients.
+`request::default_layouts` sets the layouts cycled with `Mod4+Space`. `request::wallpaper` sets each screen’s wallpaper. Each screen also gets nine **tags** (workspaces), selected with `Mod4+1` through `Mod4+9`. A window, called a **client**, can belong to several tags. Selecting a tag shows its clients.
 
 ### The Wibar
 
@@ -127,7 +125,6 @@ The largest section runs once per screen, building a taglist, a prompt box, a la
   s.mywibox = awful.wibar({
     position = "top",
     screen = s,
-    -- @DOC_SETUP_WIDGETS@
     widget = {
       layout = wibox.layout.align.horizontal,
       { -- Left widgets
@@ -152,7 +149,7 @@ The largest section runs once per screen, building a taglist, a prompt box, a la
 
 ### Keybindings
 
-Bindings are `awful.key` objects appended in themed batches:
+Bindings are `awful.key` objects registered in groups:
 
 ```lua
 -- rc.lua
@@ -171,7 +168,6 @@ When a new client appears, `ruled.client` matches it against declarative rules a
 
 ```lua
 -- rc.lua
-  -- All clients will match this rule.
   ruled.client.append_rule({
     id = "global",
     rule = {},
@@ -188,11 +184,10 @@ Other rules float selected apps and enable titlebars on normal windows and dialo
 
 ### Final Signals
 
-The file closes with three signal handlers: one that builds each client's titlebar widget tree on `request::titlebars`, one that displays notifications in the default box, and sloppy focus:
+The final handlers build titlebars, display notifications, and focus windows on mouse entry:
 
 ```lua
 -- rc.lua
--- Enable sloppy focus, so that focus follows mouse.
 client.connect_signal("mouse::enter", function(c)
   c:activate({ context = "mouse_enter", raise = false })
 end)
@@ -215,7 +210,7 @@ Xephyr :1 -ac -br -noreset -screen 1280x720 &
 DISPLAY=:1 awesome -c "$PWD/rc.lua"
 ```
 
-You should see a grey bar, nine tags, and a right-click menu. Open a terminal with `Mod4+Return`, cycle layouts with `Mod4+Space`, and open help with `Mod4+s`. See [nested testing](../../guides/testing-with-nested-compositor.md) and the [Mod4 remapping caveat](../../troubleshooting.md).
+You should see a grey bar and nine tags. Right-click the background to open the menu. Open two terminals with `Mod4+Return`, then press `Mod4+Space` to switch from floating to tile. Open shortcut help with `Mod4+s`. See [nested testing](../../guides/testing-with-nested-compositor.md) and the [Mod4 remapping caveat](../../troubleshooting.md).
 
 ## When You Break It
 
@@ -236,9 +231,6 @@ Next, build [the theme](./01-theme.md). The [series overview](./index.md#the-cha
 
 The code for this chapter is [the `00-default` branch](https://github.com/trip-zip/awesome-from-scratch/tree/00-default):
 
-```bash
-git checkout 00-default
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
 <NextChapter chapter="00" />

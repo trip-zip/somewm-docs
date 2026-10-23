@@ -1,10 +1,9 @@
 ---
 title: "Theme: Palettes, Shapes, Recolored Assets"
-description: "Build a theme system from scratch: named palettes, semantic color roles, a one-line font rule, DPI-aware sizing, a global shape switch, and SVG assets recolored at load time."
+description: "Create a theme with named palettes, shared fonts, shapes, and recoloured icons."
 sidebar_label: "01 · Theme"
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
 import SomewmOnly from '@site/src/components/SomewmOnly';
 import ChapterNav from '@site/src/components/FromScratch/ChapterNav';
 import NextChapter from '@site/src/components/FromScratch/NextChapter';
@@ -13,20 +12,11 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="01" />
 
-<YouWillLearn>
-
-- What `beautiful` is and how `beautiful.init()` turns one Lua table into the styling source for every widget
-- How named palettes plus semantic color roles let one variable switch the entire look
-- How to enforce one font family and DPI-aware sizing across the whole config
-- How a global shape switch and `gears.color.recolor_image` keep assets in sync with the theme
-
-</YouWillLearn>
-
-## Where We Are
+<span id="where-we-are" />
 
 This chapter replaces the default theme with `theme/theme.lua`. Start from [chapter 00](./00-default.md): `git checkout 00-default`.
 
-## What Beautiful Actually Is
+## Load the theme {#what-beautiful-actually-is}
 
 `beautiful.init(path)` loads a Lua table of theme values. Widgets read them through `beautiful`, such as `beautiful.bg_normal`.
 
@@ -84,7 +74,7 @@ The theme uses the white layout icons (`*w.png`). Extra files copied from the de
 
 Also copy `square.svg` and `rounded_square.svg` from the chapter's [`theme/titlebar/`](https://github.com/trip-zip/awesome-from-scratch/tree/01-theme/theme/titlebar) into your config's `theme/titlebar/`. These are new assets, not included in the default theme.
 
-The rest of this chapter is edits to that copy:
+Edit that copy using the sections below:
 
 | The default theme | What we turn it into |
 | --- | --- |
@@ -99,7 +89,7 @@ The rest of this chapter is edits to that copy:
 
 Point `beautiful.init` at your copy and reload before changing anything, so you know the copy itself is sound.
 
-Import the theme helpers:
+At the top of your copied theme, keep these imports and replace its path and table setup with:
 
 ```lua
 -- theme/theme.lua
@@ -108,6 +98,10 @@ local theme_assets = require("beautiful.theme_assets")
 local xresources = require("beautiful.xresources")
 local dpi = xresources.apply_dpi
 local recolor = require("gears").color.recolor_image
+local config_dir = gears.filesystem.get_configuration_dir()
+local theme_path = config_dir .. "theme"
+local theme = {}
+theme.icon_dir = config_dir .. "icons"
 ```
 
 ## Palettes: Named Colors, One Switch
@@ -142,7 +136,7 @@ Change `"gruvbox"` to `"nord"` and reload to switch palettes.
 The Nord palette repeats a few hexes (`red` and `soft_red` are both `#BF616A`, for example). Nord simply has fewer accent colors than gruvbox, so the "soft" variants collapse onto their base color. The keys still exist so lookups never fail.
 :::
 
-## Semantic Roles: The Layer That Makes Switching Work
+## Name colours by their use {#semantic-roles-the-layer-that-makes-switching-work}
 
 Assign colours to roles that widgets can use:
 
@@ -161,7 +155,7 @@ theme.urgent_hover = color.soft_red
 theme.fg_dim = color.grey1 -- secondary text: dates, hints, muted status lines
 ```
 
-Widgets use these roles: `beautiful.active` for enabled toggles, `beautiful.primary_color` for selected launcher rows, and `beautiful.urgent` for battery warnings. The `_hover` variants apply on mouse-over; `fg_dim` is for secondary text.
+Widgets use these roles: `beautiful.active` for enabled toggles, `beautiful.primary_color` for selected launcher rows, and `beautiful.urgent` for battery warnings. The `_hover` variants apply on mouse-over. `fg_dim` is for secondary text.
 
 Set built-in theme variables from the palette:
 
@@ -193,7 +187,7 @@ theme.font = theme.font_size(10)
 
 ## DPI-Aware Sizing
 
-`xresources.apply_dpi`, aliased to `dpi`, scales sizes by the screen's DPI. Use `dpi(8)` for 8 pixels at standard density and proportionally more on denser screens.
+`xresources.apply_dpi`, aliased to `dpi`, scales sizes using the configured DPI when called. Without a screen argument, these theme values use the global DPI. Output scaling is separate.
 
 ```lua
 -- theme/theme.lua
@@ -212,13 +206,9 @@ A widget's `shape` function draws an outline on a Cairo context: `function(cr, w
 
 ```lua
 -- theme/theme.lua
--- Global shape setting: "rectangle" or "rounded"
--- Change this single setting to switch all widget corners
 theme.shape_style = "rectangle"
 theme.corner_radius = 12 -- Only used when shape_style = "rounded"
 
--- Helper function to get the appropriate shape
--- Usage: beautiful.shape(cr, w, h) or beautiful.shape
 function theme.shape(cr, w, h)
   if theme.shape_style == "rounded" then
     gears.shape.rounded_rect(cr, w, h, theme.corner_radius)
@@ -232,17 +222,17 @@ Set `shape = beautiful.shape` on widgets that should follow `shape_style`. The `
 
 ## Recoloring Assets at Load Time
 
+<span id="the-commented-reference-block" />
+
 `gears.color.recolor_image(path, color)`, aliased to `recolor`, returns an in-memory copy of an image tinted to the given colour.
 
 Select a titlebar icon by shape and tint it for each state:
 
 ```lua
 -- theme/theme.lua
--- Button icon switches based on shape_style
 local titlebar_icon = theme.shape_style == "rounded" and theme_path .. "/titlebar/rounded_square.svg"
   or theme_path .. "/titlebar/square.svg"
 
--- Unfocused (normal) = dimmed gray, Focused = colored
 theme.titlebar_close_button_normal = recolor(titlebar_icon, color.grey1)
 theme.titlebar_close_button_focus = recolor(titlebar_icon, color.soft_red)
 ```
@@ -256,27 +246,11 @@ theme.layout_fairv = recolor(theme_path .. "/layouts/fairvw.png", color.fg)
 theme.layout_floating = recolor(theme_path .. "/layouts/floatingw.png", color.fg)
 ```
 
-## The Commented Reference Block
-
-The file includes commented settings:
-
-```lua
--- theme/theme.lua
--- theme.arcchart_bg = nil
--- theme.arcchart_border_color = nil
--- theme.arcchart_border_width = nil
--- theme.arcchart_color = nil
-```
-
-These commented settings list built-in theme variables. To style tooltips, for example, find a `tooltip_` setting, uncomment it, and assign a value.
-
-:::warning
-`theme.foo = nil` is not a no-op, it erases `theme.foo`. These lines sit after the real settings, so uncommenting one and leaving it `nil` deletes the value set two hundred lines earlier.
-:::
-
 ## The Rest of the File
 
-The remaining settings apply the same colours, shapes, and sizes to notifications, taglists, menus, and other widgets. `systray_icon_style` is a SomeWM extension for per-app tray styling; AwesomeWM ignores it.
+The remaining settings apply the same colours, shapes, and sizes to notifications, taglists, menus, and other widgets. `systray_icon_style` is a SomeWM extension for per-app tray styling. AwesomeWM ignores it.
+
+The commented theme settings are examples. Assign a value when uncommenting one, since assigning `nil` removes any earlier value.
 
 End the file with:
 
@@ -287,7 +261,7 @@ return theme
 
 ## Wallpapers in rc.lua
 
-Back in `rc.lua`, the stock config painted one wallpaper from `beautiful.wallpaper`. We replace it with a per-screen list and a defensive setter:
+Replace the stock wallpaper handler in `rc.lua` with a per-screen image list and setter:
 
 ```lua
 -- rc.lua
@@ -299,10 +273,20 @@ local wallpapers = {
 local function set_wallpaper(s)
   local wp = wallpapers[s.index] or wallpapers[1]
   if wp and gears.filesystem.file_readable(wp) then
-    gears.wallpaper.maximized(wp, s, true)
+    awful.wallpaper({
+      screen = s,
+      bg = "#282828",
+      widget = {
+        image = wp,
+        upscale = true,
+        downscale = true,
+        halign = "center",
+        valign = "center",
+        widget = wibox.widget.imagebox,
+      },
+    })
   else
-    -- Fallback to gruvbox dark color
-    gears.wallpaper.set("#282828")
+    awful.wallpaper({ screen = s, bg = "#282828" })
   end
 end
 
@@ -311,11 +295,11 @@ screen.connect_signal("request::wallpaper", function(s)
 end)
 ```
 
-Screens use the wallpaper at their index; extra screens reuse the first. Missing files produce a solid background. `request::wallpaper` runs per screen at startup and when its geometry changes.
+Screens use the wallpaper at their index. Extra screens reuse the first. The imagebox preserves the image aspect ratio, so uncovered space uses the background colour. Missing files produce a solid background. `request::wallpaper` runs at startup and on geometry changes.
 
 ### Screen Scaling <SomewmOnly />
 
-The same commit adds a small opt-in scaling table:
+For SomeWM, optionally set output scales:
 
 ```lua
 -- rc.lua
@@ -331,7 +315,7 @@ awful.screen.connect_for_each_screen(function(s)
 end)
 ```
 
-`screen.scale` is fractional output scaling, a Wayland capability with no X11 equivalent, so this is somewm-only. On AwesomeWM the table ships empty and the block never assigns anything, so it is harmless; X11 users scale via `dpi()` (which we are already using everywhere) or xrandr instead.
+`screen.scale` is SomeWM-only. Leave the table empty on AwesomeWM and configure X11 display scaling separately. See [fractional scaling](../../guides/fractional-scaling.md) for SomeWM output scales and DPI.
 
 ## The Rest of the rc.lua Diff
 
@@ -348,16 +332,14 @@ filemanager = "thunar"
 Use applications you have installed. Move `awful.layout.suit.tile` before `awful.layout.suit.floating` in `request::default_layouts` to start new tags tiled. To disable focus following the mouse, comment out this handler:
 
 ```lua
--- rc.lua
--- Enable sloppy focus, so that focus follows mouse.
 -- client.connect_signal("mouse::enter", function(c)
---     c:activate { context = "mouse_enter", raise = false }
+--   c:activate({ context = "mouse_enter", raise = false })
 -- end)
 ```
 
 Remove the X11-config startup notice and `require("lockscreen").init()` for AwesomeWM. The `lockscreen` module is SomeWM-only, so requiring it fails on AwesomeWM. [Chapter 12](./12-lockscreen.md) covers locking on both compositors.
 
-A `.stylua.toml` lands too, so `stylua .` formats the whole config consistently from here on.
+The checkpoint includes `.stylua.toml` for formatting with `stylua .`.
 
 ## Try It
 
@@ -370,11 +352,8 @@ A `.stylua.toml` lands too, so `stylua .` formats the whole config consistently 
 
 The finished code for this chapter is on [the `01-theme` branch](https://github.com/trip-zip/awesome-from-scratch/tree/01-theme).
 
-```bash
-git checkout 01-theme
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 00-default 01-theme`
+Compare your work: `git diff origin/00-default origin/01-theme`
 
 <NextChapter chapter="01" />

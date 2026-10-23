@@ -8,13 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # Shadows <SomewmOnly />
 
-SomeWM provides built-in compositor-level shadows for windows and wiboxes. This replaces the need for external compositors like picom, which only work on X11.
-
-Shadows are rendered using a smoothstep gradient falloff, displayed via the wlroots scene graph. They support full customization including color, blur radius, offset, and opacity.
-
-:::note What gets shadows?
-This feature applies to **clients** (application windows) and **drawins/wiboxes** (containers like panels and popups). Individual widgets inside a wibox do not get separate shadows. For widget-level shadow effects, use Lua/Cairo drawing techniques.
-:::
+The compositor draws shadows around clients and drawins, including wiboxes and popups. Widgets inside a wibox do not get separate compositor shadows.
 
 ## Theme Variables
 
@@ -28,15 +22,15 @@ These control shadows for application windows (clients):
 |----------|------|---------|-------------|
 | `shadow_enabled` | boolean | `false` | Enable shadows globally for clients |
 | `shadow_radius` | integer | `12` | Blur radius in pixels |
-| `shadow_offset_x` | integer | `-15` | Horizontal offset (negative = left/behind window) |
-| `shadow_offset_y` | integer | `-15` | Vertical offset (negative = up/behind window) |
+| `shadow_offset_x` | integer | `-15` | Horizontal offset (negative = left) |
+| `shadow_offset_y` | integer | `-15` | Vertical offset (negative = up) |
 | `shadow_spread` | integer | `0` | Grow the shadow by this many pixels on every side before the blur |
 | `shadow_corner_radius` | integer | `0` | Round the shadow's corners by this many pixels |
 | `shadow_opacity` | number | `0.75` | Shadow opacity (0.0 = invisible, 1.0 = solid) |
 | `shadow_color` | string | `"#000000"` | Shadow color as `"#RRGGBB"` or `"#RRGGBBAA"` (alpha multiplies opacity) |
 
 :::note
-`shadow_clip` from earlier 1.4 releases is still accepted but has no effect since 1.4.3. The shadow is drawn at its offset and fades out on every side; sides fully covered by the window are simply not visible.
+`shadow_clip` from earlier 1.4 releases is still accepted but has no effect since 1.4.3. The shadow is drawn at its offset and fades out on every side. Sides fully covered by the window are simply not visible.
 :::
 
 ### Drawin/Wibox Shadow Variables
@@ -57,7 +51,7 @@ These control shadows for drawins and wiboxes (panels, popups, notifications). I
 ### Theme Example
 
 ```lua
--- In your theme.lua
+local theme = {}
 
 -- Enable shadows for all windows
 theme.shadow_enabled = true
@@ -85,7 +79,7 @@ When set to a boolean:
 - `true` - Enable shadow using theme defaults
 - `false` - Disable shadow for this client
 
-When set to a table, you can override individual shadow parameters:
+Each assignment starts from theme defaults, not the previous override. A table enables the shadow unless `enabled = false`. Assigning `nil` disables it.
 
 | Option | Type | Description |
 |--------|------|-------------|
@@ -96,7 +90,7 @@ When set to a table, you can override individual shadow parameters:
 | `spread` | integer | Grow the shadow by this many pixels on every side before the blur |
 | `corner_radius` | integer | Round the shadow's corners by this many pixels |
 | `opacity` | number | Shadow opacity (0.0-1.0) |
-| `color` | string or table | Color as `"#RRGGBB"`/`"#RRGGBBAA"` string or `{r, g, b, a}` table (values 0.0-1.0); alpha multiplies opacity |
+| `color` | string or table | Color as `"#RRGGBB"`/`"#RRGGBBAA"` string or `{r, g, b, a}` table (values 0.0-1.0). Alpha multiplies opacity |
 
 **Examples:**
 
@@ -165,7 +159,7 @@ local mywibox = wibox {
 
 -- Popup with custom shadow
 local popup = awful.popup {
-    widget = mytextbox,
+    widget = wibox.widget.textbox("Popup"),
     shadow = {
         radius = 16,
         opacity = 0.8
@@ -200,121 +194,31 @@ end)
 
 ## Using Rules
 
-Apply shadow settings automatically based on window properties:
-
-```lua
-ruled.client.append_rule {
-    rule = { class = "mpv" },
-    properties = { shadow = false }  -- No shadows on video players
-}
-
-ruled.client.append_rule {
-    rule = { type = "dialog" },
-    properties = {
-        shadow = {
-            radius = 8,
-            opacity = 0.9
-        }
-    }
-}
-
-ruled.client.append_rule {
-    rule = { class = "Rofi" },
-    properties = {
-        shadow = {
-            color = "#5588FF",
-            radius = 24,
-            opacity = 0.5
-        }
-    }
-}
-```
+[Client rules](../guides/client-rules.md) accept a `shadow` property. Rules apply when a client is managed, not every time `floating` or `fullscreen` changes.
 
 ## Dynamic Control
 
-Use `somewm-client` to control shadows at runtime:
+`awesome.shadow_reload()` rereads `beautiful.shadow_*` defaults and updates existing shadows. Per-object overrides remain in effect.
 
-```bash
-# Enable shadows on all clients (uses theme defaults)
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = true end'
-
-# Classic drop shadow (bottom-right)
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { offset_x = 8, offset_y = 8, radius = 12, opacity = 0.6 } end'
-
-# Soft halo (all sides)
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { offset_x = 0, offset_y = 0, radius = 24, opacity = 0.5 } end'
-
-# Blue glow
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { color = "#3399FF", radius = 20, opacity = 0.6, offset_x = 0, offset_y = 0 } end'
-
-# Tight, sharp shadow
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { radius = 4, offset_x = 3, offset_y = 3, opacity = 0.9 } end'
-
-# Wibar panel shadow (downward)
-somewm-client eval 'for s in screen do if s.mywibox then s.mywibox.shadow = { radius = 12, offset_x = 0, offset_y = 4, opacity = 0.7 } end end'
-
-# Disable shadows
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = false end'
+```lua
+local beautiful = require("beautiful")
+beautiful.shadow_enabled = true
+awesome.shadow_reload()
 ```
 
 ## Complete Example
 
-A full theme.lua shadow configuration:
-
-```lua
-local theme = {}
-
--- ... other theme settings ...
-
--- Shadow configuration
-theme.shadow_enabled = true
-theme.shadow_radius = 14
-theme.shadow_offset_x = -18
-theme.shadow_offset_y = -18
-theme.shadow_opacity = 0.7
-theme.shadow_color = "#000000"
-
--- Wiboxes/panels: subtle shadows or none
-theme.shadow_drawin_enabled = true
-theme.shadow_drawin_radius = 8
-theme.shadow_drawin_opacity = 0.4
-
-return theme
-```
-
-Combined with rules in rc.lua:
-
-```lua
--- Fullscreen windows don't need shadows
-ruled.client.append_rule {
-    rule_any = { fullscreen = true },
-    properties = { shadow = false }
-}
-
--- Floating windows get enhanced shadows
-ruled.client.append_rule {
-    rule_any = { floating = true },
-    properties = {
-        shadow = {
-            radius = 20,
-            offset_x = -20,
-            offset_y = -20,
-            opacity = 0.85
-        }
-    }
-}
-```
+See [Configure shadows](../guides/shadows.md) for theme settings, rules, and runtime changes.
 
 ## Technical Notes
 
 - The shadow is the window's frame grown by `spread`, moved by the offset, rounded by `corner_radius`, fading out over `radius` pixels on every side
 - It is rendered as a nine-patch (4 corner patches, 4 stretched edge strips, solid interior), so resizing never re-renders textures
-- Each shadow renders its own tiny gradient textures (a few KB total)
 - The falloff uses a smoothstep function that visually approximates Gaussian blur
 - Shadow nodes are placed below content in the wlroots scene graph
 
 ## See Also
 
-- [How-To: Shadows](/docs/guides/shadows) - Practical guide for common shadow configurations
-- [Theme Tutorial](/docs/tutorials/theme) - Introduction to theming
-- [Beautiful Theme Variables](/docs/reference/beautiful/theme-variables) - All theme variables
+- [How-To: Shadows](/docs/1.4/guides/shadows) - Practical guide for common shadow configurations
+- [Theme Tutorial](/docs/1.4/tutorials/theme) - Introduction to theming
+- [Beautiful Theme Variables](/docs/1.4/reference/beautiful/theme-variables) - All theme variables

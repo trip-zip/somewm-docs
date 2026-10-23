@@ -11,7 +11,7 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="05" />
 
-## Where We Are
+<span id="where-we-are" />
 
 Route apps to tags, set floating behaviour, and build titlebars. Start from [chapter 04](./04-wibar.md): `git checkout 04-wibar`.
 
@@ -24,7 +24,6 @@ Register rules with `ruled.client.append_rule` inside the startup `request::rule
 ```lua
 -- rc.lua
 ruled.client.connect_signal("request::rules", function()
-  -- All clients will match this rule.
   ruled.client.append_rule({
     id = "global",
     rule = {},
@@ -60,7 +59,7 @@ A rule can also run a `callback` with the client as its argument:
     end,
 ```
 
-`grant` and `deny` control activation requests by context. Here, tag switches and focus history may activate the client; mouse entry may not. Clicking still focuses it.
+`grant` and `deny` control activation requests by context. Here, tag switches and focus history may activate the client. Mouse entry may not. Clicking still focuses it.
 
 `c:to_secondary_section()` puts new windows in the secondary section (the stack), preserving the current window in the primary section (the master area).
 
@@ -81,7 +80,7 @@ A rule can also run a `callback` with the client as its argument:
         "Kruler",
 ```
 
-The full rule also matches `name` and `role`; see the checkpoint branch. Its `properties = { floating = true }` makes matching utility windows float.
+The full rule also matches `name` and `role`. See the checkpoint branch. Its `properties = { floating = true }` makes matching utility windows float.
 
 ## Titlebars Where They Belong
 
@@ -104,7 +103,6 @@ Add rules for your own apps, replacing these class names as needed:
 
 ```lua
 -- rc.lua
-  -- Tag assignment: Browsers always open on "web" tag
   ruled.client.append_rule({
     id = "browsers",
     rule_any = {
@@ -114,7 +112,7 @@ Add rules for your own apps, replacing these class names as needed:
   })
 ```
 
-`tag = "web"` selects a tag by name on the client’s screen. If you rename a tag from chapter 04, update its rules too. Class matching is case-sensitive; Firefox has used both `firefox` and `Firefox`.
+`tag = "web"` first searches the client’s screen, then other screens, for a tag with that name. If you rename a tag from chapter 04, update its rules too. String matching uses case-sensitive Lua patterns. Firefox has used both `firefox` and `Firefox`. Use anchors such as `^firefox$` for an exact match.
 
 The branch also routes Discord, Slack, Telegram, and Signal to "chat". Open a browser while viewing "code" and check that it appears on "web".
 
@@ -128,7 +126,7 @@ somewm-client client list
 
 ```
 id=1 title="tmux a" class="com.mitchellh.ghostty" tags=1 floating=false
-id=2 title="Hacker News — Mozilla Firefox" class="firefox" tags=1 floating=false
+id=2 title="Hacker News - Mozilla Firefox" class="firefox" tags=1 floating=false
 ```
 
 The `class=` field is what a rule's `class` matcher compares against. For one
@@ -155,9 +153,7 @@ Match picture-in-picture windows by title:
       skip_taskbar = true,
     },
     callback = function(c)
-      -- Position at top-right with margin
       awful.placement.top_right(c, { margins = { top = 50, right = 20 } })
-      -- Make it smaller (good for video)
       c:geometry({ width = 480, height = 270 })
     end,
   })
@@ -170,7 +166,7 @@ A popped-out video shares the browser’s class, so this rule matches its title.
 - `sticky = true`: shows it on every tag.
 - `skip_taskbar = true`: asks tasklists and window lists to omit it.
 
-The callback places it at the top-right with 50 pixels of top margin and 20 on the right, then sets its size to 480 × 270. Open a picture-in-picture video to check the rule.
+The checkpoint places the window before resizing it. That can move the final right edge offscreen. When adapting it, call `c:geometry` before `awful.placement.top_right`, and use `"^Picture%-in%-Picture$"` for an exact hyphenated title match. Test with a picture-in-picture video.
 
 ## Callback-Only Rules: File Managers
 
@@ -210,7 +206,7 @@ The branch first routes `class = "Steam"` to "games". A second rule uses `except
   })
 ```
 
-This matches either listed title, any Steam window, or any dialog. `except = { name = "Steam" }` excludes windows with that title regardless of which condition matched. `except_any` provides the corresponding any-property exclusion.
+This matches either listed title, any Steam window, or any dialog. `except = { name = "Steam" }` excludes any title matching the Lua pattern `Steam`, including titles containing that word. `except_any` provides the corresponding any-property exclusion.
 
 Rules run in order, and a client can match several. A browser gets the global rule’s focus and placement settings as well as its tag assignment.
 
@@ -220,7 +216,6 @@ Build titlebars in a `request::titlebars` handler. First, define a helper for bu
 
 ```lua
 -- rc.lua
--- Wrap a titlebar button with hover effects
 local function with_hover(button, hover_opacity)
   hover_opacity = hover_opacity or 1.0
   local normal_opacity = 0.7
@@ -287,11 +282,8 @@ Reload the config. Check that normal windows and dialogs have titlebars, the but
 The finished code for this chapter is on
 [the `05-rules-titlebars` branch](https://github.com/trip-zip/awesome-from-scratch/tree/05-rules-titlebars).
 
-```bash
-git checkout 05-rules-titlebars
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 04-wibar 05-rules-titlebars`
+Compare your work: `git diff origin/04-wibar origin/05-rules-titlebars`
 
 <NextChapter chapter="05" />

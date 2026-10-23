@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # awful.layout.suit.carousel <SomewmOnly />
 
-A scrollable tiling layout where clients are arranged as columns on an infinite horizontal strip. The viewport auto-scrolls to keep the focused column visible, with smooth animation between positions.
+Carousel arranges clients in columns and scrolls the viewport to keep the focused column visible.
 
 Two orientations are available:
 
@@ -32,7 +32,7 @@ end)
 
 ## Configuration Properties
 
-These properties are set directly on the layout table. They apply globally to all tags using the carousel layout.
+Set these on `awful.layout.suit.carousel`. Both orientations share them across all tags.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -40,7 +40,7 @@ These properties are set directly on the layout table. They apply globally to al
 | `carousel.width_presets` | table | `{1/3, 1/2, 2/3, 1.0}` | Preset fractions cycled by `cycle_column_width()` |
 | `carousel.center_mode` | string | `"on-overflow"` | Viewport centering behavior (see [Centering Modes](#centering-modes)) |
 | `carousel.scroll_duration` | number | `0.2` | Scroll animation duration in seconds (0 = instant snap) |
-| `carousel.peek_width` | number | `0` | Pixels of visible content on each side to show adjacent column edges (`useless_gap` is added automatically) |
+| `carousel.peek_width` | number | `0` | Space reserved on each side of the viewport, in logical pixels |
 
 ```lua
 local carousel = awful.layout.suit.carousel
@@ -65,32 +65,27 @@ These can be set in your `beautiful` theme to override carousel defaults.
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
 | `beautiful.carousel_default_column_width` | number | `1.0` | Default width fraction for new columns |
-| `beautiful.carousel_peek_width` | number | `0` | Pixels of visible content on each side for adjacent column edges (`useless_gap` is added automatically) |
-| `beautiful.carousel_center_mode` | string | `"on-overflow"` | Viewport centering behavior |
+| `beautiful.carousel_peek_width` | number | `0` | Space reserved on each side, in logical pixels |
 | `beautiful.layout_carousel` | surface | nil | Layoutbox icon for the carousel layout |
 
-Theme variables take priority over the properties set directly on the layout table.
+`beautiful.carousel_default_column_width` and `beautiful.carousel_peek_width` override the corresponding layout properties. There is no `beautiful.carousel_center_mode` setting in 1.4.
 
 ```lua
--- In your theme.lua
-theme.carousel_default_column_width = 0.5
-theme.carousel_peek_width = 40
-theme.carousel_center_mode = "always"
-theme.layout_carousel = theme_dir .. "/layouts/carousel.png"
+local beautiful = require("beautiful")
+beautiful.carousel_default_column_width = 0.5
+beautiful.carousel_peek_width = 40
 ```
 
 ## Column Width Functions
 
-All column width functions operate on the currently focused column.
+These functions act on the focused column of the selected carousel tag. In the vertical variant, width fractions control column height and clients stack horizontally. A fraction of 1 uses `max(1, viewport_size - 2 * peek_width)`, before client border and gap adjustments.
 
 ### `carousel.cycle_column_width()`
 
 Cycle the focused column's width through the `width_presets` list. If the current width does not match any preset, the cycle starts from the first preset.
 
 ```lua
-awful.key({ modkey }, "bracketright", function()
-    awful.layout.suit.carousel.cycle_column_width()
-end, { description = "cycle column width", group = "carousel" })
+awful.layout.suit.carousel.cycle_column_width()
 ```
 
 ### `carousel.adjust_column_width(delta)`
@@ -102,13 +97,8 @@ Adjust the focused column's width by a delta fraction. The result is clamped to 
 | `delta` | number | Fraction to add (e.g. `0.1` to widen, `-0.1` to narrow) |
 
 ```lua
-awful.key({ modkey, "Control" }, "l", function()
-    awful.layout.suit.carousel.adjust_column_width(0.05)
-end, { description = "widen column", group = "carousel" })
-
-awful.key({ modkey, "Control" }, "h", function()
-    awful.layout.suit.carousel.adjust_column_width(-0.05)
-end, { description = "narrow column", group = "carousel" })
+awful.layout.suit.carousel.adjust_column_width(0.05)
+awful.layout.suit.carousel.adjust_column_width(-0.05)
 ```
 
 ### `carousel.set_column_width(fraction)`
@@ -129,9 +119,7 @@ awful.layout.suit.carousel.set_column_width(0.5)
 Set the focused column's width to 1.0 (full viewport width).
 
 ```lua
-awful.key({ modkey }, "m", function()
-    awful.layout.suit.carousel.maximize_column()
-end, { description = "maximize column", group = "carousel" })
+awful.layout.suit.carousel.maximize_column()
 ```
 
 ## Vertical Stacking Functions
@@ -147,13 +135,8 @@ Pull the first client from an adjacent column into the focused column, stacking 
 | `dir` | number | Direction: `-1` for left/up, `1` for right/down |
 
 ```lua
-awful.key({ modkey, "Shift" }, "l", function()
-    awful.layout.suit.carousel.consume_window(1)
-end, { description = "consume window from right", group = "carousel" })
-
-awful.key({ modkey, "Shift" }, "h", function()
-    awful.layout.suit.carousel.consume_window(-1)
-end, { description = "consume window from left", group = "carousel" })
+awful.layout.suit.carousel.consume_window(1)
+awful.layout.suit.carousel.consume_window(-1)
 ```
 
 ### `carousel.expel_window()`
@@ -161,9 +144,7 @@ end, { description = "consume window from left", group = "carousel" })
 Move the focused client out of its column into a new column inserted after the current one. The new column inherits the source column's width. No-op if the column contains only one client.
 
 ```lua
-awful.key({ modkey, "Shift" }, "e", function()
-    awful.layout.suit.carousel.expel_window()
-end, { description = "expel window to new column", group = "carousel" })
+awful.layout.suit.carousel.expel_window()
 ```
 
 ### `carousel.push_window(dir)`
@@ -178,13 +159,8 @@ Move the focused client in the given direction. The behavior depends on whether 
 | `dir` | number | Direction: `-1` for left/up, `1` for right/down |
 
 ```lua
-awful.key({ modkey, "Control" }, "l", function()
-    awful.layout.suit.carousel.push_window(1)
-end, { description = "push window right", group = "carousel" })
-
-awful.key({ modkey, "Control" }, "h", function()
-    awful.layout.suit.carousel.push_window(-1)
-end, { description = "push window left", group = "carousel" })
+awful.layout.suit.carousel.push_window(1)
+awful.layout.suit.carousel.push_window(-1)
 ```
 
 ## Column Movement
@@ -198,13 +174,8 @@ Swap the focused column with its neighbor in strip order.
 | `dir` | number | Direction: `-1` for left/up, `1` for right/down |
 
 ```lua
-awful.key({ modkey, "Mod1" }, "l", function()
-    awful.layout.suit.carousel.move_column(1)
-end, { description = "move column right", group = "carousel" })
-
-awful.key({ modkey, "Mod1" }, "h", function()
-    awful.layout.suit.carousel.move_column(-1)
-end, { description = "move column left", group = "carousel" })
+awful.layout.suit.carousel.move_column(1)
+awful.layout.suit.carousel.move_column(-1)
 ```
 
 ## Edge Focus
@@ -218,13 +189,8 @@ Focus the first client in the first column on the strip.
 Focus the first client in the last column on the strip.
 
 ```lua
-awful.key({ modkey }, "Home", function()
-    awful.layout.suit.carousel.focus_first_column()
-end, { description = "focus first column", group = "carousel" })
-
-awful.key({ modkey }, "End", function()
-    awful.layout.suit.carousel.focus_last_column()
-end, { description = "focus last column", group = "carousel" })
+awful.layout.suit.carousel.focus_first_column()
+awful.layout.suit.carousel.focus_last_column()
 ```
 
 ## Viewport Control
@@ -303,20 +269,18 @@ carousel.vertical.make_gesture_binding()
 
 ## Automatic Behaviors
 
-The carousel layout handles several things automatically:
-
 - **Focus auto-scroll.** When focus changes to a client in a different column, the viewport scrolls to bring that column into view. Focus changes within the same column (between stacked clients) do not trigger scrolling.
 - **New window insertion.** New clients are inserted as columns immediately after the focused column. If no column is focused, they are appended to the end of the strip.
 - **Empty column cleanup.** When a client is closed or moved, any column that becomes empty is automatically removed from the strip.
-- **Reconciliation.** On every arrange call, the column state is reconciled against the live client list. Clients removed by other means (rules, signals) are cleaned up and new clients are adopted.
+- **Client list updates.** Each layout pass removes clients that left the tag and adds newly tiled clients.
 - **Strip centering.** If the total strip width is narrower than the viewport, the strip is centered in the available space.
 
 ## See Also
 
-- **[Scrollable Tiling](/docs/concepts/scrollable-tiling)** - How the strip, viewport, and animation model works
-- **[Carousel Tutorial](/docs/tutorials/carousel)** - Step-by-step first session with the carousel layout
-- **[Column Widths Guide](/docs/guides/carousel-column-widths)** - Resize and customize column widths
-- **[Stacking Guide](/docs/guides/carousel-stacking)** - Consume, expel, and push windows between columns
-- **[Gesture Scrolling Guide](/docs/guides/carousel-gestures)** - Set up touchpad gesture panning
-- **[Centering Modes Guide](/docs/guides/carousel-centering)** - Choose and configure viewport centering
-- **[Layout Protocol Reference](/docs/reference/awful/layout)** - The `arrange(p)` contract and built-in layouts
+- **[Scrollable Tiling](/docs/1.4/concepts/scrollable-tiling)** - How the strip, viewport, and animation model works
+- **[Carousel Tutorial](/docs/1.4/tutorials/carousel)** - Step-by-step first session with the carousel layout
+- **[Column Widths Guide](/docs/1.4/guides/carousel-column-widths)** - Resize and customize column widths
+- **[Stacking Guide](/docs/1.4/guides/carousel-stacking)** - Consume, expel, and push windows between columns
+- **[Gesture Scrolling Guide](/docs/1.4/guides/carousel-gestures)** - Set up touchpad gesture panning
+- **[Centering Modes Guide](/docs/1.4/guides/carousel-centering)** - Choose and configure viewport centering
+- **[Layout Protocol Reference](/docs/1.4/reference/awful/layout)** - The `arrange(p)` contract and built-in layouts

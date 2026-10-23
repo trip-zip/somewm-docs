@@ -11,7 +11,7 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="11" />
 
-## Where We Are
+<span id="where-we-are" />
 
 Build a dashboard on Mod+D with a clock, volume and brightness sliders, quick settings, and a calendar. To catch up: `git checkout 10-launcher`.
 
@@ -39,13 +39,9 @@ local function create_dashboard_widget()
   return wibox.widget({
     {
       {
-        -- Profile section (user info + time)
         profile.create(),
-        -- Sliders section (volume, brightness)
         sliders.create(),
-        -- Quick toggles section
         toggles.create(),
-        -- Calendar section
         calendar.create(),
         spacing = config.spacing,
         layout = wibox.layout.fixed.vertical,
@@ -67,7 +63,6 @@ Create the popup with `modal.new` and place it below the bar:
 
 ```lua
 -- dashboard/init.lua
--- Docked top right, under the bar, on whatever screen the popup is on
 local function place(d)
   awful.placement.top_right(d, {
     margins = {
@@ -90,15 +85,12 @@ local controller = modal.new({
       shape = beautiful.shape,
       border_width = config.border_width,
       border_color = config.border_color,
-      -- Placement lives on the popup itself, not in on_show: awful.popup
-      -- re-applies it whenever the popup's size changes, which covers the
-      -- first show, when the widget has not been measured yet.
       placement = place,
     })
   end,
 ```
 
-`profile.create()` starts timers; `sliders.create()` and `toggles.create()` register signal handlers and refresh functions. Call them once in `build_popup`. Rebuilding on every opening would leave the previous timers and handlers running.
+`profile.create()` starts timers. `sliders.create()` and `toggles.create()` register signal handlers and refresh functions. Call them once in `build_popup`. Rebuilding on every opening would leave the previous timers and handlers running.
 
 On each opening, reposition the popup and read the current system values:
 
@@ -107,7 +99,6 @@ On each opening, reposition the popup and read the current system values:
   on_show = function(popup)
     place(popup)
 
-    -- Sync sections that mirror system state (volume, brightness, radios)
     sliders.refresh()
     toggles.refresh()
   end,
@@ -138,7 +129,7 @@ In `dashboard/sliders.lua`, define `create_slider` for volume and brightness:
   })
 ```
 
-`bar_color` sets the track colour; `bar_active_color` sets its filled portion. Dragging the handle changes `value` and emits `property::value`.
+`bar_color` sets the track colour. `bar_active_color` sets its filled portion. Dragging the handle changes `value` and emits `property::value`.
 
 The factory takes `get_cmd`, which reads the system value, and `set_cmd`, which converts a value into a command to apply it.
 
@@ -148,9 +139,6 @@ Use a flag to distinguish programmatic assignments from user input:
 
 ```lua
 -- dashboard/sliders.lua
-  -- property::value fires for programmatic assignments too. Without this
-  -- guard, reading the system value and assigning it to the slider would
-  -- immediately write that same value back to the system.
   local setting_programmatically = false
 
   local function set_value(value)
@@ -159,7 +147,6 @@ Use a flag to distinguish programmatic assignments from user input:
     setting_programmatically = false
   end
 
-  -- Update value display when slider changes; only user drags hit the system
   slider:connect_signal("property::value", function()
     local value = math.floor(slider.value)
     value_widget.text = value .. "%"
@@ -174,15 +161,13 @@ The handler runs synchronously during `slider.value` assignment, before the flag
 
 ### Reading the System
 
-`read_system_value` runs `get_cmd` asynchronously and passes its result to `set_value`. Register each reader in `refreshers`; `sliders.refresh()` calls them when the dashboard opens:
+`read_system_value` runs `get_cmd` asynchronously and passes its result to `set_value`. Register each reader in `refreshers`. `sliders.refresh()` calls them when the dashboard opens:
 
 ```lua
 -- dashboard/sliders.lua
   read_system_value()
   table.insert(refreshers, read_system_value)
 
-  -- External changes (e.g. the volume keybindings) announce themselves with a
-  -- bare signal; the payload is fetched fresh from the system.
   if signal then
     awesome.connect_signal(signal, read_system_value)
   end
@@ -203,13 +188,13 @@ Configure the volume slider:
   )
 ```
 
-Volume updates on `volume::update`. Brightness passes `nil` for the signal and refreshes when the dashboard opens.
+Volume refreshes on `volume::update`, subject to the command-ordering limitation in [chapter 03](03-widgets.md). Brightness refreshes when the dashboard opens. The example falls back to 50 when a command returns no usable number, so that display is not proof that the read succeeded.
 
 ## Quick Settings {#toggles-buttons-that-tell-the-truth}
 
-`create_toggle(icon, label, key, on_toggle, check_cmd, signal)` builds a button for WiFi, Bluetooth, DND, night light, airplane mode, or microphone. Store state in `toggle_states[key]`; `update_visual` applies active or inactive styling.
+`create_toggle(icon, label, key, on_toggle, check_cmd, signal)` builds a button for WiFi, Bluetooth, DND, night light, airplane mode, or microphone. Store state in `toggle_states[key]`. `update_visual` applies active or inactive styling.
 
-A click flips the state optimistically, restyles, and runs the command:
+A click changes the displayed state before running the command:
 
 ```lua
 -- dashboard/toggles.lua
@@ -222,14 +207,12 @@ A click flips the state optimistically, restyles, and runs the command:
   end))
 ```
 
-External controls use `nmcli`, `bluetoothctl`, `gammastep`, and `wpctl`.
+Install `nmcli`, `bluetoothctl`, `gammastep`, `wpctl`, and `brightnessctl` for the controls you use. Nested sessions operate the same host services.
 
 Most toggles also use a `check_cmd` to read the current state, since commands can fail or settings can change elsewhere. Register each reader in `refreshers` so `toggles.refresh()` updates the grid whenever the dashboard opens:
 
 ```lua
 -- dashboard/toggles.lua
--- Interpret a check command's output as on/off. Frontier patterns (%f) match
--- whole words only, so "on" inside "disconnected" does not count as enabled.
 local function parse_enabled(stdout)
   local out = stdout:lower()
   return (
@@ -247,8 +230,6 @@ Connect DND to the [notification module](./06-notifications.md):
 
 ```lua
 -- dashboard/toggles.lua
-  -- Do Not Disturb toggle: drives the notification module directly and
-  -- follows it when DND is toggled from anywhere else
   toggle_states.dnd = notifications.config.dnd_mode
   local dnd_toggle = create_toggle("󰂛", "DND", "dnd", function(state)
     notifications.set_dnd_mode(state)
@@ -268,8 +249,6 @@ local function render_battery(status)
   end
 end
 
--- The shared battery module already polls every 10 seconds; this section
--- just renders whatever it broadcasts instead of running its own poll
 awesome.connect_signal("battery::update", render_battery)
 ```
 
@@ -277,12 +256,11 @@ In `create()`, call `battery.get_status(render_battery)` to initialise the displ
 
 ## Calendar {#calendar-same-techniques-new-widget}
 
-`wibox.widget.calendar.month` renders a month from a date table. Its `fn_embed` callback receives a cell widget and a flag such as `"header"`, `"weekday"`, `"focus"`, or `"normal"`. Use it to style cells; this branch highlights today:
+`wibox.widget.calendar.month` renders a month from a date table. Its `fn_embed` callback receives a cell widget and a flag such as `"header"`, `"weekday"`, `"focus"`, or `"normal"`. Use it to style cells. This branch highlights today:
 
 ```lua
 -- dashboard/calendar.lua
     elseif flag == "focus" then
-      -- Today - orange background (no forced size, let it match other cells)
       widget.font = beautiful.font_size(10, "Bold")
       return wibox.widget({
         widget,
@@ -308,11 +286,8 @@ Press Mod+D. Check that the dashboard opens below the bar and that the volume sl
 
 The finished code is on [the `11-dashboard` branch](https://github.com/trip-zip/awesome-from-scratch/tree/11-dashboard).
 
-```bash
-git checkout 11-dashboard
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 10-launcher 11-dashboard`
+Compare your work: `git diff origin/10-launcher origin/11-dashboard`
 
 <NextChapter chapter="11" />

@@ -1,15 +1,7 @@
 /**
- * The Awesome From Scratch chapter ladder, in order.
- *
- * Single source of truth for the sequence. `ChapterNav`, `NextChapter`, and
- * `ChapterList` all read from here, so the prev/next chain, the overview list,
- * and the "chapter NN of 12" counter cannot drift apart.
- *
- * `slug` matches three things at once: the file name in
- * `docs/tutorials/from-scratch/`, the URL segment, and the git branch in
- * trip-zip/awesome-from-scratch. Keep them identical.
- *
- * The sidebar labels in `sidebars.ts` are `NN · label`.
+ * Chapter metadata for the SomeWM 1.4 From Scratch series.
+ * ChapterNav, NextChapter, and ChapterList use this order and these labels.
+ * Slugs match files in versioned_docs/version-1.4/tutorials/from-scratch/.
  */
 
 export interface Chapter {
@@ -32,7 +24,7 @@ export const chapters: Chapter[] = [
     label: 'The Default Config',
     title: 'The Default Config',
     blurb:
-      'The baseline. What the stock rc.lua already does, and how to test a change in a nested session instead of your real desktop.',
+      'Run the stock rc.lua in a nested session and identify its main sections.',
   },
   {
     num: '01',
@@ -40,7 +32,7 @@ export const chapters: Chapter[] = [
     label: 'Theme',
     title: 'Theme: Palettes, Shapes, Recolored Assets',
     blurb:
-      'A theme directory of your own: named palettes, semantic color roles, DPI-aware sizing, one global shape switch, and SVG assets recolored at load time.',
+      'Create a theme with named palettes, shared fonts, shapes, and recoloured icons.',
   },
   {
     num: '02',
@@ -48,15 +40,15 @@ export const chapters: Chapter[] = [
     label: 'Keybindings',
     title: 'Keybindings: A Table You Can Read',
     blurb:
-      'Every binding moves into one scannable table in its own module, with the awful.key boilerplate generated instead of repeated.',
+      'Move bindings into a module and register global, client, and tag shortcuts.',
   },
   {
     num: '03',
     slug: '03-widgets',
     label: 'Widgets',
-    title: 'Widgets: Wrappers, Clock, Volume, Battery, WiFi',
+    title: 'Widgets: Clock, Volume, Battery, WiFi',
     blurb:
-      'Four real widgets and the shared wrapper vocabulary they are made of, fed by timers, async shell reads, and a custom signal.',
+      'Build clock, volume, battery, and WiFi widgets with shared theme settings and asynchronous updates.',
   },
   {
     num: '04',
@@ -64,7 +56,7 @@ export const chapters: Chapter[] = [
     label: 'Wibar',
     title: 'Wibar: Our Own Bar',
     blurb:
-      'The stock bar goes away. A wibar factory, named tags with icons, a custom taglist that shows state, and a styled systray.',
+      'Build a bar with icon tags, a clock, status widgets, and a system tray.',
   },
   {
     num: '05',
@@ -72,7 +64,7 @@ export const chapters: Chapter[] = [
     label: 'Rules and Titlebars',
     title: 'Client Rules and Titlebars',
     blurb:
-      'Windows land where they should: apps routed to tags, dialogs floating, and titlebars drawn in your own theme.',
+      'Route applications to tags, set floating rules, and style titlebars.',
   },
   {
     num: '06',
@@ -80,7 +72,7 @@ export const chapters: Chapter[] = [
     label: 'Notifications',
     title: 'Notifications: Routing, History, Center',
     blurb:
-      'A full notification system: rule-based routing and styling, a history store with unread tracking, a notification center popup, and do-not-disturb.',
+      'Add notification rules, history, unread counts, snooze, and do-not-disturb.',
   },
   {
     num: '07',
@@ -88,7 +80,7 @@ export const chapters: Chapter[] = [
     label: 'Exit Screen',
     title: 'Exit Screen: The Modal Pattern',
     blurb:
-      'The pivot chapter. Extract the modal pattern into modal.lua, refactor the notification center onto it, and build a power menu as its first consumer.',
+      'Share popup controls through modal.lua and build a power menu.',
   },
   {
     num: '08',
@@ -96,7 +88,7 @@ export const chapters: Chapter[] = [
     label: 'Main Menu',
     title: 'Main Menu',
     blurb:
-      'A data-driven, fully themed replacement for awful.menu, built on the modal pattern from chapter 07.',
+      'Build an application and session menu with mouse and keyboard controls.',
   },
   {
     num: '09',
@@ -104,7 +96,7 @@ export const chapters: Chapter[] = [
     label: 'Window Switcher',
     title: 'Window Switcher',
     blurb:
-      'Alt-Tab semantics: clients ordered most-recently-used, and hold-and-release input that deliberately does not fit the modal pattern.',
+      'Build a Super+Tab window switcher that activates on modifier release.',
   },
   {
     num: '10',
@@ -112,7 +104,7 @@ export const chapters: Chapter[] = [
     label: 'Launcher',
     title: 'Launcher: A Menubar Replacement',
     blurb:
-      'A native fuzzy-search app launcher: parse .desktop files, scan asynchronously, score matches, and cache icon lookups on disk.',
+      'Build an application launcher with fuzzy search and cached icons.',
   },
   {
     num: '11',
@@ -120,7 +112,7 @@ export const chapters: Chapter[] = [
     label: 'Dashboard',
     title: 'Dashboard: The Control Center',
     blurb:
-      'Profile, sliders, toggles, and calendar composed into one popup, bound two ways to the system without feedback loops.',
+      'Build a dashboard with sliders, quick settings, a clock, and a calendar.',
   },
   {
     num: '12',
@@ -128,7 +120,7 @@ export const chapters: Chapter[] = [
     label: 'Lock Screen',
     title: 'Lock Screen',
     blurb:
-      'The finale: a native lock screen on the session-lock API, with PAM authentication, a masked UTF-8 prompt, and multi-monitor covers.',
+      'Build a SomeWM lock screen with a password prompt and monitor covers.',
   },
 ];
 

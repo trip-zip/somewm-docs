@@ -1,6 +1,6 @@
 ---
 title: "Notifications: Routing, History, Center"
-description: "Replace the notification defaults with a system of your own: rule-based routing and styling, a history store with unread tracking, a notification center popup, and do-not-disturb."
+description: "Add notification rules, history, unread counts, snooze, and do-not-disturb."
 sidebar_label: "06 · Notifications"
 ---
 
@@ -11,7 +11,7 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="06" />
 
-## Where We Are
+<span id="where-we-are" />
 
 Build `notifications.lua` with routing rules, history, snooze, and a notification center. To catch up: `git checkout 05-rules-titlebars`.
 
@@ -32,9 +32,6 @@ Load the module after theme initialisation, using this wrapper to report errors:
 
 ```lua
 -- rc.lua
--- Catch module errors so the rest of the config can load.
--- Report to stderr as well: if notifications failed to load, there may be
--- no request::display handler to show the error.
 local function try(name, fn)
   local ok, err = pcall(fn)
   if not ok then
@@ -48,7 +45,6 @@ local function try(name, fn)
   return ok
 end
 
--- Notification system: after theme init, before anything can fire a notification.
 try("notifications", function()
   require("notifications")
 end)
@@ -61,7 +57,6 @@ Start `notifications.lua` with a module table, `local M = {}`. Its `M.config` de
 ```lua
 -- notifications.lua
 ruled.notification.connect_signal("request::rules", function()
-  -- Default rule for all notifications
   ruled.notification.append_rule({
     rule = {},
     properties = {
@@ -71,7 +66,6 @@ ruled.notification.connect_signal("request::rules", function()
     },
   })
 
-  -- Critical notifications
   ruled.notification.append_rule({
     rule = { urgency = "critical" },
     properties = {
@@ -87,26 +81,17 @@ ruled.notification.connect_signal("request::rules", function()
   })
 ```
 
-The empty rule matches every notification; later rules override its properties. A `low` urgency rule follows with dimmer colours, a three-second timeout, and slight transparency.
+The empty rule matches every notification. Later rules override its properties. A `low` urgency rule follows with dimmer colours, a three-second timeout, and slight transparency.
 
-The browser rule checks for VIP contacts:
+Add the names you want highlighted to `M.config.vip_contacts`:
 
 ```lua
 -- notifications.lua
-  -- VIP contacts. A notification whose title or message mentions one of these names
-  -- gets the style below, is bumped to critical, and never times out. Matching is
-  -- plain text and case-insensitive, so punctuation in a name is safe.
-  --
-  -- Empty by default. Put the handful of people you must not miss in here.
   vip_contacts = {},
 ```
 
 ```lua
 -- notifications.lua
--- Does this notification mention one of the VIP contacts?
---
--- Note the `1, true` on find: that is a plain-text search. Without it, a name
--- containing a `-` or `.` would be read as a Lua pattern and match the wrong things.
 local function is_vip(notification)
   local haystack = ((notification.title or "") .. " " .. (notification.message or "")):lower()
 
@@ -140,7 +125,6 @@ The browser rule uses it in its callback:
         n:append_actions(naughty.action({ name = "Reply" }))
         n:append_actions(naughty.action({ name = "Snooze" }))
       else
-        -- Standard browser notification actions
         n:append_actions(naughty.action({ name = "Open" }))
         n:append_actions(naughty.action({ name = "Snooze" }))
       end
@@ -152,7 +136,7 @@ The browser rule uses it in its callback:
 
 ## History, Unread Counts, and Quiet Modes
 
-`M.history` stores up to `M.max_history = 50` notifications. `M.unread_count` tracks unread entries:
+History is held in Lua memory and is lost on reload. `M.history` stores up to `M.max_history = 50` notifications. `M.unread_count` tracks unread entries:
 
 ```lua
 -- notifications.lua
@@ -171,12 +155,10 @@ local function add_to_history(notification)
   table.insert(M.history, 1, history_item)
   M.unread_count = M.unread_count + 1
 
-  -- Store reference to active notification
   if notification.resident then
     M.active_notifications[history_item.id] = notification
   end
 
-  -- Trim history if too long
   while #M.history > M.max_history do
     local removed = table.remove(M.history)
     if not removed.is_read then
@@ -220,12 +202,10 @@ Connect the display handler:
 ```lua
 -- notifications.lua
 naughty.connect_signal("request::display", function(n)
-  -- Set resident for important notifications
   if n.urgency == "critical" or n.app_name == "System" then
     n.resident = true
   end
 
-  -- Always record, even when DND swallows the popup
   add_to_history(n)
   awesome.emit_signal("notification::unread_count", M.unread_count)
 
@@ -284,7 +264,6 @@ Clicking an action emits `invoked` with the notification and the action:
 -- notifications.lua
 naughty.connect_signal("invoked", function(n, a)
   if a.name == "Open" or a.name == "Reply" then
-    -- Find notification's app and activate it
     for _, c in ipairs(client.get()) do
       if c.class and n.app_name and c.class:lower():match(n.app_name:lower()) then
         c:activate({ context = "notification_action", raise = true })
@@ -300,11 +279,8 @@ naughty.connect_signal("invoked", function(n, a)
       icon = n.icon,
     })
   elseif a.name == "Dismiss" or a.name == "Mark Read" or a.name == "Read" or a.name == "Archive" then
-    -- Every acknowledge-style action does the same local thing: the history
-    -- entry is read. What "Archive" means is up to the sending app.
     mark_read_in_history(n)
   elseif a.name == "Open Folder" then
-    -- Open the Downloads folder with whatever the system prefers
     awful.spawn("xdg-open " .. os.getenv("HOME") .. "/Downloads")
   end
 end)
@@ -334,7 +310,6 @@ Use a single-shot timer to create the notification again:
     timeout = duration_seconds,
     single_shot = true,
     callback = function()
-      -- Re-create the notification
       naughty.notification({
         title = notif_data.title,
         message = notif_data.message .. "\n\n<i>(Snoozed " .. duration_label .. " ago)</i>",
@@ -343,20 +318,17 @@ Use a single-shot timer to create the notification again:
         icon = notif_data.icon,
       })
 
-      -- Remove from snoozed list
       M.snoozed_notifications[snooze_id] = nil
     end,
   })
 ```
 
-The new notification goes through the rules and display handler again. Store the timer in `M.snoozed_notifications` to prevent garbage collection before it fires.
+The new notification goes through the rules and display handler again. Store the timer in `M.snoozed_notifications`, then call `timer:start()` as the full function does. This declaration alone does not start it.
 
-`awful.popup` sizes itself to its widget. `build_picker_widget` creates duration buttons; `show_snooze_picker` places the popup near the cursor and clamps it to the screen edges. Add a dismissal handler:
+`awful.popup` sizes itself to its widget. `build_picker_widget` creates duration buttons. `show_snooze_picker` places the popup near the cursor and clamps it to the screen edges. Add a dismissal handler:
 
 ```lua
 -- notifications.lua (inside show_snooze_picker)
-  -- Wait until the opening click finishes before connecting the handler.
-  -- Disconnect it after dismissal.
   gears.timer.start_new(0.1, function()
     local close_handler
     close_handler = function()
@@ -373,7 +345,6 @@ The notification center uses a `popup_visible` flag and two dismissal handlers:
 
 ```lua
 -- notifications.lua
--- Close when a client is clicked
 client.connect_signal("button::press", function()
   if popup_visible then
     M.hide_notification_center()
@@ -412,9 +383,9 @@ Press `Mod+Shift+N` or click the clock to open the history, grouped by app:
     end
 ```
 
-`group_order` sorts apps by their latest notification. Groups start collapsed; clicking a header toggles its entry in `expanded_groups` and rebuilds the popup.
+`group_order` sorts apps by their latest notification. Groups start collapsed. Clicking a header toggles its entry in `expanded_groups` and rebuilds the popup.
 
-Click a notification to mark it read, or its clock button to snooze it. **Clear Read** removes read entries and their active references; **Clear All** resets history, the unread count, and active references. `max_visible` limits the popup to 15 rows.
+Click a notification to mark it read, or its clock button to snooze it. **Clear Read** removes read entries and their active references. **Clear All** resets history, the unread count, and active references. `max_visible` limits the popup to 15 rows.
 
 In `widgets/clock.lua`, add an unread badge and a click handler:
 
@@ -427,13 +398,11 @@ end))
 
 ```lua
 -- widgets/clock.lua
--- Update badge when unread count changes
-awesome.connect_signal("notification::unread_count", function(count)
-  set_clock()
-end)
+set_badge()
+awesome.connect_signal("notification::unread_count", set_badge)
 ```
 
-Inside `set_clock`, the badge shows `math.min(notifications.unread_count, 99)` and hides itself when the count is zero. Add a keybinding in `keybindings.lua`:
+Inside `set_badge`, the badge shows `math.min(notifications.unread_count, 99)` and hides itself when the count is zero. Add a keybinding in `keybindings.lua`:
 
 ```lua
 -- keybindings.lua
@@ -446,7 +415,7 @@ Reload the config, then generate some traffic from the Lua prompt (`Mod+x`):
 require("notifications").generate_sample_notifications()
 ```
 
-Check the five samples: the battery warning should stay top middle, Discord appear top right, and Firefox bottom right. The clock should show an unread badge. Press `Mod+Shift+N` to see the grouped history.
+After about three seconds, check the five samples: the battery warning should stay top middle, Discord appear top right, and Firefox bottom right. The clock should show an unread badge. Press `Mod+Shift+N` to see the grouped history.
 
 ## Try It
 
@@ -457,13 +426,10 @@ Check the five samples: the battery warning should stay top middle, Discord appe
 
 ## Checkpoint
 
-Your code should now match [the `06-notifications` branch](https://github.com/trip-zip/awesome-from-scratch/tree/06-notifications).
+The complete files are on [the `06-notifications` branch](https://github.com/trip-zip/awesome-from-scratch/tree/06-notifications).
 
-```bash
-git checkout 06-notifications
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 05-rules-titlebars 06-notifications`
+Compare your work: `git diff origin/05-rules-titlebars origin/06-notifications`
 
 <NextChapter chapter="06" />

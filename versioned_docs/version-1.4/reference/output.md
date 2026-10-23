@@ -8,9 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 # output <SomewmOnly />
 
-The `output` object represents a physical monitor connector. Unlike [screen](/docs/reference/screen) objects (which are created and destroyed when outputs are enabled or disabled), output objects persist from the moment a monitor is plugged in until it is physically disconnected.
-
-This is a SomeWM-only feature. AwesomeWM has no equivalent because X11 delegates monitor management to `xrandr`. On Wayland, the compositor owns the output lifecycle, so SomeWM exposes it directly.
+An `output` represents a connected monitor or a nested/headless display. It persists across disable/enable cycles until the output is removed. Its [screen](screen.md) exists only while enabled.
 
 ## Output vs Screen
 
@@ -74,28 +72,16 @@ print(o.physical_width)  -- 597 (mm)
 | `enabled` | boolean | read/write | Whether the output is active |
 | `scale` | number | read/write | Output scale factor (0.1 to 10.0) |
 | `transform` | number/string | read/write | Rotation/flip (see values below) |
-| `mode` | table | write | Set resolution `{width, height, refresh?}` |
+| `mode` | table | write | Set `{width, height, refresh?}`. Refresh is in millihertz. Read `current_mode` to inspect it |
 | `position` | table | read/write | Layout position `{x, y}` |
 | `adaptive_sync` | boolean | read/write | Variable refresh rate (VRR/FreeSync) |
 
 ```lua
-local o = output.get_by_name("eDP-1")
-
--- Scale a HiDPI laptop display
+local o = output[1]
 o.scale = 1.5
-
--- Rotate an external monitor
-o.transform = "90"
-
--- Set resolution
-o.mode = { width = 2560, height = 1440 }
-
--- Position right of another output
-o.position = { x = 2560, y = 0 }
-
--- Disable an output
-o.enabled = false
 ```
+
+Mode, transform, and adaptive-sync changes depend on backend and monitor support. A failed commit raises a Lua error.
 
 #### Transform Values
 
@@ -104,9 +90,9 @@ The `transform` property accepts both integers (Wayland protocol values) and str
 | Integer | String | Effect |
 |---------|--------|--------|
 | 0 | `"normal"` | No transformation |
-| 1 | `"90"` | 90 degrees clockwise |
+| 1 | `"90"` | 90 degrees counter-clockwise |
 | 2 | `"180"` | 180 degrees |
-| 3 | `"270"` | 270 degrees clockwise |
+| 3 | `"270"` | 270 degrees counter-clockwise |
 | 4 | `"flipped"` | Horizontal flip |
 | 5 | `"flipped-90"` | Flip + 90 degrees |
 | 6 | `"flipped-180"` | Flip + 180 degrees |
@@ -119,9 +105,9 @@ Reading `transform` always returns an integer. Setting it accepts either form.
 | Property | Type | Access | Description |
 |----------|------|--------|-------------|
 | `modes` | table | read | All supported modes |
-| `current_mode` | table/nil | read | Active mode (nil if disabled) |
+| `current_mode` | table/nil | read | Active advertised mode. Nil if disabled or using a custom mode, including many nested/headless outputs |
 
-Each mode is a table: `{width, height, refresh, preferred}`.
+Each mode is `{width, height, refresh, preferred}`. Width and height are physical pixels. Refresh is millihertz, so `60000` means 60 Hz. Setting a mode requires a listed resolution. An omitted or zero refresh selects the first matching resolution, otherwise the closest listed refresh is used.
 
 ```lua
 -- List all supported modes
@@ -143,13 +129,13 @@ end
 |----------|------|--------|-------------|
 | `screen` | screen/nil | read | Associated screen (nil when disabled) |
 | `valid` | boolean | read | False after physical disconnect |
-| `virtual` | boolean | read | True for headless, nested, or fake screen outputs |
+| `virtual` | boolean | read | True for headless or nested outputs |
 
 ```lua
 -- Navigate from output to screen and back
 local o = output[1]
 local s = o.screen           -- the screen for this output
-assert(s.output == o)        -- bidirectional link
+if s then assert(s.output == o) end
 ```
 
 ## Methods
@@ -164,18 +150,19 @@ output.count()
 output.get_by_name("HDMI-A-1")  -- returns output or nil
 
 -- Numeric indexing
-output[1]
-output(2)
+local first = output[1]
+local second = output(2)
 
 -- Iterate
-for o in output do ... end
+for o in output do print(o.name) end
 ```
 
 ### Instance Methods
 
 ```lua
 -- Connect to instance signals
-o:connect_signal("property::scale", function() ... end)
+local handler = function(o) print(o.scale) end
+o:connect_signal("property::scale", handler)
 o:disconnect_signal("property::scale", handler)
 o:emit_signal("my-custom-signal")
 ```
@@ -186,72 +173,42 @@ o:emit_signal("my-custom-signal")
 
 | Signal | Arguments | Description |
 |--------|-----------|-------------|
-| `added` | `o` | New output connected. Fires after screen is ready, so `o.screen` is available. |
+| `added` | `o` | Output connected, after initial screen setup. `o.screen` is nil if disabled |
 | `removed` | `o` | Output disconnected. Fires while output is still valid (properties readable). |
 
 ### Instance Signals
 
 | Signal | Arguments | Description |
 |--------|-----------|-------------|
-| `property::enabled` | (none) | Output enabled or disabled |
-| `property::scale` | (none) | Scale factor changed |
-| `property::transform` | (none) | Rotation/flip changed |
-| `property::mode` | (none) | Resolution changed |
-| `property::position` | (none) | Layout position changed |
-| `property::adaptive_sync` | (none) | VRR toggled |
-| `property::screen` | (none) | Screen link changed (nil to screen, or screen to nil) |
+| `property::enabled` | `o` | Output enabled or disabled |
+| `property::scale` | `o` | Scale factor changed |
+| `property::transform` | `o` | Rotation/flip changed |
+| `property::mode` | `o` | Resolution changed |
+| `property::position` | `o` | Layout position changed |
+| `property::adaptive_sync` | `o` | VRR toggled |
+| `property::screen` | `o` | Screen link changed (nil to screen, or screen to nil) |
 
-Property signals fire regardless of how the change was made. If an external tool like `wlr-randr` or `kanshi` changes the output, the corresponding `property::*` signals still fire, keeping Lua in sync.
+Output-management changes made by tools such as `wlr-randr` also emit property signals. Connecting a class `added` handler immediately calls it for existing outputs as well as future ones.
 
 ## Common Patterns
 
 ### Per-Output Configuration
 
-The output object's persistence is its key feature. Because the same output object stays alive across enable/disable cycles, you can use it as a stable key for configuration:
-
-```lua
-local output_config = {}
-
-output.connect_signal("added", function(o)
-    -- Configure based on hardware
-    if o.name:match("^eDP") then
-        output_config[o] = { scale = 1.5, tags = {"1","2","3","4","5"} }
-    elseif o.make == "Dell" then
-        output_config[o] = { scale = 1.0, tags = {"web","code","docs"} }
-    else
-        output_config[o] = { scale = 1.0, tags = {"1","2","3"} }
-    end
-
-    -- Apply scale immediately
-    o.scale = output_config[o].scale
-end)
-
-screen.connect_signal("request::desktop_decoration", function(s)
-    local config = output_config[s.output]
-    if config then
-        awful.tag(config.tags, s, awful.layout.suit.tile)
-    end
-end)
-```
+See [Multi-monitor setup](../guides/multi-monitor.md) for connector-specific scale, position, tags, and wibars. `request::desktop_decoration` can run before `output.added`, so tag creation must not depend on data first populated in `added`.
 
 ### Identify Monitor Hardware
 
 ```lua
-output.connect_signal("added", function(o)
-    print("Connected: " .. o.name)
-    print("  Make:   " .. (o.make or "unknown"))
-    print("  Model:  " .. (o.model or "unknown"))
-    print("  Serial: " .. (o.serial or "unknown"))
-    print("  Size:   " .. o.physical_width .. "x" .. o.physical_height .. " mm")
-end)
+for o in output do
+    print(o.name, o.make, o.model, o.serial)
+end
 ```
 
 ### React to External Tool Changes
 
 ```lua
--- Fires whether scale was set from Lua, wlr-randr, or kanshi
-output[1]:connect_signal("property::scale", function()
-    print("Scale changed to: " .. output[1].scale)
+output[1]:connect_signal("property::scale", function(o)
+    print(o.name, o.scale)
 end)
 ```
 
@@ -259,32 +216,25 @@ end)
 
 ```lua
 output.connect_signal("added", function(o)
-    -- o.screen is guaranteed to be available here
-    print("Plugged in: " .. o.name .. " → screen " .. o.screen.index)
+    print("Available:", o.name, o.screen and o.screen.index)
 end)
 
 output.connect_signal("removed", function(o)
-    -- Output is still valid during this handler
-    print("Unplugged: " .. o.name)
+    print("Removed:", o.name)
 end)
 ```
 
 ### Track Screen Link Changes
 
 ```lua
-output[1]:connect_signal("property::screen", function()
-    local s = output[1].screen
-    if s then
-        print("Output now has screen " .. s.index)
-    else
-        print("Output has no screen (disabled)")
-    end
+output[1]:connect_signal("property::screen", function(o)
+    print(o.name, o.screen and o.screen.index)
 end)
 ```
 
 ## See Also
 
-- [screen Reference](/docs/reference/screen) - The logical display object
-- [Multi-Monitor Setup](/docs/guides/multi-monitor) - Practical configuration patterns
-- [The Object Model](/docs/concepts/object-model) - How output relates to screen, tags, and clients
-- [Display Scaling](/docs/concepts/display-scaling) - How output scaling works
+- [screen Reference](/docs/1.4/reference/screen) - The logical display object
+- [Multi-Monitor Setup](/docs/1.4/guides/multi-monitor) - Practical configuration patterns
+- [The Object Model](/docs/1.4/concepts/object-model) - How output relates to screen, tags, and clients
+- [Display Scaling](/docs/1.4/concepts/display-scaling) - How output scaling works

@@ -1,6 +1,6 @@
 ---
 title: "Keybindings: A Table You Can Read"
-description: Extract every keybinding into its own module, flatten the awful.key boilerplate into a scannable table, and learn how global, client, and tag bindings differ.
+description: Move keybindings into a module and register global, client, and tag shortcuts.
 sidebar_label: "02 · Keybindings"
 ---
 
@@ -11,7 +11,7 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="02" />
 
-## Where We Are
+<span id="where-we-are" />
 
 Move bindings into `keybindings.lua` and store each as a table row. Start from [chapter 01](./01-theme.md): `git checkout 01-theme`.
 
@@ -45,7 +45,7 @@ Define `terminal`, `filemanager`, and `modkey` in `rc.lua` before `require("keyb
 A stock binding looks like this:
 
 ```lua
--- rc.lua (before, on 01-theme)
+-- rc.lua
   awful.key({ modkey }, "j", function()
     awful.client.focus.byidx(1)
   end, { description = "focus next by index", group = "client" }),
@@ -53,9 +53,9 @@ A stock binding looks like this:
 
 `awful.key` takes four things:
 
-1. **Modifiers.** `{ modkey }` means Super; `{ modkey, "Shift" }` requires both. `{}` requires no modifier.
-2. **Key.** A letter, named key, or keysym such as `"XF86AudioRaiseVolume"`. Names are case-insensitive. Use [Key Names](../../reference/key-names.md) or the `sym:` field from `wev` to identify keys: comma is `"comma"`, Page Up is `"Prior"`.
-3. **Callback.** Runs on press; client callbacks receive the focused client. Pass a function, such as `media_helpers.lower_volume`, rather than calling it during setup.
+1. **Modifiers.** `{ modkey }` means Super. `{ modkey, "Shift" }` requires both. `{}` requires no modifier.
+2. **Key.** A letter, named key, or keysym such as `"XF86AudioRaiseVolume"`. Use [Key Names](../../reference/key-names.md) or the `sym:` field from `wev` to identify keys: comma is `"comma"`, Page Up is `"Prior"`.
+3. **Callback.** Runs on press. Client callbacks receive the focused client. Pass a function, such as `media_helpers.lower_volume`, rather than calling it during setup.
 4. **Description table.** `description` labels the binding and `group` organises it in the Mod+S help popup.
 
 ## One Row Per Binding
@@ -79,9 +79,7 @@ Start `global_keys` with the media bindings:
 
 ```lua
 -- keybindings.lua
---{modifier(s) table, key string,          function function,                     description string,    group string}
 local global_keys = {
-  -- no modifiers
   {{},         "XF86AudioLowerVolume",  media_helpers.lower_volume,                               "decrease volume",                       "media"    },
   {{},         "XF86AudioRaiseVolume",  media_helpers.raise_volume,                               "increase volume",                       "media"    },
   {{},         "XF86MonBrightnessDown", function() awful.spawn("brightnessctl s 5%-") end,        "decrease brightness",                   "media"    },
@@ -91,7 +89,7 @@ local global_keys = {
 
 Media keys use an empty modifiers table. The branch also includes `playerctl` bindings for next, play/pause, and previous.
 
-Group the remaining rows by modifier, then sort by key:
+Group the remaining rows by modifier, then sort by key. These entries are excerpts from the table:
 
 ```lua
 -- keybindings.lua
@@ -115,13 +113,11 @@ local client_helpers = {
     c:raise()
   end,
   minimize = function(c)
-    -- The client currently has the input focus, so it cannot be
-    -- minimized, since minimized clients can't have the focus.
     c.minimized = true
   end,
 ```
 
-The branch replaces the deprecated `awful.client.floating.toggle` with direct assignment to `c.floating`, and `awful.client.getmaster()` with the first entry from `awful.client.visible(c.screen)`.
+The branch toggles floating with `c.floating = not c.floating`. Its swap helper selects the first visible client, which can differ from the first tiled client when floating windows are present.
 
 The volume helper runs `wpctl` and emits a custom signal:
 
@@ -134,7 +130,7 @@ local media_helpers = {
   end,
 ```
 
-`awful.spawn` starts the command asynchronously. `awesome.emit_signal("volume::update")` tells listeners to refresh; [chapter 03](./03-widgets.md) connects the volume widget to this signal. No listener is needed yet.
+`awful.spawn` returns before the command finishes, so this signal can arrive before the volume changes. [Chapter 03](./03-widgets.md) connects the widget and shows how to emit the signal after command completion.
 
 ## Global Keys and Client Keys Register Differently
 
@@ -157,7 +153,6 @@ Define `client_keys` using the same row format:
 ```lua
 -- keybindings.lua
 local client_keys = {
-  -- modkey only modifier
   {{ modkey },            "f",      client_helpers.toggle_fullscreen,       "toggle fullscreen",         "client" },
   {{ modkey },            "m",      client_helpers.toggle_maximized,        "(un)maximize",              "client" },
   {{ modkey },            "n",      client_helpers.minimize,                "minimize",                  "client" },
@@ -195,7 +190,7 @@ Keep the four tag actions: view, toggle, move client to tag, and toggle client o
 ## Try It
 
 1. Add a row to `global_keys` that launches your browser on Mod+B, with a sensible description in the `"launcher"` group. Press Mod+S afterwards and find it in the popup.
-2. Change the terminal. `terminal` is a global defined in rc.lua, so the Mod+Return row should not need to change at all. Prove it.
+2. Change `terminal` in `rc.lua`, reload, and check that Mod+Return launches the new terminal without changing the binding.
 
 ![The hotkeys popup on Mod+S listing the migrated keybindings by group](/img/from-scratch/02-keybindings-hotkeys.png)
 
@@ -203,11 +198,8 @@ Keep the four tag actions: view, toggle, move client to tag, and toggle client o
 
 The finished code is on [the `02-keybindings` branch](https://github.com/trip-zip/awesome-from-scratch/tree/02-keybindings).
 
-```bash
-git checkout 02-keybindings
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 01-theme 02-keybindings`
+Compare your work: `git diff origin/01-theme origin/02-keybindings`
 
 <NextChapter chapter="02" />

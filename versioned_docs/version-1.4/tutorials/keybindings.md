@@ -4,406 +4,82 @@ title: Keybindings
 description: Add custom keyboard shortcuts to SomeWM
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Keybindings
 
-<YouWillLearn>
+<span id="keybinding-anatomy" />
+<span id="adding-a-global-keybinding" />
+<span id="adding-a-client-keybinding" />
+<span id="key-names-reference" />
+<span id="media-keys" />
+<span id="organizing-with-tables" />
+<span id="helper-functions" />
+<span id="the-hotkeys-popup" />
+<span id="customizing-the-popup" />
+<span id="numrow-keybindings" />
+<span id="mouse-bindings" />
+<span id="complete-example" />
+<span id="troubleshooting" />
+<span id="keybinding-not-working" />
+<span id="key-name-not-found" />
+<span id="callback-errors" />
+<span id="next-steps" />
 
-- The four parts of an `awful.key` binding
-- How to add global and per-client keybindings
-- How to bind media keys and mouse buttons
-- How to organize bindings into reusable tables
+Add a browser shortcut and a window-opacity toggle to the default 1.4 config. Keep its existing bindings.
 
-</YouWillLearn>
+Open your `rc.lua`. The default file already imports `awful` and defines `modkey = "Mod4"`. Install Firefox for the browser example, or substitute an application you have.
 
-:::tip Building a full config?
-This page retrofits one feature into an existing config. If you would rather build a complete desktop from the ground up, the [Awesome From Scratch](from-scratch/index.md) series covers this topic as part of a thirteen-chapter course.
-:::
+## Add a global shortcut
 
-## Keybinding Anatomy
-
-Every keybinding in SomeWM has four parts:
-
-```lua
-awful.key(
-    { "Mod4" },           -- 1. Modifiers (table)
-    "Return",             -- 2. Key
-    function()            -- 3. Callback function
-        awful.spawn(terminal)
-    end,
-    { description = "open a terminal", group = "launcher" }  -- 4. Metadata
-)
-```
-
-| Part | Description |
-|------|-------------|
-| **Modifiers** | Table of modifier keys: `"Mod4"`, `"Shift"`, `"Control"`, `"Mod1"` (Alt) |
-| **Key** | The key name: `"Return"`, `"space"`, `"a"`, `"F1"`, etc. |
-| **Callback** | Function to execute when pressed |
-| **Metadata** | Description and group for the help popup |
-
-## Adding a Global Keybinding
-
-Global keybindings work anywhere, regardless of which window is focused.
-
-Open your `rc.lua` and find the keybindings section. Add a new keybinding:
+After the `modkey` definition, add:
 
 ```lua
 awful.keyboard.append_global_keybindings({
-    -- Your existing keybindings...
-
-    -- Add a new one:
     awful.key({ modkey }, "b", function()
         awful.spawn("firefox")
     end, { description = "open browser", group = "launcher" }),
 })
 ```
 
-Press **Mod4 + Ctrl + r** to reload, then **Mod4 + b** to open Firefox.
+Reload with **Mod4+Ctrl+r**, then press **Mod4+b**. Firefox should open. Press **Mod4+s** and find “open browser” in the launcher group.
 
-## Adding a Client Keybinding
+`awful.key` creates a binding. `append_global_keybindings` registers it. The arguments specify modifiers, key, callback, and help text. `{}` means no modifiers, and `{ modkey, "Shift" }` requires both keys.
 
-Client keybindings only work when a window is focused, and the focused window (`c`) is passed to your callback.
+## Add a shortcut for the focused window
 
-Find the client keybindings section in your rc.lua:
+Find the existing `request::default_keybindings` handler. Add this entry inside its `awful.keyboard.append_client_keybindings({ ... })` table:
 
 ```lua
-client.connect_signal("request::default_keybindings", function()
-    awful.keyboard.append_client_keybindings({
-        -- Existing keybindings...
-
-        -- Toggle window opacity:
-        awful.key({ modkey }, "o", function(c)
-            if c.opacity == 1 then
-                c.opacity = 0.8
-            else
-                c.opacity = 1
-            end
-        end, { description = "toggle opacity", group = "client" }),
-    })
-end)
+awful.key({ modkey, "Shift" }, "o", function(c)
+    c.opacity = c.opacity == 1 and 0.8 or 1
+end, { description = "toggle opacity", group = "client" }),
 ```
 
-Now **Mod4 + o** will toggle transparency on the focused window.
+Reload, focus a window, and press **Mod4+Shift+o** twice. The window should become translucent, then opaque again. The callback receives the focused client as `c`.
 
-## Key Names Reference
+The unmodified **Mod4+o** already moves a window to another screen, so this example adds Shift to avoid that conflict.
 
-For a complete list of modifier keys, key names, and mouse buttons, see the [Key Names Reference](/docs/reference/key-names).
+## Add volume keys
 
-Common modifiers: `"Mod4"` (Super), `"Mod1"` (Alt), `"Shift"`, `"Control"`
-
-Common keys: `"Return"` (Enter), `"space"`, `"Tab"`, `"Escape"`, `"Left"`/`"Right"`/`"Up"`/`"Down"` (arrows)
-
-## Media Keys
-
-Media keys work without modifiers:
+If you use PipeWire with WirePlumber, check that `wpctl` is installed. Add this block after your browser shortcut:
 
 ```lua
 awful.keyboard.append_global_keybindings({
-    -- Volume controls
     awful.key({}, "XF86AudioRaiseVolume", function()
-        awful.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+")
+        awful.spawn({ "wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", "5%+" })
     end, { description = "raise volume", group = "media" }),
-
     awful.key({}, "XF86AudioLowerVolume", function()
-        awful.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-")
+        awful.spawn({ "wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "5%-" })
     end, { description = "lower volume", group = "media" }),
-
     awful.key({}, "XF86AudioMute", function()
-        awful.spawn("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
+        awful.spawn({ "wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle" })
     end, { description = "toggle mute", group = "media" }),
-
-    -- Brightness controls
-    awful.key({}, "XF86MonBrightnessUp", function()
-        awful.spawn("brightnessctl s +5%")
-    end, { description = "increase brightness", group = "media" }),
-
-    awful.key({}, "XF86MonBrightnessDown", function()
-        awful.spawn("brightnessctl s 5%-")
-    end, { description = "decrease brightness", group = "media" }),
 })
 ```
 
-## Organizing with Tables
+Reload and press a volume key. Check the result in your audio controls. The raise command caps the volume at 100%.
 
-```lua
--- Define keybindings as data
-local my_global_keys = {
-    -- { modifiers,         key,      callback,                        description,       group }
-    { { modkey },           "b",      function() awful.spawn("firefox") end, "browser",   "launcher" },
-    { { modkey },           "e",      function() awful.spawn("thunar") end,  "file manager", "launcher" },
-    { { modkey, "Shift" },  "s",      function() awful.spawn("flameshot gui") end, "screenshot", "utility" },
-}
+For another key, use the `sym:` name reported by `wev` on Wayland. See [key names](../reference/key-names.md) and [default bindings](../reference/default-keybindings.md) before assigning a shortcut.
 
--- Convert table entries to keybindings
-local function make_keybindings(definitions)
-    local keys = {}
-    for _, def in ipairs(definitions) do
-        table.insert(keys, awful.key(
-            def[1],  -- modifiers
-            def[2],  -- key
-            def[3],  -- callback
-            { description = def[4], group = def[5] }
-        ))
-    end
-    return keys
-end
+If a shortcut does nothing, check the key name, reload the saved file, and look for duplicate bindings or an error notification. Test the application command in a terminal too.
 
--- Apply them
-awful.keyboard.append_global_keybindings(make_keybindings(my_global_keys))
-```
-
-## Helper Functions
-
-For common patterns, create helper functions:
-
-```lua
-local helpers = {
-    -- Toggle a client property
-    toggle_property = function(property)
-        return function(c)
-            c[property] = not c[property]
-            c:raise()
-        end
-    end,
-
-    -- Spawn a command
-    spawn = function(cmd)
-        return function()
-            awful.spawn(cmd)
-        end
-    end,
-}
-
--- Use them in keybindings:
-awful.keyboard.append_client_keybindings({
-    awful.key({ modkey }, "f", helpers.toggle_property("fullscreen"),
-        { description = "toggle fullscreen", group = "client" }),
-
-    awful.key({ modkey }, "m", helpers.toggle_property("maximized"),
-        { description = "toggle maximized", group = "client" }),
-})
-
-awful.keyboard.append_global_keybindings({
-    awful.key({ modkey }, "b", helpers.spawn("firefox"),
-        { description = "browser", group = "launcher" }),
-})
-```
-
-## The Hotkeys Popup
-
-Press **Mod4 + s** to see all your keybindings organized by group.
-
-{/* TODO: Screenshot needed
-   - Hotkeys popup showing custom keybinding groups
-   - Should show the "launcher" group with custom shortcuts
-*/}
-
-The popup automatically includes your keybindings if you set the `description` and `group` metadata.
-
-### Customizing the Popup
-
-You can style the popup through theme variables:
-
-```lua
--- In your theme.lua
-theme.hotkeys_bg = "#282828"
-theme.hotkeys_fg = "#ebdbb2"
-theme.hotkeys_border_color = "#fabd2f"
-theme.hotkeys_modifiers_fg = "#fe8019"
-theme.hotkeys_label_bg = "#b8bb26"
-```
-
-## Numrow Keybindings
-
-For tag switching (1-9), use the declarative pattern with `keygroup`:
-
-```lua
-awful.keyboard.append_global_keybindings({
-    awful.key({
-        modifiers = { modkey },
-        keygroup = "numrow",
-        description = "view tag",
-        group = "tag",
-        on_press = function(index)
-            local screen = awful.screen.focused()
-            local tag = screen.tags[index]
-            if tag then
-                tag:view_only()
-            end
-        end,
-    }),
-
-    awful.key({
-        modifiers = { modkey, "Shift" },
-        keygroup = "numrow",
-        description = "move client to tag",
-        group = "tag",
-        on_press = function(index)
-            if client.focus then
-                local tag = client.focus.screen.tags[index]
-                if tag then
-                    client.focus:move_to_tag(tag)
-                end
-            end
-        end,
-    }),
-})
-```
-
-The `keygroup = "numrow"` automatically binds to keys 1-9.
-
-## Mouse Bindings
-
-Mouse bindings work similarly, using `awful.button`:
-
-```lua
-client.connect_signal("request::default_mousebindings", function()
-    awful.mouse.append_client_mousebindings({
-        -- Left click to focus
-        awful.button({}, 1, function(c)
-            c:activate({ context = "mouse_click" })
-        end),
-
-        -- Mod4 + Left click to move
-        awful.button({ modkey }, 1, function(c)
-            c:activate({ context = "mouse_click", action = "mouse_move" })
-        end),
-
-        -- Mod4 + Right click to resize
-        awful.button({ modkey }, 3, function(c)
-            c:activate({ context = "mouse_click", action = "mouse_resize" })
-        end),
-    })
-end)
-```
-
-Button numbers:
-- `1` = Left click
-- `2` = Middle click
-- `3` = Right click
-- `4` = Scroll up
-- `5` = Scroll down
-
-## Complete Example
-
-Here's a complete keybindings module you could save as `keybindings.lua`:
-
-```lua
--- keybindings.lua
-local awful = require("awful")
-local hotkeys_popup = require("awful.hotkeys_popup")
-
--- Helper to convert table format to keybindings
-local function make_keys(definitions)
-    local keys = {}
-    for _, def in ipairs(definitions) do
-        table.insert(keys, awful.key(def[1], def[2], def[3],
-            { description = def[4], group = def[5] }))
-    end
-    return keys
-end
-
--- Global keybindings
-local global_keys = {
-    -- Launchers
-    { { modkey },           "Return", function() awful.spawn(terminal) end,    "terminal",       "launcher" },
-    { { modkey },           "b",      function() awful.spawn("firefox") end,   "browser",        "launcher" },
-    { { modkey },           "e",      function() awful.spawn("thunar") end,    "file manager",   "launcher" },
-    { { modkey },           "r",      function() awful.screen.focused().mypromptbox:run() end, "run prompt", "launcher" },
-
-    -- Awesome
-    { { modkey },           "s",      hotkeys_popup.show_help,                  "show help",      "awesome" },
-    { { modkey, "Control"}, "r",      awesome.restart,                          "reload",         "awesome" },
-    { { modkey, "Shift" },  "q",      awesome.quit,                             "quit",           "awesome" },
-
-    -- Layout
-    { { modkey },           "space",  function() awful.layout.inc(1) end,       "next layout",    "layout" },
-    { { modkey },           "h",      function() awful.tag.incmwfact(-0.05) end, "shrink master", "layout" },
-    { { modkey },           "l",      function() awful.tag.incmwfact(0.05) end,  "grow master",   "layout" },
-
-    -- Focus
-    { { modkey },           "j",      function() awful.client.focus.byidx(1) end,  "next window",   "client" },
-    { { modkey },           "k",      function() awful.client.focus.byidx(-1) end, "prev window",   "client" },
-    { { modkey },           "Tab",    function()
-        awful.client.focus.history.previous()
-        if client.focus then client.focus:raise() end
-    end, "last window", "client" },
-}
-
--- Client keybindings
-local client_keys = {
-    { { modkey },           "f",      function(c) c.fullscreen = not c.fullscreen; c:raise() end, "fullscreen", "client" },
-    { { modkey },           "m",      function(c) c.maximized = not c.maximized; c:raise() end,   "maximize",   "client" },
-    { { modkey },           "n",      function(c) c.minimized = true end,                          "minimize",   "client" },
-    { { modkey, "Shift" },  "c",      function(c) c:kill() end,                                    "close",      "client" },
-    { { modkey, "Control"}, "space",  awful.client.floating.toggle,                                "float",      "client" },
-}
-
--- Apply global keybindings
-awful.keyboard.append_global_keybindings(make_keys(global_keys))
-
--- Apply client keybindings
-client.connect_signal("request::default_keybindings", function()
-    awful.keyboard.append_client_keybindings(make_keys(client_keys))
-end)
-
--- Numrow tag switching (can't use table format for keygroups)
-awful.keyboard.append_global_keybindings({
-    awful.key({
-        modifiers = { modkey },
-        keygroup = "numrow",
-        description = "view tag",
-        group = "tag",
-        on_press = function(index)
-            local tag = awful.screen.focused().tags[index]
-            if tag then tag:view_only() end
-        end,
-    }),
-    awful.key({
-        modifiers = { modkey, "Shift" },
-        keygroup = "numrow",
-        description = "move to tag",
-        group = "tag",
-        on_press = function(index)
-            if client.focus then
-                local tag = client.focus.screen.tags[index]
-                if tag then client.focus:move_to_tag(tag) end
-            end
-        end,
-    }),
-})
-```
-
-Then in your `rc.lua`:
-
-```lua
-require("keybindings")
-```
-
-## Troubleshooting
-
-### Keybinding not working
-
-1. Check for typos in key names (they're case-sensitive for modifiers)
-2. Look for conflicts with existing keybindings
-3. Make sure you reloaded config with **Mod4 + Ctrl + r**
-
-### Key name not found
-
-Use `xev` (X11) or check the [Default Keybindings](/docs/reference/default-keybindings) reference for correct key names.
-
-### Callback errors
-
-Check the notification for error messages. Common issues:
-- Missing `local` for variables
-- Typos in function names
-- Missing `end` for functions
-
-## Next Steps
-
-- **[Key Names Reference](/docs/reference/key-names)** - Complete list of key names and modifiers
-- **[Default Keybindings](/docs/reference/default-keybindings)** - Built-in shortcuts
-- **[Widgets](/docs/tutorials/widgets)** - Create custom widgets
-- **[awful.key (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/awful.key.html)** - Upstream API reference
+To move bindings into a separate module, follow [From Scratch: Keybindings](from-scratch/02-keybindings.md).

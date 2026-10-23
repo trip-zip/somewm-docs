@@ -6,7 +6,7 @@ description: Utility functions and helpers
 
 # gears
 
-The `gears` library provides utility functions used throughout AwesomeWM/SomeWM. It includes timers, shapes, color manipulation, filesystem helpers, and more.
+`gears` provides timers, drawing utilities, and file, string, and table helpers.
 
 **Upstream documentation:** The `gears` library spans multiple sections in the AwesomeWM docs:
 - [theme_related_libraries](https://awesomewm.org/apidoc/theme_related_libraries/gears.shape.html) - shape, color
@@ -53,7 +53,8 @@ end)
 ```lua
 local gears = require("gears")
 
--- Rounded rectangle
+local wibox = require("wibox")
+local widget = wibox.container.background()
 widget.shape = function(cr, w, h)
     gears.shape.rounded_rect(cr, w, h, 8)
 end
@@ -66,17 +67,16 @@ end
 ```lua
 local gsurface = require("gears.surface")
 
-local img = gsurface.load("/path/to/image.png")            -- cached by path
-local img2 = gsurface.load_uncached("/path/to/image.png")  -- fresh copy, no cache
+local path = require("gears.filesystem").get_themes_dir() .. "default/background.png"
+local img = gsurface.load(path)            -- cached by path
+local img2 = gsurface.load_uncached(path)  -- fresh copy, no cache
 local w, h = gsurface.get_size(img)                        -- pixel dimensions
 ```
 
-Behavior worth knowing:
-
-- `load` caches surfaces by file path, so loading the same file twice is free. Use `load_uncached` if you modify the surface in place.
+- `load` keeps a weak cache by file path. Calls can share a surface while it remains in memory. Use `load_uncached` after replacing the file or when you need a separate surface to modify.
 - A path that fails to load is **not an error**: an error is printed to the log and an empty 0x0 surface is returned, which draws nothing. If an image silently does not appear, check the log.
 - Passing an existing cairo surface returns it unchanged, so APIs built on `gears.surface` accept either a path or a surface.
 
 ## Behavioral Notes
 
-SomeWM's `gears` implementation is fully compatible with AwesomeWM.
+The Cairo utilities use the AwesomeWM API. See [deviations](../deviations.md) for compositor-specific behaviour, including wallpaper rendering.

@@ -1,6 +1,6 @@
 ---
 title: "Exit Screen: The Modal Pattern"
-description: "Extract the modal pattern into modal.lua, refactor the notification center onto it, and build a full-screen power menu as its first consumer."
+description: "Share popup controls through modal.lua and build a full-screen power menu."
 sidebar_label: "07 · Exit Screen"
 ---
 
@@ -11,15 +11,15 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="07" />
 
-## Where We Are
+<span id="where-we-are" />
 
 Extract the notification center’s popup controls into `modal.lua`, then use it to build a full-screen power menu. To catch up: `git checkout 06-notifications`.
 
-## Naming the Pattern
+## Shared popup controls {#naming-the-pattern}
 
 The shared controller needs:
 
-1. **A popup**: an `awful.popup`, which is an on-top window that sizes itself to the widget you put inside it.
+1. **A popup**: an `awful.popup` that sizes itself to its widget. Set `ontop = true` to keep it above normal clients.
 2. **A visibility flag**: a boolean guarding `show()` and `hide()` so double calls do nothing.
 3. **A keygrabber**: so Escape closes the overlay instead of going to whatever client has focus.
 4. **Dismissal rules**: clicking a client or switching tags should close the overlay.
@@ -46,7 +46,6 @@ Route both paths through `hide()`. Clear the visibility flag before stopping the
       self.popup = args.build_popup()
     end
 
-    -- Every modal opens on the screen the user is looking at
     self.popup.screen = awful.screen.focused()
 
     if args.on_show then
@@ -60,10 +59,6 @@ Route both paths through `hide()`. Clear the visibility flag before stopping the
       autostart = true,
       stop_key = "Escape",
       stop_callback = function()
-        -- The grabber is already stopped when this fires (Escape, or an
-        -- explicit stop from hide()). Clearing the reference first and
-        -- routing through hide() gives both paths one cleanup; hide()'s
-        -- visibility guard ends the re-entry.
         grabber = nil
         self.hide()
       end,
@@ -89,8 +84,6 @@ Then define `hide()`:
       return
     end
 
-    -- Flip the flag before stopping the grabber: stop() re-enters hide() via
-    -- stop_callback, and this guard ends that second call immediately.
     visible = false
 
     local kg = grabber
@@ -115,7 +108,6 @@ The last piece of `modal.new` handles dismissal by mouse and by tag switch:
 
 ```lua
 -- modal.lua
-  -- Clicking a client or switching tags while the modal is open dismisses it
   client.connect_signal("button::press", function()
     if visible then
       self.hide()
@@ -129,7 +121,7 @@ The last piece of `modal.new` handles dismissal by mouse and by tag switch:
   end)
 ```
 
-`modal.new(args)` takes a signal-prefix `name`, a required `build_popup`, and optional `on_show`, `on_hide`, and `keypressed` callbacks. It returns `show()`, `hide()`, `toggle()`, `is_visible()`, and `.popup`. Escape is reserved; other presses reach `keypressed`.
+`modal.new(args)` takes a signal-prefix `name`, a required `build_popup`, and optional `on_show`, `on_hide`, and `keypressed` callbacks. It returns `show()`, `hide()`, `toggle()`, `is_visible()`, and `.popup`. Escape is reserved. Other presses reach `keypressed`.
 
 ## Refactoring the Notification Center
 
@@ -205,15 +197,15 @@ local options = {
   },
 ```
 
-Reboot and Shutdown follow the same shape with `systemctl reboot` and `systemctl poweroff`. The icons are Nerd Font glyphs, which is why JetBrainsMono Nerd Font is a hard dependency of this config.
+Reboot and Shutdown follow the same shape with `systemctl reboot` and `systemctl poweroff`. The icons require a Nerd Font, such as JetBrainsMono Nerd Font.
 
 :::note Where is Lock?
-Lock requires a lock surface; without one, the lock request leaves the screen unlocked. [Chapter 12](./12-lockscreen.md) adds the lockscreen and its menu entry.
+Lock requires a lock surface. Without one, the lock request leaves the screen unlocked. [Chapter 12](./12-lockscreen.md) adds the lockscreen and its menu entry.
 :::
 
 ### Buttons and Selection
 
-`create_button` turns an option into a widget: icon over name over `[key]` hint, wrapped in a background container. Selection is pure styling, driven by comparing the button's index against a module-local `selected_index`:
+`create_button` turns an option into a widget: icon over name over `[key]` hint, wrapped in a background container. Compare the button's index with `selected_index` to choose its colours:
 
 ```lua
 -- exitscreen/init.lua
@@ -225,7 +217,7 @@ Lock requires a lock surface; without one, the lock request leaves the screen un
     widget = wibox.container.background,
 ```
 
-`exitscreen.refresh()` rebuilds the widget tree when selection changes. A click runs the command; `mouse::enter` selects the hovered button. Guard the hover handler with `if selected_index == index then return end` to avoid rebuilding an already selected button.
+`exitscreen.refresh()` rebuilds the widget tree when selection changes. A click runs the command. `mouse::enter` selects the hovered button. Guard the hover handler with `if selected_index == index then return end` to avoid rebuilding an already selected button.
 
 ### Assembling the Layout
 
@@ -233,9 +225,6 @@ Use `unpack` to insert the button array into the layout:
 
 ```lua
 -- exitscreen/init.lua
-        -- Buttons. unpack() must be the LAST field in the constructor: Lua
-        -- adjusts a multi-value expression to a single value anywhere else,
-        -- which would silently render only the first button.
         {
           layout = wibox.layout.fixed.horizontal,
           spacing = config.spacing,
@@ -247,13 +236,10 @@ For LuaJIT and Lua 5.2+ compatibility, define `unpack` at the top of the file:
 
 ```lua
 -- exitscreen/init.lua
--- somewm and AwesomeWM both run on LuaJIT, which is Lua 5.1, where `unpack` is a global
--- and `table.unpack` does not exist. Write it this way round so the config also works
--- on a 5.2+ interpreter.
 local unpack = unpack or table.unpack
 ```
 
-The outer container is a `wibox.container.background` with `bg = beautiful.bg_normal .. "E8"`. The popup itself is fully transparent (`bg = "#00000000"`) and placed with `awful.placement.maximize`, so it covers the whole screen; the `E8` alpha suffix on the inner background is what dims your desktop behind the centered buttons.
+The outer container is a `wibox.container.background` with `bg = beautiful.bg_normal .. "E8"`. The popup itself is fully transparent (`bg = "#00000000"`) and placed with `awful.placement.maximize`, so it covers the whole screen. The `E8` alpha suffix on the inner background is what dims your desktop behind the centered buttons.
 
 ### Keyboard Handling
 
@@ -262,13 +248,10 @@ The `keypressed` callback checks the labeled shortcut keys before anything else:
 ```lua
 -- exitscreen/init.lua
   keypressed = function(_, key)
-    -- The labeled shortcut keys are checked before vim navigation, so the
-    -- key a button displays is the key that triggers it
     for i, option in ipairs(options) do
       if key == option.key then
         selected_index = i
         exitscreen.refresh()
-        -- Small delay for visual feedback
         gears.timer.start_new(0.15, function()
           execute_selected()
           return false
@@ -289,14 +272,12 @@ The `keypressed` callback checks the labeled shortcut keys before anything else:
   end,
 ```
 
-Chapter 12 adds Lock on `l`, which must take precedence over navigation. Returning `false` from the timer callback makes it run once; `true` would repeat the command.
+Chapter 12 adds Lock on `l`, which must take precedence over navigation. Returning `false` from the timer callback makes it run once. `true` would repeat the command.
 
 Create the controller:
 
 ```lua
 -- exitscreen/init.lua
--- The modal controller owns visibility, the keygrabber, Escape, and the
--- exitscreen::visible signal; this module only describes content and keys.
 local controller = modal.new({
   name = "exitscreen",
 ```
@@ -309,13 +290,40 @@ Add a power button to the wibar:
 
 ```lua
 -- widgets/power.lua
-local power = wrappers.image_widget("/power.svg", beautiful.bg_normal)
-local power_widget = wrappers.square_icon(power, beautiful.primary_color, beautiful.primary_color_hover)
+local awful = require("awful")
+local wibox = require("wibox")
+local beautiful = require("beautiful")
+local exitscreen = require("exitscreen")
 
--- Click for the power menu (the exit screen)
+local power_widget = wibox.widget({
+  {
+    {
+      image = beautiful.icon("power.svg", beautiful.bg_normal),
+      halign = "center",
+      valign = "center",
+      widget = wibox.widget.imagebox,
+    },
+    margins = beautiful.widget_icon_margins,
+    widget = wibox.container.margin,
+  },
+  bg = beautiful.primary_color,
+  fg = beautiful.fg_normal,
+  shape = beautiful.shape,
+  widget = wibox.container.background,
+})
+
+power_widget:connect_signal("mouse::enter", function(w)
+  w.bg = beautiful.primary_color_hover
+end)
+power_widget:connect_signal("mouse::leave", function(w)
+  w.bg = beautiful.primary_color
+end)
+
 power_widget:add_button(awful.button({}, 1, function()
   exitscreen.show()
 end))
+
+return power_widget
 ```
 
 Register it in `widgets/init.lua` and add it after a separator at the right end of the wibar. Add the keybinding:
@@ -325,14 +333,14 @@ Register it in `widgets/init.lua` and add it after a separator at the right end 
   {{ modkey, "Shift"   }, "e",          function() exitscreen.toggle() end,                       "exit screen",                           "awesome"  },
 ```
 
-Reload and press Mod+Shift+E. Arrows or `h`/`l` move the selection; Escape or a tag switch dismisses the menu. The wibar power button opens it too.
+Reload and press Mod+Shift+E. Use arrows to move the selection, then Escape to dismiss it. Check that the wibar button opens it too. Power actions affect the host even in a nested session, so use Escape when checking the layout.
 
 <span id="the-payoff" />
 
 ## Try It
 
 1. Add a fifth option to the exit screen: Hibernate, with icon `󰋊`, key `h`, running `systemctl hibernate`. Check how this affects `h` navigation, then choose another shortcut if needed.
-2. Change the Escape behavior for the exit screen only: instead of closing immediately, make the first Escape reset the selection to 1 and only a second Escape close. Escape is reserved as `stop_key`; extend `modal.new` with an option to change it.
+2. Change the Escape behavior for the exit screen only: instead of closing immediately, make the first Escape reset the selection to 1 and only a second Escape close. Escape is reserved as `stop_key`. Extend `modal.new` with an option to change it.
 
 ![The exit screen: four labeled buttons with their shortcut keys over a dimmed desktop](/img/from-scratch/07-exitscreen-open.png)
 
@@ -340,11 +348,8 @@ Reload and press Mod+Shift+E. Arrows or `h`/`l` move the selection; Escape or a 
 
 The finished code for this chapter is on [the `07-exitscreen` branch](https://github.com/trip-zip/awesome-from-scratch/tree/07-exitscreen):
 
-```bash
-git checkout 07-exitscreen
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 06-notifications 07-exitscreen`
+Compare your work: `git diff origin/06-notifications origin/07-exitscreen`
 
 <NextChapter chapter="07" />

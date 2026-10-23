@@ -11,16 +11,16 @@ import FromAwesomeWM from '@site/src/components/FromAwesomeWM';
 
 <FromAwesomeWM upstream="core_components/screen" lastSynced="2026-05-11" />
 
-The `screen` object represents a physical or virtual display. Each monitor connected to your system is a screen.
+A `screen` is a logical display area with tags, clients, and wibars. Enabling an output creates its screen. Disabling it removes that screen.
 
 ## Deviations from AwesomeWM
 
-SomeWM extends `screen` with fractional output scaling and DPI introspection. The Lua interface stays compatible; only the additional properties and one new signal are SomeWM-only.
+SomeWM adds output scaling and an `output` link. DPI properties come from AwesomeWM’s `awful.screen` API.
 
 | API | SomeWM behavior | Why |
 |-----|-----------------|-----|
-| `screen.scale` <SomewmOnly /> | Read/write fractional scale (0.1–10.0). | Wayland fractional-scale protocol; no X11 equivalent. |
-| `screen.dpi` / `minimum_dpi` / `maximum_dpi` / `preferred_dpi` <SomewmOnly /> | DPI computed from output physical dimensions. | Wayland exposes per-output mm dimensions. |
+| `screen.scale` <SomewmOnly /> | Read/write fractional scale (0.1–10.0). | Sets the Wayland output scale. |
+| `screen.output` <SomewmOnly /> | Associated output object. | Configure the connector independently of the screen’s lifetime. |
 | `property::scale` signal <SomewmOnly /> | Fires when an output scale changes. | Driven by user or `somewm-client screen scale`. |
 
 ## Accessing Screens
@@ -60,14 +60,16 @@ local count = screen.count()
 | Property | Type | Access | Description |
 |----------|------|--------|-------------|
 | `outputs` | table | read | Physical output info (see below) |
+| `output` <SomewmOnly /> | output/nil | read | Associated output object |
+| `content` <SomewmOnly /> | image | read | Captured screen content, used by `awful.screenshot` |
 | `name` | string | read/write | User-assignable screen name |
 
-The `outputs` table is keyed by output name:
+In 1.4, `outputs` is an array, unlike AwesomeWM’s name-keyed table:
 
 ```lua
 -- Example outputs table
-{
-    ["DP-1"] = {
+local outputs = {
+    [1] = {
         name = "DP-1",
         mm_width = 600,   -- Physical width in millimeters
         mm_height = 340,  -- Physical height in millimeters
@@ -76,12 +78,12 @@ The `outputs` table is keyed by output name:
 }
 ```
 
-### Scaling & DPI <SomewmOnly />
+### Scaling & DPI
 
 | Property | Type | Access | Description |
 |----------|------|--------|-------------|
-| `scale` | number | read/write | Output scale factor (0.1 to 10.0) |
-| `dpi` | number | read | Screen DPI (computed from physical size) |
+| `scale` <SomewmOnly /> | number | read/write | Output scale factor (0.1 to 10.0) |
+| `dpi` | number | read/write | DPI used by Lua widgets. Can be overridden independently of output scale |
 | `minimum_dpi` | number | read | Lowest DPI across outputs |
 | `maximum_dpi` | number | read | Highest DPI across outputs |
 | `preferred_dpi` | number | read | Recommended DPI for this screen |
@@ -107,7 +109,7 @@ When you change `scale`, the `geometry` and `workarea` update to reflect logical
 | `selected_tags` | table | read | Currently visible tags |
 | `selected_tag` | tag | read | First selected tag (or nil) |
 | `clients` | table | read | All clients on this screen |
-| `tiled_clients` | table | read | Non-floating, non-minimized clients |
+| `tiled_clients` | table | read | Visible clients excluding floating, fullscreen, and maximized clients |
 
 ## Methods
 
@@ -117,39 +119,28 @@ When you change `scale`, the `geometry` and `workarea` update to reflect logical
 -- Get total screen count
 local count = screen.count()
 
--- Get bounding geometry (respects workarea and padding)
+-- Get the workarea
 local geo = s:get_bounding_geometry({
     honor_workarea = true,
-    honor_padding = true,
 })
 
--- Swap two screens' positions
-screen[1]:swap(screen[2])
+-- Swap two screen indices, if a second screen exists
+if screen[2] then screen[1]:swap(screen[2]) end
 ```
+
+In 1.4, `s:get_bounding_geometry()` honours `honor_workarea` but ignores `honor_padding` and `margins`. It also ignores `tag`, `parent`, and `bounding_rect`, unlike the upstream Lua helper.
 
 ### Virtual Screens
 
-:::warning Not functional
+`screen.fake_add()` creates a Lua screen object and emits `added`, but it does not create a monitor-backed layout area in 1.4. Clients moved there are hidden and wibars cannot attach to it. It cannot split a monitor into working virtual screens.
 
-`screen.fake_add` creates a real screen object: `screen.count()` goes up, `added`
-fires, and tags and wibars get created for it. But the screen does not work as a
-screen. Clients moved to it are hidden, wibars cannot attach to it, and layouts
-never run in its region, because window management is keyed to physical monitors
-([#561](https://github.com/trip-zip/somewm/issues/561)). Making a carved-out
-monitor region behave as a screen is planned as part of the 2.2 layout work.
+| Method | Result |
+| --- | --- |
+| `screen.fake_add(x, y, width, height)` | Create and return a screen object |
+| `s:fake_resize(x, y, width, height)` | Change its geometry |
+| `s:fake_remove()` | Remove it |
 
-:::
-
-```lua
--- Create a virtual screen object
-local fake = screen.fake_add(0, 0, 1920, 1080)
-
--- Resize it
-fake:fake_resize(0, 0, 2560, 1440)
-
--- Remove it
-fake:fake_remove()
-```
+These methods create no output or monitor. Use a nested compositor to test code that creates fake screens.
 
 ## Signals
 
@@ -169,65 +160,37 @@ fake:fake_remove()
 
 ```lua
 screen.connect_signal("property::scale", function(s)
-    -- Refresh widgets when scale changes
     print("Screen " .. s.index .. " scale is now " .. s.scale)
 end)
 ```
 
 ### Example: Handle Monitor Hotplug
 
-```lua
-screen.connect_signal("added", function(s)
-    -- Set up new monitor with appropriate scale
-    if s.geometry.width > 3000 then
-        s.scale = 1.5  -- 4K display
-    end
-
-    -- Create tags
-    awful.tag({ "1", "2", "3" }, s, awful.layout.layouts[1])
-end)
-```
+Use [multi-monitor configuration](../guides/multi-monitor.md) to create tags and bars in `request::desktop_decoration`. Adding a second tag-creation handler to the default config creates duplicate tags.
 
 ## Common Patterns
 
 ### Auto-Scale Based on Resolution
 
-```lua
-awful.screen.connect_for_each_screen(function(s)
-    if s.geometry.width > 3000 then
-        s.scale = 1.5
-    elseif s.geometry.width > 2000 then
-        s.scale = 1.25
-    else
-        s.scale = 1.0
-    end
-end)
-```
+`screen.geometry` is already scaled. For automatic scaling, use output modes or connector names as described in [fractional scaling](../guides/fractional-scaling.md).
 
 ### Get Screen Under Mouse
 
 ```lua
-local s = awful.screen.focused()  -- Follows focus
--- or
-local s = mouse.screen  -- Screen containing mouse pointer
+local s = mouse.screen
 ```
 
 ### Find Screen by Output Name
 
 ```lua
-for s in screen do
-    for name, _ in pairs(s.outputs) do
-        if name == "HDMI-A-1" then
-            return s
-        end
-    end
-end
+local o = output.get_by_name("HDMI-A-1")
+local s = o and o.screen
 ```
 
 ## See Also
 
-- [Fractional Scaling Guide](/docs/guides/fractional-scaling) - Configure HiDPI displays
-- [Multi-Monitor Setup](/docs/guides/multi-monitor) - Per-screen configuration
-- [Tag Persistence](/docs/concepts/tag-persistence) - How tags survive monitor hotplug
-- [Display Scaling Concepts](/docs/concepts/display-scaling) - How scaling works
-- [Object Model](/docs/concepts/object-model) - How screens relate to tags and clients
+- [Fractional Scaling Guide](/docs/1.4/guides/fractional-scaling) - Configure HiDPI displays
+- [Multi-Monitor Setup](/docs/1.4/guides/multi-monitor) - Per-screen configuration
+- [Tag Persistence](/docs/1.4/concepts/tag-persistence) - How tags survive monitor hotplug
+- [Display Scaling Concepts](/docs/1.4/concepts/display-scaling) - How scaling works
+- [Object Model](/docs/1.4/concepts/object-model) - How screens relate to tags and clients

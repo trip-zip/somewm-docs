@@ -10,7 +10,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly';
 
 Generated from `@beautiful` LDoc annotations in the [SomeWM source](https://github.com/trip-zip/somewm/tree/release/1.4/lua). Last sync: `6393acb0e5`. **443 documented**, 76 used-but-undocumented.
 
-See the [Theme Tutorial](/docs/tutorials/theme) for how to apply these in a custom theme.
+See the [Theme Tutorial](/docs/1.4/tutorials/theme) for how to apply these in a custom theme.
 
 <!--
 Hand-curated prelude for theme-variables.md. Survives regeneration.
@@ -19,7 +19,7 @@ Edits to this file are picked up on the next `npm run generate:reference`.
 
 ## Quick-Start Variables
 
-The handful of variables every theme sets. Each is also listed in its module section below.
+Common theme values. Widgets read them as defaults unless configured otherwise.
 
 | Variable | Type | Description |
 | --- | --- | --- |
@@ -40,8 +40,7 @@ The handful of variables every theme sets. Each is also listed in its module sec
 
 Standard X cursor names like `"left_ptr"`, `"fleur"`, `"cross"`, `"watch"` are accepted.
 
-:::tip Cursor theme
-Set the cursor theme via environment variables before launching:
+Set the cursor theme before launching:
 
 ```bash
 export XCURSOR_THEME="Adwaita"
@@ -56,8 +55,7 @@ root.cursor_theme("Adwaita")
 root.cursor_size(32)
 ```
 
-See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
-:::
+See [cursor theming](../../guides/input-devices.md#cursor-theming).
 
 ---
 
@@ -620,8 +618,8 @@ See [Input Devices: Cursor Theming](/docs/guides/input-devices#cursor-theming).
 
 ## See Also
 
-- [Theme Tutorial](/docs/tutorials/theme) – Build a custom theme
-- [Key Names](/docs/reference/key-names) – Common keybinding key names
+- [Theme Tutorial](/docs/1.4/tutorials/theme) – Build a custom theme
+- [Key Names](/docs/1.4/reference/key-names) – Common keybinding key names
 - [beautiful (AwesomeWM upstream docs)](https://awesomewm.org/apidoc/libraries/beautiful.html) – Full upstream API
 
 <!-- generator: scripts/generate-theme-variables.mjs | source ref: release/1.4 @ 6393acb0e5 | regenerate with `npm run generate:reference` -->

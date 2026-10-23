@@ -4,449 +4,126 @@ title: Wibar
 description: Build a custom status bar from scratch
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
-
 # Wibar
 
-<YouWillLearn>
+<span id="how-wibars-work" />
+<span id="the-three-section-pattern" />
+<span id="creating-a-wibar-factory" />
+<span id="adding-standard-widgets" />
+<span id="adding-custom-widgets" />
+<span id="adding-separators" />
+<span id="wibar-properties" />
+<span id="styling-the-wibar" />
+<span id="through-theme-variables" />
+<span id="inline-styling" />
+<span id="complete-example" />
+<span id="multiple-wibars" />
+<span id="toggling-visibility" />
+<span id="troubleshooting" />
+<span id="wibar-not-showing" />
+<span id="widgets-cut-off" />
+<span id="systray-icons-not-showing" />
+<span id="next-steps" />
 
-- How to attach a wibar via `request::desktop_decoration`
-- The three-section align layout pattern
-- How to add standard widgets, custom widgets, and separators
-- How to style and toggle visibility
+Replace the default 1.4 bar with a small module, keeping its existing taglist, tasklist, prompt, and layoutbox. Start with the default `rc.lua` so those widgets are already defined.
 
-</YouWillLearn>
+## Create the module
 
-:::tip Building a full config?
-This page retrofits one feature into an existing config. If you would rather build a complete desktop from the ground up, the [Awesome From Scratch](from-scratch/index.md) series covers this topic as part of a thirteen-chapter course.
-:::
-
-## How Wibars Work
-
-A wibar is created with `awful.wibar` and attached to a screen. The default setup creates one wibar per screen inside the `request::desktop_decoration` signal:
-
-```lua
-screen.connect_signal("request::desktop_decoration", function(s)
-    s.mywibox = awful.wibar {
-        position = "top",
-        screen = s,
-        widget = { ... },
-    }
-end)
-```
-
-The `widget` property contains your entire bar layout - typically organized into left, center, and right sections.
-
-## The Three-Section Pattern
-
-Most wibars use `wibox.layout.align.horizontal` to create three sections:
+Save this as `wibar.lua` beside `rc.lua`:
 
 ```lua
-widget = {
-    { -- Left section
-        layout = wibox.layout.fixed.horizontal,
-        -- widgets go here
-    },
-    { -- Center section
-        layout = wibox.layout.flex.horizontal,
-        -- widgets go here
-    },
-    { -- Right section
-        layout = wibox.layout.fixed.horizontal,
-        -- widgets go here
-    },
-    layout = wibox.layout.align.horizontal,
-}
-```
-
-- **Left** - Fixed width, grows from left edge
-- **Center** - Takes remaining space, centers content
-- **Right** - Fixed width, grows from right edge
-
-## Creating a Wibar Factory
-
-Create `~/.config/somewm/wibar.lua`:
-
-```lua
--- wibar.lua
-local awful = require("awful")
-local wibox = require("wibox")
-local beautiful = require("beautiful")
-
--- Factory function that creates a wibar for each screen
-return function(s)
-    local wibar = awful.wibar {
-        position = "top",
-        screen = s,
-        height = beautiful.wibar_height or 24,
-        widget = {
-            { -- Left section
-                layout = wibox.layout.fixed.horizontal,
-                -- We'll add widgets here
-            },
-            { -- Center section
-                layout = wibox.layout.fixed.horizontal,
-            },
-            { -- Right section
-                layout = wibox.layout.fixed.horizontal,
-            },
-            layout = wibox.layout.align.horizontal,
-        },
-    }
-    return wibar
-end
-```
-
-Use it in your `rc.lua`:
-
-```lua
-local wibar = require("wibar")
-
-screen.connect_signal("request::desktop_decoration", function(s)
-    -- Create tags for this screen
-    awful.tag({ "1", "2", "3", "4", "5" }, s, awful.layout.layouts[1])
-
-    -- Create wibar for this screen
-    s.mywibox = wibar(s)
-end)
-```
-
-## Adding Standard Widgets
-
-```lua
--- wibar.lua
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 
 return function(s)
-    -- Create widgets that need the screen
-    s.mypromptbox = awful.widget.prompt()
-
-    s.mylayoutbox = awful.widget.layoutbox {
-        screen = s,
-        buttons = {
-            awful.button({}, 1, function() awful.layout.inc(1) end),
-            awful.button({}, 3, function() awful.layout.inc(-1) end),
-        },
-    }
-
-    s.mytaglist = awful.widget.taglist {
-        screen = s,
-        filter = awful.widget.taglist.filter.all,
-        buttons = {
-            awful.button({}, 1, function(t) t:view_only() end),
-            awful.button({}, 3, awful.tag.viewtoggle),
-            awful.button({}, 4, function(t) awful.tag.viewprev(t.screen) end),
-            awful.button({}, 5, function(t) awful.tag.viewnext(t.screen) end),
-        },
-    }
-
-    s.mytasklist = awful.widget.tasklist {
-        screen = s,
-        filter = awful.widget.tasklist.filter.currenttags,
-        buttons = {
-            awful.button({}, 1, function(c)
-                c:activate { context = "tasklist", action = "toggle_minimization" }
-            end),
-            awful.button({}, 3, function()
-                awful.menu.client_list { theme = { width = 250 } }
-            end),
-        },
-    }
-
-    local wibar = awful.wibar {
-        position = "top",
-        screen = s,
-        widget = {
-            { -- Left section
-                layout = wibox.layout.fixed.horizontal,
-                s.mytaglist,
-                s.mypromptbox,
-            },
-            s.mytasklist, -- Center section
-            { -- Right section
-                layout = wibox.layout.fixed.horizontal,
-                wibox.widget.systray(),
-                wibox.widget.textclock(),
-                s.mylayoutbox,
-            },
-            layout = wibox.layout.align.horizontal,
-        },
-    }
-
-    return wibar
-end
-```
-
-## Adding Custom Widgets
-
-```lua
--- At the top of wibar.lua
-local my_clock = require("widgets.clock")
-local my_battery = require("widgets.battery")
-
--- In the right section:
-{ -- Right section
-    layout = wibox.layout.fixed.horizontal,
-    wibox.widget.systray(),
-    my_battery,
-    my_clock,
-    s.mylayoutbox,
-},
-```
-
-## Adding Separators
-
-Create visual separation between widget groups:
-
-```lua
-local function separator()
-    return wibox.widget {
-        {
-            widget = wibox.widget.separator,
-            orientation = "vertical",
-            forced_width = 1,
-            color = beautiful.fg_normal .. "40",  -- 25% opacity
-        },
-        margins = { left = 8, right = 8 },
-        widget = wibox.container.margin,
-    }
-end
-
--- Use in your layout:
-{ -- Right section
-    layout = wibox.layout.fixed.horizontal,
-    wibox.widget.systray(),
-    separator(),
-    my_battery,
-    separator(),
-    my_clock,
-    separator(),
-    s.mylayoutbox,
-},
-```
-
-## Wibar Properties
-
-For a complete reference of all wibar properties, see the [Wibar Properties Reference](/docs/reference/wibox/wibar).
-
-Key properties include:
-- `position` - `"top"`, `"bottom"`, `"left"`, `"right"`
-- `height`/`width` - Size in pixels
-- `margins` - Create floating effect with gaps
-- `shape` - Custom shape function (e.g., rounded corners)
-- `bg`/`fg` - Colors (can include alpha for transparency)
-
-## Styling the Wibar
-
-### Through Theme Variables
-
-In your `theme.lua`:
-
-```lua
-theme.wibar_bg = "#282828"
-theme.wibar_fg = "#ebdbb2"
-theme.wibar_height = 28
-theme.wibar_border_color = "#3c3836"
-theme.wibar_border_width = 1
-```
-
-### Inline Styling
-
-```lua
-awful.wibar {
-    position = "top",
-    screen = s,
-    bg = beautiful.wibar_bg .. "e0",  -- Slightly transparent
-    fg = beautiful.wibar_fg,
-    border_width = 1,
-    border_color = beautiful.wibar_border_color,
-}
-```
-
-## Complete Example
-
-```lua
--- wibar.lua
-local awful = require("awful")
-local wibox = require("wibox")
-local gears = require("gears")
-local beautiful = require("beautiful")
-
--- Optional: import custom widgets
--- local widgets = require("widgets")
-
--- Separator widget
-local function separator()
-    return wibox.widget {
-        {
-            orientation = "vertical",
-            forced_width = 1,
-            color = beautiful.fg_normal .. "30",
-            widget = wibox.widget.separator,
-        },
-        top = 6,
-        bottom = 6,
-        left = 8,
-        right = 8,
-        widget = wibox.container.margin,
-    }
-end
-
--- Wibar factory function
-return function(s)
-    -- Per-screen widgets
-    s.mypromptbox = awful.widget.prompt()
-
-    s.mylayoutbox = awful.widget.layoutbox {
-        screen = s,
-        buttons = {
-            awful.button({}, 1, function() awful.layout.inc(1) end),
-            awful.button({}, 3, function() awful.layout.inc(-1) end),
-            awful.button({}, 4, function() awful.layout.inc(-1) end),
-            awful.button({}, 5, function() awful.layout.inc(1) end),
-        },
-    }
-
-    s.mytaglist = awful.widget.taglist {
-        screen = s,
-        filter = awful.widget.taglist.filter.all,
-        buttons = {
-            awful.button({}, 1, function(t) t:view_only() end),
-            awful.button({ modkey }, 1, function(t)
-                if client.focus then
-                    client.focus:move_to_tag(t)
-                end
-            end),
-            awful.button({}, 3, awful.tag.viewtoggle),
-            awful.button({}, 4, function(t) awful.tag.viewprev(t.screen) end),
-            awful.button({}, 5, function(t) awful.tag.viewnext(t.screen) end),
-        },
-    }
-
-    s.mytasklist = awful.widget.tasklist {
-        screen = s,
-        filter = awful.widget.tasklist.filter.currenttags,
-        buttons = {
-            awful.button({}, 1, function(c)
-                c:activate { context = "tasklist", action = "toggle_minimization" }
-            end),
-            awful.button({}, 3, function()
-                awful.menu.client_list { theme = { width = 250 } }
-            end),
-            awful.button({}, 4, function() awful.client.focus.byidx(-1) end),
-            awful.button({}, 5, function() awful.client.focus.byidx(1) end),
-        },
-    }
-
-    -- Create the wibar
-    local wibar = awful.wibar {
+    return awful.wibar {
         position = "top",
         screen = s,
         height = beautiful.wibar_height or 28,
-        bg = beautiful.wibar_bg,
-        fg = beautiful.wibar_fg,
         widget = {
-            { -- Left section
-                layout = wibox.layout.fixed.horizontal,
+            {
                 s.mytaglist,
-                separator(),
                 s.mypromptbox,
-            },
-            { -- Center section
-                s.mytasklist,
-                layout = wibox.layout.flex.horizontal,
-            },
-            { -- Right section
+                spacing = 8,
                 layout = wibox.layout.fixed.horizontal,
+            },
+            s.mytasklist,
+            {
                 wibox.widget.systray(),
-                separator(),
-                awful.widget.keyboardlayout(),
-                separator(),
                 wibox.widget.textclock(" %a %b %d, %H:%M "),
-                separator(),
                 s.mylayoutbox,
+                spacing = 8,
+                layout = wibox.layout.fixed.horizontal,
             },
             layout = wibox.layout.align.horizontal,
         },
     }
-
-    return wibar
 end
 ```
 
-{/* TODO: Screenshot needed
-   - Custom wibar with all sections visible
-   - Show taglist, tasklist, systray, clock, layoutbox
-*/}
+The function takes a screen and returns its bar. The outer `align.horizontal` layout gives the left and right groups their natural widths. The tasklist uses the remaining space between them. That middle region is not necessarily centred on the screen.
 
-## Multiple Wibars
+## Replace the default bar
 
-You can have multiple wibars on a screen:
+After `beautiful.init(...)` in `rc.lua`, add:
 
 ```lua
-screen.connect_signal("request::desktop_decoration", function(s)
-    -- Top bar with tags and systray
-    s.top_wibar = awful.wibar {
-        position = "top",
-        screen = s,
-        widget = { ... },
-    }
-
-    -- Bottom bar with tasklist only
-    s.bottom_wibar = awful.wibar {
-        position = "bottom",
-        screen = s,
-        widget = s.mytasklist,
-    }
-end)
+local config_dir = gears.filesystem.get_configuration_dir()
+package.path = config_dir .. "?.lua;" .. config_dir .. "?/init.lua;" .. package.path
+local make_wibar = require("wibar")
 ```
 
-## Toggling Visibility
-
-Hide/show the wibar with a keybinding:
+Find the existing `request::desktop_decoration` handler. Keep its tag creation and definitions of `s.mypromptbox`, `s.mylayoutbox`, `s.mytaglist`, and `s.mytasklist`. Replace only the `s.mywibox = awful.wibar { ... }` construction with:
 
 ```lua
-awful.key({ modkey }, "b", function()
-    local s = awful.screen.focused()
-    s.mywibox.visible = not s.mywibox.visible
-end, { description = "toggle wibar", group = "awesome" }),
+s.mywibox = make_wibar(s)
 ```
 
-## Troubleshooting
+Use the existing handler. Adding another would create duplicate bars or tags.
 
-### Wibar not showing
+Reload with **Mod4+Ctrl+r**. Check that the new bar shows tags, open windows, the clock, and the layout indicator. Click a tag and a tasklist entry, then press **Mod4+r** to check the run prompt.
 
-1. Check that you're returning the wibar from your factory function
-2. Verify it's being called in `request::desktop_decoration`
-3. Try adding explicit `height` to ensure it has size
+The systray is shared across the session and displays on its configured screen, the primary screen by default. It can be empty when no applications have tray icons.
 
-### Widgets cut off
+## Add your clock
 
-The wibar may be too short. Increase the height:
+If you completed [Widgets](widgets.md), add this near the top of `wibar.lua`:
 
 ```lua
-awful.wibar {
-    height = 32,  -- Increase from default
-    ...
-}
+local my_clock = require("widgets.clock")
 ```
 
-### Systray icons not showing
+Replace the `wibox.widget.textclock(...)` entry with `my_clock`, then reload. The custom clock should appear in the same position. Keep the module import after theme initialisation in `rc.lua`.
 
-The systray can only be on one screen. Make sure it's only added once:
+## Change its appearance
+
+In the `awful.wibar` properties, after `screen = s`, add:
 
 ```lua
--- Only add systray to primary screen
-if s == screen.primary then
-    -- add wibox.widget.systray()
-end
+bg = "#282828",
+fg = "#ebdbb2",
+border_width = 1,
+border_color = "#504945",
 ```
 
-## Next Steps
+Reload to see the colours and border. Set `position = "bottom"` to move the bar to the bottom edge, then reload again. Tiled windows adjust to the space it reserves.
 
-- **[Wibar Properties Reference](/docs/reference/wibox/wibar)** - Complete wibar configuration reference
-- **[Widgets](/docs/tutorials/widgets)** - Create custom widgets for your wibar
-- **[Theme](/docs/tutorials/theme)** - Style your wibar
-- **[awful.wibar (AwesomeWM docs)](https://awesomewm.org/apidoc/classes/awful.wibar.html)** - Upstream API reference
+For a theme shared by several bars, put the corresponding `theme.wibar_*` values in your [theme file](theme.md) and remove these explicit properties. See the [wibar reference](../reference/wibox/wibar.md) for sizing, margins, and placement.
+
+## Toggle visibility
+
+Add this to `rc.lua` after `modkey` is defined:
+
+```lua
+awful.keyboard.append_global_keybindings({
+    awful.key({ modkey, "Control" }, "b", function()
+        local s = awful.screen.focused()
+        if s.mywibox then
+            s.mywibox.visible = not s.mywibox.visible
+        end
+    end, { description = "toggle wibar", group = "awesome" }),
+})
+```
+
+Reload and press **Mod4+Ctrl+b** twice to hide and restore the bar.

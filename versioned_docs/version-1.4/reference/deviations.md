@@ -6,7 +6,7 @@ description: Supported behaviour, platform differences and compatibility limits 
 
 # AwesomeWM compatibility reference
 
-SomeWM 1.4 mirrors AwesomeWM master and is maintained as the upstream-compatible line. Wayland requires differences in protocols and desktop integration.
+SomeWM 1.4 uses AwesomeWM’s Lua API with the Wayland differences listed below.
 
 <span id="looking-for" />
 
@@ -26,12 +26,16 @@ SomeWM 1.4 mirrors AwesomeWM master and is maintained as the upstream-compatible
 | Area | SomeWM behaviour |
 | --- | --- |
 | System tray | `wibox.widget.systray` uses StatusNotifierItem over D-Bus. XEmbed-only tray applications do not appear. |
-| Clipboard | Wayland clipboard and primary-selection protocols replace X selections; see [protocol support](wayland-protocols.md). |
-| Screenshots | The compositor captures the scene; see [screenshots](../guides/screenshots.md). |
-| Monitor and input configuration | The compositor owns these settings; see [`output`](output.md) and [`awful.input`](awful/input.md). |
-| Configuration paths | SomeWM uses `somewm/` configuration and cache directories; see [configuration search order](../getting-started/first-launch.md#configuration-locations). |
-| GTK theme discovery | `beautiful.gtk` reads GTK settings files instead of creating GTK widgets. GTK CSS is not fully represented; the fallback is Adwaita Dark. |
+| Clipboard | Wayland clipboard and primary-selection protocols replace X selections. See [protocol support](wayland-protocols.md). |
+| Screenshots | The compositor captures the scene. See [screenshots](../guides/screenshots.md). |
+| Monitor and input configuration | The compositor owns these settings. See [`output`](output.md) and [`awful.input`](awful/input.md). |
+| Configuration paths | SomeWM uses `somewm/` configuration and cache directories. See [configuration search order](../getting-started/first-launch.md#configuration-locations). |
+| GTK theme discovery | `beautiful.gtk` reads GTK settings files instead of creating GTK widgets. GTK CSS is not fully represented. The fallback is Adwaita Dark. |
 | Xresources | `gears.xresources` reads `~/.Xresources`, with fallback values. Updating the X server's resource database with `xrdb` does not update these values. |
+
+### Screen bounds
+
+In 1.4, `screen:get_bounding_geometry()` honours `honor_workarea` but ignores padding, margins, and alternate bounding rectangles. `screen.outputs` is a numeric array of output metadata, rather than a table keyed by output name. See [screen](screen.md#screen-management).
 
 ### Drawing and shapes
 
@@ -39,7 +43,7 @@ Widgets paint into drawable surfaces. The compositor places these surfaces along
 
 Client X11 shape masks have no Wayland implementation. See the [wibox reference](wibox/index.md) for widget and wibox shapes.
 
-Client geometry excludes the border. Titlebars occupy space inside the decorated client geometry; the border surrounds the client frame.
+Client geometry excludes the border. Titlebars occupy space inside the decorated client geometry. The border surrounds the client frame.
 
 ### Restart and reload
 
@@ -47,7 +51,7 @@ Client geometry excludes the border. Titlebars occupy space inside the decorated
 
 Modules holding GLib sources or D-Bus registrations must release them on `exit` before their Lua state closes. See [signals](signals.md) and [tag persistence](../guides/tag-persistence.md).
 
-`awesome.quit(1)` requests a new process when launched through `somewm-session`; applications lose their Wayland connections during a process restart.
+`awesome.quit(1)` requests a new process when launched through `somewm-session`. Applications lose their Wayland connections during a process restart.
 
 ## X-property APIs {#stubbed-apis}
 
@@ -59,7 +63,7 @@ Modules holding GLib sources or D-Bus registrations must release them on `exit` 
 
 ### Client properties {#x-property-family}
 
-`client:get_xproperty(name)` returns `nil`; `client:set_xproperty(name, value)` does nothing. These client methods allow configurations to load, but do not persist values across a Lua reload.
+`client:get_xproperty(name)` returns `nil`. `client:set_xproperty(name, value)` does nothing. These client methods allow configurations to load, but do not persist values across a Lua reload.
 
 ## Keyboard layouts {#partially-implemented}
 
@@ -73,16 +77,16 @@ The `grp:*` XKB toggle options do not reliably switch the compositor's keyboard 
 
 ## Client metadata and state
 
-Native Wayland clients provide an application ID, exposed as `client.class`. X11 `instance`, `machine` and `icon_name` metadata is unavailable for native clients; match rules by `class` instead. XWayland clients can supply X11 metadata.
+Native Wayland clients provide an application ID, exposed as `client.class`. X11 `instance`, `machine` and `icon_name` metadata is unavailable for native clients. Match rules by `class` instead. XWayland clients can supply X11 metadata.
 
 | Property | Behaviour |
 | --- | --- |
 | `client.id` | Compositor-assigned client identifier, also used by `somewm-client`. |
-| `client.aspect_ratio` | Width-to-height constraint; `0` or `nil` disables it. |
-| `client.xdg_fullscreen` | Read-only fullscreen state scheduled for an XDG client; falls back to `client.fullscreen` for other clients. |
-| `client.shadow` | Per-client shadow configuration; see [shadows](shadows.md). |
+| `client.aspect_ratio` | Width-to-height constraint. `0` or `nil` disables it. |
+| `client.xdg_fullscreen` | Read-only fullscreen state scheduled for an XDG client. Falls back to `client.fullscreen` for other clients. |
+| `client.shadow` | Per-client shadow configuration. See [shadows](shadows.md). |
 
-Protocol fullscreen state can differ from Lua state; `client.xdg_fullscreen` exposes that distinction.
+Protocol fullscreen state can differ from Lua state. `client.xdg_fullscreen` exposes that distinction.
 
 ## Signals
 
@@ -120,17 +124,17 @@ These limits concern X11 applications running through XWayland, not native Wayla
 
 | Area | API and documentation |
 | --- | --- |
-| Input devices and NumLock | [`awful.input`](awful/input.md); [`awesome._set_keyboard_setting`](awful/input.md) for NumLock |
-| Lua utilities | `gears.xresources` reads resource files; `gears.bitwise` provides bitwise operations on Lua versions without the operators |
+| Input devices and NumLock | [`awful.input`](awful/input.md) and [NumLock configuration](../guides/keyboard-layouts.md) |
+| Lua utilities | `gears.xresources` reads resource files. `gears.bitwise` provides bitwise operations on Lua versions without the operators |
 | IPC | [`somewm-client`](somewm-client.md), backed by `awful.ipc` |
 | Outputs and scaling | [`output`](output.md), [`screen.scale`](screen.md) |
 | Capture | [`screen.content`](screen.md), [`awful.screenshot`](awful/screenshot.md) |
-| Cursor themes | `root.cursor_theme`, `root.cursor_size`; [input devices](../guides/input-devices.md#cursor-theming) |
-| Shadows | Client and wibox shadows; [shadow reference](shadows.md) |
-| Tray integration | `awful.systray`, `awful.statusnotifierwatcher`, `wibox.widget.systray_icon`; [wibox widgets](wibox/index.md) |
-| Layer-shell rules | `ruled.layer_surface`; [layer surfaces](layer_surface/index.md) |
-| Scrolling layouts | `awful.layout.suit.carousel`; [carousel](awful/carousel.md) |
-| Monitor reconnection | [Tag persistence](tag-persistence.md); saved state is keyed by connector name |
+| Cursor themes | `root.cursor_theme`, `root.cursor_size`, see [input devices](../guides/input-devices.md#cursor-theming) |
+| Shadows | Client and wibox shadows, see [shadow reference](shadows.md) |
+| Tray integration | `awful.systray`, `awful.statusnotifierwatcher`, `wibox.widget.systray_icon`, see [wibox widgets](wibox/index.md) |
+| Layer-shell rules | `ruled.layer_surface`, see [layer surfaces](layer_surface/index.md) |
+| Scrolling layouts | `awful.layout.suit.carousel`, see [carousel](awful/carousel.md) |
+| Monitor reconnection | [Tag persistence](tag-persistence.md). Saved state is keyed by connector name |
 | Idle and locking | [Lock, idle and DPMS](lock.md), [session lock](lockscreen.md) |
 
 

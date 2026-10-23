@@ -6,9 +6,7 @@ description: Complete list of default keyboard shortcuts
 
 # Default Keybindings
 
-<!-- TODO: Complete keybinding list from themes/default/lua/rc.lua -->
-
-All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
+These bindings come from the 1.4 `somewmrc.lua`. **Mod4** is the Super/Windows key. Your `rc.lua` can replace them.
 
 ## Launcher
 
@@ -18,6 +16,8 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 | `Mod4 + r` | Run prompt |
 | `Mod4 + p` | Show menubar |
 | `Mod4 + s` | Show keybinding help |
+| `Mod4 + w` | Show main menu |
+| `Mod4 + x` | Run Lua prompt |
 
 ## Window Focus
 
@@ -34,6 +34,7 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 |------------|--------|
 | `Mod4 + Shift + j` | Swap with next client |
 | `Mod4 + Shift + k` | Swap with previous client |
+| `Mod4 + Ctrl + Return` | Swap with master client |
 
 ## Layout
 
@@ -45,6 +46,8 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 | `Mod4 + l` | Increase master width |
 | `Mod4 + Shift + h` | Increase master count |
 | `Mod4 + Shift + l` | Decrease master count |
+| `Mod4 + Ctrl + h/l` | Increase/decrease stack column count |
+| `Mod4 + Numpad 1-9` | Select layout by index |
 
 ## Tags
 
@@ -55,6 +58,7 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 | `Mod4 + Ctrl + 1-9` | Toggle tag view |
 | `Mod4 + Ctrl + Shift + 1-9` | Toggle client on tag |
 | `Mod4 + Left/Right` | View previous/next tag |
+| `Mod4 + Escape` | Restore previous tag selection |
 
 ## Screens
 
@@ -73,8 +77,10 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 | `Mod4 + m` | Toggle maximize |
 | `Mod4 + n` | Minimize |
 | `Mod4 + Ctrl + n` | Restore minimized |
-| `Mod4 + t` | Toggle floating |
-| `Mod4 + Ctrl + t` | Toggle always-on-top |
+| `Mod4 + Ctrl + Space` | Toggle floating |
+| `Mod4 + t` | Toggle always-on-top |
+| `Mod4 + Ctrl + m` | Toggle vertical maximization |
+| `Mod4 + Shift + m` | Toggle horizontal maximization |
 
 ## Session
 
@@ -95,5 +101,5 @@ All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 
 ## See Also
 
-- [Keybindings Tutorial](/docs/tutorials/keybindings)
+- [Keybindings Tutorial](/docs/1.4/tutorials/keybindings)
 - [AwesomeWM Key Docs](https://awesomewm.org/doc/api/libraries/awful.key.html)

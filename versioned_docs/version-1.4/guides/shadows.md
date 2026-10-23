@@ -4,414 +4,149 @@ title: Shadows
 description: Add compositor-level shadows to windows and wiboxes
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Shadows <SomewmOnly />
 
-SomeWM includes built-in shadow support, eliminating the need for external compositors like picom. This guide shows you how to enable and customize shadows.
-
-:::note
-Shadows apply to **clients** (windows) and **wiboxes** (containers), not individual widgets inside a wibox. For widget-level effects, use Lua/Cairo drawing.
-:::
+Enable compositor shadows in your theme, then override them for individual clients or wiboxes. These settings affect whole surfaces, not widgets inside them.
 
 ## Enabling Shadows
 
-Add these lines to your `theme.lua`:
+In `theme.lua`, before loading the theme:
 
 ```lua
 theme.shadow_enabled = true
+theme.shadow_radius = 12
+theme.shadow_opacity = 0.6
+theme.shadow_color = "#000000"
 ```
 
-That's it! All windows now have shadows with sensible defaults (12px blur radius, 75% opacity, black color).
+Reload the configuration to apply theme defaults. For all available settings and defaults, see the [shadow reference](../reference/shadows.md).
 
 ## Customizing Shadow Appearance
 
-### Soft, Diffuse Shadows
+<span id="soft-diffuse-shadows" />
+<span id="sharp-defined-shadows" />
+<span id="adjusting-shadow-position" />
+<span id="spread" />
+<span id="rounded-corners" />
+<span id="using-colored-shadows" />
+<span id="dynamic-color-effects" />
 
-For a gentle, modern look:
+| Setting | Effect |
+| --- | --- |
+| `shadow_radius` | Blur radius. Larger values soften the edge. |
+| `shadow_opacity` | Opacity from `0` to `1`. |
+| `shadow_offset_x`, `shadow_offset_y` | Position relative to the window. Positive values move right and down. |
+| `shadow_spread` | Expansion beyond the surface edges before blurring. |
+| `shadow_corner_radius` | Rounding of the shadow's corners. Does not round the window itself. |
+| `shadow_color` | Hex colour. An alpha byte multiplies the opacity. |
+
+For a downward shadow with rounded corners:
 
 ```lua
-theme.shadow_enabled = true
-theme.shadow_radius = 20      -- Larger blur = softer
-theme.shadow_opacity = 0.5    -- More transparent
-theme.shadow_offset_x = -25   -- Spread further
-theme.shadow_offset_y = -25
+theme.shadow_offset_x = 0
+theme.shadow_offset_y = 8
+theme.shadow_spread = 4
+theme.shadow_corner_radius = 16
 ```
 
-### Sharp, Defined Shadows
-
-For a more dramatic effect:
+For an even coloured glow, use zero offsets, a larger radius and a tinted colour:
 
 ```lua
-theme.shadow_enabled = true
-theme.shadow_radius = 6       -- Small blur = sharp edges
-theme.shadow_opacity = 0.9    -- Nearly solid
-theme.shadow_offset_x = -8
-theme.shadow_offset_y = -8
-```
-
-### Adjusting Shadow Position
-
-The offset values control where the shadow appears relative to the window:
-
-- **Negative values** place the shadow behind/above the window (typical)
-- **Positive values** place the shadow in front/below (unusual, but can create interesting effects)
-
-```lua
--- Shadow directly behind (centered)
 theme.shadow_offset_x = 0
 theme.shadow_offset_y = 0
-
--- Shadow to the bottom-right (light source top-left)
-theme.shadow_offset_x = 10
-theme.shadow_offset_y = 10
-```
-
-The shadow fades out on every side; the parts covered by the window itself are simply not visible. So a large offset gives a one-sided drop shadow, and a zero offset gives an even halo around the window.
-
-### Spread
-
-`spread` grows the shadow beyond the window's edges before the blur, so it peeks out on every side even with an offset. This is what makes windows read as raised:
-
-```lua
-theme.shadow_spread = 4
-```
-
-### Rounded Corners
-
-`corner_radius` rounds the shadow's corners. Match it to your window corner styling:
-
-```lua
-theme.shadow_corner_radius = 12
-```
-
-## Using Colored Shadows
-
-Shadows don't have to be black! Create glow effects or match your color scheme:
-
-```lua
--- Subtle blue tint
-theme.shadow_color = "#1a1a2e"
-
--- Cyan glow
-theme.shadow_color = "#00FFFF"
-theme.shadow_opacity = 0.4
 theme.shadow_radius = 24
-
--- Warm amber
-theme.shadow_color = "#FFB347"
-
--- Translucent red: the alpha byte multiplies shadow_opacity
-theme.shadow_color = "#FF000080"
-```
-
-### Dynamic Color Effects
-
-Change shadow colors at runtime using `somewm-client`:
-
-```bash
-# Red alert mode
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { color = "#FF0000" } end'
-
-# Calm blue
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { color = "#4488FF" } end'
-
-# Purple haze
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { color = "#8800FF" } end'
-
-# Back to black
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { color = "#000000" } end'
+theme.shadow_color = "#3399FF"
+theme.shadow_opacity = 0.5
 ```
 
 ## Different Settings for Panels vs Windows
 
-You might want shadows on application windows but not on your wibar or other panels:
+Wibox defaults use the `shadow_drawin_` prefix:
 
 ```lua
--- Enable shadows for windows
-theme.shadow_enabled = true
-theme.shadow_radius = 14
-theme.shadow_opacity = 0.7
-
--- Disable shadows for panels/wiboxes
-theme.shadow_drawin_enabled = false
-```
-
-Or use subtler shadows for panels:
-
-```lua
--- Windows get full shadows
-theme.shadow_enabled = true
-theme.shadow_radius = 16
-theme.shadow_opacity = 0.8
-
--- Panels get lighter shadows
 theme.shadow_drawin_enabled = true
 theme.shadow_drawin_radius = 6
 theme.shadow_drawin_opacity = 0.3
 ```
 
+Set `shadow_drawin_enabled = false` to disable default panel shadows while keeping client shadows.
+
 ## Disabling Shadows for Specific Windows
 
-Use rules to control shadows per-application:
+<span id="enhanced-shadows-for-floating-windows" />
+<span id="special-effects-for-launchers" />
 
-```lua
--- No shadows on video players (might interfere with viewing)
-ruled.client.append_rule {
-    rule = { class = "mpv" },
-    properties = { shadow = false }
-}
-
-ruled.client.append_rule {
-    rule = { class = "vlc" },
-    properties = { shadow = false }
-}
-
--- No shadows on fullscreen windows
-ruled.client.append_rule {
-    rule_any = { fullscreen = true },
-    properties = { shadow = false }
-}
-```
-
-### Enhanced Shadows for Floating Windows
-
-Make floating windows stand out:
+Put this in your existing client rules handler:
 
 ```lua
 ruled.client.append_rule {
-    rule_any = { floating = true },
-    properties = {
-        shadow = {
-            radius = 24,
-            offset_x = -20,
-            offset_y = -20,
-            opacity = 0.9
-        }
-    }
+    rule_any = { class = { "^mpv$", "^vlc$" } },
+    properties = { shadow = false },
 }
 ```
 
-### Special Effects for Launchers
-
-Give your application launcher a glow:
-
-```lua
-ruled.client.append_rule {
-    rule = { class = "Rofi" },
-    properties = {
-        shadow = {
-            color = "#5599FF",
-            radius = 30,
-            opacity = 0.5
-        }
-    }
-}
-```
+Rules apply when a client is managed. To change shadows when a property such as `fullscreen` changes later, use a property signal handler.
 
 ## Per-Window Control
 
-Toggle shadows on individual windows programmatically:
+Set a client's `shadow` to `false`, `true` for theme defaults, or a settings table:
 
 ```lua
--- In a keybinding
-awful.key({ modkey }, "s", function()
-    local c = client.focus
-    if c then
-        c.shadow = not c.shadow
-    end
-end, {description = "toggle shadow", group = "client"})
+local c = client.focus
+if c then
+    c.shadow = {
+        radius = 20,
+        offset_x = 0,
+        offset_y = 0,
+        color = "#3399FF",
+        opacity = 0.6,
+    }
+end
 ```
 
-Or create custom shadow presets:
-
-```lua
-local shadow_presets = {
-    none = false,
-    subtle = { radius = 8, opacity = 0.4 },
-    normal = { radius = 12, opacity = 0.7 },
-    dramatic = { radius = 24, opacity = 0.9 },
-    glow = { radius = 20, opacity = 0.5, color = "#00AAFF" }
-}
-
--- Cycle through presets
-local current_preset = 1
-local preset_names = {"none", "subtle", "normal", "dramatic", "glow"}
-
-awful.key({ modkey, "Shift" }, "s", function()
-    local c = client.focus
-    if c then
-        current_preset = current_preset % #preset_names + 1
-        c.shadow = shadow_presets[preset_names[current_preset]]
-        naughty.notify { text = "Shadow: " .. preset_names[current_preset] }
-    end
-end, {description = "cycle shadow presets", group = "client"})
-```
+Reading `c.shadow` returns a configuration table or `false`. Inspect `c.shadow.enabled` when testing whether a returned table enables the shadow. A disabled configuration table is still truthy in Lua.
 
 ## Adding Shadows to Wiboxes
 
-Create wiboxes with shadows:
+<span id="shadow-recipes" />
+<span id="classic-drop-shadow" />
+<span id="raised-card" />
+<span id="soft-halo" />
+<span id="colored-glow" />
+<span id="tight-sharp-shadow" />
+<span id="wibar-panel-shadow" />
 
 ```lua
-local mybox = wibox {
-    width = 300,
-    height = 100,
-    visible = true,
-    shadow = true  -- Uses theme defaults
-}
-
--- Or with custom settings
+local wibox = require("wibox")
 local popup = wibox {
     width = 200,
     height = 50,
-    shadow = {
-        radius = 10,
-        opacity = 0.6,
-        color = "#222222"
-    }
+    visible = true,
+    bg = "#222222",
+    shadow = { radius = 10, opacity = 0.6, color = "#000000" },
 }
 ```
 
-## Shadow Recipes
-
-Tested configurations you can copy directly into your setup.
-
-### Classic Drop Shadow
-
-A traditional shadow cast to the bottom-right, as if the light source is at the top-left:
-
-```lua
--- In theme.lua
-theme.shadow_enabled = true
-theme.shadow_radius = 12
-theme.shadow_offset_x = 8
-theme.shadow_offset_y = 8
-theme.shadow_opacity = 0.6
-
--- Or per-window
-c.shadow = {
-    radius = 12,
-    offset_x = 8,
-    offset_y = 8,
-    opacity = 0.6
-}
-```
-
-### Raised Card
-
-A modern elevation look: small downward offset, a little spread so the shadow peeks out on every side, rounded corners:
-
-```lua
--- In theme.lua
-theme.shadow_enabled = true
-theme.shadow_radius = 16
-theme.shadow_offset_x = 0
-theme.shadow_offset_y = 8
-theme.shadow_spread = 4
-theme.shadow_corner_radius = 16
-theme.shadow_opacity = 0.6
-```
-
-### Soft Halo
-
-An even glow on all sides, giving windows a floating appearance:
-
-```lua
--- In theme.lua
-theme.shadow_enabled = true
-theme.shadow_radius = 24
-theme.shadow_offset_x = 0
-theme.shadow_offset_y = 0
-theme.shadow_opacity = 0.5
-
--- Or per-window
-c.shadow = {
-    radius = 24,
-    offset_x = 0,
-    offset_y = 0,
-    opacity = 0.5
-}
-```
-
-### Colored Glow
-
-A blue neon glow surrounding the window. Works well as a focused-window indicator:
-
-```lua
--- Per-window (e.g., in a focus signal handler)
-c.shadow = {
-    color = "#3399FF",
-    radius = 20,
-    offset_x = 0,
-    offset_y = 0,
-    opacity = 0.6
-}
-```
-
-### Tight, Sharp Shadow
-
-A small, crisp shadow for a subtle beveled look:
-
-```lua
--- In theme.lua
-theme.shadow_enabled = true
-theme.shadow_radius = 4
-theme.shadow_offset_x = 3
-theme.shadow_offset_y = 3
-theme.shadow_opacity = 0.9
-
--- Or per-window
-c.shadow = {
-    radius = 4,
-    offset_x = 3,
-    offset_y = 3,
-    opacity = 0.9
-}
-```
-
-### Wibar Panel Shadow
-
-A downward shadow on the top panel, making it float above the desktop:
-
-```lua
--- In rc.lua, after creating the wibar
-s.mywibox.shadow = {
-    radius = 12,
-    offset_x = 0,
-    offset_y = 4,
-    opacity = 0.7
-}
-```
+For an existing wibar, assign the same table to `s.mywibox.shadow`, using your bar's actual variable name.
 
 ## Troubleshooting
 
-### Shadows not appearing
+<span id="shadows-not-appearing" />
+<span id="shadows-appear-but-wrong-color" />
+<span id="performance-concerns" />
 
-1. Check that `theme.shadow_enabled = true` is in your theme
-2. Verify your theme is loading correctly (check for errors on startup)
-3. Try enabling shadows directly: `somewm-client eval 'client.focus.shadow = true'`
+Check that the theme loaded and no rule overrides `shadow`. To test the focused window directly:
 
-### Shadows appear but wrong color
-
-Make sure you're using hex color format with the `#` prefix:
-
-```lua
--- Correct
-theme.shadow_color = "#FF0000"
-
--- Wrong (won't work)
-theme.shadow_color = "FF0000"
-theme.shadow_color = "red"
+```bash
+somewm-client eval 'if client.focus then client.focus.shadow = true end'
 ```
 
-### Performance concerns
-
-Shadow textures are tiny (~2.5KB per shadow), so performance impact is minimal. If you notice any issues:
-- Reduce `shadow_radius` (smaller blur = fewer pixels)
-- Lower the number of windows with unique shadow configurations
+Use hex colours such as `#000000` or `#FF000080`. Compare with shadows disabled when investigating rendering cost rather than assuming a fixed memory or performance cost.
 
 ## See Also
 
-- [Shadow Reference](/docs/reference/shadows) - Complete API documentation
-- [Theme Tutorial](/docs/tutorials/theme) - Introduction to theming
-- [Client Rules](/docs/tutorials/basics) - How to set up client rules
+- [Shadow Reference](../reference/shadows.md)
+- [Theme Tutorial](../tutorials/theme.md)
+- [Client Rules](client-rules.md)

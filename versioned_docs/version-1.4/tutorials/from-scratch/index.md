@@ -6,7 +6,9 @@ sidebar_label: Overview
 
 import ChapterList from '@site/src/components/FromScratch/ChapterList';
 
-# Awesome(And SomeWM 1.4) From Scratch
+# Awesome and SomeWM 1.4 From Scratch
+
+<span id="awesomeand-somewm-14-from-scratch" />
 
 Build a desktop configuration in thirteen chapters: theme, widgets, bar, notifications, menus, launcher, dashboard, window switcher, and a SomeWM lockscreen.
 
@@ -44,12 +46,14 @@ git clone https://github.com/trip-zip/awesome-from-scratch.git
 cd awesome-from-scratch
 
 git checkout 03-widgets        # the finished code for chapter 3
-git diff 02-keybindings 03-widgets   # exactly what chapter 3 added
+git diff origin/02-keybindings origin/03-widgets
 ```
 
-Use the checkpoints to compare your work or catch up.
+Each chapter shows excerpts from its checkpoint. They are not complete files unless labelled as such. Keep the full files open while following the steps, and use the branch diff to find omitted imports, layouts, and handlers. Save your own edits on a separate branch before switching checkpoints.
 
 ## Running Your Work Safely
+
+<span id="how-this-relates-to-the-other-tutorials" />
 
 Test edits in a nested window before applying them to your desktop. Run these commands from the checkout.
 
@@ -59,7 +63,7 @@ Test edits in a nested window before applying them to your desktop. Run these co
 somewm-client test start --config "$PWD/rc.lua" --name afs
 ```
 
-See [nested testing](../../guides/testing-with-nested-compositor.md) and the [Mod4 remapping caveat](../../troubleshooting.md).
+After editing, run `somewm-client test reload --name afs`. Before changing checkpoint branches, stop the instance with `somewm-client test stop --name afs`, then start it again. Add `--host x11` when launching from X11. See [nested testing](../../guides/testing-with-nested-compositor.md) for modifier remapping.
 
 **AwesomeWM:** use Xephyr:
 
@@ -68,11 +72,7 @@ Xephyr :1 -ac -br -noreset -screen 1280x720 &
 DISPLAY=:1 awesome -c "$PWD/rc.lua"
 ```
 
-The config finds its modules relative to the specified `rc.lua`, so both commands work from the checkout.
-
-## How This Relates to the Other Tutorials
-
-Use the standalone tutorials to add [a theme](../theme.md), [widgets](../widgets.md), [keybindings](../keybindings.md), or [a bar](../wibar.md) to an existing config.
+From chapter 01 onward, the config finds modules relative to the specified `rc.lua`. Stop the Xephyr session before switching branches. Nested sessions share your files and services, so power-menu and dashboard actions can affect your real desktop.
 
 ## Start
 

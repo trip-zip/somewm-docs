@@ -6,7 +6,7 @@ description: Widgets, containers, and the wibar
 
 # wibox
 
-The `wibox` library provides the widget system for AwesomeWM/SomeWM. It includes primitive widgets, containers, layouts, and the `wibar` (status bar).
+`wibox` supplies widgets, containers, and layouts. A `wibox` displays a widget tree in a desktop surface. [`awful.wibar`](wibar.md) attaches one to a screen edge.
 
 **Upstream documentation:** [awesomewm.org/apidoc/popups_and_bars/wibox.html](https://awesomewm.org/apidoc/popups_and_bars/wibox.html)
 
@@ -67,6 +67,9 @@ Layouts arrange multiple child widgets.
 Widgets compose by nesting. The `widget` field identifies the type, and children are table entries:
 
 ```lua
+local wibox = require("wibox")
+local gears = require("gears")
+
 wibox.widget {
     {
         {
@@ -85,6 +88,7 @@ wibox.widget {
 Use `id` fields to access nested widgets later:
 
 ```lua
+local wibox = require("wibox")
 local w = wibox.widget {
     {
         id = "my_text",
@@ -105,4 +109,4 @@ w:get_children_by_id("my_text")[1].text = "Updated"
 
 ## Behavioral Notes
 
-SomeWM uses the SNI (StatusNotifierItem) protocol for the system tray instead of X11's XEmbed. See [Wayland vs X11](/docs/concepts/wayland-vs-x11) for details.
+SomeWM uses the SNI (StatusNotifierItem) protocol for the system tray instead of X11's XEmbed. See [Wayland vs X11](/docs/1.4/concepts/wayland-vs-x11) for details.

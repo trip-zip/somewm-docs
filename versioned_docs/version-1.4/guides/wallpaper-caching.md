@@ -4,188 +4,107 @@ title: Wallpaper Caching
 description: Speed up tag switching with per-tag wallpapers
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Wallpaper Caching <SomewmOnly />
 
-SomeWM caches wallpaper textures to make tag switching instant when using per-tag wallpapers.
+Use `gears.wallpaper.maximized(path, screen, ...)` with a file path and an explicit screen to cache per-tag wallpapers. The default config's `awful.wallpaper` widget path does not use this cache.
 
 ## Automatic Caching
 
-If you use `gears.wallpaper.maximized()` with file paths, caching works automatically:
+Replace the existing wallpaper handler with this one, using image paths that exist on your machine:
 
 ```lua
--- rc.lua
-local tag_wallpapers = {
-    [1] = "/home/user/wallpapers/mountains.jpg",
-    [2] = "/home/user/wallpapers/forest.png",
-    [3] = "/home/user/wallpapers/ocean.jpg",
+local gears = require("gears")
+local wallpapers = {
+    os.getenv("HOME") .. "/wallpapers/mountains.jpg",
+    os.getenv("HOME") .. "/wallpapers/forest.png",
+    os.getenv("HOME") .. "/wallpapers/ocean.jpg",
 }
 
-local function set_wallpaper_for_tag(t)
-    if not t or not t.selected then return end
-    local wp = tag_wallpapers[t.index]
-    if wp then
-        gears.wallpaper.maximized(wp, t.screen, true)
-    end
+local function set_wallpaper(s)
+    local t = s.selected_tag
+    local path = t and wallpapers[t.index]
+    if path then gears.wallpaper.maximized(path, s, true) end
 end
 
+screen.connect_signal("request::wallpaper", set_wallpaper)
 tag.connect_signal("property::selected", function(t)
-    set_wallpaper_for_tag(t)
+    if t.selected then set_wallpaper(t.screen) end
 end)
+for s in screen do set_wallpaper(s) end
 ```
 
-The first time you visit a tag, the wallpaper loads normally (~20ms). Every subsequent visit is instant (~0.1ms) because SomeWM reuses the cached GPU texture.
+The first use loads and renders the image. A cache hit reuses it. The key includes the path and screen index, so each screen has separate entries. With several selected tags, this example uses `s.selected_tag`.
 
 ## Preloading Wallpapers
 
-For instant first-switch too, preload wallpapers at startup:
+<span id="multi-monitor-support" />
+
+Preload after screens exist, using the same `wallpapers` list:
 
 ```lua
--- Preload all wallpapers into cache
-root.wallpaper_cache_preload({
-    "/home/user/wallpapers/mountains.jpg",
-    "/home/user/wallpapers/forest.png",
-    "/home/user/wallpapers/ocean.jpg",
-})
+for s in screen do
+    local count = root.wallpaper_cache_preload(wallpapers, s)
+    print("Preloaded wallpapers:", count)
+end
 ```
 
-This loads all images during startup so even the first visit to each tag is instant.
-
-## Multi-Monitor Support
-
-The cache is per-screen. Each screen has its own set of cached wallpapers, so switching tags on one screen doesn't affect wallpapers on other screens.
-
-```lua
--- With multiple screens, each gets its own wallpaper cache
-tag.connect_signal("property::selected", function(t)
-    if not t or not t.selected then return end
-    local wp = tag_wallpapers[t.index]
-    if wp then
-        -- This caches separately for t.screen
-        gears.wallpaper.maximized(wp, t.screen, true)
-    end
-end)
-```
+Without the screen argument, preloading uses the primary screen. Preloading performs work immediately, so a large list can delay startup.
 
 ## Cache API
-
-SomeWM provides four functions for cache control:
 
 ### Check if Cached
 
 ```lua
--- Check if wallpaper is cached for a specific screen
-if root.wallpaper_cache_has("/path/to/wallpaper.jpg", screen.primary) then
-    -- Already in cache for this screen
-end
+local cached = root.wallpaper_cache_has(wallpapers[1], screen.primary)
 ```
 
 ### Show Cached Wallpaper
 
-```lua
--- Returns true if cache hit, false if not cached
--- You normally don't need to call this directly
-local hit = root.wallpaper_cache_show("/path/to/wallpaper.jpg", screen.primary)
-```
-
-This is used internally by the automatic caching.
-
-### Preload Multiple Wallpapers
+<span id="preload-multiple-wallpapers" />
 
 ```lua
--- Preload wallpapers for a specific screen
--- Screen defaults to primary if not specified
-local count = root.wallpaper_cache_preload({
-    "/path/to/image1.jpg",
-    "/path/to/image2.png",
-    "/path/to/image3.jpg",
-}, screen.primary)
-print("Preloaded " .. count .. " wallpapers")
-
--- For multi-monitor, preload for each screen:
-for s in screen do
-    root.wallpaper_cache_preload({
-        tag_wallpapers[1],
-        tag_wallpapers[2],
-        -- ...
-    }, s)
-end
+local shown = root.wallpaper_cache_show(wallpapers[1], screen.primary)
 ```
+
+`show` returns `false` on a miss. Normally, let `gears.wallpaper.maximized` handle this lookup and load the file when needed.
 
 ### Clear Cache
 
+The key does not include file modification time, screen geometry or rendering options. After replacing an image or changing output geometry, clear the cache and repaint:
+
 ```lua
--- Free all cached wallpaper textures (all screens)
 root.wallpaper_cache_clear()
+for s in screen do set_wallpaper(s) end
 ```
 
-Use this to free GPU memory if needed. The cache will rebuild as you switch tags.
+Clearing also removes cached wallpaper scene nodes, including currently displayed ones. Always restore the visible wallpapers afterward.
 
 ## Cache Limits
 
-The cache holds up to 32 wallpapers total (all screens combined). With a typical 2-screen setup and 9 tags each, that's 18 wallpapers which fits comfortably.
+<span id="memory-usage" />
 
-When the cache is full, the least recently used wallpaper is evicted to make room for new ones.
+Eviction begins at 32 entries across all screens. It removes the oldest inserted entry that is not currently displayed. Cache hits do not update insertion order, so this is not a least-recently-used cache.
 
-## Memory Usage
-
-Each cached wallpaper uses GPU memory:
-
-| Resolution | Memory per Wallpaper |
-|------------|---------------------|
-| 1920x1080 | ~8 MB |
-| 2560x1440 | ~15 MB |
-| 3840x2160 | ~33 MB |
-
-With 16 cached 1080p wallpapers, expect ~128 MB of GPU memory usage. For 4K displays, consider reducing the number of unique wallpapers or clearing the cache when memory is tight.
+Each entry retains CPU image data as well as renderer resources. A single 3840×2160 RGBA image is about 32 MiB before additional renderer storage. Use fewer unique images if memory use is too high.
 
 ## What Gets Cached
 
-Only `gears.wallpaper.maximized()` calls with **file paths** are cached:
-
-```lua
--- Cached (file path)
-gears.wallpaper.maximized("/path/to/image.jpg", s, true)
-
--- NOT cached (cairo surface)
-local surf = gears.surface.load("/path/to/image.jpg")
-gears.wallpaper.maximized(surf, s, true)
-
--- NOT cached (solid color)
-gears.wallpaper.set("#282828")
-```
-
-Other wallpaper functions (`centered`, `tiled`, `fit`) are not currently cached.
+The automatic cache applies to file paths passed to `gears.wallpaper.maximized` with an explicit screen. It does not apply to Cairo surfaces, solid colours, `centered`, `tiled`, `fit` or `awful.wallpaper` widget rendering.
 
 ## Troubleshooting
 
-### Wallpaper Not Caching
+<span id="wallpaper-not-caching" />
+<span id="cache-not-persisting" />
+<span id="high-memory-usage" />
 
-Ensure you're passing a file path string directly to `gears.wallpaper.maximized()`:
-
-```lua
--- Works: direct path
-gears.wallpaper.maximized("/path/to/wallpaper.jpg", s, true)
-
--- Doesn't work: loaded surface
-local surf = gears.surface("/path/to/wallpaper.jpg")
-gears.wallpaper.maximized(surf, s, true)
-```
-
-### Cache Not Persisting
-
-The cache only lives in memory. It's cleared when SomeWM restarts. Use `root.wallpaper_cache_preload()` in your rc.lua to rebuild it at startup.
-
-### High Memory Usage
-
-If GPU memory is a concern:
-
-1. Use fewer unique wallpapers
-2. Use lower resolution images
-3. Call `root.wallpaper_cache_clear()` periodically
+- **File changes do not appear:** clear and repaint as above.
+- **No cache hit:** check that the exact path and screen match, and that the entry was not evicted.
+- **State survives a reload:** the cache lives in C and survives a Lua reload. Exiting the compositor clears it.
+- **Another wallpaper replaces yours:** remove or update the other wallpaper handler.
 
 ## See Also
 
-- [Wallpaper Caching Concepts](../concepts/wallpaper-caching.md) - How caching works under the hood
-- [Wayland vs X11](/docs/concepts/wayland-vs-x11) - Why caching is needed on Wayland
+- [Wallpaper Caching](../concepts/wallpaper-caching.md)
+- [Wayland and X11](../concepts/wayland-vs-x11.md)

@@ -1,6 +1,6 @@
 ---
 title: "Launcher: A Menubar Replacement"
-description: "Build a native fuzzy-search application launcher: parse .desktop files, scan asynchronously, score matches, and cache icon lookups on disk."
+description: "Build an application launcher with fuzzy search and cached icons."
 sidebar_label: "10 · Launcher"
 ---
 
@@ -11,7 +11,7 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="10" />
 
-## Where We Are
+<span id="where-we-are" />
 
 Build `launcher/init.lua`: an application launcher with fuzzy search, icons, and an icon cache, opened with `Mod+P`.
 
@@ -21,7 +21,7 @@ To catch up: `git checkout 09-switcher`.
 
 Applications provide `.desktop` files with names, commands, and icons. Search `~/.local/share/applications`, `/usr/local/share/applications`, and `/usr/share/applications`. A Firefox entry looks like this:
 
-```bash
+```ini
 # /usr/share/applications/firefox.desktop (abridged)
 [Desktop Entry]
 Type=Application
@@ -35,7 +35,6 @@ Enable `debug_launcher` while testing to log scan timings and icon-cache results
 
 ```lua
 -- launcher/init.lua
--- Logs to stderr (`~/.cache/somewm/stderr`).
 local debug_launcher = false
 ```
 
@@ -65,7 +64,6 @@ Split each line on its first `=`:
         if key == "Name" and not app.name then
           app.name = value
         elseif key == "Exec" then
-          -- Remove field codes like %f, %F, %u, %U, etc.
           app.exec = value:gsub("%%[fFuUdDnNickvm]", ""):gsub("%s+$", "")
         elseif key == "Icon" then
           app.icon = value
@@ -84,7 +82,7 @@ Split each line on its first `=`:
       end
 ```
 
-`Exec` field codes such as `%f` and `%u` represent file or URL arguments. This launcher strips them because it opens apps without those arguments. Return `nil` if the entry has no name or command.
+`Exec` field codes such as `%f` and `%u` represent file or URL arguments. This example strips them and opens apps without file arguments. Return `nil` if the entry has no name or command. The parser does not implement all desktop-entry fields, including `Terminal`, `TryExec`, and desktop-specific visibility, so some entries need additional handling.
 
 ## Scanning Asynchronously
 
@@ -92,8 +90,6 @@ Use `awful.spawn.easy_async` to run `find`. Waiting on `io.popen` would block th
 
 ```lua
 -- launcher/init.lua
-  -- Phase 1: Find all desktop files, off the main loop. find(1) complains
-  -- about directories that don't exist; stderr is simply ignored.
   local find_start = os.clock()
   local cmd = { "find" }
   for _, dir in ipairs(desktop_dirs) do
@@ -131,9 +127,7 @@ Try a plain-text substring match first:
 
 ```lua
 -- launcher/init.lua
-  -- Exact substring match (highest priority)
   if str:find(pattern, 1, true) then
-    -- Earlier match = higher score
     local pos = str:find(pattern, 1, true)
     return 1000 - pos
   end
@@ -149,13 +143,11 @@ Otherwise, match the letters in order, with bonuses for adjacent letters and wor
 
   for i = 1, #str do
     if pattern_idx <= #pattern and str:sub(i, i) == pattern:sub(pattern_idx, pattern_idx) then
-      -- Bonus for consecutive matches
       if i == last_match + 1 then
         score = score + 10
       else
         score = score + 1
       end
-      -- Bonus for matching at word boundaries
       if i == 1 or str:sub(i - 1, i - 1):match("[%s%-_]") then
         score = score + 5
       end
@@ -164,7 +156,6 @@ Otherwise, match the letters in order, with bonuses for adjacent letters and wor
     end
   end
 
-  -- Return score only if entire pattern was matched
   if pattern_idx > #pattern then
     return score
   end
@@ -196,7 +187,6 @@ An icon name such as `firefox` must be resolved to a file. Avoid checking nonexi
 
 ```lua
 -- launcher/init.lua
--- Existing icon directories, in search order.
 local icon_search_dirs = nil
 ```
 
@@ -215,14 +205,11 @@ Save resolved paths in a persistent cache:
 
 ```lua
 -- launcher/init.lua
--- The format is one "name<TAB>path" line per entry. Icon names cannot contain
--- tabs or newlines, so nothing needs escaping; an empty path records a known
--- miss so we never re-run the expensive search for an icon that isn't there.
 local icon_cache = {}
 local icon_cache_path = gears.filesystem.get_cache_dir() .. "launcher-icons.cache"
 ```
 
-The cache directory is `~/.cache/somewm/`, or `~/.cache/awesome/` on AwesomeWM. Read each tab-separated entry:
+The default cache directory is `~/.cache/somewm/`, or `~/.cache/awesome/` on AwesomeWM. Read each tab-separated entry:
 
 ```lua
 -- launcher/init.lua
@@ -233,19 +220,18 @@ The cache directory is `~/.cache/somewm/`, or `~/.cache/awesome/` on AwesomeWM. 
     end
 ```
 
-`false` records a known miss; `nil` means the icon has not been searched for:
+`false` records a known miss. `nil` means the icon has not been searched for:
 
 ```lua
 -- launcher/init.lua
-  -- Cache the miss
   icon_cache[icon_name] = false
   icon_cache_dirty = true
   return nil
 ```
 
-A dirty flag means the cache file is only rewritten when something actually changed.
+The cache is written only after a new lookup. Remove `launcher-icons.cache` and reload after changing icon themes or installing a previously missing icon.
 
-Icon resolution still runs synchronously inside the callback. A cold cache can block the main loop; check the debug timings.
+Icon resolution still runs synchronously inside the callback. A cold cache can block the main loop. Check the debug timings.
 
 ## The Interface
 
@@ -266,15 +252,13 @@ end
 
 `initial_colors` lists theme accents. The name determines the colour, so each app keeps the same fallback icon between sessions.
 
-Clicking launches an app; hovering selects it. Skip the rebuild if that row is already selected. Scroll buttons 4 and 5 move the selection.
+Clicking launches an app. Hovering selects it. Skip the rebuild if that row is already selected. Scroll buttons 4 and 5 move the selection.
 
 Use `modal.new` from [chapter 07](./07-exitscreen.md). Build the popup once and load apps in `on_show`:
 
 ```lua
 -- launcher/init.lua
   on_show = function(popup)
-    -- Load apps if not already loaded; the list fills in when the async scan
-    -- finishes (the popup shows "Loading applications..." until then)
     if #all_apps == 0 then
       load_apps(function()
         if launcher.is_visible() then
@@ -285,7 +269,6 @@ Use `modal.new` from [chapter 07](./07-exitscreen.md). Build the popup once and 
       log("Using cached apps (%d apps)", #all_apps)
     end
 
-    -- Reset state
     search_text = ""
     selected_index = 1
     filter_apps()
@@ -298,19 +281,17 @@ The `keypressed` handler routes `Return` to launch, `Up`/`Down` to move the sele
 ```lua
 -- launcher/init.lua
     elseif key == "Tab" then
-      -- Tab completion - fill in selected app name
       if #filtered_apps > 0 then
         search_text = filtered_apps[selected_index].name
         launcher.refresh()
       end
     elseif #key == 1 then
-      -- Single character - add to search
       search_text = search_text .. key
       launcher.refresh()
     end
 ```
 
-Keygrabbers provide key names. This input handler accepts single-byte names; it does not handle multi-byte text or the `space` key.
+SomeWM 1.4 sends printable keys as UTF-8 text. This handler accepts only single-byte input, including spaces, and ignores multi-byte characters.
 
 ## Opening It
 
@@ -331,7 +312,7 @@ Add an Apps entry at the top of the main menu:
 
 In `execute_item`, handle `"launcher"` with `require("launcher").show()`. Keeping the `require` inside the handler avoids loading the launcher with the menu.
 
-Reload with `Mod+Ctrl+R`, press `Mod+P`, and search for an installed app. With debugging enabled, compare the first and subsequent load timings in `~/.cache/somewm/stderr`.
+Reload with Mod+Ctrl+r, press Mod+p, and search for an installed graphical app. With debugging enabled, compare the first and subsequent scans in `somewm-client test logs --name afs`. On AwesomeWM, read the terminal running the nested session.
 
 ## Try It
 
@@ -342,13 +323,10 @@ Reload with `Mod+Ctrl+R`, press `Mod+P`, and search for an installed app. With d
 
 ## Checkpoint
 
-Your config now matches [the `10-launcher` branch](https://github.com/trip-zip/awesome-from-scratch/tree/10-launcher).
+The complete files are on [the `10-launcher` branch](https://github.com/trip-zip/awesome-from-scratch/tree/10-launcher).
 
-```bash
-git checkout 10-launcher
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 09-switcher 10-launcher`
+Compare your work: `git diff origin/09-switcher origin/10-launcher`
 
 <NextChapter chapter="10" />

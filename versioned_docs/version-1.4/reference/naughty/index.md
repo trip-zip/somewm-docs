@@ -14,13 +14,13 @@ The `naughty` library handles desktop notifications. It receives notifications f
 
 ## Deviations from AwesomeWM
 
-None. SomeWM's `naughty` implementation is fully compatible with AwesomeWM. Notifications travel over the standard D-Bus `org.freedesktop.Notifications` interface; the Lua API and signal contract are identical.
+Notifications use the standard D-Bus service on Wayland. The widget and rule APIs follow AwesomeWM.
 
 ## Modules
 
 | Module | Purpose |
 |--------|---------|
-| `naughty.notify` | Create and display notifications |
+| `naughty.notify` | Deprecated constructor, use `naughty.notification` |
 | `naughty.notification` | Notification object |
 | `naughty.layout.box` | Default notification display widget |
 | `naughty.widget.icon` | Notification icon widget |
@@ -32,7 +32,7 @@ None. SomeWM's `naughty` implementation is fully compatible with AwesomeWM. Noti
 
 ## Display Handler
 
-Naughty requires a `request::display` handler to show notifications. The default config provides one. If building from scratch:
+The default config registers a `request::display` handler. A custom config can use:
 
 ```lua
 local naughty = require("naughty")
@@ -42,14 +42,14 @@ naughty.connect_signal("request::display", function(n)
 end)
 ```
 
-## naughty.notify
+## naughty.notification {#naughtynotify}
 
-Create a notification:
+`naughty.notification` creates a notification object. `naughty.notify` is the deprecated equivalent, with `text` as the legacy name for `message`:
 
 ```lua
-naughty.notify {
+naughty.notification {
     title   = "Title",
-    text    = "Body text",
+    message = "Body text",
     timeout = 5,
 }
 ```
@@ -59,7 +59,7 @@ naughty.notify {
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `title` | string | `""` | Notification title |
-| `text` | string | `""` | Notification body |
+| `message` | string | `""` | Notification body |
 | `timeout` | number | `5` | Auto-dismiss time in seconds (0 = never) |
 | `urgency` | string | `"normal"` | `"low"`, `"normal"`, or `"critical"` |
 | `position` | string | `"top_right"` | Screen position (see [Positions](#positions)) |
@@ -74,57 +74,38 @@ naughty.notify {
 
 ### Actions
 
-```lua
-naughty.notify {
-    title = "Download complete",
-    text = "document.pdf",
-    actions = {
-        naughty.action { name = "Open" },
-        naughty.action { name = "Show in folder" },
-    },
-}
-```
-
-Handle action clicks with the `invoked` signal:
+`invoked` belongs to each action, not the notification. The default action widget passes the action and its notification to the handler:
 
 ```lua
-local n = naughty.notify {
-    title = "Download complete",
-    text = "document.pdf",
-    actions = {
-        naughty.action { name = "Open" },
-        naughty.action { name = "Show in folder" },
-    },
-}
-
-n:connect_signal("invoked", function(_, action_index)
-    if action_index == 1 then
-        awful.spawn("xdg-open ~/Downloads/document.pdf")
-    elseif action_index == 2 then
-        awful.spawn("nautilus ~/Downloads")
-    end
+local naughty = require("naughty")
+local open = naughty.action { name = "Open" }
+open:connect_signal("invoked", function(action, notification)
+    print(action.name, notification.title)
 end)
+
+local n = naughty.notification {
+    title = "Download complete",
+    message = "document.pdf",
+    actions = { open },
+}
 ```
+
+Calling `open:invoke(n)` emits the same signal. Calling it without an argument passes nil as the notification.
 
 ## naughty.config.defaults
 
-Global defaults applied to all notifications:
+Fallback values used unless properties, rules, presets, or theme settings override them:
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `timeout` | number | `5` | Auto-dismiss time in seconds |
 | `position` | string | `"top_right"` | Screen position |
-| `margin` | number | `10` | Margin from screen edge |
-| `icon_size` | number | `48` | Default icon size |
-
-```lua
-naughty.config.defaults.timeout = 5
-naughty.config.defaults.position = "top_right"
-naughty.config.defaults.margin = 10
-naughty.config.defaults.icon_size = 48
-```
+| `margin` | number | DPI-scaled `5` | Margin inside the notification |
+| `icon_size` | number | `nil` | Icon size override |
 
 ### Spacing
+
+`naughty.config.padding` defaults to DPI-scaled 4 pixels from the workarea edge. `spacing` defaults to DPI-scaled 1 pixel between notifications. For example:
 
 ```lua
 naughty.config.spacing = 4  -- Gap between stacked notifications
@@ -143,15 +124,15 @@ naughty.config.spacing = 4  -- Gap between stacked notifications
 
 ## Urgency Presets
 
-Configure appearance per urgency level via `naughty.config.presets`:
+Legacy D-Bus notifications use `naughty.config.presets` by urgency. Connecting `ruled.notification`’s `request::rules` handler replaces this preset matching with rules. Use the [notification rules](#notification-rules) below in a modern config.
 
 | Preset | Default Timeout | Description |
 |--------|----------------|-------------|
 | `naughty.config.presets.low` | `5` | Subtle, low-priority |
-| `naughty.config.presets.normal` | `5` | Standard notifications |
+| `naughty.config.presets.normal` | Inherits defaults | No preset override |
 | `naughty.config.presets.critical` | `0` (never) | Requires manual dismissal |
 
-Each preset accepts `bg`, `fg`, `timeout`, and other notification properties:
+Presets accept notification properties. Lua-created notifications use a preset only when it is passed explicitly as `preset = naughty.config.presets.critical`:
 
 ```lua
 naughty.config.presets.critical.bg = "#ff0000"
@@ -168,9 +149,8 @@ local ruled = require("ruled")
 
 ruled.notification.connect_signal("request::rules", function()
     ruled.notification.append_rule {
-        rule       = { ... },       -- match criteria
-        rule_any   = { ... },       -- match any of these criteria
-        properties = { ... },       -- properties to apply
+        rule       = { app_name = "Spotify" },
+        properties = { timeout = 3 }
     }
 end)
 ```
@@ -185,12 +165,15 @@ end)
 | `urgency` | string | `"low"`, `"normal"`, or `"critical"` |
 | `category` | string | Notification category (e.g., `"email.arrived"`) |
 
-Use `rule` for exact matches. Use `rule_any` with table values to match any of multiple values:
+String matching accepts equality or Lua patterns. All fields in `rule` must match. `rule_any` matches any listed alternative:
 
 ```lua
-rule_any = {
-    app_name = { "Spotify", "vlc" },
-    category = { "device.error", "network.error" },
+ruled.notification.append_rule {
+    rule_any = {
+        app_name = { "Spotify", "vlc" },
+        category = { "device.error", "network.error" },
+    },
+    properties = { timeout = 3 },
 }
 ```
 
@@ -243,7 +226,7 @@ naughty.toggle()    -- Deprecated, use naughty.suspended = not naughty.suspended
 
 | Signal | Arguments | Description |
 |--------|-----------|-------------|
-| `request::display` | `n` | Notification ready to display (must connect a handler) |
+| `request::display` | `n` | Notification ready for the configured display handler |
 | `request::rules` | (none) | Rules should be registered (via `ruled.notification`) |
 | `added` | `n` | Notification created |
 | `destroyed` | `n, reason` | Notification dismissed or expired |
@@ -252,14 +235,14 @@ naughty.toggle()    -- Deprecated, use naughty.suspended = not naughty.suspended
 
 | Signal | Arguments | Description |
 |--------|-----------|-------------|
-| `invoked` | `n, action_index` | User clicked a notification action |
+| `invoked` (on a `naughty.action`) | `action, notification` | Action invoked. Connect to the action object |
 | `property::title` | `n` | Title changed |
 | `property::message` | `n` | Message changed |
 | `property::urgency` | `n` | Urgency changed |
 
 ## Theme Variables
 
-Notifications are styled via `beautiful` variables. See [Theme Variables: Notifications](/docs/reference/beautiful/theme-variables#notifications) for the full list.
+Notifications are styled via `beautiful` variables. See [Theme Variables: Notifications](/docs/1.4/reference/beautiful/theme-variables#notifications) for the full list.
 
 Key variables:
 
@@ -278,6 +261,6 @@ Key variables:
 
 ## See Also
 
-- **[Notifications Guide](/docs/guides/notifications)** - Practical configuration tasks
-- **[Theme Variables](/docs/reference/beautiful/theme-variables)** - All theme variables including notifications
+- **[Notifications Guide](/docs/1.4/guides/notifications)** - Practical configuration tasks
+- **[Theme Variables](/docs/1.4/reference/beautiful/theme-variables)** - All theme variables including notifications
 - **[naughty (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/naughty.html)** - Upstream API reference

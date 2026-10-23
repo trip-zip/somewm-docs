@@ -1,6 +1,6 @@
 ---
 title: "Window Switcher"
-description: "Build Alt-Tab: clients ordered most-recently-used, with activation on modifier release."
+description: "Build a Super+Tab window switcher that activates on modifier release."
 sidebar_label: "09 · Window Switcher"
 ---
 
@@ -11,7 +11,7 @@ import NextChapter from '@site/src/components/FromScratch/NextChapter';
 
 <ChapterNav chapter="09" />
 
-## Where We Are
+<span id="where-we-are" />
 
 Build a window switcher in `widgets/windowswitcher.lua`, ordered by most recently used.
 
@@ -27,13 +27,10 @@ Read `awful.client.focus.history.list` for most-recent-first ordering. Append cl
 
 ```lua
 -- widgets/windowswitcher.lua
--- Collect all clients
 local function collect_clients()
   clients = {}
   local seen = {}
 
-  -- awful keeps a most-recent-first stack of focused clients; walking it
-  -- first gives real Alt-Tab ordering, with the current window at index 1.
   for _, c in ipairs(awful.client.focus.history.list) do
     if (c:isvisible() or c.minimized) and not seen[c] then
       seen[c] = true
@@ -41,7 +38,6 @@ local function collect_clients()
     end
   end
 
-  -- Clients that were never focused (e.g. spawned in the background) go last.
   for _, c in ipairs(client.get()) do
     if (c:isvisible() or c.minimized) and not seen[c] then
       seen[c] = true
@@ -51,7 +47,7 @@ local function collect_clients()
 end
 ```
 
-The filter includes visible and minimised clients. Other hidden clients are excluded.
+The filter includes visible clients and minimised clients on any tag or screen. It excludes non-minimised clients on unselected tags.
 
 ## Why Selection Starts at Index 2
 
@@ -64,19 +60,17 @@ Here is `show()` picking the initial selection:
     return
   end
 
-  -- Start at second item (first is current window)
   selected_index = math.min(2, #clients)
 ```
 
-Index 1 is the current window, so start at index 2 to select the previous one. `math.min` handles the one-window case.
+With a focused client first in the history, index 2 selects the previous window. `math.min` handles the one-window case.
 
 ## Drawing the List
 
-Centre an `awful.popup` and highlight the selection with `beautiful.primary_color`. `config.max_items` limits it to ten rows; `create_client_list` scrolls the list to keep the selection visible. Rebuild the widget on selection changes:
+Centre an `awful.popup` and highlight the selection with `beautiful.primary_color`. `config.max_items` limits it to ten rows. `create_client_list` scrolls the list to keep the selection visible. Rebuild the widget on selection changes:
 
 ```lua
 -- widgets/windowswitcher.lua
--- Refresh the popup display
 local function refresh()
   if popup then
     popup.widget = create_popup_widget()
@@ -89,7 +83,6 @@ Each row shows the client’s icon (`c.icon`), title (`c.name`), and application
 ```lua
 -- widgets/windowswitcher.lua
   else
-    -- Fallback: colored initial
     local initial = (c.class or c.name or "?"):sub(1, 1):upper()
 ```
 
@@ -103,7 +96,6 @@ Start it at the end of `show()`:
 
 ```lua
 -- widgets/windowswitcher.lua
-  -- Start keygrabber with modifier key events enabled
   keygrabber = awful.keygrabber({
     autostart = true,
     stop_key = nil,
@@ -139,7 +131,6 @@ Then the release-to-commit itself:
 ```lua
 -- widgets/windowswitcher.lua
     keyreleased_callback = function(_, _, key, _)
-      -- Activate when Super key is released
       if key == "Super_L" or key == "Super_R" then
         windowswitcher.activate()
       end
@@ -151,7 +142,6 @@ Hide the popup if the grabber stops externally:
 ```lua
 -- widgets/windowswitcher.lua
     stop_callback = function()
-      -- Keygrabber stopped externally
       if visible then
         windowswitcher.hide()
       end
@@ -195,7 +185,7 @@ One line in the global keys table, using the table-driven format from [chapter 0
 
 Register the module in `widgets/init.lua`. While the switcher is open, its keygrabber handles subsequent Tab presses.
 
-Reload with Super+Ctrl+R. Open a few windows, hold Super, and tap Tab. Check that windows appear in the order you last used them, then release Super to activate the selection.
+Reload with Super+Ctrl+r. Open a few windows, hold Super, and tap Tab. Release Super to activate the selection. The release handler checks `Super_L` and `Super_R` explicitly. If your nested session remaps Mod4 to Alt, add `Alt_L` and `Alt_R` here too, or press Return to activate.
 
 ## Try It
 
@@ -206,13 +196,10 @@ Reload with Super+Ctrl+R. Open a few windows, hold Super, and tap Tab. Check tha
 
 ## Checkpoint
 
-Your code should now match [the `09-switcher` branch](https://github.com/trip-zip/awesome-from-scratch/tree/09-switcher).
+The complete files are on [the `09-switcher` branch](https://github.com/trip-zip/awesome-from-scratch/tree/09-switcher).
 
-```bash
-git checkout 09-switcher
-somewm-client test start --config "$PWD/rc.lua" --name afs
-```
+Use the [nested-session commands](index.md#running-your-work-safely) to run this checkpoint. Stop the previous instance before switching branches.
 
-Compare your work: `git diff 08-mainmenu 09-switcher`
+Compare your work: `git diff origin/08-mainmenu origin/09-switcher`
 
 <NextChapter chapter="09" />

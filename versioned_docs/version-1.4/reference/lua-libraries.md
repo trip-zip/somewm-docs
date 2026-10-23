@@ -6,9 +6,7 @@ description: Overview of AwesomeWM's Lua libraries
 
 # Lua Libraries
 
-SomeWM implements AwesomeWM's Lua API. The official [AwesomeWM API documentation](https://awesomewm.org/apidoc/) is the primary reference for all standard libraries.
-
-This section documents SomeWM-specific extensions and notes any behavioral differences from AwesomeWM.
+SomeWM 1.4 uses AwesomeWM’s Lua libraries with Wayland-specific changes. Use the [AwesomeWM API documentation](https://awesomewm.org/apidoc/) alongside the [1.4 deviations](deviations.md) and references below.
 
 ## Core Libraries
 
@@ -30,6 +28,11 @@ These APIs are unique to SomeWM and not available in AwesomeWM:
 |-----|---------|
 | [awful.input](./awful/input) | Runtime input device configuration |
 | [somewm-client](./somewm-client) | IPC command-line tool |
+| [Carousel](./awful/carousel) | Scrollable tiling layouts |
+| [output](./output) | Monitor configuration and lifecycle |
+| [Lock, idle, and DPMS](./lock) | Session locking and display power |
+| [Shadows](./shadows) | Client and wibox shadows |
+| [layer_surface](./layer_surface/) | External panels and launchers |
 
 ## Other References
 
@@ -37,4 +40,4 @@ These APIs are unique to SomeWM and not available in AwesomeWM:
 |-----------|-------------|
 | [Key Names](./key-names) | Modifier keys and key name reference |
 | [Signals](./signals) | Event signals by object type |
-| [Default Keybindings](./default-keybindings) | Built-in keyboard shortcuts |
+| [Default Keybindings](./default-keybindings) | Shortcuts in the default config |
