@@ -1,145 +1,93 @@
 ---
 sidebar_position: 4
 title: Signals
-description: How SomeWM uses signals for events, lifecycle, and customization
+description: Signal arguments, synchronous dispatch and request handlers in SomeWM 1.4.
 ---
 
 # Signals
 
-SomeWM is event-driven. When a client is created, a screen is added, focus changes, or a property updates, the relevant object emits a signal. Your `rc.lua` (and the AwesomeWM Lua libraries) connect handlers to those signals to react.
-
-If you've used Qt, GObject, or any pub/sub system, this will feel familiar. The mechanism comes from `gears.object`, the same object system AwesomeWM uses.
+Signals call registered handlers when an object changes or requests an action. In SomeWM 1.4, handlers run synchronously: emitting a signal runs its handlers before returning.
 
 ## Connect, emit, disconnect
 
-Three operations:
+This custom global signal passes exactly the arguments supplied by the caller:
 
 ```lua
--- Run my_handler whenever the focused client changes
-client.connect_signal("focus", my_handler)
+local function report(value)
+    print("Value: " .. value)
+end
 
--- Emit a signal manually (rare in user code; libraries do this)
-client.emit_signal("focus", c)
-
--- Stop listening
-client.disconnect_signal("focus", my_handler)
+awesome.connect_signal("example::value", report)
+awesome.emit_signal("example::value", 42)
+awesome.disconnect_signal("example::value", report)
 ```
 
-Signal names are strings. Many include `::` (`property::name`, `request::tag`); that's a convention, not syntax. Anything is a valid signal name; tooling treats them as opaque.
-
-For the full list of signals SomeWM emits, see the [Signals Reference](../reference/signals.md).
+Keep the function reference if you need to disconnect it. Signal names are strings. The `property::` and `request::` prefixes describe conventions, not special Lua syntax.
 
 ## Two sources: C and Lua
 
-Signals come from two places.
-
-**The C side** fires signals when the compositor itself does something: a Wayland client mapped (`request::manage`), the focused window changed (`focus`/`unfocus`), an output was hot-plugged (`screen` `added`). These are part of the compositor lifecycle and you generally can't suppress them. You can only choose whether to react.
-
-**The Lua side** fires signals from the AwesomeWM libraries: `ruled.client` emits `request::rules` to ask modules for rules; `naughty` emits `request::display` to ask for a notification widget; `awful.layout` emits `request::default_layouts` to ask for layouts at startup. These exist so user code and modules can plug into the library without monkey-patching.
-
-You can usually tell from where a signal is documented:
-- `client::*`, `screen::*`, `tag::*`, layer-surface signals fire from the C side
-- Module-level signals on `ruled.*`, `naughty`, `awful.layout` fire from the Lua side
+The C compositor emits lifecycle events such as client management and output changes. Lua libraries also emit signals, including property changes and requests for rules, layouts or notification widgets. A signal's object or name alone does not tell you which language emits it.
 
 ## Dispatch
 
-In SomeWM 1.4, every signal dispatches synchronously: when a signal is emitted, its handlers run inline, in the same call stack as the emit. Handlers can re-enter; you can emit further signals from inside a handler and they will run before the original emit returns.
+Handlers can emit more signals, and those nested handlers run before the original emission returns. Avoid changing a property unconditionally from its own change handler, which can cause recursive updates.
 
-This matches AwesomeWM's behavior. SomeWM 2.0 introduces a queue for some C-emitted signals that drains at deliberate points; that's documented separately in the 2.0 docs when you're working on a 2.0 config.
+Synchronous dispatch does not mean every operation is immediate. Libraries can schedule work with `gears.timer.delayed_call`, then emit signals when that work runs.
 
 ## Most signals receive their object as the first argument
 
-```lua
-client.connect_signal("manage", function(c)
-    -- c is the client that was just managed
-end)
-
-screen.connect_signal("added", function(s)
-    -- s is the new screen
-end)
-
-tag.connect_signal("property::selected", function(t)
-    -- t is the tag whose selection changed
-end)
-```
-
-Some signals carry extra arguments after the object. `request::*` signals usually pass a `context` string and an optional `hints` table:
+For an instance signal, a handler receives the object followed by the signal's arguments:
 
 ```lua
-client.connect_signal("request::border", function(c, context, hints)
-    -- context is one of "added", "active", "inactive", "floating", ...
+local gears = require("gears")
+local object = gears.object {}
+
+object:connect_signal("example::value", function(self, value)
+    assert(self == object)
+    print(value)
 end)
+object:emit_signal("example::value", 42)
 ```
 
-The reference page lists arguments per signal.
+Class listeners such as `client.connect_signal("focus", handler)` receive the client that emitted the event. Global signals such as `awesome`'s `startup` do not add an object argument. Consult the [signal reference](../reference/signals.md) for each signature.
 
 ## The `request::*` pattern
 
-Many signals start with `request::`. They aren't notifications that something happened. They're requests for someone to do something. The compositor (or a library) emits them; a default handler does the standard thing; user code can replace the default.
+A request asks handlers to perform an action. For example, `request::activate` asks for client activation, and `ruled.client`'s `request::rules` asks configuration modules to register rules.
 
-`request::tag` is a clean example. When a client appears with no tag (say, after a screen was just removed), the compositor emits `client.request::tag`. The default handler, `awful.permissions.tag`, picks a reasonable tag. If you want different behavior (always send to tag 1, send to a tag named after the app's class, etc.), replace the handler.
-
-```lua
--- Replace the default tag handler
-client.disconnect_signal("request::tag", awful.permissions.tag)
-
-client.connect_signal("request::tag", function(c, t, hints)
-    c:move_to_tag(screen.primary.tags[1])
-end)
-```
-
-The `awful.permissions` module is the home for the default handlers.
-
-`request::*` signals always have a default handler. If you connect *additionally* (without disconnecting the default), both run.
+Many requests have handlers in `awful.permissions` or another library. Connecting an additional handler leaves existing handlers in place. To replace one, disconnect that specific function before connecting yours. A request is not guaranteed to have a default handler.
 
 ## Startup ordering
 
-Signal ordering matters most at startup. The sequence is:
+Register handlers at module load time in `rc.lua`. Requiring a library may connect its own handlers, and registering screen decoration can immediately configure screens that already exist.
 
-1. `rc.lua` runs top to bottom. `require` statements pull in libraries, which connect their default handlers.
-2. The compositor starts scanning for already-running clients.
-3. `client.scanning` fires.
-4. `ruled.client` (and `ruled.notification`) emit `request::rules` from inside `scanning`. This is the moment for modules to add rules.
-5. `awful.layout` has already wired itself to the first `tag.new` and will emit `request::default_layouts` from there.
-6. `awful.keyboard` and `awful.mouse` emit `request::default_keybindings` and `request::default_mousebindings` from the same scanning window.
-7. Existing clients are managed (`request::manage` then `manage`).
-8. `client.scanned` fires.
-9. `awesome.startup` fires.
+The timing depends on the request:
 
-The takeaway: connect handlers for `request::rules` *before* `client.scanning` fires (i.e. at module load time, in `rc.lua` or the module's top level), and they will run in time. Appending to `ruled.client.rules` directly at module load time also works, but it forces the module to be `require`-d in a specific order, which is exactly what `request::rules` is designed to avoid.
+| Request | Trigger |
+| --- | --- |
+| `tag`'s `request::default_layouts` | The layout library's first request for default layouts |
+| `ruled.client`'s `request::rules` | Client scanning after config loading |
+| Client default key and mouse bindings | Client scanning after config loading |
+| `ruled.notification`'s `request::rules` | The global `startup` signal, when a rules handler is connected |
+
+After config loading, the compositor emits `screen.scanned`, `client.scanning`, `client.scanned` and the global `startup` signal. `awesome.startup` is also a boolean property, distinct from the signal.
 
 ## What's safe to do in a handler
 
-A few rules of thumb:
-
-- **In `manage`, the client is fully tagged and placed.** Reading `c.screen`, `c:tags()`, `c.geometry` is safe.
-- **In `request::manage`, default handlers may not have run yet.** If you connect after `awful.permissions` and `ruled.client`, you'll see the post-rule state. If you connect before, you won't.
-- **In `unmanage`, the client is gone.** Don't read geometry or screen; they may already be invalid. Save what you need by stashing it on `manage`.
-- **In `refresh`, do as little as possible.** It fires often (every redraw). Anything heavy will visibly slow the compositor.
-- **Errors in handlers are caught.** The default `debug::error` handler logs them to stderr. Add your own `debug::error` handler if you want to surface them somewhere visible.
+- Keep handlers short. Blocking work also blocks the compositor. Use asynchronous process helpers for external commands.
+- In `request::manage`, other handlers may still be applying rules. In `manage`, the management request has completed.
+- In an unmanage handler, do not retain the client for later use without checking `c.valid`.
+- Avoid expensive work in `refresh`, which runs frequently.
+- Errors are reported through the error-handling machinery. The default config displays them with notifications.
 
 ## Connect vs. disconnect vs. replace
 
-Three patterns, in increasing invasiveness:
+Use a custom signal to test a callback. Manually emitting `focus` or `manage` invokes handlers but does not perform the underlying compositor operation, and can leave library state inconsistent.
 
-```lua
--- 1. Add a reaction (default handler still runs)
-client.connect_signal("manage", function(c)
-    if c.class == "Firefox" then c.maximized = true end
-end)
-
--- 2. Stop reacting (your handler stops running; default unaffected)
-client.disconnect_signal("manage", my_handler)
-
--- 3. Replace the default (default stops; yours takes over)
-client.disconnect_signal("request::tag", awful.permissions.tag)
-client.connect_signal("request::tag", my_tag_handler)
-```
-
-For non-`request::` signals, additive `connect_signal` is the common case. For `request::*`, decide whether you want to *add to* or *replace* the default handler.
+For actual activation, use `c:activate { context = "my_config", raise = true }`. To observe it, connect to `focus`.
 
 ## Where to look next
 
-- [Signals Reference](../reference/signals.md): every signal SomeWM and the AwesomeWM libraries emit
-- [Object Model](/docs/concepts/object-model): the things that emit signals
-- [`gears.object`](https://awesomewm.org/doc/api/libraries/gears.object.html): the underlying machinery
+- [Signals Reference](../reference/signals.md)
+- [Object Model](object-model.md)
+- [Architecture](architecture.md)

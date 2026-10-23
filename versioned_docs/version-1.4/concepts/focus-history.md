@@ -1,228 +1,104 @@
 ---
 sidebar_position: 4
 title: Focus History
-description: How the compositor decides which window gets focus when one closes
+description: How focus history selects a visible client after focus is lost.
 ---
 
 # Focus History
 
-When you close a window, which one gets focus next?
+`awful.client.focus.history` records clients in most-recently-focused order. Focus restoration uses that history to choose an eligible visible client on the relevant screen.
 
 ## The Focus History List
 
-The focus history is maintained by `awful.client.focus.history`. Key facts:
-
-- Most recently focused client is at the front
-- When a client closes, the next one in history gets focus
-- History has **unlimited depth**: every client you've ever focused is tracked until it closes
+Focusing a client removes its old entry and inserts it at the front. Unmanaged clients are removed. There is no fixed history length.
 
 ## How It Works
 
-Every time a client receives focus:
+<span id="customizing-the-behavior" />
+<span id="note-for-awesomewm-users" />
 
-1. It's removed from wherever it was in the history
-2. It's inserted at the front (position 1)
-
-```lua
--- Conceptually (simplified from awful/client/focus.lua)
-function focus.history.add(c)
-    focus.history.delete(c)                    -- Remove if present
-    table.insert(focus.history.list, 1, c)     -- Insert at front
-end
-```
-
-This means the history always reflects the *order you focused clients*, not their stack position or creation order.
+The history records focus changes, independently of visual stacking and layout order. Raising a window alone does not make it the most recently focused client.
 
 ## Example Walkthrough
 
-You have 5 clients. You focus them in this order:
+Assuming all three clients remain visible and focusable on one screen:
 
-| Action | Focus History (front → back) |
-|--------|------------------------------|
-| Focus client 1 | [1] |
-| Focus client 2 | [2, 1] |
-| Focus client 5 | [5, 2, 1, ...] |
-| Focus client 4 | [4, 5, 2, 1, ...] |
-| **Close client 4** | Focus → 5, history becomes [5, 2, 1, ...] |
-| **Close client 5** | Focus → 2, history becomes [2, 1, ...] |
+| Action | History, newest first |
+| --- | --- |
+| Focus A, then B, then C | C, B, A |
+| Close C | B, A |
+| Close B | A |
 
-Notice that closing client 4 gives focus to client 5 (the previous focus), and closing 5 jumps back to 2, skipping clients 3 and 1 because you never focused them recently.
+A hidden, minimised or otherwise ineligible client is not necessarily the next focus target even if it is next in the list.
 
 ## Focus History vs Client Stack
 
-These are completely independent systems:
-
-| Aspect | Focus History | Client Stack |
-|--------|---------------|--------------|
-| What it tracks | Focus order (timing) | Z-order (visual overlap) |
-| What uses it | Focus fallback on close | Rendering order |
-| How it's ordered | Most recent focus first | Back-to-front by raise/lower |
-| Raising a window | No effect | Moves to top |
-| Focusing a window | Moves to front | No effect |
-
-You can have a window at the top of the z-order stack but deep in the focus history (if you raised it but haven't focused it recently). The two systems don't affect each other.
+| Operation | History | Visual stack |
+| --- | --- | --- |
+| Focus a client | Moves it to the front | Unchanged unless a handler also raises it |
+| Raise a client | Unchanged | Moves it upward within its layer |
+| Swap clients | Unchanged | Unchanged, but layout order changes |
 
 ## Accessing the Focus History
 
 ```lua
--- Direct access to the history list
-local history = awful.client.focus.history.list
+local awful = require("awful")
+local s = awful.screen.focused()
+local previous = awful.client.focus.history.get(s, 1, awful.client.focus.filter)
 
--- Get the previously focused client
-local prev = awful.client.focus.history.get(screen, 1, nil)
-
--- Get previous client on a specific screen
-local prev_on_screen = awful.client.focus.history.get(s, 0, function(c)
-    return c.screen == s
-end)
-
--- Filter by arbitrary criteria
-local prev_floating = awful.client.focus.history.get(nil, 0, function(c)
-    return c.floating
-end)
+for i, c in ipairs(awful.client.focus.history.list) do
+    print(i, c.name, c.screen.index)
+end
 ```
 
 ### Parameters for `focus.history.get()`
 
-| Parameter | Description |
-|-----------|-------------|
-| `screen` | Filter to this screen (nil for any) |
-| `idx` | How many positions back to look (0 = most recent, 1 = second most recent) |
-| `filter` | Optional function `(client) -> boolean` for custom filtering |
+| Argument | Meaning |
+| --- | --- |
+| `s` | Screen object or index. Pass a specific screen for screen-local history. |
+| `idx` | Zero-based index among visible matching candidates. `0` is most recent. |
+| `filter` | Optional function accepting a client and returning whether to include it |
+
+If no history candidate matches, the function can fall back to a visible client accepted by the filter. Without an explicit filter, that fallback uses `awful.client.focus.filter`. It is not a strict index into the raw history list.
 
 ## Common Use Cases
 
 ### Alt-Tab Style Switching
 
-Switch between your two most recently focused windows:
+`awful.client.focus.history.previous()` requests the previous client on the focused client's screen, or the focused screen when no client is focused. It does not request a raise.
 
-```lua
-awful.key({ "Mod1" }, "Tab", function()
-    awful.client.focus.history.previous()
-end)
-```
-
-Or cycle through the full history:
-
-```lua
-awful.key({ modkey }, "Tab", function()
-    awful.client.focus.byidx(1)
-end)
-```
+`awful.client.focus.byidx(1)` instead cycles through visible clients in client-list order. It does not cycle through focus history.
 
 ### Focus Follows Close
 
-This is the default behavior. When a client closes, `awful.client.focus.history.previous()` is called automatically to focus the next client in history. No configuration needed.
+The permissions library schedules a focus check when a client is unmanaged. If focus is absent or no longer visible, it chooses an eligible client from history and emits `request::autoactivate`. The default policy first prefers non-sticky clients, then considers other focusable clients.
 
 ### Screen-Aware Focus Fallback
 
-Focus the previous client on the same screen:
-
-```lua
-client.connect_signal("unmanage", function(c)
-    if c == client.focus then
-        local fallback = awful.client.focus.history.get(c.screen, 0, function(cl)
-            return cl ~= c and cl.screen == c.screen
-        end)
-        if fallback then
-            fallback:emit_signal("request::activate", "history", {raise = true})
-        end
-    end
-end)
-```
+The C compositor also requests restoration through `screen`'s `request::focus_restore`. The default handler, `awful.permissions.focus_restore`, selects a visible focusable client on that screen and requests activation without raising.
 
 ### Custom Focus Fallback Logic
 
-Override the default behavior entirely:
-
-```lua
--- Replace default focus fallback with your own logic
-client.connect_signal("request::unmanage", function(c)
-    if c == client.focus then
-        -- Your custom logic here
-        local next_client = find_my_preferred_client()
-        if next_client then
-            next_client:emit_signal("request::activate", "custom", {raise = true})
-        end
-    end
-end)
-```
+Replace a specific default handler if you need another policy. Adding a second handler does not disable the first. See [Signals](signals.md#the-request-pattern) for the distinction.
 
 ### Disable Focus History
 
-If you want focus to follow a different pattern (e.g., always focus the master window):
+`awful.client.focus.history.disable_tracking()` pauses updates from focus events. It does not clear history or replace the focus-restoration policy. Pair it with `enable_tracking()`. Calls are counted, so each disable needs a matching enable.
 
-```lua
-awful.client.focus.history.disable_tracking()
-```
-
-Or selectively exclude clients:
-
-```lua
-awful.client.focus.filter = function(c)
-    -- Return false to exclude from focus history
-    if c.class == "some-app" then
-        return false
-    end
-    return true
-end
-```
+Changing `awful.client.focus.filter` affects candidate selection. It does not prevent focused clients from being recorded in the raw history.
 
 ## Debugging Focus Issues
 
-If focus isn't going where you expect when you close a window:
-
-```lua
--- Print the current focus history
-for i, c in ipairs(awful.client.focus.history.list) do
-    print(i, c.name, c.class)
-end
-```
-
-This shows the complete history in order, so you can see why a particular client got focus.
+Compare the printed history with each client's screen, visibility and focusability. Also inspect handlers that request activation or raise on focus. The raw list alone does not explain every focus decision.
 
 ## Layer Shell Focus Restoration
 
-Layer shell surfaces (rofi, wofi, fuzzel, and other launchers) are not clients - they're special Wayland surfaces that can grab keyboard focus for input.
+Layer-shell launchers and panels can hold keyboard focus without being clients. When focus needs restoring after one closes, SomeWM uses `screen`'s `request::focus_restore` and `awful.permissions.focus_restore`.
 
-When a layer shell surface closes after having keyboard focus, somewm automatically restores focus to the most recent client from focus history. This is handled by `awful.permissions.handle_layer_shell_closed`.
-
-### How It Works
-
-1. Layer shell surface opens (e.g., rofi launcher)
-2. It grabs keyboard focus for input
-3. User makes a selection or presses Escape
-4. Layer shell surface closes
-5. somewm emits `layer_shell::closed` signal
-6. Default handler calls `awful.client.focus.history.get()` to find the previous client
-7. That client receives focus via `request::autoactivate`
-
-### Customizing the Behavior
-
-Replace the default handler with your own:
-
-```lua
--- Disconnect the default handler
-awesome.disconnect_signal("layer_shell::closed", awful.permissions.handle_layer_shell_closed)
-
--- Connect your own
-awesome.connect_signal("layer_shell::closed", function()
-    -- Your custom logic here
-    -- For example, always focus the master client:
-    local s = awful.screen.focused()
-    local master = awful.client.getmaster(s)
-    if master then
-        master:emit_signal("request::activate", "layer_shell_closed", {raise = true})
-    end
-end)
-```
-
-### Note for AwesomeWM Users
-
-This is a **somewm-specific feature**. AwesomeWM doesn't have layer shell (it's a Wayland protocol), so `layer_shell::closed` signal and `handle_layer_shell_closed` don't exist there.
+The older `layer_shell::closed` / `handle_layer_shell_closed` interface is not used by the current 1.4 branch.
 
 ## See Also
 
-- [Client Stacking](/docs/concepts/client-stack) - Z-order and visual overlap (independent from focus history)
-- [Object Model](/docs/concepts/object-model) - Understanding clients, tags, screens
-- [Wayland vs X11](/docs/concepts/wayland-vs-x11) - Why some things work differently
+- [Client Stacking](client-stack.md)
+- [Object Model](object-model.md)
+- [Signals](signals.md)

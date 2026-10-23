@@ -1,87 +1,58 @@
 ---
 sidebar_position: 2
 title: Wayland vs X11
-description: Why some things work differently on Wayland
+description: Display-server differences that affect an AwesomeWM configuration on SomeWM 1.4.
 ---
 
 # Wayland vs X11
 
-This page explains why some AwesomeWM features work differently (or don't work) on Wayland.
+On X11, AwesomeWM manages windows served by a separate X server. SomeWM is both the window manager and the Wayland compositor, so it owns display connections, input routing and scene composition.
 
 ## Fundamental Differences
 
-| Aspect | X11 | Wayland |
-|--------|-----|---------|
-| Window management | Client-side hints, WM interprets | Compositor controls everything |
-| Drawing | Server-side or client-side | Client-side only (EGL/Vulkan) |
-| Input | Global access | Per-surface, security-focused |
-| Screenshots | Any app can capture | Requires compositor support |
-| Tray icons | X11 embed (`_NET_SYSTEMTRAY`) | D-Bus (StatusNotifierItem) |
+| Area | X11 | Wayland |
+| --- | --- | --- |
+| Application drawing | Clients can submit buffers or use X drawing operations | Clients submit buffers for the compositor to display |
+| Window placement | Window manager interprets X properties and requests | Compositor applies placement policy |
+| Input and capture | X clients have broad access through the X server | Access depends on compositor-supported protocols and policy |
+| Traditional tray icons | XEmbed windows | Usually StatusNotifierItem over D-Bus |
+
+Wayland clients can use shared-memory buffers as well as GPU rendering. EGL or Vulkan is not required for every application.
 
 ## What This Means for SomeWM
 
 ### No WM Restart
 
-**X11**: AwesomeWM can restart itself, re-reading config and reconnecting to windows.
-
-**Wayland**: The compositor *is* the display server. Restarting it would disconnect all clients.
-
-**Workaround**: Use `Mod4 + Ctrl + r` to reload your Lua configuration without restarting.
+Restarting the compositor process disconnects Wayland applications. SomeWM's `awesome.restart()` instead rebuilds Lua configuration inside the running compositor. **Mod4 + Ctrl + r** invokes that reload in the default config. It does not load a newly installed compositor binary.
 
 ### Different Systray
 
-**X11**: Tray icons are embedded X11 windows inside the wibox.
-
-**Wayland**: Tray icons use the StatusNotifierItem (SNI) D-Bus protocol.
-
-**Impact**: Most modern apps (NetworkManager, Discord, Bluetooth) support SNI. Legacy XEmbed-only apps won't show tray icons.
+SomeWM's tray uses StatusNotifierItem over D-Bus. Applications that only provide XEmbed tray windows do not appear. XWayland support for application windows does not add XEmbed tray support.
 
 ### No Global Input Injection
 
-**X11**: `xdotool` and similar tools can inject input anywhere.
-
-**Wayland**: Security model prevents apps from injecting input into other apps.
-
-**Impact**: Input injection needs compositor support. SomeWM implements `root.fake_input()`; see the [compatibility reference](../reference/deviations.md#signals).
+Native Wayland clients cannot use X11 tools to control other native clients. Input injection needs a supported compositor interface. Inside SomeWM configuration, `root.fake_input()` provides synthetic key, pointer and button events.
 
 ### No X Properties
 
-**X11**: Windows can store arbitrary properties that persist across sessions.
+X properties belong to X server objects. They can survive a window-manager restart while the X server and windows remain alive. Native Wayland clients have no equivalent general X-property store.
 
-**Wayland**: No equivalent mechanism exists.
-
-**Impact**: X-property APIs have different availability. The [compatibility reference](../reference/deviations.md#stubbed-apis) lists which calls are absent and which are stubs.
+SomeWM 1.4 leaves some compatibility methods as stubs and omits others. Check the [X-property reference](../reference/deviations.md#stubbed-apis) before calling them.
 
 ### Titlebar Border Positioning
 
-**X11**: Borders drawn OUTSIDE the window frame by X server.
-
-**Wayland**: Borders are scene graph rectangles drawn around the client geometry. `c:geometry()` excludes the border, matching AwesomeWM; the window's on-screen footprint is the geometry plus `border_width` on each side.
-
-**Impact**: Titlebars are inside the geometry and start INSIDE the border area (inset by `border_width`).
+`c:geometry()` excludes the border. A border of width `b` adds `b` to each side of the client's visible footprint. Compositor-drawn titlebars occupy space inside the decorated client geometry. Application-drawn decorations belong to the application's own buffer.
 
 ## Partially Working Features
 
 ### XKB Layout Toggle
 
-**X11**: Toggle options like `grp:alt_shift_toggle` work because the X server intercepts the key combination and executes the layout switch.
+In SomeWM 1.4, `grp:*` options do not reliably switch the compositor's active keyboard group. This is an implementation limitation, not a rule of the Wayland protocol. Static options such as `ctrl:nocaps` and `compose:ralt` work.
 
-**Wayland**: No X server exists to execute toggle logic. The key combination is just a regular key press that does nothing.
-
-**Impact**: Sway, Hyprland, and other Wayland compositors have the same limitation.
-
-**Workaround**: Use explicit keybindings to switch layouts programmatically. See [Keyboard Layout Switching](../guides/keyboard-layouts.md) for complete examples.
-
-```lua
-awful.key({ "Mod1", "Shift" }, "space", function()
-    local current = awesome.xkb_get_layout_group()
-    awesome.xkb_set_layout_group((current + 1) % 2)
-end)
-```
-
-**Note**: Static XKB options like `ctrl:nocaps` and `compose:ralt` work normally - only `grp:*` toggle options are affected.
+Use an explicit binding that calls `awesome.xkb_set_layout_group()`. The [keyboard layout guide](../guides/keyboard-layouts.md) shows configuration and cycling between groups.
 
 ## See Also
 
-- [Tag Persistence](tag-persistence.md) - How SomeWM handles monitor hotplug differently
-- [AwesomeWM Compatibility](awesomewm-compat.md) - Full compatibility matrix
+- [Migrating from AwesomeWM](../getting-started/migrating.md)
+- [AwesomeWM Compatibility](awesomewm-compat.md)
+- [Tag Persistence](tag-persistence.md)

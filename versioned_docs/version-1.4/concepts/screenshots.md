@@ -1,105 +1,57 @@
 ---
 sidebar_position: 9
 title: Screenshots
-description: How the screenshot capture pipeline works
+description: Logical-resolution capture and interactive cropping in SomeWM 1.4.
 ---
 
 # Screenshots
 
-This page explains how SomeWM captures screenshots through `root.content()` and how the interactive selection mode works.
+SomeWM 1.4 implements `root.content()` by compositing the desktop into a Cairo image surface at logical resolution. `awful.screenshot` uses that surface for capture and cropping. External tools such as `grim` use a Wayland capture protocol instead.
 
 ## The Capture Pipeline
 
-All screenshots flow through the same C function: `root.content()`. This is the Wayland equivalent of reading the X11 root window pixmap.
+<span id="x11-awesomewm" />
+<span id="wayland-somewm" />
 
-### X11 (AwesomeWM)
+`root.content()` performs these steps:
 
-On X11, the root window is a composited pixmap managed by the X Server:
+1. Allocate an ARGB32 Cairo surface using the output layout's logical bounding-box dimensions.
+2. Paint the wallpaper, or clear to transparent when preserving alpha.
+3. Read visible application scene buffers and composite them at their logical destinations.
+4. Composite widget surfaces, processing ordinary widgets before `ontop` widgets.
+5. Return a Cairo surface pointer for Lua to wrap with `gears.surface`.
 
-```
-root.content() → cairo_xcb_surface_create() → Done
-```
-
-One function call. The X Server already has a composited framebuffer.
-
-### Wayland (SomeWM)
-
-On Wayland, the compositor owns all buffers. There is no pre-composited root pixmap to read from. SomeWM must manually composite every visible element onto a new Cairo surface:
-
-```
-root.content()
-  ├─ Create Cairo surface at layout dimensions
-  ├─ Paint wallpaper
-  ├─ For each scene buffer (client windows):
-  │   ├─ Read pixels from GPU texture (or SHM buffer)
-  │   └─ Composite at logical position with scaling
-  ├─ Composite widgets (drawins, titlebars)
-  └─ Return surface as lightuserdata
-```
-
-The result is a Cairo image surface at **logical resolution** (matching `root.size()`). This is the coordinate system Lua operates in.
+This is a CPU composition path, rather than a readback of a single completed output framebuffer. It is not the capture path for every screenshot tool.
 
 ## HiDPI and Buffer Scaling
 
-On HiDPI displays, client windows render at physical resolution but occupy logical space. A client at logical size 800x600 might have a 1600x1200 pixel buffer (at 2x scale).
-
-The scene buffer compositor handles this by:
-
-1. Reading the full `buffer->width x buffer->height` texture (physical pixels)
-2. Scaling down to `dst_width x dst_height` (logical pixels) when painting
-
-This produces a screenshot where every pixel corresponds 1:1 to a logical coordinate, which is what `awful.screenshot` expects for cropping.
+A client occupying 800×600 logical pixels may supply a 1600×1200 buffer at scale 2. Capture maps that buffer back into its logical rectangle. Increasing the output scale therefore does not double the dimensions returned by `root.content()`.
 
 ### Widget Surfaces
 
-Widget drawable surfaces (drawins, titlebars) use a different mechanism. Their Cairo surfaces have `cairo_surface_set_device_scale()` applied, so Cairo handles the physical-to-logical scaling automatically during compositing. No explicit scaling is needed.
+Drawable surfaces carry a Cairo device scale. The capture code accounts for that scale when painting them into the logical-resolution result.
 
 ## Interactive Selection Mode
 
-`awful.screenshot({ interactive = true })` uses a three-phase pipeline:
-
 ### Phase 1: Capture
 
-When `refresh()` is called, `root.content()` captures the entire desktop into a Cairo surface. This happens **before** the overlay is shown, so the overlay itself is not captured.
+The screenshot object captures before showing its selection overlay, so the overlay is absent from the captured image.
 
 ### Phase 2: Overlay
 
-`start_snipping()` creates a fullscreen wibox (the "frame") containing:
-
-- An **imagebox** showing the captured surface as a background
-- A **selection widget** (red rectangle) that follows the mouse
-
-The user sees the captured image and draws a selection rectangle on top of it. Mouse coordinates from the mousegrabber are in logical space, matching the captured surface.
+A wibox displays the captured image and selection outline. A mousegrabber records the drag in logical coordinates. The default outline is red and can be themed.
 
 ### Phase 3: Crop
 
-When the user releases the mouse button, `accept()` crops the pre-captured surface using the selection coordinates:
-
-```lua
--- Inside accept()
-crop_shot(selected_geometry.surface, selected_geometry)
--- selected_geometry = {x, y, width, height} from mouse coordinates
-```
-
-The crop operates on the original high-quality capture. The overlay was only for visual feedback.
+Accepting the selection crops the stored capture at the selected logical rectangle. It does not capture the desktop again. Changes made by applications during selection therefore do not appear in the result.
 
 ## Coordinate Spaces
 
-Everything in the screenshot pipeline uses **logical coordinates**:
+`root.size()`, the capture dimensions and selection coordinates use logical units. The 1.4 capture code allocates the output-layout bounding-box size but does not translate scene positions by the bounding box's origin. Layouts with outputs at negative coordinates can therefore produce clipped or displaced captures.
 
-| Component | Coordinate Space |
-|-----------|-----------------|
-| `root.size()` | Logical (layout bounding box) |
-| `root.content()` surface | Logical pixels |
-| Mouse position (mousegrabber) | Logical (Wayland compositor coords) |
-| Frame wibox dimensions | Logical |
-| Selection rectangle | Logical |
-| `crop_shot()` source and target | Logical |
-
-This consistency is what makes the crop coordinates match the captured content.
+For capture and saving examples, see the [screenshot guide](../guides/screenshots.md).
 
 ## See Also
 
-- [Interactive Screenshots Guide](/docs/guides/screenshots) - Practical setup
-- [Display Scaling](/docs/concepts/display-scaling) - How logical vs physical pixels work
-- [awful.screenshot Reference](/docs/reference/awful/screenshot) - Full API documentation
+- [Display Scaling](display-scaling.md)
+- [Screenshot Reference](../reference/awful/screenshot.md)

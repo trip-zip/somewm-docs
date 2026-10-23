@@ -1,269 +1,87 @@
 ---
 sidebar_position: 8
 title: Wallpaper Caching
-description: How SomeWM caches wallpapers for instant switching
+description: What wallpaper caching reuses, how entries are keyed and when to clear it.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Wallpaper Caching <SomewmOnly />
 
-This page explains how SomeWM caches wallpaper textures and why it matters for performance.
+SomeWM 1.4 caches wallpapers set with `gears.wallpaper.maximized(path, screen, ...)`. Returning to a cached path on the same screen can show an existing scene node without decoding and painting the image again.
 
 ## The Problem
 
-A common configuration is to have different wallpapers per tag. When you switch tags, the wallpaper changes:
+<span id="x11-vs-wayland" />
+<span id="x11-awesomewm" />
+<span id="wayland-somewm-without-caching" />
 
-```lua
-tag.connect_signal("property::selected", function(t)
-    gears.wallpaper.maximized(tag_wallpapers[t.index], t.screen, true)
-end)
-```
+Changing a wallpaper can involve file reading, image decoding, Cairo painting and creating a scene buffer. Repeating those steps on every tag change adds work to the compositor's main thread.
 
-Without caching, every tag switch triggers this expensive pipeline:
-
-1. **Load image from disk** - Read file, decompress PNG/JPEG (~5ms)
-2. **Create cairo surface** - Allocate memory, decode pixels (~2ms)
-3. **Scale to screen size** - Cairo paint operation (~3ms)
-4. **Create GPU texture** - Upload to wlroots scene buffer (~5ms)
-5. **Destroy old texture** - Free previous wallpaper
-
-Total: **~15-25ms per switch**
-
-At 60fps, a frame is 16.6ms. Wallpaper switching alone can cause dropped frames and visible lag.
-
-## X11 vs Wayland
-
-### X11 (AwesomeWM)
-
-On X11, wallpapers are fast because of how the display server works:
-
-```
-App creates pixmap → X Server stores in VRAM → Switch = change property
-```
-
-The X Server keeps pixmaps in video memory. "Switching" wallpapers just changes which pixmap is displayed. No re-uploading, no re-decoding.
-
-### Wayland (SomeWM without caching)
-
-Wayland compositors manage their own buffers:
-
-```
-Each switch: Load file → Decode → Create buffer → Upload to GPU → Destroy old
-```
-
-There's no persistent pixmap storage. Every wallpaper change re-does all the work.
+The benefit depends on image size, storage and renderer. There is no fixed switching time or speedup guaranteed by the cache.
 
 ## The Solution: Scene Node Caching
 
-SomeWM caches wallpapers at the GPU texture level:
+<span id="performance-comparison" />
 
-```
-First visit:  Load → Decode → Create scene node → Hide node
-Cache hit:    Show cached node (toggle visibility)
-```
-
-Instead of destroying wallpaper textures, SomeWM keeps them in a cache and toggles their visibility:
-
-```c
-// Cache miss: create new texture (~20ms)
-scene_node = wlr_scene_buffer_create(layer, buffer);
-wlr_scene_node_set_enabled(&scene_node->node, false);  // Hidden until shown
-
-// Cache hit: just toggle visibility (~0.1ms)
-wlr_scene_node_set_enabled(&old_node->node, false);    // Hide current
-wlr_scene_node_set_enabled(&cached_node->node, true);  // Show cached
-```
-
-### Performance Comparison
-
-| Operation | Without Cache | With Cache |
-|-----------|--------------|------------|
-| First visit | ~20ms | ~20ms |
-| Subsequent visits | ~20ms | **~0.1ms** |
-| Speedup | - | **~200x** |
+On a miss, SomeWM creates the wallpaper surface and scene node. On a hit, it hides the previous wallpaper for that screen and enables the cached node. Other screens keep their current wallpapers.
 
 ## Short-Circuit at Lua Level
 
-Caching GPU textures alone isn't enough. The Lua code still runs expensive operations:
+A hook installed in `luaa.c` wraps `gears.wallpaper.maximized`. For a file path and an explicit valid screen, it calls `root.wallpaper_cache_show(path, screen_index)` first. A hit returns before the original Lua function loads or paints the image.
 
-```lua
--- gears.wallpaper.maximized does all this work:
-function wallpaper.maximized(surf, s, ignore_aspect, offset)
-    local geom, cr = wallpaper.prepare_context(s)  -- Create cairo context
-    surf = surface.load_uncached(surf)              -- Load image from disk!
-    -- ... scale, paint, etc.
-    root._wallpaper(pattern)                        -- Finally call C
-end
-```
-
-Even with C-side caching, Lua still loads and decodes the image every time.
-
-SomeWM solves this by patching `gears.wallpaper.maximized` to check the cache first:
-
-```lua
--- Patched version (simplified)
-function wallpaper.maximized(surf, s, ...)
-    if type(surf) == "string" and root.wallpaper_cache_show(surf) then
-        return  -- Cache hit! Skip everything
-    end
-    -- Cache miss: fall through to original implementation
-    return original_maximized(surf, s, ...)
-end
-```
-
-On cache hit, we skip:
-- File I/O
-- Image decoding
-- Cairo surface creation
-- Scaling and painting
-- Pattern creation
-
-The entire Lua pipeline is bypassed.
+On a miss, the original function runs, and `root.c` records the resulting wallpaper for reuse.
 
 ## Per-Screen Caching
 
-Wallpapers are cached per-screen. The cache key is `(path, screen_index)`, meaning the same image file can be cached separately for different screens with different positions and sizes.
-
-```c
-typedef struct wallpaper_cache_entry {
-    struct wl_list link;              // Linked list for LRU ordering
-    char *path;                       // Filepath (part of cache key)
-    int screen_index;                 // Screen index (part of cache key)
-    struct wlr_scene_buffer *scene_node;  // GPU texture positioned at screen coords
-    cairo_surface_t *surface;         // For getter compatibility
-} wallpaper_cache_entry_t;
-```
-
-Each cached entry's scene node is positioned at the screen's coordinates and sized to match the screen's dimensions. This means switching tags on screen 1 only toggles screen 1's wallpaper node, leaving screen 2's wallpaper untouched.
+The key is the path string and screen index. The same image on two screens has separate entries. Each entry retains the screen-sized surface and its positioned scene node.
 
 ### Cache Operations
 
-| Operation | Complexity | Description |
-|-----------|------------|-------------|
-| Lookup | O(n) | Linear scan by (filepath, screen) |
-| Insert | O(1) | Add to head of list |
-| Evict | O(n) | Remove oldest not currently displayed |
-| Show | O(1) | Toggle visibility flags for screen |
+Lookup scans the cache for a matching path and screen. Showing an entry toggles node visibility. New entries are inserted at the front of the list.
 
-With a max of 32 entries, O(n) operations are fast enough.
+### Eviction {#lru-eviction}
 
-### LRU Eviction
-
-When the cache is full (32 entries), the least recently used wallpaper is evicted:
-
-```c
-void wallpaper_cache_evict_oldest(void) {
-    // Find oldest not currently displayed on any screen
-    wallpaper_cache_entry_t *oldest = NULL;
-    wl_list_for_each(entry, &cache, link) {
-        if (!is_current_on_any_screen(entry))
-            oldest = entry;
-    }
-
-    if (oldest) {
-        wlr_scene_node_destroy(&oldest->scene_node->node);
-        // ... cleanup
-    }
-}
-```
+At the 32-entry threshold, insertion removes the oldest inserted entry that is not currently displayed. A cache hit does not move an entry in the list, so this is not least-recently-used eviction. Currently displayed entries are protected.
 
 ## Memory Considerations
 
-Each cached wallpaper consumes GPU memory:
+An ARGB32 image needs approximately `width × height × 4` bytes, before renderer allocations and other overhead:
 
-```
-Memory = width × height × 4 bytes (ARGB32)
+| Dimensions | Pixel storage per surface |
+| --- | --- |
+| 1920×1080 | 7.9 MiB |
+| 3840×2160 | 31.6 MiB |
 
-1920×1080 = 8,294,400 bytes ≈ 8 MB
-3840×2160 = 33,177,600 bytes ≈ 32 MB
-```
-
-With 32 cached wallpapers (max cache size):
-- 1080p: ~256 MB GPU memory
-- 4K: ~1 GB GPU memory
-
-A typical dual-monitor setup with 9 tags per screen = 18 cached wallpapers:
-- 1080p: ~144 MB GPU memory
-- 4K: ~576 MB GPU memory
-
-This is typically acceptable for modern GPUs, but users with many 4K wallpapers should be mindful of memory usage.
+Thirty-two 4K surfaces alone use about 1 GiB. Cached surfaces and renderer resources both contribute to total memory use.
 
 ## Implementation Details
 
 ### Monkey-Patching
 
-SomeWM patches Lua modules at startup without modifying the sacred Lua files:
-
-```c
-// In luaA_loadrc(), before loading rc.lua:
-luaL_dostring(L,
-    "local orig_require = require\n"
-    "require = function(name)\n"
-    "    local mod = orig_require(name)\n"
-    "    if name == 'gears.wallpaper' then\n"
-    "        -- Patch maximized to check cache first\n"
-    "    end\n"
-    "    return mod\n"
-    "end\n"
-);
-```
-
-This intercepts `require('gears.wallpaper')` and wraps the `maximized` function.
+The C-installed `require` hook wraps the wallpaper and surface-loading functions when they are loaded. The on-disk Lua module files are not rewritten.
 
 ### Cache Key
 
-The filepath string is used as the cache key:
+The cache does not compare file contents, modification times or inodes. Different path strings can produce separate entries for the same file. Replacing a file at the same path leaves the old image cached.
 
-```c
-static wallpaper_cache_entry_t *wallpaper_cache_lookup(const char *path) {
-    wallpaper_cache_entry_t *entry;
-    wl_list_for_each(entry, &cache, link) {
-        if (strcmp(entry->path, path) == 0)
-            return entry;
-    }
-    return NULL;
-}
-```
-
-This means:
-- Same file path = cache hit
-- Different path to same file = cache miss (no inode checking)
-- Modified file = stale cache (no mtime checking)
-
-For typical use cases (static wallpaper files), this is sufficient.
+Screen geometry and painting options are not part of the key either. Clear and repaint when changing those inputs if an existing entry would otherwise be reused.
 
 ## Limitations
 
 ### Only `maximized` is Cached
 
-Currently only `gears.wallpaper.maximized()` benefits from caching. Other functions are not patched:
-
-- `gears.wallpaper.centered()` - Not cached
-- `gears.wallpaper.tiled()` - Not cached
-- `gears.wallpaper.fit()` - Not cached
+The shortcut applies to `gears.wallpaper.maximized`. It does not wrap `centered`, `tiled`, `fit` or the default config's `awful.wallpaper` widget renderer.
 
 ### File Paths Only
 
-Caching requires a file path string as the cache key:
-
-```lua
--- Cached
-gears.wallpaper.maximized("/path/to/image.jpg", s, true)
-
--- NOT cached (no cache key)
-gears.wallpaper.maximized(some_cairo_surface, s, true)
-```
+A Cairo surface passed directly has no path key and does not use this shortcut. Pass the screen explicitly when using cached file paths.
 
 ### No Invalidation
 
-The cache doesn't detect when files change on disk. If you modify a wallpaper file, you need to either:
-
-1. Restart SomeWM
-2. Call `root.wallpaper_cache_clear()` manually
+Call `root.wallpaper_cache_clear()` to remove cached entries, then set the wallpapers again. This also removes currently displayed cached nodes. A full compositor process restart clears the cache. A Lua configuration reload does not reset this C-owned cache.
 
 ## See Also
 
-- [Wallpaper Caching Guide](../guides/wallpaper-caching.md) - Practical configuration
-- [Wayland vs X11](/docs/concepts/wayland-vs-x11) - Platform differences
-- [Scene Graph](/docs/concepts/scene-graph) - How wlroots renders
+- [Wallpaper Caching Guide](../guides/wallpaper-caching.md)
+- [Scene Graph](scene-graph.md)

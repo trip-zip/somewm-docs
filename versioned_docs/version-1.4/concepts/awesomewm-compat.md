@@ -14,9 +14,9 @@ SomeWM 1.4 mirrors AwesomeWM master and is maintained as the upstream-compatible
 
 ## The 1.4 and 2.x lines
 
-The 1.4 line follows AwesomeWM master. Its purpose is to preserve the upstream configuration API on Wayland. Features developed for 2.x are not routinely backported; parity with AwesomeWM is the reason for an exception.
+The 1.4 line follows AwesomeWM master. Its purpose is to preserve the upstream configuration API on Wayland. Features developed for 2.x are not routinely backported. Exceptions serve upstream compatibility.
 
-The 2.x line keeps the Lua configuration model while developing its libraries and compositor independently. Existing configurations are preserved where possible, but a shared name is not a promise of identical arguments, defaults or signal timing.
+The 2.x line develops independently. Shared API names can have different arguments, defaults or signal timing.
 
 <span id="documentation-promise" />
 
@@ -50,7 +50,7 @@ The 2.x line keeps the Lua configuration model while developing its libraries an
 
 ## The version defines the contract
 
-The [compatibility reference](../reference/deviations.md) records platform differences and unsupported behaviour for this version. Individual API references describe supported properties, methods and signals. Linked AwesomeWM documentation provides background for inherited APIs.
+The [compatibility reference](../reference/deviations.md) records platform differences and unsupported behaviour for this version. Individual API references describe supported properties, methods and signals. Use linked AwesomeWM documentation for inherited APIs, together with the listed SomeWM differences.
 
 [Upgrade from 1.4 to 2.0](/docs/2.0/getting-started/upgrading-from-1.4) describes configuration changes between SomeWM releases. [Migrating from AwesomeWM](../getting-started/migrating.md) covers the move from X11 tools and assumptions to Wayland.
 

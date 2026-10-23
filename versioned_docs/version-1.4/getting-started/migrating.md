@@ -119,7 +119,7 @@ local path = info and info:get_filename()
 
 ### Client icons {#client-icons}
 
-SomeWM 1.4 does not receive icons from native Wayland clients, so `c.icon` is `nil`. Resolve an icon from `c.class` using the `icontheme` above:
+Native Wayland clients do not provide the X11 window-icon property. SomeWM 1.4 tries desktop-entry lookup when `c.icon` is missing. If that lookup finds no icon, you can try `c.class` with the `icontheme` above:
 
 ```lua
 local menubar = require("menubar")
