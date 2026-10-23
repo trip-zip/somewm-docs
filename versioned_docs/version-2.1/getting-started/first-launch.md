@@ -56,6 +56,8 @@ Mod4 + s shows every binding; [Default Keybindings](../reference/default-keybind
 
 ## Next
 
+To make your first visible addition to the desktop, [build a clock widget](../tutorials/widgets.md). The example includes a preview before adding it to the bar.
+
 - an AwesomeWM config: [Migrating from AwesomeWM](migrating.md)
 - a SomeWM 2.0 config: [Upgrading from 2.0 to 2.1](./upgrading-from-2.0.md)
 - from scratch: [Basics](../tutorials/basics.md)

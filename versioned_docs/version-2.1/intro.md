@@ -6,25 +6,30 @@ description: SomeWM is a wlroots compositor that runs AwesomeWM's Lua API on Way
 
 # SomeWM Documentation
 
-SomeWM runs AwesomeWM’s Lua configuration model on Wayland, using [wlroots](https://gitlab.freedesktop.org/wlroots/wlroots). The [compatibility reference](reference/deviations.md) lists differences from AwesomeWM.
+SomeWM is a Wayland compositor configured in Lua. You can build your own bars, widgets, popups and window layouts. In 2.1, widgets describe their content and sizing rules. SomeWM calculates placement and draws them. Your Lua code controls their data and behaviour.
 
 ## Start here
 
-| Page | For |
+| Starting point | Read next |
 | --- | --- |
-| [Installation](getting-started/installation.md) | build and install |
-| [Launch](getting-started/first-launch.md) | first session, config location, the five keys |
-| [Migrating from AwesomeWM](getting-started/migrating.md) | an existing `rc.lua` |
-| [Upgrading from 2.0 to 2.1](getting-started/upgrading-from-2.0.md) | a 2.0 config |
-| [Try SomeWM without logging out](tutorials/try-somewm-without-installing.md) | a nested instance in a window |
+| I want to try SomeWM | [Run it in a window without logging out](tutorials/try-somewm-without-installing.md), or [install](getting-started/installation.md) and [launch](getting-started/first-launch.md) it. |
+| I have a running session and want to build something | [Build a clock widget](tutorials/widgets.md). Create a Lua module, see it on screen, add interaction, then put it in your bar. |
+| I have a SomeWM 2.0 configuration | [Upgrade to 2.1](getting-started/upgrading-from-2.0.md), including how to port custom widgets. |
+| I have an AwesomeWM configuration | [Migrate from AwesomeWM](getting-started/migrating.md) and check the [widget changes](getting-started/upgrading-from-2.0.md#port-a-custom-widget). |
 
-## Tutorials
+## Build your desktop {#tutorials}
 
-[Basics](tutorials/basics.md), [Keybindings](tutorials/keybindings.md), [Widgets](tutorials/widgets.md), [Wibar](tutorials/wibar.md), [Theme](tutorials/theme.md), [Carousel](tutorials/carousel.md). Each stands alone.
+Start with [configuration basics](tutorials/basics.md) if you have not edited `rc.lua` before. Then follow the widget path:
 
-## Guides
+1. [Build a clock widget](tutorials/widgets.md): a complete example you can see and interact with.
+2. [Build a wibar](tutorials/wibar.md): place widgets alongside tags, tasks and the system tray.
+3. [Create a custom widget](guides/custom-widgets.md): add your own methods and state, write a Clay description, or display custom Cairo artwork.
 
-Use the sidebar to find guides for specific tasks, such as configuring input devices, client rules, or multiple monitors.
+[Keybindings](tutorials/keybindings.md), [Theme](tutorials/theme.md) and [Carousel](tutorials/carousel.md) cover other parts of the desktop. You do not need to read the renderer documentation before building widgets.
+
+## Solve a specific task {#guides}
+
+[Update widgets from timers and commands](guides/widget-timers.md), [animate them](guides/animation.md), or [write a client layout](guides/custom-layouts.md). The How-To Guides section in the sidebar lists configuration tasks such as input devices, notifications and multiple monitors.
 
 ## Reference
 

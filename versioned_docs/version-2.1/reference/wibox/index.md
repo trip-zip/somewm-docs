@@ -12,7 +12,7 @@ The `wibox` library provides the widget system for AwesomeWM/SomeWM. It includes
 
 ## Widget Types
 
-Widgets come in three categories: primitives that display content, containers that modify a single widget, and layouts that arrange multiple widgets. None of them draws or sizes itself: each declares what it holds and how it is sized, SomeWM solves the whole wibox once per frame, and the renderer draws the result. [AwesomeWM widgets in that model](../../concepts/widgets-in-the-tree.md) explains what each class declares, and [Reading the tree](../../concepts/reading-the-tree.md#sizing) maps the layouts and containers below onto the sizing words.
+Widgets come in three categories: primitives that display content, containers that modify a single widget, and layouts that arrange multiple widgets. None of them draws or sizes itself: each declares what it holds and how it is sized, SomeWM solves the whole wibox once per frame, and the renderer draws the result. [Widgets in SomeWM 2.1](../../concepts/widgets-in-the-tree.md) explains what each class declares, and [Reading the tree](../../concepts/reading-the-tree.md#sizing) maps the layouts and containers below onto the sizing words.
 
 ### Primitives
 
@@ -61,6 +61,8 @@ Layouts arrange multiple child widgets.
 | `wibox.layout.ratio.horizontal` | Side by side, proportional widths |
 | `wibox.layout.ratio.vertical` | Stacked vertically, proportional heights |
 | `wibox.layout.manual` | Absolute positioning |
+
+Custom widgets can compose these components, register a Clay description, or display a Cairo image surface. See [Create or port a custom widget](../../guides/custom-widgets.md) for examples.
 
 ## Widget Composition
 

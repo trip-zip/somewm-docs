@@ -1,81 +1,53 @@
 ---
 sidebar_position: 4
-title: AwesomeWM widgets in that model
-description: Every stock wibox class has a describer that turns its properties into Clay declarations. A widget with its own draw or fit method is left out of the tree, and a property the tree cannot hold warns once.
+title: Widgets in SomeWM 2.1
+description: How built-in and custom widgets get their content, size and position in SomeWM 2.1.
 ---
 
-# AwesomeWM widgets in that model
+# Widgets in SomeWM 2.1
 
-A widget in SomeWM is a description of an element, not a thing that paints one. Every stock class in `wibox.widget`, `wibox.layout` and `wibox.container` has a describer, a function in its module that reads the widget's properties and returns Clay declarations. `wibox.clay` walks the widget tree at each frame's `clay::declare`, calls each describer, and hands the result to C. The API you write is AwesomeWM's: the same constructors, properties and declarative tables.
+A widget combines content, sizing rules and Lua behaviour. You can build your own by combining built-in widgets, supplying a Clay description, or displaying an image drawn with Cairo. [Create or port a custom widget](../guides/custom-widgets.md) has working examples of each approach.
 
-## What a stock widget declares
+A *widget tree* is the nesting you write in Lua: a wibar contains a layout, the layout contains widgets, and containers wrap those widgets. For example, a textbox inside a margin container inside a background container is a tree with three widgets.
 
-| Class | Declares |
+## From widget properties to layout {#what-a-stock-widget-declares}
+
+Each built-in widget has a *describer*: a function that converts its properties into a table of content and sizing rules. A textbox supplies its text and font. A margin container supplies padding and a child. A horizontal layout supplies its children and the gap between them.
+
+SomeWM combines these descriptions and passes them to Clay, the library that calculates sizes and positions. The renderer then draws the text, backgrounds and images in those positions. The same process also places application windows. [How SomeWM draws](./how-somewm-draws.md) explains that part.
+
+For a textbox inside a margin and a background, Clay measures the text, adds the margins, and determines the background's size from the result and the space its parent gives it. Setting `textbox.text` requests an update. You do not have to measure the new text or repaint the background yourself.
+
+| Widget | What its description supplies |
 | --- | --- |
-| `wibox.widget.textbox` | its text, font, colour, alignment and whether it ellipsizes. Clay measures the text through its one measure callback and wraps it at words. |
-| `wibox.widget.imagebox` | the image and its aspect. Sized from an explicit ancestor size propagated through the tree ([rules](./reading-the-tree.md#where-a-number-comes-from)): a 32-pixel bar and a square image make a 32 by 32 box. Without that bound, it uses the image's dimensions. |
-| `wibox.container.background` | a fill, a border and a corner radius around a child that fills it. A `shape` of `gears.shape.rounded_rect`, or a function drawing that path, is a corner radius. Other shapes clip the fill and child to the supplied path. |
-| layouts and containers | a direction, a sizing for each child, padding, a gap and an alignment ([table](./reading-the-tree.md#sizing)) |
-| `progressbar`, `slider`, `checkbox`, `arcchart` | composed from the values you set: a progressbar's bar is `value` over `max_value` as a percent of its box, a slider's handle is a path placed at `value`, a checkbox or arcchart is a square sized explicitly or from its ancestors. Nothing is measured. |
-| `awful.widget.taglist`, `tasklist`, `layoutlist` | pass through to the layout that holds their items; each tag, task or layout entry is an ordinary widget in the tree |
+| `wibox.widget.textbox` | Text, font, colour, alignment and ellipsizing. Text wraps at words. |
+| `wibox.widget.imagebox` | Image content and sizing information. An explicit size supplied by the widget or its ancestors can limit it. Without such a limit, it uses its natural size. See [image sizing](./reading-the-tree.md#where-a-number-comes-from). |
+| `wibox.container.background` | A fill, border and shape around its child. Rounded rectangles use a corner radius. Other shapes clip the fill and child to a path. |
+| Layouts and containers | Child sizing, direction, padding, spacing and alignment. See the [sizing table](./reading-the-tree.md#sizing). |
+| Progressbar, slider, checkbox and arcchart | Shapes and sizes computed from their properties, such as a progressbar's `value` and `max_value`. |
+| `awful.widget.taglist`, `tasklist` and `layoutlist` | A layout containing the widgets for each tag, client or layout entry. |
 
-## A widget that paints itself
+## Custom behaviour and appearance {#the-same-look-without-a-painter}
 
-A widget with its own `draw`, `fit`, `layout`, `before_draw_children` or `after_draw_children` method is left out of the tree, with everything inside it. The log gets one warning per class naming the methods it found. The wibox's own background stays.
+A widget made from built-in components can still have its own constructor, methods, state, timers, signals and button bindings. For example, a battery widget can read the charge level, update a textbox and progressbar, and change its background when the charge is low. Using built-in components handles its drawing and sizing. It does not restrict the data or behaviour you add.
 
-A custom widget written the AwesomeWM way, filling its box with a rounded rectangle:
+For new content or sizing rules, `wibox.clay.describe_widget` registers a description for a widget instance. `describe_class` registers one on a class table. A description can contain other widgets as well as drawing elements. The [custom-widget guide](../guides/custom-widgets.md#register-a-clay-description) shows a meter built this way.
 
-```lua
-local gears = require("gears")
-local wibox = require("wibox")
-local badge = wibox.widget.base.make_widget(nil, "badge")
-function badge:fit(context, width, height) return width, height end
-function badge:draw(context, cr, width, height)
-    cr:set_source(gears.color("#d79921"))
-    gears.shape.rounded_rect(cr, width, height)
-    cr:fill()
-end
-local sample = wibox {
-    x = 100, y = 100, width = 400, height = 48, visible = true, bg = "#282828",
-    widget = badge,
-}
-```
+Cairo can also draw into an image surface that an imagebox displays. This is useful for custom artwork, but your code must choose the image dimensions and regenerate it when needed. It does not get an automatic callback with the widget's final size.
 
-Loading it writes to the compositor's log:
+## Why an old widget disappears {#a-widget-that-paints-itself}
 
-```
+SomeWM 2.0 and AwesomeWM ask widgets to measure themselves with `fit`, place children with `layout`, and paint with `draw`. SomeWM 2.1 calculates placement from descriptions and draws the result centrally. It does not run those widget callbacks.
+
+An instance with its own `draw`, `fit`, `layout`, `before_draw_children` or `after_draw_children` method is omitted, including all its children. The containing wibox can remain visible with just its background. SomeWM logs a warning once per class:
+
+```text
 W: awesome: wibox.clay: badge draws itself (:draw, :fit) and is left out of the tree
 ```
 
-and `somewm-client clay tree` prints the wibox with nothing under it:
+Here `badge` is the name passed to `wibox.widget.base.make_widget`. Without an explicit name, the warning uses the module name derived from the source file. The methods in parentheses identify what must be replaced. Adding a description without removing these methods does not restore the widget.
 
-```
-  drawin screen 1 400x48+100+100 converted: 1 nodes, 0 images clip w=fixed(400) user h=fixed(48) user row attach ROOT offset 100,100 band 25 box 100,100 400x48
-```
-
-`badge` is the name given to `make_widget`; without one, the warning names the file that made the widget. The log is the compositor's standard error: under `somewm-session` that is `journalctl --user -u somewm.service`.
-
-## The same look without a painter
-
-```lua
-local gears = require("gears")
-local wibox = require("wibox")
-local sample = wibox {
-    x = 100, y = 100, width = 400, height = 48, visible = true, bg = "#282828",
-    widget = {
-        widget = wibox.container.background,
-        bg = "#d79921",
-        shape = gears.shape.rounded_rect,
-    },
-}
-```
-
-```
-  drawin screen 1 400x48+100+100 converted: 2 nodes, 0 images clip w=fixed(400) user h=fixed(48) user row attach ROOT offset 100,100 band 25 box 100,100 400x48
-    51c3b964 wibox.container.background w=grow h=grow row box 100,100 400x48
-```
-
-The background fills the wibox. `gears.shape.rounded_rect` defaults to a corner radius of 10.
+This affects custom and third-party widgets that use those callbacks. A custom widget that only combines supported built-in components does not need a new drawing implementation. Custom **client layouts** with `arrange` are a separate API and still work. See [client layouts](./clients-in-the-tree.md).
 
 ## Properties that warn once
 
@@ -91,10 +63,10 @@ Unsupported property values produce one warning naming the class, property, and 
 
 ## What looks different
 
-Without any change to `rc.lua`:
+These differences can affect an existing configuration:
 
 - A wibox with `opacity` below 1 blends each fill at that opacity, so overlapping fills add up: a blue container on a blue wibox at 0.5 is denser than either alone. The renderer draws each fill as its own rect and has no step that blends a finished wibox.
-- A `bgimage` set to a function is not drawn and warns, because no widget paints into a surface any more.
+- A `bgimage` set to a function is not drawn and warns, because SomeWM no longer calls it to paint the wibox. A file path or image surface is still supported.
 - A `shape` function that does more than trace a path is used as the path it traces. A colour it sets or anything it paints is dropped.
 
-[Upgrading from 2.0 to 2.1](../getting-started/upgrading-from-2.0.md) lists every removed property and method.
+[Upgrading from 2.0 to 2.1](../getting-started/upgrading-from-2.0.md) lists removed properties and methods, with migration advice.

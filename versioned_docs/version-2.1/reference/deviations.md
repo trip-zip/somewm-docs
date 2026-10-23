@@ -153,6 +153,107 @@ These limits concern X11 applications running through XWayland, not native Wayla
 | Animation | `somewm.animation`, client and wibox animation policies; [Animation](../guides/animation.md) |
 
 
+## Changes from 2.0 {#changes-from-20}
+
+For upgrade steps, see [Upgrading from 2.0 to 2.1](../getting-started/upgrading-from-2.0.md). These tables list removed APIs and changed behaviour.
+
+### Removed APIs and properties
+
+Calling a removed function raises `attempt to call ... (a nil value)`. Setting a removed widget, wallpaper or layout_animation property warns once that it is ignored. Setting `surface_scale`, `shape_border` or `carousel.scroll_duration` is silent and does nothing. Remove unused settings and replace calls as listed below.
+
+#### Widget methods and drawing
+
+| Gone | Instead |
+| --- | --- |
+| `fit`, `draw`, `layout`, `before_draw_children`, `after_draw_children` on every stock widget, container and layout class | Use built-in components, a Clay description or an image surface. See [Port a custom widget](../getting-started/upgrading-from-2.0.md#port-a-custom-widget). |
+| `wibox.hierarchy` and all its methods | The old hierarchy API has no replacement. Inspect calculated widget boxes in the tree dump and inspector. |
+| `wibox.widget.base.fit_widget`, `layout_widget`, `place_widget_at`, `place_widget_via_matrix`, `rect_to_device_geometry`, and `no_parent_I_know_what_I_am_doing` | Use [widget layouts and containers](wibox/index.md). Clay computes their geometry. |
+| `wibox.widget.draw_to_cairo_context`, `draw_to_image_surface`, `draw_to_svg_file`, `wibox:to_widget`, `wibox:save_to_svg` | Use [screen capture](../guides/screenshots.md): `root.content()`, `screen.content` or `somewm-client screenshot`. |
+| `wibox.widget.textbox:get_preferred_size`, `get_preferred_size_at_dpi`, `get_height_for_width`, `get_height_for_width_at_dpi`, `wibox.widget.textbox.get_markup_geometry`, `menubar.utils.compute_text_width`, `menubar.utils.compute_textbox_width` | The solver measures text. Let the textbox fit, or give it a `forced_width`. |
+| the drawable `refresh` method and `surface` property, the drawin `surface_scale` and `shape_border` properties | Drawables no longer have surfaces. The renderer draws a shaped wibox's border from `border_width` and `border_color`. |
+| the scroll container's `context`, `first_x`, `first_y`, `fit_width`, `fit_height`, `hierarchy`, `surface_width`, `surface_height` | The container is a scroll element of the tree. |
+| the wibox `__tostring` | `tostring(wibox)` prints the table. |
+
+#### Classes and properties
+
+| Gone | Instead |
+| --- | --- |
+| `wibox.container.border` | `wibox.container.background` with `border_width`, `border_color` and `shape`. Loading the old module is an error. |
+| `horizontal_offset` (stack) | none. Stacked widgets share one box |
+| `minimum_column_width`, `superpose` (grid) | none. A widget added over another is refused |
+| `inner_fill_strategy` (ratio) | none |
+| `stretch_horizontally`, `stretch_vertically` (background) | none. The child fills the container |
+| `paddings` (radialprogressbar) | none |
+| `horizontal_crop`, `vertical_crop` (tile) | none |
+| `auto_dpi`, `source_width` (imagebox) | none. The output's scale applies |
+| `ticks_gap` (progressbar) | none |
+| `bar_border_color`, `bar_border_width`, `handle_margins` (slider) | none |
+| `empty_cell_mode`, `empty_color`, `empty_widget` (calendar) | none |
+| `check_border_color`, `check_border_width`, `check_shape` (checkbox) | `shape` draws the check |
+| `awful.wallpaper` `uncovered_areas_color`, `dpi`, `get_dpi` | the root wallpaper shows in uncovered areas. The output scale applies |
+| `awful.client.shape`: `get_transformed`, `update.all`, `update.bounding`, `update.clip`, `update.input` | `client.shape` |
+| `carousel.scroll_duration` | `theme.animation_layout_duration`. See [Animation](../guides/animation.md). |
+| `somewm.layout_animation.easing` | No equivalent. Use the built-in animation curves. |
+| `awesome.start_animation` | Use [object animation policies](../guides/animation.md). `somewm.layout_animation` is also deprecated. |
+| `awesome.systray` | `wibox.widget.systray`. The C painter entry point is gone |
+| `_wibox` | `wibox`. The private surface-backed C module is gone |
+| `ruled.client.completed_with_payload_callback` | `ruled.client.execute` |
+
+#### Theme variables
+
+Gone with the properties that read them: `slider_bar_border_color`, `slider_bar_border_width`, `slider_handle_margins`, `calendar_empty_color`, `checkbox_check_border_color`, `checkbox_check_border_width`, `checkbox_check_shape` and `radialprogressbar_paddings`. Setting one does nothing.
+
+### Widget restrictions
+
+
+These values produce one warning naming the class, property and resulting behaviour:
+
+| You set | What happens |
+| --- | --- |
+| `bgimage` to a function | `wibox.drawable: bgimage functions are not drawn`. A surface or a file path still draws, once at its own size in the top-left corner. To cover a bar, prepare the image at the bar's size ([Put a PNG texture on your wibar](../guides/wibar-background-image.md)). |
+| a `shape` function that does more than trace a path | only the path is taken. A colour it sets or anything it paints is dropped. `gears.shape.rounded_rect` and the other `gears.shape` functions are fine. |
+| a widget tree of more than 4096 nodes in one wibox | the wibox shows nothing and warns once that it is over the output's element budget. |
+| a textbox with more than one line under a `rotate` or `mirror` | left out with a warning. Rotated text is one line. |
+| a `wibox.container.scroll` under a `rotate` or `mirror`, or a rotate inside a rotate | left out with a warning. |
+| a grid with `superpose`, or a row span | a widget added over another is refused. A span occupies its first row and warns. |
+| a padding, gap or border width below 0 | it is 0, with a warning. |
+| a colour that is not a solid or a gradient (a surface or mesh pattern) | transparent, with a warning naming the property. |
+
+Textboxes wrap at words. `wrap = "char"` warns that character wrapping is not applied. `wibox.container.tile` draws one copy of its widget and warns that tiling is not applied.
+
+### Layout, rendering and client behaviour
+
+
+| Area | 2.1 |
+| --- | --- |
+| Client shape | Changing `c.shape` emits `property::shape` and arranges the screen. |
+| Entrance input | Widgets receive pointer events during their wibox or popup’s entrance animation. |
+| Bordered popups | Content larger than the slot is clipped while the popup keeps its slot geometry. |
+| Size-hint signals | `property::size_hints` fires when a Wayland client’s committed bounds change. |
+| Layout leaves | A leaf placed and sized with grow, fit or percent on one axis is omitted with a warning naming the client. |
+| Fractional dimensions | Padding, gaps, offsets and border widths round to the nearest whole pixel. |
+| Screenshot overlay | Interactive selection covers the pointer’s screen. |
+| Xwayland geometry | Content-size requests pass through the Clay client frame. Geometry replies use the completed solve. |
+| Render verification | `render_verify` is removed. The verifier runs only in sanitizer and test builds. |
+| Imagebox sizing | An imagebox without a forced size takes its size from an explicit ancestor size, as 2.0's fit did. With none on either axis it declares the image's own size and can overflow a flex or fixed layout. An imagebox forced on one axis scales its image to that axis. |
+| Hotkeys help and menubar | They scroll instead of paging. Hotkeys: one column per group, continued every `beautiful.hotkeys_rows` rows (default 20), PgDn and PgUp scroll by one viewport. Menubar: `left_label` and `right_label` show while items lie beyond that side. |
+| Grid | A non-homogeneous grid no longer sizes its columns to the widest cell across rows. A homogeneous grid inside a content-sized box takes content-sized cells and warns. Border dashes draw solid and gradient border colours are transparent, both with a warning. |
+| Clients under a layout | An ontop, above or below client tiles into its slot, as in AwesomeWM. A client whose protocol minimum exceeds its tiled cell overhangs the cell. The workarea and its neighbours keep their size. A client that draws a size other than the one it was given is drawn at the drawn size, cut at its cell. |
+| Max and magnifier | A floating client is above the layout's clients whatever the raise order, and a transient of a max or magnifier client is above every client of that layout. |
+| Size hints | `c.size_hints` reports min and max width and height for Wayland clients, from the toplevel's committed bounds. A Wayland client whose min equals max reports `is_fixed` and floats. |
+| Border width | A client whose rules set no `border_width` draws no border, as in AwesomeWM. 2.0 applied the theme's width from C. `property::border_color` also fires when the focus recolour changes the drawn border. |
+| Overflow scroll signals | `property::scroll_factor` fires once the frame has applied a change, with the applied value, including for the mouse wheel and for a content or viewport change that moves the factor. |
+| Gradients | A slider `bar_color` gradient, an arcchart `colors` gradient and a separator `color` gradient are drawn in the bar's, the box's and the line's own box. Upstream used the widget's box or a centred square. A slider `bar_active_color` gradient now draws. |
+| Rotate | A widget under a rotate receives press coordinates relative to its rotated box. Text under a rotate or mirror draws as one line. |
+| Shapes | `shape_bounding`, `shape_clip` and `shape_input` on a client or a wibox are accepted and never read, and warn by name. A client's corners come from `client.shape` and a wibox's from its `shape`. |
+| Align with `expand = "none"` | An outer widget wider than its half pushes the centre widget off centre instead of being cut at the half. |
+| Stacking | 2.0 kept six fixed scene layers, background to overlay, and moved each client's and wibox's node between them in C. 2.1 has no layers: order is a band the tree declares ([Scene Graph](../concepts/scene-graph.md#bands)). |
+| Layouts | 2.0's `arrange` computed a rectangle per client in Lua. 2.1 declares the layout as a Clay subtree. An `arrange` layout still works, with its numbers marked `legacy` in the dump. |
+| Widget sizing | Clay computes widget geometry, replacing the per-widget `fit` and `layout` calls used in 2.0. |
+| Client-local properties | `client:set_xproperty` stores scalar values across Lua hot reloads. The 2.0 method did nothing. See [client properties](#x-property-family). |
+| Shadows | `clip_directional` is accepted but has no effect. Shadows fade on every side. Remove the setting. See [shadow reference](shadows.md). |
+| Layout animation | A client frame declares no transition until something configures animation: `c.animation`, `theme.animation_duration` or any `theme.animation_*_duration` set to a number (0 included), `theme.animation_appear` or `animation_disappear`, or `somewm.animation.layout_duration` above 0. Requiring `somewm.layout_animation` sets that to 0.15 and is deprecated. A client's first frame after that, or after a reload, does not animate unless it has an entrance. |
+
 ## Testing compatibility {#testing-implications}
 
 Tests relying on X11 properties or native clients' X11 metadata need a Wayland-specific expectation. Supported key release, keyboard-layout and input-injection APIs can be tested directly. [Nested compositor testing](../guides/testing-with-nested-compositor.md) keeps configuration checks separate from the desktop session.

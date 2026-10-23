@@ -1,85 +1,94 @@
 ---
 sidebar_position: 8
 title: Signals
-description: The C-to-Lua notification queue defines when configuration reactions run. Dispatch rules, synchronous requests, coalescing and startup order.
+description: Connect Lua handlers to events, understand their arguments, and know when they run.
 ---
 
 # Signals
 
-Every object in SomeWM is a `gears.object`: it emits named signals, and handlers connected to a name run with the object as their first argument. The compositor emits them when something happens (a client maps, focus moves, an output appears), and the Lua libraries emit them to ask for something (`request::rules`, `request::display`). [Signals Reference](../reference/signals.md) lists every one with its arguments.
+A signal is a named event. Connecting a function to a signal makes that function run when the event occurs. For example, this handler logs the title of each window that gains focus:
 
 ```lua
-client.connect_signal("focus", handler)
-client.disconnect_signal("focus", handler)
-client.emit_signal("focus", c)      -- libraries do this; user code rarely
+local function log_focus(c)
+    print("Focused: " .. (c.name or "untitled"))
+end
+
+client.connect_signal("focus", log_focus)
 ```
 
-A name is any string; the `::` in `property::name` is convention, not syntax.
+`client.connect_signal` listens for all clients. The `c` argument is the client that gained focus. To stop listening, pass the same function to `client.disconnect_signal("focus", log_focus)`.
 
-## Who emits
+Signal names are strings. The `property::` prefix conventionally means a property changed. `request::` asks a handler to perform an action. The `::` has no special meaning to Lua.
 
-| Source | Examples | Can you suppress it |
-| --- | --- | --- |
-| C | `request::manage`, `focus`, `property::geometry`, screen `added`, `mouse::move` | no; only choose whether to react |
-| Lua libraries | `ruled.client` `request::rules`, `naughty` `request::display`, `awful.layout` `request::default_layouts` | yes; they exist so modules can plug in without monkey-patching |
-| your code | `awesome.emit_signal("volume::changed")` | |
+## Which arguments a handler receives {#who-emits}
 
-## Why the queue is an execution boundary
+The arguments depend on the emitter:
 
-A notification emitted inside a C operation can immediately call Lua, whose handlers can call back into C and change related objects. That nests configuration reactions inside the operation producing the notification. The queue gives selected notifications a separate delivery phase.
+| Connection | Handler receives |
+| --- | --- |
+| `client.connect_signal("focus", handler)` | The client that gained focus. |
+| `widget:connect_signal("button::press", handler)` | That widget, then pointer coordinates, button number, modifiers and hit information. |
+| `awesome.connect_signal("volume::changed", handler)` | Exactly the arguments passed to `awesome.emit_signal`. No object is added. |
 
-C records the signal, its target and its arguments. At `some_refresh()`, the queue dispatches a snapshot in order, before the `refresh` signal and pending layout work. Handlers can update configuration state during that phase. New queued notifications wait for the next drain, so a handler cannot keep extending the current batch indefinitely.
+Notice the dot for `client.connect_signal` and `awesome.connect_signal`, and the colon for a widget instance's `:connect_signal`. An instance signal supplies that instance as the first argument. Global and module signals have their own argument lists. The [signal reference](../reference/signals.md) lists them.
 
-This also gives notification delivery explicit lifetime rules. Queued events hold Lua references to their targets and arguments until delivery. Pending references are cleared when the owning Lua state is replaced during reload. Consecutive pointer moves for the same object can be coalesced while preserving intervening events.
-
-The result is a defined place to run queued configuration reactions. It does not make every callback asynchronous or eliminate every C-to-Lua call. Requests needing an immediate answer and Lua-emitted signals remain synchronous. The dispatch rules below distinguish those paths.
-
-## Dispatch
-
-Some C-generated notifications are queued until `some_refresh()`. The queue drains before `refresh` and the output declarations ([How SomeWM draws](./how-somewm-draws.md)). Requests whose results the compositor needs immediately call Lua synchronously.
-
-- **Queued:** property changes, focus, mouse motion, lifecycle, selected `request::*`, the output and screen signals hotplug causes, layer-shell properties, most global signals. The exact set is the [dispatch section of the reference](../reference/signals.md#dispatch).
-- **Synchronous from C:** `request::manage`, `request::unmanage`, `request::geometry`, screen `added` and `removed`, and the client scalar `property::*` signals. The compositor acts on their handlers' results immediately.
-- **Synchronous when Lua caused it:** `screen.fake_add`, `screen.fake_remove`, `s:swap()`, `screen.primary = s`, `awesome.dpms_on()` deliver inline, so a change you make is visible to your next line.
-- **Always synchronous:** anything emitted from Lua, including the libraries' own `request::*` emits and your custom signals. The queue is the C to Lua boundary only.
-
-`property::workarea` has two emitters: the one driven by wibar and client struts is inline, the one driven by geometry is queued so it cannot overtake the `property::geometry` it follows.
-
-**Coalescing.** `mouse::move` on one object is coalesced: of several queued moves with no other event between them, only the latest survives. Nothing else is coalesced.
-
-**Reentrancy.** A drain processes a snapshot of the queue. New queued events wait for the next drain. Synchronous C signals and Lua-emitted signals still run inline, including when emitted by a queued handler. [State before a queued handler runs](../reference/signals.md#state-before-a-queued-handler-runs) describes the effect on Lua caches.
-
-## The `request::*` pattern
-
-A `request::*` signal asks for something to be done rather than reporting that it happened. A default handler in `awful.permissions` does the standard thing, and user code can add to it or replace it:
+Custom signals let unrelated parts of a configuration communicate. This one passes a volume percentage to its handler:
 
 ```lua
--- Add: the default still runs
-client.connect_signal("request::manage", function(c)
-    if c.class == "Firefox" then c.maximized = true end
-end)
+local function log_volume(percent)
+    print("Volume: " .. percent .. "%")
+end
 
--- Replace: the default stops
-client.disconnect_signal("request::tag", awful.permissions.tag)
-client.connect_signal("request::tag", function(c, t, hints)
-    c:move_to_tag(screen.primary.tags[1])
-end)
+awesome.connect_signal("volume::changed", log_volume)
+awesome.emit_signal("volume::changed", 50)
+awesome.disconnect_signal("volume::changed", log_volume)
 ```
 
-Most carry a `context` string and a `hints` table after the object: `request::border` passes `"added"`, `"active"`, `"inactive"`, `"floating"`. [Replacing a default handler](../guides/replace-default-handler.md) has the patterns.
+The handler prints `Volume: 50%` during `emit_signal`, before the next line runs. Emitting a signal only calls its handlers. It does not perform the operation named by the signal. For example, manually emitting `focus` does not focus a window.
+
+## When handlers run {#dispatch}
+
+Signals emitted directly from Lua run synchronously: the connected functions run before `emit_signal` returns. This includes custom signals and signals emitted by the Lua libraries.
+
+Some notifications from the C compositor wait in a queue. Ordinary focus changes and client geometry changes are examples. The main loop delivers queued notifications before `refresh` and before the next [layout pass](./how-somewm-draws.md). Other C signals run immediately, including `request::manage`, `request::unmanage`, `request::geometry` and client properties such as `property::name` and `property::fullscreen`.
+
+The distinction matters when you read state. After a focus change, `client.focus` can already name the new client while `awful.client.focus.history` still contains the previous result: its signal handler has not run yet. Code that depends on that handler's update can defer the read with `gears.timer.delayed_call`. See [state before a queued handler runs](../reference/signals.md#state-before-a-queued-handler-runs).
+
+Timing can also depend on what caused the change. Screen changes made by Lua through `screen.fake_add`, `screen.fake_remove`, `s:swap()` and `screen.primary = s` notify handlers immediately. Some corresponding changes caused by monitor hotplug are queued. The [dispatch reference](../reference/signals.md#dispatch) lists the signals and exceptions, including the two sources of `property::workarea`.
+
+## Why some notifications wait {#why-notifications-are-queued}
+
+<span id="why-the-queue-is-an-execution-boundary" />
+
+A handler can call compositor functions and change other objects. Calling it halfway through a C operation would let those changes happen before the original operation finishes. Queuing selected notifications allows the operation to finish first.
+
+Each delivery pass processes the events that were waiting when it began, in order. Events added to the queue by those handlers wait for the next pass. A handler can still emit a synchronous signal, which runs immediately.
+
+Consecutive `mouse::move` events for the same object are combined into the latest move, provided no other event intervenes. Other queued events are delivered separately. The queue holds references to its objects and arguments until delivery. Reloading the Lua configuration clears pending references.
+
+## Requests and default handlers {#the-request-pattern}
+
+A `request::*` signal asks handlers to do something. Many client requests have a default handler in `awful.permissions`. For example, a `request::activate` handler decides whether to focus or raise a window. Connecting another handler adds behaviour. It does not remove the default.
+
+To replace a default, disconnect the function that implements it, then connect your replacement. [Replacing a default handler](../guides/replace-default-handler.md) gives complete examples. There is no general cancellation return value for signals: returning `false` from an ordinary handler does not stop the others.
+
+Request arguments vary. `request::activate` supplies a client, a context string and a hints table. `request::tag` supplies a client, a tag and hints. Check the [reference](../reference/signals.md#requests) before writing a handler.
 
 ## Startup order
 
-1. `rc.lua` runs top to bottom; each `require` connects that library's default handlers.
-2. `client.scanning` fires. Inside it, `ruled.client` and `ruled.notification` emit `request::rules`, and `awful.keyboard` and `awful.mouse` emit `request::default_keybindings` and `request::default_mousebindings`. `awful.layout` emits `request::default_layouts` from the first `tag.new`.
-3. Existing clients are managed: `request::manage` for each.
-4. `client.scanned`, then `awesome.startup`.
+`rc.lua` runs before existing clients are managed. Requiring a library can connect its default handlers during this time.
 
-Connect a `request::rules` handler at module load time and it runs in time, whatever order modules are required in. [Defer startup with request::rules](../guides/defer-startup-with-request-rules.md) shows the pattern.
+1. The first tag creation, or an earlier read of `awful.layout.layouts`, triggers `tag`'s `request::default_layouts`. Connect before either if you want to supply the layouts. Assigning `awful.layout.layouts` directly bypasses this request.
+2. After configuration, `client` emits `scanning`. `ruled.client` requests client rules. `awful.keyboard` and `awful.mouse` request default client bindings.
+3. Existing clients receive `request::manage`.
+4. `client` emits `scanned`, then `awesome` emits `startup`. `ruled.notification` requests notification rules from `startup`.
+
+Connect rule handlers while loading the configuration, before the corresponding startup signal. [Defer startup with request::rules](../guides/defer-startup-with-request-rules.md) shows how to organise this across modules.
 
 ## In a handler
 
-- In `request::manage`, handlers connected after `awful.permissions` and `ruled.client` see the client tagged and placed; handlers connected before do not.
-- In `request::unmanage`, the client is gone: geometry and screen may be invalid. Stash what you need at `request::manage`.
-- `refresh` runs during the main-loop refresh phase, which can run without presenting a frame. Keep its handlers small.
-- Errors in handlers are caught and logged through `debug::error`; connect your own handler to surface them elsewhere.
+Keep handlers short: they run on the compositor's main thread. A slow handler delays input and drawing. Use asynchronous commands for external work.
+
+During `request::unmanage`, the client has been removed from the client list and its tags. Do cleanup there. Do not retain the client and expect it to remain valid after the callback. Save any state you need later while the client is still managed.
+
+`refresh` runs during main-loop processing, even when no frame is presented. It is not a notification that a frame has reached the screen. Errors reaching the compositor's Lua error handler are reported through `debug::error`.

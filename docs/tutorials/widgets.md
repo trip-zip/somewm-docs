@@ -1,35 +1,26 @@
 ---
 sidebar_position: 2
-title: Widgets
-description: Build a clock widget in its own module, update it on a timer, add an icon, containers, a tooltip and click handlers, and put it in the bar.
+title: Build a clock widget
+description: Create a clock module, preview it on screen, add hover and click behaviour, then put it in the default bar.
 ---
 
-import YouWillLearn from '@site/src/components/YouWillLearn';
+# Build a clock widget
 
-# Widgets
+Build a clock that updates itself, shows the date on hover, and opens a notification when clicked. You will first display it in a small box on screen, then put it in the bar.
 
-<YouWillLearn>
+Start with a running SomeWM 2.1 session and a copy of the bundled configuration at `~/.config/somewm/rc.lua`. [Launch](../getting-started/first-launch.md#configuration) explains how to create that copy. The examples use its theme and reload keybinding, **Super + Ctrl + r**.
 
-- Composing primitives, containers and layouts
-- A clock widget that updates on a timer
-- Icons, tooltips, click handlers, shell output and signals
-
-</YouWillLearn>
-
-A widget is a declarative table: a primitive shows content (`textbox`, `imagebox`), a container modifies one child (`margin`, `background`), a layout arranges several (`fixed`, `flex`, `align`). None of them draws itself; SomeWM solves the bar from their declarations once per frame ([what each class declares](../concepts/widgets-in-the-tree.md)). They nest:
-
-```lua
-wibox.widget {
-    { { text = "Hello", widget = wibox.widget.textbox },
-      margins = 4, widget = wibox.container.margin },
-    bg = "#ff0000",
-    widget = wibox.container.background,
-}
-```
+Widgets combine in Lua tables: a textbox displays content, a margin adds space around one child, and a layout arranges several children. You choose their properties and behaviour. SomeWM calculates their sizes and draws them.
 
 ## 1. A clock module
 
-`~/.config/somewm/widgets/clock.lua`:
+Create the module directory:
+
+```bash
+mkdir -p ~/.config/somewm/widgets
+```
+
+Save this as `~/.config/somewm/widgets/clock.lua`:
 
 ```lua
 local wibox = require("wibox")
@@ -50,29 +41,34 @@ gears.timer {
 return clock
 ```
 
-## 2. Put it in the bar
+## 2. Preview it on screen {#2-put-it-in-the-bar}
 
-In `rc.lua`, require it after `beautiful.init()`:
+Add this at the end of `rc.lua`, after the existing theme initialisation. Leave the existing configuration in place:
 
 ```lua
-local beautiful = require("beautiful")
-beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
+local wibox = require("wibox")
 local my_clock = require("widgets.clock")
+
+local clock_preview = wibox {
+    screen = screen.primary,
+    x = screen.primary.geometry.x + 100,
+    y = screen.primary.geometry.y + 100,
+    width = 200,
+    height = 40,
+    bg = "#282828",
+    fg = "#ebdbb2",
+    visible = true,
+    widget = my_clock,
+}
 ```
 
-:::warning
-A widget module runs when required. A theme value read at its top level, such as `bg = beautiful.bg_normal`, is nil before `beautiful.init()`, with no error: the widget renders unstyled in `sans 8`. A later `init` does not restyle it. If a widget ignores the theme, check this order first.
-:::
+Reload with **Super + Ctrl + r**. A box near the top-left of the primary screen should show the time, with seconds changing once a second. Here `wibox { ... }` creates the preview window, while `wibox.widget { ... }` in the module creates its content. The same clock can go inside your existing bar, which already supplies a window.
 
-Then in the right section of the bar:
-
-```lua
-{ layout = wibox.layout.fixed.horizontal, my_clock, s.mylayoutbox },
-```
-
-Mod4 + Ctrl + r shows the clock.
+The timer changes `clock.text`. The textbox requests the display update. There is no separate drawing function to call.
 
 ## 3. An icon, containers, a tooltip, clicks
+
+Replace the contents of `widgets/clock.lua` with this version, then reload. It uses the theme already loaded by the bundled configuration.
 
 ```lua
 local awful = require("awful")
@@ -135,45 +131,26 @@ return clock
 
 The margin pads the row, the background colours it and changes on hover, the tooltip shows the date, and a left click posts a notification. `shape = gears.shape.rounded_rect` on the background rounds its corners.
 
-## Patterns
+## 4. Put it in the default bar
 
-**Shell output.** Run the command asynchronously and set the text in the callback:
-
-```lua
-gears.timer {
-    timeout = 30, autostart = true, call_now = true,
-    callback = function()
-        awful.spawn.easy_async_with_shell("cat /sys/class/power_supply/BAT1/capacity",
-            function(stdout) battery_text.text = stdout:gsub("\n", "") .. "%" end)
-    end,
-}
-```
-
-**Signals.** Emit a custom signal where the change happens and update where the widget is:
+Remove the preview block you added to `rc.lua`. In the bundled configuration, find the `local mytextclock = wibox.widget` declaration under `-- Wibar`. Replace that entire widget declaration with:
 
 ```lua
-awesome.connect_signal("volume::update", update_volume_widget)
--- in the keybinding:
-awful.spawn.easy_async("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+",
-    function() awesome.emit_signal("volume::update") end)
+local mytextclock = require("widgets.clock")
 ```
 
-**Children by id.** Name a nested widget and fetch it later:
+Leave the `mytextclock` entry inside `s.mywibox` in place. Reload: your clock now occupies the existing clock position in the bar, and the preview box is gone. Hover over it to see the date, then left-click for the notification.
 
-```lua
-local w = wibox.widget {
-    { id = "text_role", text = "", widget = wibox.widget.textbox },
-    { id = "icon_role", widget = wibox.widget.imagebox },
-    layout = wibox.layout.fixed.horizontal,
-}
-w:get_children_by_id("text_role")[1].text = "Updated!"
-```
+If you use a different bar configuration, insert the returned clock widget into one of that bar's layouts. [Wibar](wibar.md) shows a complete bar and where custom widgets fit.
 
 ## If a widget is missing
 
-- The module must `return` the widget, and the bar must include it.
-- A line in the log ending `is left out of the tree` names a widget with its own `draw` or `fit`, left out with everything inside it. Compose it from stock widgets ([Upgrading from 2.0 to 2.1](../getting-started/upgrading-from-2.0.md#what-you-will-see)).
-- `somewm-client clay tree` shows the widget's line with its size and where the size came from ([Reading the tree](../concepts/reading-the-tree.md)).
-- A timer needs `autostart = true`. An image path must be absolute: `os.getenv("HOME") .. "/.config/somewm/icons/clock.svg"`.
+- The module must return the widget, and a visible wibox or bar must contain it.
+- A `module 'widgets.clock' not found` error means the file is not at `~/.config/somewm/widgets/clock.lua` or you are using a different configuration directory.
+- Load the module after `beautiful.init()` so it can read the theme values.
+- `somewm-client clay tree` shows the displayed widgets and their sizes. [Reading the tree](../concepts/reading-the-tree.md) explains the output.
+- For errors while reloading, read standard error or, under `somewm-session`, `journalctl --user -u somewm.service -f`.
 
-[wibox reference](../reference/wibox/index.md) lists every primitive, container and layout; [Wibar](wibar.md) builds the bar around this widget.
+## Next steps {#patterns}
+
+[Create a custom widget](../guides/custom-widgets.md) shows how to give a reusable component its own methods and state, and how to write a Clay description when you need new content or sizing rules. [Widget timers and updates](../guides/widget-timers.md) covers external commands and signals. The [wibox reference](../reference/wibox/index.md) lists the available components.

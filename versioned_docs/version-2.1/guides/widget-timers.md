@@ -133,4 +133,4 @@ return battery_widget
 
 A CPU widget is the same shape with `head -1 /proc/stat` and the difference between two readings; a network widget pairs a 10-second timer with a `network::connected` signal you emit from the script that connects.
 
-A widget that paints with cairo in its timer is left out of the tree with a warning; compose it from stock widgets instead ([AwesomeWM widgets in that model](../concepts/widgets-in-the-tree.md)). [Widgets](../tutorials/widgets.md) is the tutorial.
+A timer can update built-in widget properties or assign a newly drawn Cairo surface to an imagebox. The unsupported part is a widget with its own `draw`, `fit` or `layout` callback. See [Create or port a custom widget](./custom-widgets.md) for examples, or [Widgets](../tutorials/widgets.md) for an introduction to composition.

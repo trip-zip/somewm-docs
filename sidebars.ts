@@ -62,6 +62,7 @@ const sidebars: SidebarsConfig = {
         'guides/shadows',
         'guides/animation',
         'guides/wibar-background-image',
+        'guides/custom-widgets',
         'guides/widget-timers',
       ],
     },
