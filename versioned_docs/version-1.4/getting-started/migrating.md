@@ -1,249 +1,132 @@
 ---
 sidebar_position: 3
 title: Migrating from AwesomeWM
-description: Adapting your AwesomeWM config for Wayland
+description: Check an AwesomeWM configuration and replace X11-dependent code for SomeWM 1.4.
 ---
 
 # Migrating from AwesomeWM
 
-## Quick Compatibility Check
+SomeWM 1.4 follows AwesomeWM master. Start with your existing configuration, check it for X11 dependencies, then [test it in a nested session](../tutorials/try-somewm-without-installing.md).
 
-Before migrating, scan your config for potential issues:
+## Quick Compatibility Check
 
 ```bash
 somewm --check ~/.config/awesome/rc.lua
 ```
 
-To only fail on issues that would actually hang the compositor (ignoring warnings):
+This checks Lua syntax, known X11 patterns and missing modules. It also runs Luacheck if installed. It does not execute your config or guarantee that it will work.
+
+### Severity Levels
+
+| Level | Meaning |
+| --- | --- |
+| CRITICAL | A pattern that can fail or block the compositor |
+| WARNING | Code that may need a Wayland alternative |
+| INFO | A possible compatibility difference |
+
+By default, warnings and critical issues produce a non-zero exit status. To fail only on critical issues while still displaying the full report:
 
 ```bash
 somewm --check ~/.config/awesome/rc.lua --check-level=critical
 ```
 
-This checks for:
-- **Lua syntax errors** - Caught before execution
-- **X11-specific APIs** - Functions like `awesome.get_xproperty()` that don't exist on Wayland
-- **Blocking X11 tools** - Calls to `xrandr`, `xdotool`, `xprop` via `io.popen()` that would hang
-- **Missing local modules** - `require()` statements for files that can't be found
-- **Luacheck issues** - Code quality warnings (if luacheck is installed)
-
-### Severity Levels
-
-Issues are categorized by severity:
-- **CRITICAL** - Will fail or hang on Wayland (must fix)
-- **WARNING** - Needs a Wayland alternative
-- **INFO** - May not work but won't break config
-
-Example output:
-```
-somewm config compatibility report
-====================================
-Config: /home/user/.config/awesome/rc.lua
-
-X CRITICAL:
-  rc.lua:45 - io.popen with xrandr (blocks)
-    → Use screen:geometry() or screen.outputs instead
-
-! WARNING:
-  rc.lua:112 - maim screenshot tool
-    → Use awful.screenshot or grim instead
-
-Summary: 1 critical, 1 warning
-```
-
 ### Suppressing False Positives
 
-If `--check` flags a pattern you've already handled (e.g. behind a runtime guard), add `-- somewm:ignore` to that line:
+Add `-- somewm:ignore` to a line only after checking that it is safe in your configuration:
 
 ```lua
+local awful = require("awful")
 awful.spawn("flameshot gui") -- somewm:ignore using XDG portal on Wayland
 ```
 
-The suppression also works at runtime, not just in `--check` mode. SomeWM's startup prescan will skip suppressed lines too.
+Both `--check` and the startup scan skip that line.
 
 ## X11 Pattern Replacements
 
 ### Screen/Display Information
 
-| X11 Pattern | Wayland Alternative |
-|-------------|---------------------|
-| `io.popen("xrandr")` | `screen:geometry()` or `screen.outputs` |
-| `xdpyinfo` | `screen.geometry` properties |
+Read screen properties instead of parsing `xrandr` or `xdpyinfo` output:
 
 ```lua
--- X11 (don't do this)
-local handle = io.popen("xrandr | grep ' connected'")
-
--- Wayland
 for s in screen do
     print(s.geometry.width .. "x" .. s.geometry.height)
-    for name, output in pairs(s.outputs) do
+    for name in pairs(s.outputs) do
         print("  Output: " .. name)
     end
 end
 ```
 
+`geometry` is a property, not a method. Use `s.geometry`, not `screen:geometry()`.
+
 ### Window/Client Information
 
-| X11 Pattern | Wayland Alternative |
-|-------------|---------------------|
-| `io.popen("xdotool")` | `awful.spawn()` or `client:send_key()` |
-| `io.popen("xprop")` | `client.class`, `client.instance` |
-| `awesome.register_xproperty()` | Not needed on Wayland |
-
-```lua
--- X11 (don't do this)
-local handle = io.popen("xprop -id " .. c.window)
-
--- Wayland
-local class = c.class      -- e.g., "firefox"
-local instance = c.instance  -- e.g., "Navigator"
-```
+Use client properties instead of calling `xprop`. Native Wayland clients expose their application ID as `c.class`. XWayland clients also provide X11 metadata such as `c.instance`. See [client metadata](../reference/deviations.md#client-metadata-and-state).
 
 ### Screenshots
 
-| X11 Pattern | Wayland Alternative |
-|-------------|---------------------|
-| `scrot` | `awful.screenshot` or `grim` |
-| `maim` | `awful.screenshot` or `grim` |
-| `import` (ImageMagick) | `grim` |
+Replace `scrot`, `maim` or ImageMagick's `import` with `grim`, or use [`awful.screenshot`](../guides/screenshots.md) from Lua:
 
 ```lua
--- X11 (don't do this)
-awful.spawn("scrot ~/screenshot.png")
-
--- Wayland
-awful.screenshot({ directory = "~" })
--- or
-awful.spawn("grim ~/screenshot.png")
+local awful = require("awful")
+awful.spawn({ "grim", os.getenv("HOME") .. "/screenshot.png" })
 ```
 
 ### Input Simulation
 
-| X11 Pattern | Wayland Alternative |
-|-------------|---------------------|
-| `xdotool key` | Keybindings, or wait for `root.fake_input()` |
-| `xdotool mousemove` | Not yet implemented |
+Replace `xdotool key` with `root.fake_input()`:
 
-:::note
-SomeWM implements `root.fake_input()` through the compositor. See the [compatibility reference](../reference/deviations.md#signals) for supported input behaviour.
-:::
+```lua
+root.fake_input("key_press", "a")
+root.fake_input("key_release", "a")
+```
+
+Key events go to the focused client. To move the pointer to absolute coordinates, use `root.fake_input("motion_notify", false, x, y)`. There is no `client:send_key()` method.
 
 ### GTK/GDK via LGI {#gtkgdk-via-lgi}
 
-| Pattern | Severity | Notes |
-|---------|----------|-------|
-| `lgi.require("Gtk")` | WARNING | Importing it is safe, but anything needing a display returns nil |
-| `lgi.require("Gdk")` | CRITICAL | Freezes the compositor the moment the import runs |
+Your configuration runs inside the compositor. Display initialisation in GTK or GDK can wait for a response from SomeWM while SomeWM is still running that code, causing a deadlock.
 
-Your `rc.lua` runs *inside* the compositor process. GTK and GDK are written to
-be Wayland clients: on startup they connect to the display server and wait for
-it to answer. That display server is SomeWM, which is busy running your config
-and cannot answer until your config returns. It waits for itself, forever.
+SomeWM skips GTK initialisation, so importing `Gtk` is safe for operations that need no display. Importing `Gdk` can still hang the compositor. Moving the import into a timer or signal handler does not help because those callbacks run on the same thread.
 
-SomeWM defuses half of this by preloading an empty `lgi.override.Gtk`, so
-importing Gtk never calls `gtk_init_check()`. There is no equivalent for Gdk:
-`lgi/override/Gdk.lua` calls `Gdk.threads_init()` at import, which connects to
-the display and hangs. Recovering means a hard power cycle.
-
-Loading it later does not help. A callback, a signal handler and a timer all
-run on the compositor's own thread inside its event loop, so deferring the
-import only changes *when* it hangs:
-
-```lua
--- Still freezes: the handler runs inside the compositor
-awesome.connect_signal("my::signal", function()
-    local Gdk = lgi.require("Gdk", "3.0")
-end)
-```
-
-What does work is anything that never touches the display. `GdkPixbuf` decodes
-images and is safe. Gtk's non-display types are safe. See
-[Icon theme lookups](#icon-theme-lookups) for the common case.
+Use `GdkPixbuf` for image decoding and `Gtk.IconTheme.new()` for [icon lookups](#icon-theme-lookups).
 
 ### Running a GTK app {#running-a-gtk-app}
 
-| Pattern | Severity |
-|---------|----------|
-| `Gtk.Application(...)`, `Gtk.Application.new`, `Gtk.main()` | CRITICAL |
+Run GTK applications in a separate process. Calling `Gtk.main()` or a GTK application's `run()` method inside the config blocks SomeWM's event loop.
 
-A settings window or a preferences dialog written with GTK runs its own main
-loop. Started from your config, that loop runs *inside* the compositor and
-never returns, so SomeWM stops drawing, stops handling input, and stops
-responding to `somewm-client`. There is no keybinding out of it.
+If your settings application is an executable Lua script with a shebang, spawn it instead of importing it:
 
 ```lua
--- Freezes the session the moment the handler runs
-local app = Gtk.Application({ application_id = "com.example.settings" })
-function app:on_activate() ... end
-return app:run()
-```
-
-A GTK app has to be its own process, the same as any other Wayland client.
-Move the code into a standalone script and spawn it:
-
-```lua
--- settings.lua is a normal Lua script with a #! line, run outside SomeWM
+local awful = require("awful")
 awful.spawn("/usr/share/mywm/settings.lua")
 ```
 
-The script is usually the file you already have. If it ends in `app:run()` it
-is already a complete program; it only needed to stop being `require`d into the
-compositor.
-
 ### Icon theme lookups {#icon-theme-lookups}
 
-| Pattern | Severity |
-|---------|----------|
-| `Gtk.IconTheme.get_default()` | WARNING |
-
-`get_default()` returns the icon theme belonging to the default display, so it
-needs `gtk_init` to have run. SomeWM skips `gtk_init` on purpose (see
-[GTK/GDK via LGI](#gtkgdk-via-lgi)), so `get_default()` returns **nil** and the
-next line fails with `attempt to index a nil value`.
-
-Dock, launcher and desktop-icon widgets are the usual casualties, and the error
-surfaces far from the cause.
-
-`Gtk.IconTheme.new()` needs no display. It reads the XDG icon directories
-directly and works normally:
+`Gtk.IconTheme.get_default()` needs an initialised display and returns `nil` inside SomeWM. Create an independent icon theme instead:
 
 ```lua
+local Gtk = require("lgi").require("Gtk", "3.0")
+local beautiful = require("beautiful")
 local icontheme = Gtk.IconTheme.new()
-icontheme:set_custom_theme(beautiful.icons)   -- e.g. "Papirus-Light"
+icontheme:set_custom_theme(beautiful.icons or "hicolor")
 
 local info = icontheme:lookup_icon("firefox", 64, 0)
 local path = info and info:get_filename()
 ```
 
-`menubar.utils.lookup_icon_uncached(name)` is a pure-Lua fallback when the
-theme has no match.
+`menubar.utils.lookup_icon_uncached(name)` is a pure-Lua fallback when the theme has no match.
 
 ### Client icons {#client-icons}
 
-| Pattern | Severity |
-|---------|----------|
-| `c.icon`, `awful.widget.clienticon` | INFO |
-
-On X11 a window carries its own icon in the `_NET_WM_ICON` property, so
-`c.icon` is almost always set and a tasklist just draws it. Wayland has no
-equivalent that SomeWM implements, so `c.icon` is **nil** for native Wayland
-clients.
-
-Nothing errors. Every client simply gets whatever fallback your config draws
-when the icon is missing, so a dock or tasklist shows the same generic image
-for every window.
-
-Resolve the icon from the class instead, which is set for both Wayland and
-XWayland clients:
+SomeWM 1.4 does not receive icons from native Wayland clients, so `c.icon` is `nil`. Resolve an icon from `c.class` using the `icontheme` above:
 
 ```lua
-local icontheme = Gtk.IconTheme.new()
-icontheme:set_custom_theme(beautiful.icons)
+local menubar = require("menubar")
 
 local function icon_for(class)
     if not class then return nil end
-    -- Reverse-DNS classes are common: try "com.mitchellh.ghostty", then "ghostty"
+    -- Try the full application ID, then its final component.
     for _, name in ipairs({ class:lower(), class:lower():match("([^.]+)$") }) do
         local info = icontheme:lookup_icon(name, 64, 0)
         if info and info:get_filename() then return info:get_filename() end
@@ -252,150 +135,81 @@ local function icon_for(class)
 end
 ```
 
+For example, this tries `com.mitchellh.ghostty` and then `ghostty`. XWayland clients can supply their own icons.
+
 ### Xresources and xrdb {#xresources-and-xrdb}
 
-| Pattern | Severity |
-|---------|----------|
-| `xrdb` | WARNING |
+`xrdb` updates an X server's resource database. It does not configure native Wayland applications. Put terminal colours in the terminal's configuration.
 
-The X resource database belongs to the X server. Without one, `xrdb` has
-nothing to write to and nothing reads what it writes. Configs hit this by
-generating an `Xresources` file for terminal colours and then calling
-`os.execute("xrdb ...")`.
-
-`beautiful.xresources` still works for DPI and for reading values a config
-supplies, but there is no live database behind it. Terminal colours belong in
-the terminal's own config file, which every Wayland terminal has.
-
+SomeWM's `gears.xresources` reads `~/.Xresources`, falling back to `~/.Xdefaults` and built-in values. `beautiful.xresources` uses those values for colours and DPI. See [compatibility differences](../reference/deviations.md#architectural-differences).
 
 ### X11 properties {#x11-properties}
 
-| Pattern | Severity | Notes |
-|---------|----------|-------|
-| `awesome.get_xproperty` | CRITICAL | Not defined. Calling it aborts the config |
-| `awesome.set_xproperty` | CRITICAL | Not defined. Calling it aborts the config |
-| `awesome.register_xproperty` | WARNING | Defined, but does nothing |
+| API | SomeWM 1.4 behaviour |
+| --- | --- |
+| `awesome.get_xproperty`, `awesome.set_xproperty` | Undefined. Calling either raises a Lua error and aborts the config. |
+| `awesome.register_xproperty` | Accepts its arguments but does nothing. |
+| `client:get_xproperty`, `client:set_xproperty` | Return `nil` and do nothing, respectively. Values do not survive reloads. |
 
-X11 properties are values attached to a window by the X server. Wayland has no
-equivalent, so SomeWM does not implement them.
-
-Only `register_xproperty` exists, as a stub that accepts its arguments and does
-nothing. `get_xproperty` and `set_xproperty` are not bound at all, so calling
-either raises `attempt to call field 'get_xproperty' (a nil value)`. That error
-escapes `rc.lua`, and SomeWM falls back to its own config. Your whole desktop is
-missing, from one line.
-
-The usual reason a config calls these is to work out whether this is a fresh
-start or a restart:
-
-```lua
--- AwesomeWM
-local function restarted()
-    awesome.register_xproperty("restarted", "boolean")
-    local detected = awesome.get_xproperty("restarted") ~= nil
-    awesome.set_xproperty("restarted", true)
-    return detected
-end
-
-if not restarted() then
-    -- run autostart
-end
-```
-
-`awesome.startup` answers the same question and needs no property:
-
-```lua
-if awesome.startup then
-    -- run autostart
-end
-```
-
-Read it while your config is loading. It is computed from the compositor's main
-loop rather than stored, so it is true only during a fresh start's config load,
-and false during a reload's and at every point afterwards. Reading it from a
-signal handler or a timer always gives false.
-
+Remove code that relies on these properties. Some AwesomeWM configs use them to track whether autostart has already run. `awesome.startup` does not distinguish a fresh start from a reload in the current 1.4 branch: it is true during both config loads, then false during normal operation. For a TTY session, move commands that must run only at initial startup into a script and pass it to `somewm -s /path/to/autostart.sh`.
 
 ## What Works Unchanged
 
-Most of your config will work without changes:
-
-- **All awful.* modules** - layouts, keybindings, rules, spawn, etc.
-- **All gears.* modules** - timers, shapes, filesystem, etc.
-- **All wibox.* widgets** - text, image, progressbar, etc.
-- **Naughty notifications**
-- **Theming** - beautiful.* properties
-- **Client rules** - `awful.rules.rules`
-- **Signals** - `client.connect_signal()`, `screen.connect_signal()`, etc.
+Keep your widget compositions, layouts, keybindings, rules, notifications and themes. Review code that depends on X11 tools, metadata or protocols against the [compatibility reference](../reference/deviations.md).
 
 ## Automatic Detection
 
-Before loading, SomeWM scans your `rc.lua` and every file it requires, and reports the X11-specific code it finds. It loads the config either way: a report is a warning, not a refusal.
+Before loading, SomeWM scans `rc.lua` and the modules it can resolve for known X11 patterns. Reports are advisory. SomeWM still tries to load the config, with a ten-second timeout before falling back if loading hangs.
 
-A config that genuinely hangs is caught by a ten second alarm on the load, after which SomeWM falls back to its own config. Run `somewm --check` to read the same report without starting the compositor.
-
-If you share a config between AwesomeWM and SomeWM, you can detect which compositor is running:
+To share a config with AwesomeWM, branch on `awesome.release`:
 
 ```lua
+local awful = require("awful")
 local is_somewm = awesome.release == "somewm"
 
 if is_somewm then
-    awful.spawn("grim ~/screenshot.png")
+    awful.spawn({ "grim", os.getenv("HOME") .. "/screenshot.png" })
 else
-    awful.spawn("scrot ~/screenshot.png")
+    awful.spawn({ "scrot", os.getenv("HOME") .. "/screenshot.png" })
 end
 ```
 
 ## Testing Your Config
 
-1. **Run the compatibility check first:**
-   ```bash
-   somewm --check ~/.config/awesome/rc.lua
-   ```
+Fix critical findings from `--check`, then [start a nested session](../tutorials/try-somewm-without-installing.md#reload-after-editing) with your config. Test shortcuts, widget updates and application rules.
 
-2. **Fix any CRITICAL issues**
+To select the config when starting SomeWM directly, with debug output:
 
-3. **Try loading the config:**
-   ```bash
-   somewm -c ~/.config/awesome/rc.lua
-   ```
-
-4. **Check debug output if needed:**
-   ```bash
-   somewm -d -c ~/.config/awesome/rc.lua 2>&1 | tee migration.log
-   ```
+```bash
+somewm -d -c ~/.config/awesome/rc.lua 2>&1 | tee migration.log
+```
 
 ## Common Migration Scenarios
 
 ### Autostart Scripts
 
-If you're spawning X11 tools on startup:
+Replace `xset r rate 200 30` with compositor settings. The delay is in milliseconds and the rate is in repeats per second:
 
 ```lua
--- X11 (problematic)
-awful.spawn.once("xset r rate 200 30")  -- Keyboard repeat
-
--- Wayland (use awful.input)
+local awful = require("awful")
 awful.input.keyboard_repeat_delay = 200
 awful.input.keyboard_repeat_rate = 30
 ```
 
 ### Status Bar with X11 Tools
 
-```lua
--- X11 (won't work)
-awful.widget.watch("xbacklight -get", 5, function(widget, stdout)
-    widget:set_text(stdout)
-end)
+Replace `xbacklight` with `brightnessctl`. Pass the command directly and parse its output in Lua:
 
--- Wayland (use brightnessctl or similar)
-awful.widget.watch("brightnessctl -m | cut -d',' -f4", 5, function(widget, stdout)
-    widget:set_text(stdout)
+```lua
+local awful = require("awful")
+local brightness = awful.widget.watch("brightnessctl -m", 5, function(widget, stdout)
+    local percent = stdout:match("(%d+)%%")
+    widget:set_text(percent and (percent .. "%") or "N/A")
 end)
 ```
 
+Install `brightnessctl` and add `brightness` to your wibar. The widget shows `N/A` if the command returns no percentage.
+
 ## Next Steps
 
-- See [Wayland vs X11](../concepts/wayland-vs-x11.md) for a deeper understanding of the differences
-- Check [AwesomeWM Compatibility](../concepts/awesomewm-compat.md) for the full compatibility matrix
-- Explore [SomeWM-only features](../reference/awful/input.md) like `awful.input`
+See [Wayland vs X11](../concepts/wayland-vs-x11.md) for platform differences and [Input Device Configuration](../guides/input-devices.md) for SomeWM's keyboard and pointer settings.

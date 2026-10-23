@@ -1,16 +1,18 @@
 ---
 sidebar_position: 2
 title: Launch
-description: Running SomeWM and essential configuration
+description: Start SomeWM 1.4, create a configuration and check startup errors.
 ---
 
 # Launch
+
+After [installing SomeWM 1.4](installation.md), select **SomeWM** in your display manager or start it from a TTY.
 
 ## Starting SomeWM
 
 ### From a Display Manager
 
-If you ran `make install-session`, select **"SomeWM"** from your display manager's session list (GDM, SDDM, etc.).
+`make install` installs the session entry. Select **SomeWM** from the session list in GDM, SDDM or another display manager.
 
 ### From a TTY
 
@@ -18,89 +20,74 @@ If you ran `make install-session`, select **"SomeWM"** from your display manager
 dbus-run-session somewm
 ```
 
-With a startup command (e.g., to launch a terminal):
+To launch a terminal after startup:
+
 ```bash
 dbus-run-session somewm -s 'alacritty'
 ```
 
-:::tip D-Bus Session
-`dbus-run-session` ensures D-Bus services (notifications, media keys, etc.) work correctly. If you're already in a D-Bus session (e.g., from a display manager), you can run `somewm` directly.
-:::
+Replace `alacritty` with an installed terminal. `dbus-run-session` provides the D-Bus session used by desktop services. If you already have one, run `somewm` directly.
 
 ## Configuration Locations
 
-SomeWM searches for configuration files in this order:
+Unless you pass `-c`, SomeWM tries these files in order:
 
-1. `~/.config/somewm/rc.lua` - Your personal config
-2. `~/.config/awesome/rc.lua` - AwesomeWM compatibility (use your existing config!)
-3. System fallback - Default config installed with SomeWM
+1. `$XDG_CONFIG_HOME/somewm/rc.lua`, or `~/.config/somewm/rc.lua` when that variable is unset
+2. `~/.config/awesome/rc.lua`
+3. The installed `etc/xdg/somewm/rc.lua`
+4. `./somewmrc.lua`, when running from the source directory
+5. The installed `share/somewm/somewmrc.lua` fallback
+
+The installed paths depend on the build prefix. A default source build uses `/usr/local`.
 
 ### First Time Setup
 
-If you don't have a config yet, SomeWM will use the default configuration. To customize:
+SomeWM uses the default configuration if you have no personal config. To customise it, run these commands from the 1.4 source directory:
 
 ```bash
-# Create config directory
-mkdir -p ~/.config/somewm
-
-# Copy default config to customize
-cp /etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
-# Or for local install:
-# cp ~/.local/etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/somewm"
+cp somewmrc.lua "${XDG_CONFIG_HOME:-$HOME/.config}/somewm/rc.lua"
 ```
 
-:::note NixOS
-The `nix-build` approach installs only binaries. Get the default config from the [source repository](https://github.com/trip-zip/somewm/blob/main/somewmrc.lua).
-:::
+For a package installation, copy the installed `etc/xdg/somewm/rc.lua` instead. The default terminal is `xterm`, which needs XWayland. Change `terminal = "xterm"` in your copy to an installed terminal, such as `alacritty`.
 
 ## Essential Keybindings
 
-The default configuration uses these keybindings (where **Mod4** is usually the Super/Windows key):
+**Mod4** is usually the Super/Windows key.
 
 | Keybinding | Action |
-|------------|--------|
+| --- | --- |
 | `Mod4 + Return` | Open terminal |
 | `Mod4 + r` | Run prompt |
 | `Mod4 + j/k` | Focus next/previous client |
 | `Mod4 + Shift + j/k` | Swap client with next/previous |
 | `Mod4 + 1-9` | View tag 1-9 |
 | `Mod4 + Shift + 1-9` | Move client to tag 1-9 |
-| `Mod4 + Space` | Toggle layout |
+| `Mod4 + Space` | Next layout |
 | `Mod4 + Shift + c` | Close focused client |
 | `Mod4 + Ctrl + r` | Reload configuration |
 | `Mod4 + Shift + q` | Quit SomeWM |
 
-:::info Full Keybinding Reference
-See [Default Keybindings](/docs/reference/default-keybindings) for the complete list.
-:::
+Press `Mod4 + s` for shortcut help, or see [Default Keybindings](../reference/default-keybindings.md).
 
 ## Troubleshooting
 
 ### "No config found" error
 
-Make sure you ran `make install` (or `make install-local`). Running SomeWM directly from the build directory won't work because Lua libraries aren't in the expected paths.
+Run `sudo make install` from your source directory. To test without installing, run `./build/somewm` from that directory so it can find `lua/` and `somewmrc.lua`.
 
 ### Config loads but crashes immediately
 
-Enable debug logging to see what's happening:
+Start with debug logging and look for `error loading` or `error executing`:
 
 ```bash
 somewm -d 2>&1 | tee somewm.log
 ```
 
-Or with full wlroots debug output:
-```bash
-WLR_DEBUG=1 somewm 2>&1 | tee somewm.log
-```
-
-Look for lines containing `error loading` or `error executing` in the log.
-
 ### Widgets not rendering
 
-This usually means LGI isn't found or is the wrong version. See [Installation - LGI Troubleshooting](/docs/getting-started/installation#lgi-troubleshooting).
+Check the log for LGI loading errors. The LGI package must match your Lua version. See [LGI Troubleshooting](installation.md#lgi-troubleshooting).
 
 ## Next Steps
 
-- **Have an existing AwesomeWM config?** See [Migrating from AwesomeWM](/docs/getting-started/migrating)
-- **Starting fresh?** Try the [Basics](/docs/tutorials/basics) tutorial
-- **Want to customize input?** See [Input Device Configuration](/docs/guides/input-devices)
+Follow [Basics](../tutorials/basics.md) to use the default desktop, or [Migrating from AwesomeWM](migrating.md) to adapt an existing config. For keyboard and pointer settings, see [Input Device Configuration](../guides/input-devices.md).

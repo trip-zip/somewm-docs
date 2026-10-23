@@ -6,52 +6,36 @@ description: Build and install SomeWM on your system
 
 # Installation
 
-:::tip Want to try first?
-You can run a sandboxed nested SomeWM inside your current Wayland or X11 session without logging out. Install the binary, then follow the [Try SomeWM Without Logging Out](../tutorials/try-somewm-without-installing.md) tutorial. Your daily-driver desktop is untouched.
-:::
+Build the `release/1.4` branch for SomeWM 1.4. After installing, you can [try it in a window](../tutorials/try-somewm-without-installing.md) before logging into it.
 
 ## Dependencies
 
-:::note wlroots
-SomeWM builds against wlroots 0.20, or 0.19 if your system is too old for 0.20. If wlroots is not installed, Meson fetches the matching version as a subproject during the build.
+You need Git, a C compiler, Make, Meson, Ninja and pkg-config, plus the libraries below.
 
-wlroots 0.20 needs wayland-server 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0, wayland-protocols 1.47 and pixman 0.46.0. Debian 13 and Ubuntu 24.04 ship older versions, so they get 0.19. An already-installed wlroots 0.20 is used regardless. Force a version with `-Dwlroots_version=0.19` or `-Dwlroots_version=0.20`.
+SomeWM 1.4 supports wlroots 0.19 and 0.20. Meson uses an installed wlroots or builds it as a subproject. It selects 0.19 when the system dependencies are too old for 0.20.
 
-The 0.19 path exists for these older distributions and will be dropped once they ship wlroots 0.20 or the dependency versions it needs.
-:::
+wlroots 0.20 requires wayland-server 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0, wayland-protocols 1.47 and pixman 0.46.0. An installed wlroots 0.20 takes priority over this dependency check. To choose explicitly, pass `MESON_OPTS=-Dwlroots_version=0.19` or `MESON_OPTS=-Dwlroots_version=0.20` to the first `make` invocation.
 
 ### Arch Linux
 
-#### From the AUR (recommended)
+#### AUR packages {#from-the-aur-recommended}
 
-```bash
-yay -S somewm-git
-# or with paru:
-paru -S somewm-git
-```
-
-This installs somewm and all dependencies. After installation, skip directly to [Launch](/docs/getting-started/first-launch).
+`somewm-git` builds the current development branch. To install 1.4, use the source build below.
 
 #### Manual Build
 
-If you prefer to build from source:
-
 ```bash
-# Required dependencies
-# Note: lua51-lgi is required for LuaJIT (the default Lua for SomeWM)
-sudo pacman -S \
-    luajit \
-    lua51-lgi \
-    cairo \
-    pango \
-    gdk-pixbuf2 \
-    wayland-protocols \
-    libinput \
-    libxkbcommon
+sudo pacman -S --needed \
+    base-devel git meson ninja pkgconf \
+    luajit lua51-lgi cairo pango gdk-pixbuf2 \
+    wayland wayland-protocols libdrm dbus glib2 \
+    libinput libxkbcommon
 
 # Optional: XWayland support
-sudo pacman -S xorg-xwayland libxcb
+sudo pacman -S xorg-xwayland libxcb xcb-util-wm
 ```
+
+`lua51-lgi` matches LuaJIT, the default Lua runtime.
 
 ### Debian/Ubuntu
 
@@ -61,6 +45,7 @@ If your release does not package wlroots 0.19 or 0.20, Meson builds wlroots from
 # Required dependencies
 sudo apt install \
     build-essential \
+    git \
     meson \
     ninja-build \
     pkg-config \
@@ -122,6 +107,7 @@ sudo apt install gir1.2-rsvg-2.0
 ```bash
 # Required dependencies
 sudo dnf install \
+    gcc make git ninja-build pkgconf-pkg-config \
     meson \
     luajit \
     luajit-devel \
@@ -148,45 +134,40 @@ sudo dnf install \
 
 ### Gentoo
 
-:::note
-SomeWM is not currently part of the official Gentoo Portage tree or the [GURU](https://wiki.gentoo.org/wiki/Project:GURU) project overlay. Use the third-party overlay below instead.
-:::
-
-SomeWM is packaged in the [somewm-gentoo-overlay](https://github.com/shuber2/somewm-gentoo-overlay):
+The [SomeWM overlay](https://github.com/shuber2/somewm-gentoo-overlay) provides a `1.4.9999` ebuild that tracks `release/1.4`. As root:
 
 ```bash
 eselect repository add somewm git https://github.com/shuber2/somewm-gentoo-overlay.git
 emaint sync -r somewm
 
-echo 'gui-wm/somewm ~amd64' >> /etc/portage/package.accept_keywords/somewm
-emerge -av gui-wm/somewm
+mkdir -p /etc/portage/package.accept_keywords
+echo '=gui-wm/somewm-1.4.9999 **' >> /etc/portage/package.accept_keywords/somewm
+emerge -av '=gui-wm/somewm-1.4.9999'
 ```
 
-This installs somewm and all dependencies, building it from source via the ebuild. After installation, skip directly to [Launch](/docs/getting-started/first-launch).
-
-A live `9999` ebuild (tracking `main`) and a `1.4.9999` ebuild (tracking the `release/1.4` branch) are also provided for those who want the latest changes.
+After installation, continue to [Launch](first-launch.md).
 
 ### NixOS
 
-A `default.nix` is provided for building on NixOS:
+From a checkout of `release/1.4`, build and run:
 
 ```bash
 nix-build
 ./result/bin/somewm
 ```
 
-The included derivation sets up LGI and `GI_TYPELIB_PATH` automatically. For custom configurations or third-party Lua libraries, see the [NixOS section](#nixos-details) below.
+The derivation wraps SomeWM with LGI and its typelib paths. See [NixOS Details](#nixos-details) to add libraries. NixOS users can skip the Make commands below.
 
 ## Build and Install
 
 ```bash
-git clone https://github.com/trip-zip/somewm
+git clone --branch release/1.4 https://github.com/trip-zip/somewm
 cd somewm
 make
 sudo make install
 ```
 
-The build will verify that LGI is correctly installed for your Lua version. If the check fails, you'll see instructions for which package to install.
+The build checks that LGI matches the selected Lua version and reports missing packages. The default install prefix is `/usr/local`.
 
 ## LGI Troubleshooting
 
@@ -197,48 +178,34 @@ SomeWM requires LGI (Lua GObject Introspection bindings) for widget rendering. *
 | LuaJIT (default) | `lua51-lgi` | `lua-lgi` | `lua-lgi` |
 | Lua 5.4 | `lua-lgi` | `lua-lgi` | `lua-lgi` |
 
-If you have the wrong package, you'll see:
-```
+A missing or mismatched LGI package can produce:
+
+```text
 module 'lgi' not found
 ```
 
 For custom LGI locations, use the `-L` (or `--search`) flag:
+
 ```bash
 somewm -L /usr/lib/lua/5.1
 ```
 
 ## NixOS Details {#nixos-details}
 
-### GI_TYPELIB_PATH and Third-Party Libraries
+<span id="gi_typelib_path-and-third-party-libraries" />
+<span id="extra-lua-modules" />
 
-On NixOS, GObject Introspection typelibs are isolated in `/nix/store` rather than system paths. The `default.nix` sets up `GI_TYPELIB_PATH` with common typelibs (pango, gdk-pixbuf, glib, gtk3).
-
-**If you use third-party Lua libraries** (like [bling](https://github.com/BlingCorp/bling)), they may require additional typelibs. For example, bling's `app_launcher` widget requires GTK3 for icon theme lookups.
-
-To add additional typelibs when packaging SomeWM, extend the wrapper:
+`package.nix` includes GTK3 typelibs by default. To add typelibs or Lua modules, save this as `custom.nix` beside `package.nix`:
 
 ```nix
-postFixup = ''
-  wrapProgram $out/bin/somewm \
-    --prefix GI_TYPELIB_PATH : "${pkgs.gtk3}/lib/girepository-1.0" \
-    --prefix GI_TYPELIB_PATH : "${pkgs.networkmanager}/lib/girepository-1.0" \
-    # Add more as needed for your Lua libraries
-'';
+{ pkgs ? import <nixpkgs> {} }:
+(pkgs.callPackage ./package.nix {}).override {
+  extraGIPackages = [ pkgs.networkmanager ];
+  extraLuaPackages = ps: [ ps.luafilesystem ];
+}
 ```
 
-### Extra Lua Modules
-
-To add additional Lua modules (like `luafilesystem`):
-
-```nix
-let
-  luaEnv = pkgs.luajit.withPackages (ps: with ps; [
-    lgi
-    luafilesystem  # Add extra modules here
-  ]);
-in
-# ... use luaEnv in buildInputs and wrapper
-```
+Run `nix-build custom.nix`. The wrapper adds the typelibs to `GI_TYPELIB_PATH` and the Lua modules to the Lua search paths.
 
 ## Uninstallation
 
@@ -252,4 +219,4 @@ make clean
 
 ## Next Steps
 
-Once installed, proceed to [Launch](/docs/getting-started/first-launch) to run SomeWM for the first time.
+Continue to [Launch](first-launch.md).
