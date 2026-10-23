@@ -1,33 +1,70 @@
 ---
 sidebar_position: 9
 title: Keyboard Layout Switching
-description: "Set several layouts with awful.input.xkb_layout, switch with a keybinding since grp:* toggle options need an X server, show the current one in the bar, and keep the static XKB options that still work."
+description: Configure multiple keyboard layouts and switch between them
 ---
 
 # Keyboard Layout Switching
 
+Configure a comma-separated list of layouts in `rc.lua`, then register a keybinding to cycle through them.
+
+## Setting Your Layout
+
 ```lua
+local awful = require("awful")
 awful.input.xkb_layout = "us,de,ru"
-awful.input.xkb_variant = ",nodeadkeys,"        -- one per layout
+awful.input.xkb_variant = ",nodeadkeys,"
 awful.input.xkb_options = "ctrl:nocaps,compose:ralt"
 ```
 
-`grp:alt_shift_toggle` and the other `grp:*` options switch nothing on Wayland: the X server used to act on the key, and here it is only a key press. Every Wayland compositor has this limit. Static options (`ctrl:nocaps`, `ctrl:swapcaps`, `compose:ralt`, `caps:escape`) work as before.
+Variant positions correspond to layout positions. Here, only German uses a variant. For one layout, set `xkb_layout = "us"` and leave `xkb_variant` empty.
 
-## Switch with a key
+## Switching Layouts
+
+<span id="switch-with-a-key" />
+
+In SomeWM 2.1, use an explicit binding instead of relying on `grp:*` toggle options. This is a SomeWM implementation limitation, not a general restriction of Wayland.
 
 ```lua
-awful.key({ "Mod1", "Shift" }, "space", function()
-    local layouts = awful.widget.keyboardlayout.get_groups_from_group_names(awesome.xkb_get_group_names())
-    local current = awesome.xkb_get_layout_group()
-    awesome.xkb_set_layout_group((current + 1) % #layouts)
-end, { description = "switch keyboard layout", group = "awesome" })
+awful.keyboard.append_global_keybindings({
+    awful.key({ "Mod1", "Shift" }, "space", function()
+        local layouts = awful.widget.keyboardlayout.get_groups_from_group_names(
+            awesome.xkb_get_group_names())
+        if not layouts or #layouts == 0 then return end
+        local current = awesome.xkb_get_layout_group()
+        awesome.xkb_set_layout_group((current + 1) % #layouts)
+    end, { description = "switch keyboard layout", group = "awesome" }),
+})
 ```
 
-With exactly two layouts, `(current + 1) % 2` is enough.
+Press **Alt+Shift+Space** to advance through the configured layouts. Group indices start at zero.
 
-## Show it in the bar
+## Displaying Current Layout
 
-`awful.widget.keyboardlayout()` is a widget that follows the active layout; put it in a wibar section like any other.
+<span id="show-it-in-the-bar" />
 
-[Input Device Configuration](input-devices.md) has the rest of `awful.input`; [awful.input reference](../reference/awful/input.md) every property.
+Create an indicator inside your screen decoration handler and add it to the existing wibar's widget layout:
+
+```lua
+local keyboard_layout = awful.widget.keyboardlayout()
+```
+
+The widget updates when the active group changes. Clicking it also cycles layouts.
+
+## XKB Options That Work
+
+Static mappings can be combined in `xkb_options`, as in the first example:
+
+| Option | Mapping |
+| --- | --- |
+| `ctrl:nocaps` | Caps Lock becomes Control |
+| `ctrl:swapcaps` | Swap Caps Lock and Control |
+| `compose:ralt` | Right Alt becomes Compose |
+| `caps:escape` | Caps Lock becomes Escape |
+
+Choose one Caps Lock mapping. Each assignment replaces the whole option string.
+
+## See Also
+
+- [Input Device Configuration](input-devices.md)
+- [Input Reference](../reference/awful/input.md)

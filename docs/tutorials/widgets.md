@@ -78,10 +78,7 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 
 local clock_icon = wibox.widget {
-    image = gears.color.recolor_image(
-        require("menubar").utils.lookup_icon_uncached("clock-symbolic") or beautiful.awesome_icon,
-        beautiful.fg_normal
-    ),
+    image = beautiful.awesome_icon,
     forced_width = 16,
     forced_height = 16,
     widget = wibox.widget.imagebox,

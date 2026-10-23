@@ -1,110 +1,102 @@
 ---
 sidebar_position: 1
 title: Basics
-description: The default desktop, the keybindings for windows, tags and layouts, and your first config edit and reload.
+description: Open and tile windows, switch tags, and change your terminal in SomeWM 2.1.
 ---
-
-import YouWillLearn from '@site/src/components/YouWillLearn';
 
 # Basics
 
-<YouWillLearn>
+Start with SomeWM 2.1's default config and an installed `foot`. Open windows, tile them, move between tags, then change the terminal shortcut.
 
-- How to read the default desktop
-- The keybindings for windows, tags and layouts
-- How to edit and reload `rc.lua`
+If SomeWM is not running yet, follow [First Launch](../getting-started/first-launch.md). To try it inside your current desktop, use [a nested session](try-somewm-without-installing.md).
 
-</YouWillLearn>
+## Open two terminals
 
-You need a running SomeWM session ([Launch](../getting-started/first-launch.md)) or a nested one in a window ([Try SomeWM without logging out](try-somewm-without-installing.md)), and a terminal. The default config uses `foot`.
+<span id="windows" />
 
-## The desktop
+Press **Mod4+Return** twice. `Mod4` is the Super or Windows key. The default layout is **tile**. One terminal occupies the master area on the left, and the other occupies the stack on the right. Open a third terminal to split the right side vertically.
 
-The bar at the top is the wibar. Left to right:
+If nothing opens, check that `foot` is installed or change `terminal` as shown below. In a nested session, use Alt instead of Super if its startup message reports a modifier remap.
 
-| Part | What it is |
-| --- | --- |
-| launcher icon | opens the main menu |
-| taglist | the five tags `dev`, `web`, `chat`, `files`, `media`; click to switch |
-| prompt area | where Mod4 + r's run prompt appears |
-| tasklist | the windows on the current tag |
-| clock | centred over the bar |
-| systray | app indicators |
-| layout icon | the current layout; rightmost |
+## Focus and resize
 
-A tag is a label on a window, not a container: a window can carry several, and a screen can show several at once.
+<span id="layouts" />
 
-## Windows
+Press **Mod4+j** and **Mod4+k** to cycle focus. The focused window gets the active border colour.
 
-Mod4 is the Super key. Press Mod4 + Return for a terminal; it fills the screen. Press it twice more: the first window keeps the left half, the master area, and the others stack on the right ([Master and Stack](../concepts/master-and-stack.md)).
+With tile selected, press **Mod4+h** to shrink the master area and **Mod4+l** to enlarge it. Press **Mod4+Shift+c** to close the focused window.
 
-| Keys | Action |
-| --- | --- |
-| Mod4 + j, Mod4 + k | focus next, previous |
-| Mod4 + Tab | last focused |
-| Mod4 + Shift + c | close; the others re-tile at once |
-| Mod4 + r | run prompt in the bar: type `firefox`, press Enter |
-| Mod4 + s | every keybinding; any key dismisses it |
+Press **Mod4+s** to view the configured shortcuts. Press Escape to close the popup.
 
-## Tags
+## Move between tags
 
-The number keys address tags by position: Mod4 + 1 is `dev`, Mod4 + 2 is `web`.
+<span id="tags" />
 
-| Keys | Action |
-| --- | --- |
-| Mod4 + 1 to 5 | view that tag |
-| Mod4 + Left, Right | previous, next tag |
-| Mod4 + Shift + 1 to 5 | move the focused window to that tag |
-| Mod4 + Ctrl + 1 to 5 | also view that tag |
+The labels `dev`, `web`, `chat`, `files` and `media` in the top bar are **tags**. Number keys select them by position. Each window belongs to one or more tags, and the screen shows windows on the selected tags.
 
-Try it: open a terminal, Mod4 + 2, open another, Mod4 + 1. The first is still there. With it focused, Mod4 + Shift + 3 moves it to `chat`; Mod4 + 3 shows it alone. Mod4 + Ctrl + 2 from `dev` tiles both tags' windows together and highlights both tags; the same keys again go back.
+1. Press **Mod4+2**. The second tag, `web`, is empty.
+2. Open a terminal there with **Mod4+Return**.
+3. Press **Mod4+1** to return to the windows on tag 1.
+4. Press **Mod4+Ctrl+2** to display tags 1 and 2 together.
+5. Press **Mod4+1** to show only tag 1 again.
 
-## Layouts
+To move the focused window to tag 2, press **Mod4+Shift+2**, then **Mod4+2** to follow it.
 
-| Keys | Action |
-| --- | --- |
-| Mod4 + Space, Mod4 + Shift + Space | next, previous layout |
-| Mod4 + l, Mod4 + h | master wider, narrower (tile, spiral, dwindle) |
+You can also click a tag in the bar.
 
-| Layout | Arrangement |
-| --- | --- |
-| tile | master left, stack right |
-| fair | equal sizes |
-| max | the focused window fills the screen |
-| floating | overlapping windows |
+## Use the bar
 
-## Mouse
+<span id="the-desktop" />
+<span id="mouse" />
 
-| Action | Effect |
-| --- | --- |
-| click a tag | view it |
-| scroll on the taglist | cycle tags |
-| Mod4 + left drag | move a window; a tiled one starts floating |
-| Mod4 + right drag | resize |
-| right-click the desktop | main menu |
+The top **wibar** contains the launcher menu, tags, run prompt, tasklist, tray, clock and layout indicator. The clock sits at the centre of the screen. Click the layout indicator to cycle layouts.
 
-## Your first edit
+Press **Mod4+r**, type an installed application's command, then press Return. The application opens on the selected tag. Escape cancels the prompt.
 
-SomeWM loads `~/.config/somewm/rc.lua`, then `~/.config/awesome/rc.lua`, then the bundled default. Start from the default:
+## Change the terminal
 
-```bash
-mkdir -p ~/.config/somewm
-cp /etc/xdg/somewm/rc.lua ~/.config/somewm/rc.lua
-```
+<span id="your-first-edit" />
 
-Near the top of the file:
+Use your own copy of the default config, as described in [First Launch](../getting-started/first-launch.md). Edit `~/.config/somewm/rc.lua` unless you chose a different configuration directory.
+
+Find:
 
 ```lua
 local terminal = "foot"
 ```
 
-Change it to `"alacritty"`, `"kitty"` or whatever you have. Save, press Mod4 + Ctrl + r to reload, then Mod4 + Return. Your terminal opens. The reload rebuilt the bar and the Lua state; your windows stayed where they were.
+Replace it with an installed terminal, for example:
 
-A broken config falls through to alternate configs; if none loads, the log reports a fatal error. The usual causes are a missing comma, a mismatched bracket, or a misspelled name.
+```lua
+local terminal = "alacritty"
+```
 
-## Next
+Save the file, then check its syntax:
 
-- [Theme](theme.md): colours, fonts and gaps
-- [Keybindings](keybindings.md): your own shortcuts
-- [Widgets](widgets.md): a widget in the bar
-- [Default Keybindings](../reference/default-keybindings.md): the complete list
+```bash
+somewm --check ~/.config/somewm/rc.lua
+```
+
+This parses the file and checks for known compatibility issues. It does not execute the config or prove that callbacks will work.
+
+Press **Mod4+Ctrl+r** to reload, then **Mod4+Return** to check the new terminal. A reload rebuilds the Lua configuration. If loading fails, SomeWM may load its fallback config, so read any error notification before continuing.
+
+## Keep these shortcuts nearby
+
+<span id="next" />
+
+| Action | Default shortcut |
+| --- | --- |
+| Open terminal | Mod4+Return |
+| Close window | Mod4+Shift+c |
+| Focus next / previous window | Mod4+j / Mod4+k |
+| Select tag | Mod4+1–5 |
+| Move window to tag | Mod4+Shift+1–5 |
+| Next / previous layout | Mod4+Space / Mod4+Shift+Space |
+| Toggle focused window floating | Mod4+Ctrl+Space |
+| Run command | Mod4+r |
+| Show shortcut help | Mod4+s |
+| Reload config | Mod4+Ctrl+r |
+| Quit SomeWM | Mod4+Shift+q |
+
+Continue with [a custom clock widget](widgets.md), [keybindings](keybindings.md), or [a theme](theme.md). The [default keybindings reference](../reference/default-keybindings.md) lists the remaining shortcuts.

@@ -6,24 +6,11 @@ description: Full enumeration of xkbcommon keysym names accepted by SomeWM
 
 # All Keysyms
 
-SomeWM resolves `awful.key` names through xkbcommon. **2629 keysyms** in 37 categories.
+The tables list 2,629 keysyms from `xkbcommon-keysyms.h`, grouped into 37 categories. Use the name shown in the first column, without the C header’s `XKB_KEY_` prefix.
 
-SomeWM resolves key names by calling `xkb_keysym_from_name()` (case-insensitive). Take any `XKB_KEY_*` name from this list, strip the `XKB_KEY_` prefix, and pass the remainder as a string.
+SomeWM resolves names case-insensitively. `"Return"` and `"return"` identify the same keysym. Availability depends on the libxkbcommon version installed with SomeWM, which can differ from the header used to generate this list.
 
-```lua
--- These are equivalent because xkb_keysym_from_name is case-insensitive:
-awful.key({ modkey }, "Return",     function() awful.spawn(terminal) end)
-awful.key({ modkey }, "return",     function() awful.spawn(terminal) end)
-
--- Multimedia and special keys use the literal XF86 name:
-awful.key({}, "XF86AudioRaiseVolume", function() ... end)
-```
-
-For the everyday key reference (modifiers, common keys, F-keys, media keys, mouse buttons), see **[Key Names](key-names.md)**.
-
-:::note Source of truth
-This page is generated from `/usr/include/xkbcommon/xkbcommon-keysyms.h` on the build host. SomeWM links against the same libxkbcommon at runtime, so the lists are identical.
-:::
+See [Key names](key-names.md) for modifiers, mouse buttons, and binding examples.
 
 <details>
 <summary>Special keysyms (2 keys)</summary>
@@ -2438,7 +2425,7 @@ This page is generated from `/usr/include/xkbcommon/xkbcommon-keysyms.h` on the 
 | `XF86Open` | `0x1008ff6b` | Open |
 | `XF86Option` | `0x1008ff6c` | ?? |
 | `XF86Paste` | `0x1008ff6d` | Paste |
-| `XF86Phone` | `0x1008ff6e` | Launch phone; dial number |
+| `XF86Phone` | `0x1008ff6e` | Launch phone and dial number |
 | `XF86Q` | `0x1008ff70` | Compaq's Q - don't use |
 | `XF86Reply` | `0x1008ff72` | Reply e.g., mail |
 | `XF86Reload` | `0x1008ff73` | Reload web page, file, etc. |
@@ -2916,8 +2903,8 @@ This page is generated from `/usr/include/xkbcommon/xkbcommon-keysyms.h` on the 
 
 ## See Also
 
-- [Key Names](key-names.md) – Curated reference for everyday bindings
-- [Keybindings Tutorial](../tutorials/keybindings.md) – Learn how to bind keys
+- [Key Names](/docs/next/reference/key-names) – Curated reference for everyday bindings
+- [Keybindings Tutorial](/docs/next/tutorials/keybindings) – Learn how to bind keys
 - [xkbcommon documentation](https://xkbcommon.org/doc/current/group__keysyms.html) – Upstream API reference
 
 <!-- generator: scripts/generate-keysyms.mjs | header: /usr/include/xkbcommon/xkbcommon-keysyms.h | regenerate with `npm run generate:reference` -->

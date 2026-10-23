@@ -72,7 +72,7 @@ A `request::*` signal asks handlers to do something. Many client requests have a
 
 To replace a default, disconnect the function that implements it, then connect your replacement. [Replacing a default handler](../guides/replace-default-handler.md) gives complete examples. There is no general cancellation return value for signals: returning `false` from an ordinary handler does not stop the others.
 
-Request arguments vary. `request::activate` supplies a client, a context string and a hints table. `request::tag` supplies a client, a tag and hints. Check the [reference](../reference/signals.md#requests) before writing a handler.
+Request arguments vary. `request::activate` supplies a client, a context string and a hints table. `request::tag` supplies a client, a tag or `true` for sticky state, and hints. Check the [reference](../reference/signals.md#requests) before writing a handler.
 
 ## Startup order
 

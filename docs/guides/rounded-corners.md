@@ -4,11 +4,11 @@ title: Rounded Corners
 description: Round client corners with a rule, remove the square border, and try a radius on open windows without reloading.
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Rounded Corners <SomewmOnly />
 
-SomeWM 2.1 draws rounded corners on Wayland clients through `client.shape`.
+Set `client.shape` in a rule to round window corners.
 
 ## Set a rule
 
@@ -37,11 +37,9 @@ end)
 
 ## Remove the square border
 
-- Set `border_width = 0` on rounded clients.
-- SomeWM subtracts the border width from the corner radius, down to zero.
-- The border is a plain rectangle around the rounded window. A 2px theme border makes the outer corners look square.
-- A border width set by a rule or by hand is kept when focus changes.
-- Without a border, a click in a cut corner reaches what is below the window.
+Set `border_width = 0` to remove the rectangular border around rounded clients. Otherwise, SomeWM subtracts the border width from the corner radius, down to zero. Explicit border widths survive focus changes.
+
+Without a border, a click in a cut corner reaches what is below the window.
 
 ## Keep titlebars
 

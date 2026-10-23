@@ -4,17 +4,11 @@ title: Shadows
 description: Compositor-level shadow support for clients and wiboxes
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Shadows <SomewmOnly />
 
-SomeWM provides built-in compositor-level shadows for windows and wiboxes. This replaces the need for external compositors like picom, which only work on X11.
-
-Shadows are rendered using a smoothstep gradient falloff, displayed via the wlroots scene graph. They support full customization including color, blur radius, offset, and opacity.
-
-:::note What gets shadows?
-This feature applies to **clients** (application windows) and **drawins/wiboxes** (containers like panels and popups). Individual widgets inside a wibox do not get separate shadows. A widget cannot draw one itself either: a widget that paints with cairo is left out of the tree ([AwesomeWM widgets in that model](../concepts/widgets-in-the-tree.md)). Widget-level depth is composed from stock widgets: a `wibox.container.background` with a darker `bg`, a `border_width` and a `shape` behind another.
-:::
+The compositor draws shadows around clients and drawins, including wiboxes and popups. Widgets inside a wibox do not get separate compositor shadows.
 
 ## Theme Variables
 
@@ -28,16 +22,14 @@ These control shadows for application windows (clients):
 |----------|------|---------|-------------|
 | `shadow_enabled` | boolean | `false` | Enable shadows globally for clients |
 | `shadow_radius` | integer | `12` | Blur radius in pixels |
-| `shadow_offset_x` | integer | `-15` | Horizontal offset (negative = left/behind window) |
-| `shadow_offset_y` | integer | `-15` | Vertical offset (negative = up/behind window) |
+| `shadow_offset_x` | integer | `-15` | Horizontal offset (negative = left) |
+| `shadow_offset_y` | integer | `-15` | Vertical offset (negative = up) |
 | `shadow_spread` | integer | `0` | Grow the shadow by this many pixels on every side before the blur |
 | `shadow_corner_radius` | integer | `0` | Round the shadow's corners by this many pixels |
 | `shadow_opacity` | number | `0.75` | Shadow opacity (0.0 = invisible, 1.0 = solid) |
 | `shadow_color` | string | `"#000000"` | Shadow color as `"#RRGGBB"` or `"#RRGGBBAA"` (alpha multiplies opacity) |
 
-:::note
-`shadow_clip` from 2.0 is still accepted but has no effect since 2.1. The shadow is drawn at its offset and fades out on every side; sides fully covered by the window are simply not visible.
-:::
+`shadow_clip` and per-object `clip_directional` are accepted but have no effect in 2.1. Shadows fade on every side. Content hides the portions behind it.
 
 ### Drawin/Wibox Shadow Variables
 
@@ -57,7 +49,7 @@ These control shadows for drawins and wiboxes (panels, popups, notifications). I
 ### Theme Example
 
 ```lua
--- In your theme.lua
+local theme = {}
 
 -- Enable shadows for all windows
 theme.shadow_enabled = true
@@ -85,7 +77,7 @@ When set to a boolean:
 - `true` - Enable shadow using theme defaults
 - `false` - Disable shadow for this client
 
-When set to a table, you can override individual shadow parameters:
+Each assignment starts from theme defaults, not the previous override. A table enables the shadow unless `enabled = false`. Assigning `nil` disables it.
 
 | Option | Type | Description |
 |--------|------|-------------|
@@ -96,7 +88,7 @@ When set to a table, you can override individual shadow parameters:
 | `spread` | integer | Grow the shadow by this many pixels on every side before the blur |
 | `corner_radius` | integer | Round the shadow's corners by this many pixels |
 | `opacity` | number | Shadow opacity (0.0-1.0) |
-| `color` | string or table | Color as `"#RRGGBB"`/`"#RRGGBBAA"` string or `{r, g, b, a}` table (values 0.0-1.0); alpha multiplies opacity |
+| `color` | string or table | Color as `"#RRGGBB"`/`"#RRGGBBAA"` string or `{r, g, b, a}` table (values 0.0-1.0). Alpha multiplies opacity |
 
 **Examples:**
 
@@ -128,9 +120,7 @@ c.shadow = {
 
 ### Reading Shadow Configuration
 
-When reading `client.shadow`, you receive:
-- `false` if shadows are disabled
-- A table with all current shadow settings if enabled
+Reading `client.shadow` returns `false` when disabled, or a table of the current settings when enabled.
 
 ```lua
 local s = c.shadow
@@ -146,7 +136,7 @@ end
 
 ### drawin.shadow
 
-Drawins and wiboxes accept the client shadow settings; wibox shadow signals fire on `wibox.drawin`.
+The `shadow` property on drawins and wiboxes works identically to the client shadow property.
 
 **Type:** `boolean` or `table`
 
@@ -165,7 +155,7 @@ local mywibox = wibox {
 
 -- Popup with custom shadow
 local popup = awful.popup {
-    widget = mytextbox,
+    widget = wibox.widget.textbox("Popup"),
     shadow = {
         radius = 16,
         opacity = 0.8
@@ -188,11 +178,12 @@ local notification_box = wibox {
 
 ### property::shadow
 
-Emitted on clients and drawins; connect through `wibox.drawin` for a wibox.
+Emitted when the shadow property changes on a client or drawin.
 
 ```lua
 client.connect_signal("property::shadow", function(c)
-    if c.shadow then
+    local shadow = c.shadow
+    if shadow then
         print(c.name .. " now has shadows enabled")
     end
 end)
@@ -200,35 +191,33 @@ end)
 
 ## Using Rules
 
-`shadow` is settable from `ruled.client` like any client property:
+<span id="runtime-control" />
+
+[Client rules](../guides/client-rules.md) accept a `shadow` property. Rules apply when a client is managed, not every time `floating` or `fullscreen` changes.
+
+## Dynamic Control
+
+`awesome.shadow_reload()` rereads `beautiful.shadow_*` defaults and updates existing shadows. Per-object overrides remain in effect.
 
 ```lua
-ruled.client.append_rule {
-    rule = { class = "mpv" },
-    properties = { shadow = false }  -- No shadows on video players
-}
+local beautiful = require("beautiful")
+beautiful.shadow_enabled = true
+awesome.shadow_reload()
 ```
 
-## Runtime Control
+## Complete Example
 
-`shadow` is writable at runtime on any client or drawin, including over IPC:
-
-```bash
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { radius = 24, opacity = 0.5 } end'
-```
-
-The [Shadows guide](../guides/shadows.md) has tested recipes (drop shadows, halos, glows, per-window rules) ready to copy.
+See [Configure shadows](../guides/shadows.md) for theme settings, rules, and runtime changes.
 
 ## Technical Notes
 
 - The shadow is the window's frame grown by `spread`, moved by the offset, rounded by `corner_radius`, fading out over `radius` pixels on every side
-- It is rendered as a nine-patch (4 corner patches, 4 stretched edge strips, solid interior), so resizing never re-renders textures
-- Each shadow renders its own tiny gradient textures (a few KB total)
+- It is rendered as a nine-patch (4 corner patches, 4 stretched edge strips, solid interior), so resizing reuses the patches
 - The falloff uses a smoothstep function that visually approximates Gaussian blur
 - Shadow nodes are placed below content in the wlroots scene graph
 
 ## See Also
 
-- [How-To: Shadows](../guides/shadows.md) - Practical guide for common shadow configurations
-- [Theme Tutorial](../tutorials/theme.md) - Introduction to theming
-- [Beautiful Theme Variables](beautiful/theme-variables.md) - All theme variables
+- [How-To: Shadows](/docs/next/guides/shadows) - Practical guide for common shadow configurations
+- [Theme Tutorial](/docs/next/tutorials/theme) - Introduction to theming
+- [Beautiful Theme Variables](/docs/next/reference/beautiful/theme-variables) - All theme variables

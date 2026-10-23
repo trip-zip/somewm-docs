@@ -4,13 +4,11 @@ title: Signals Reference
 description: Signals emitted by SomeWM and the AwesomeWM Lua libraries
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Signals Reference
 
-SomeWM is event-driven. The compositor and the AwesomeWM Lua libraries emit signals at lifecycle points; your `rc.lua` connects handlers to react. For the model behind signals (what they are, when C fires them, the `request::*` pattern, default handlers, ordering), see [Signals (concepts)](../concepts/signals.md).
-
-Signals are grouped by the class or module that emits them.
+Signals are grouped by the object or module that emits them. See [signal concepts](../concepts/signals.md) for connecting handlers and replacing defaults.
 
 ## Dispatch
 
@@ -29,51 +27,39 @@ Currently queued:
 - Layer shell: `property::layer`, `property::anchor`, `property::exclusive_zone`, `property::keyboard_interactive`, `property::margin`
 - Globals: `xkb::map_changed`, `xkb::group_changed`, `idle::stop`, `dpms::on`, `spawn::timeout`, `spawn::completed`, `switch::toggle`, `screen::focus`, `client::map`, `client::unmap`, `client::property::geometry`
 
-The output and screen entries cover changes the compositor makes on its own: a monitor being
-plugged or unplugged, or an external tool like `wlr-randr` or `kanshi` changing output state.
-The equivalent changes made from Lua stay synchronous, so `screen.fake_add`, `screen.fake_remove`
-and `s:swap(...)` still deliver `list` inline (`s:swap` delivers `swapped` inline too),
-`screen.primary = s` still delivers `primary_changed` inline, and `awesome.dpms_on()` still
-delivers `dpms::on` inline. `property::workarea` splits differently: the emitter driven by wibar
-and client struts stays inline, so a wibar appearing notifies Lua immediately; only the
-screen-geometry path queues, so it arrives after the `property::geometry` it follows.
+Dispatch depends on the emitter, not only the signal name. Every Lua `emit_signal()` runs inline. These C paths also run inline:
 
-`property::geometry` appears on both `client` and `screen`. The screen version carries the
-previous geometry as a second argument; the client version carries none.
+| Path | Signals |
+| --- | --- |
+| Client lifecycle | `request::manage`, `request::unmanage`, `scanning`, `scanned` |
+| Client requests and scalar properties | `request::geometry`, `property::name`, `property::fullscreen`, and other properties absent from the queue list |
+| Screen lifecycle | `added`, `removed`, `request::focus_restore` |
+| Lua screen operations | `fake_add`/`fake_remove` deliver `list`, `swap` delivers `list` and `swapped`, setting `screen.primary` delivers `primary_changed` |
+| Output teardown | `removed`, and `property::screen` when detaching the screen |
+| Lua output setters | Property notifications from the setter, apart from the queued screen geometry updates it causes |
+| Input and layer lifecycle | Key/button and grabber callbacks, layer manage/unmanage and keyboard requests |
+| Idle, power, and sleep | `idle::start` before its timeout callback, `awesome.dpms_on()` notifications, `logind::prepare_sleep` before suspend |
 
-Everything else C emits, and every Lua-emitted signal, dispatches synchronously. The notable
-synchronous survivors are `request::manage` and `request::unmanage`, screen `added` and
-`removed`, output `removed` (and output `property::screen` when the screen is detached),
-`request::geometry`, and the client scalar properties such as `property::name`
-and `property::fullscreen`. `request::focus_restore`, `scanning`, `scanned`,
-layer-surface lifecycle and keyboard requests, key and button callbacks,
-grabber callbacks and D-Bus method handlers also run synchronously.
+Wibar changes take effect during layout. `property::workarea` is queued after Clay solves the new workarea, not emitted inline by the wibar setter.
 
-Two signals stay synchronous because a queued one would arrive too late to be useful.
-`idle::start` is emitted just before your `awesome.set_idle_timeout` callback runs, so it has to
-reach you first. `logind::prepare_sleep` is your window to lock the screen before the machine
-suspends, and the event loop may stop before the next drain.
-
-Signals queued against a screen or output that is then removed are dropped rather than
-delivered, because a torn-down screen or output reports itself invalid. Reading any property
-other than `valid` on one raises `invalid object`, and `screen[s]` returns nil for it.
+D-Bus method handlers also run inline. `request::tag` and `request::select` are Lua-emitted and synchronous.
 
 ### State before a queued handler runs
 
-The object may expose its new state before a queued handler updates a Lua cache. Immediately after a focus change, `client.focus` can name the new client while `awful.client.focus.history.get` and `history.previous` still reflect the previous focus event. Timer, IPC, D-Bus and keybinding callbacks can observe this interval. Code that needs the handler's result should defer that read until after the queue drains, for example with `gears.timer.delayed_call`.
+The queue drains before `refresh` and layout. An object's state can change before its queued handlers run. For example, `client.focus` may already name the new client while focus history still reflects the previous event. Use `gears.timer.delayed_call()` when a read needs to follow those handlers.
 
-The queue drains before `refresh` and the layout pass. XKB change signals also use the queue, so caches updated by their handlers may lag the keyboard state until that drain. Lua-emitted `request::tag` and `request::select` do not use this queue.
+Queued arguments retain their emitted values, but reading the object returns its current state. Events for screens or outputs removed before delivery are dropped. Only `valid` remains readable on these invalid objects, and `screen[s]` returns nil for a removed screen.
 
 ## `client` signals
 
-Emitted on the `client` class. Connect with `client.connect_signal("name", handler)` (no `c` argument: handlers receive whichever client the signal was emitted on).
+Connect with `client.connect_signal("name", handler)`. Instance signals pass the client as the first argument. Class signals such as `scanning` do not.
 
 ### Lifecycle
 
 | Signal | Args | Notes |
 |--------|------|-------|
-| `request::manage` | `c, context, hints` | A new client wants to be managed. Default handlers (in `awful.permissions`, `ruled.client`) tag it, place it, and apply rules. Connect after default handlers run if you want to read post-rule properties. `context` is `"new"` or `"startup"`. |
-| `request::unmanage` | `c, context, hints` | The client is going away. Default handlers do final cleanup. `context` is `"user"`, `"reparented"`, or `"destroyed"`. Don't access geometry or screen; they may already be invalid. |
+| `request::manage` | `c, context, hints` | A new client wants to be managed. Default handlers (in `awful.permissions`, `ruled.client`) tag it, place it, and apply rules. Class-handler connection order does not guarantee execution order. Use a rule callback to read post-rule properties. `context` is `"new"` or `"startup"`. |
+| `request::unmanage` | `c, context, hints` | The client is going away. Default handlers do final cleanup. `context` is `"user"`, `"reparented"`, or `"destroyed"`. The client is still valid and its geometry and screen are readable, but its tags have already been detached. |
 | `scanning` | none | Compositor is enumerating already-running clients before any are managed. `ruled.client` emits `request::rules` from here. |
 | `scanned` | none | Initial scan is complete. Fires before `awesome.startup` callbacks. |
 
@@ -94,30 +80,30 @@ Each `property::*` fires after the property changes. Read the new value off the 
 |--------|-------|
 | `property::shape` | Client shape changed. |
 | `property::animation` | Animation policy assigned. |
-| `property::size_hints` | Size hints changed, including Wayland committed min/max bounds. |
+| `property::size_hints` | Size hints changed, including committed Wayland min/max bounds. |
 | `property::border_color` | Border colour changed, including focus recolouring. |
 | `property::name` | Title changed. |
-| `property::class` | Class changed (rare; usually only at startup). |
+| `property::class` | Class changed (usually at startup). |
 | `property::geometry` | Size or position changed. |
 | `property::floating` | Floating state toggled. |
 | `property::fullscreen` | Fullscreen toggled. |
 | `property::ontop` | Above-everything layer toggled. |
 | `property::above` | Above-normal layer toggled. |
 | `property::below` | Below-normal layer toggled. |
-| `property::urgent` | Urgency hint changed. Check `c.urgent` inside the handler; fires for both `true` and `false`. |
+| `property::urgent` | Urgency hint changed. Check `c.urgent` inside the handler. Fires for both `true` and `false`. |
 
 ### Requests
 
-`request::*` signals ask handlers to do something. The default handler usually lives in `awful.permissions` and ships with sensible defaults; replace it by `disconnect_signal` plus your own `connect_signal`. See [Replacing a default handler](../guides/replace-default-handler.md).
+`request::*` signals ask handlers to do something. Replace a default handler by disconnecting it and connecting your replacement. See [Replacing a default handler](../guides/replace-default-handler.md).
 
 | Signal | Args | Notes |
 |--------|------|-------|
 | `request::activate` | `c, context, hints` | Something asked for the client to become active (focused/raised). Default handler in `awful.permissions.activate`. |
 | `request::titlebars` | `c, context, hints` | Client should grow titlebars. Connect to draw them (or skip drawing to opt out). |
 | `request::geometry` | `c, context, hints` | Client (or another module) asked to be moved/resized. `context` says why (`"maximized_horizontal"`, `"fullscreen"`, etc.). |
-| `request::tag` | `c, tag, hints` | Client needs a tag (after creation, after losing its screen). Default handler: `awful.permissions.tag`. `hints.reason` can be `"screen"`, `"screen-removed"`, `"rules"`. |
-| `request::border` | `c, context, hints` | Client wants its border restyled. Default handler: `awful.permissions.update_border`. `context` is one of `"added"`, `"active"`, `"inactive"`, `"floating"`, `"urgent"`. |
-| `request::urgent` | `c` | Urgency hint set. Fires alongside `property::urgent`. |
+| `request::tag` | `c, tag_or_true, hints` | Client needs a tag (after creation, after losing its screen). Default handler: `awful.permissions.tag`. A true second argument requests sticky state. `hints.reason` can be `"screen"`, `"screen-removed"`, `"rules"`. |
+| `request::border` | `c, context, hints` | Client wants its border restyled. Default handler: `awful.permissions.update_border`. `context` is one of `"added"`, `"active"`, `"inactive"`, `"floating"`, `"urgent"`, `"maximized"`, `"fullscreen"`. |
+| `request::urgent` | `c, urgent` | Application requested an urgency change. The default handler decides whether to set `c.urgent`. |
 | `request::default_keybindings` | `context` (string) | Class signal emitted once at startup. Connect to register default keybindings via `awful.keyboard.append_client_keybindings`. |
 | `request::default_mousebindings` | `context` (string) | Class signal emitted once at startup. Connect to register default mousebindings via `awful.mouse.append_client_mousebindings`. |
 
@@ -129,9 +115,9 @@ Each `property::*` fires after the property changes. Read the new value off the 
 | `removed` | `s` | Output disconnected. Tags on this screen will get `request::screen` next. |
 | `request::desktop_decoration` | `s` | Screen needs tags and wibars. Your handler creates them. See [Tag Persistence](tag-persistence.md). |
 | `request::wallpaper` | `s` | Screen wants its wallpaper drawn. The default handler builds it with `awful.wallpaper`. |
-| `request::focus_restore` | `s` | Something that had focus went away (client closed, layer surface dismissed, session unlocked, monitor disconnected). Default handler: `awful.permissions.focus_restore`, which activates the most recent visible client from focus history. If no handler focuses a client, C focuses the topmost client on the monitor. <SomewmOnly /> |
-| `property::geometry` | `s` | Screen geometry changed (resolution or layout). |
-| `property::workarea` | `s` | Workarea (geometry minus struts) changed. Fires when wibars appear or resize. |
+| `request::focus_restore` | `s` | Something that had focus went away (client closed, layer surface dismissed, session unlocked, monitor disconnected). Default handler: `awful.permissions.focus_restore`, which activates the most recent visible client from focus history. If no handler focuses a client, C tries the topmost eligible client on the monitor. <SomewmOnly /> |
+| `property::geometry` | `s, old_geometry` | Screen geometry changed (resolution or layout). |
+| `property::workarea` | `s, old_workarea` | Workarea (geometry minus struts) changed. Fires when wibars appear or resize. |
 | `property::scale` | `s` | Output scale changed. <SomewmOnly /> |
 | `property::inspector` | `s` | Inspector opened or closed. <SomewmOnly /> |
 | `property::outputs` | `s` | Output metadata (model, make, refresh) changed. |
@@ -155,7 +141,7 @@ Module-level signals on `ruled.client`. Connect with `ruled.client.connect_signa
 
 | Signal | Args | Notes |
 |--------|------|-------|
-| `request::rules` | none | Fires once on `client.scanning`, after all modules are loaded but before any client is managed. Append rules to `ruled.client.rules` here so every module gets a chance before client matching begins. See [Defer startup with `request::rules`](../guides/defer-startup-with-request-rules.md). |
+| `request::rules` | none | Fires once on `client.scanning`, after all modules are loaded but before any client is managed. Call `ruled.client.append_rule()` here before client matching begins. See [Defer startup with `request::rules`](../guides/defer-startup-with-request-rules.md). |
 
 ## `ruled.notification` signals
 
@@ -163,7 +149,7 @@ Module-level signals on `ruled.notification`.
 
 | Signal | Args | Notes |
 |--------|------|-------|
-| `request::rules` | none | Same shape as `ruled.client` `request::rules`. Append entries to `ruled.notification.rules`. |
+| `request::rules` | none | Fires from `awesome.startup`. Register rules with `ruled.notification.append_rule()`. |
 
 ## `naughty` signals
 
@@ -180,7 +166,7 @@ See the [naughty reference](naughty/index.md) for the full set.
 
 | Signal | Args | Notes |
 | --- | --- | --- |
-| `property::scroll_factor` | `layout, factor` | Fires after a frame applies a changed scroll factor, including wheel input and content or viewport changes. |
+| `property::scroll_factor` | `layout, factor` | A frame applied a changed scroll factor, including wheel input and content or viewport changes. |
 
 ## Layer surface signals <SomewmOnly />
 
@@ -226,33 +212,18 @@ Global signals on `awesome.*`. Connect with `awesome.connect_signal(...)`.
 |--------|------|-------|
 | `startup` | none | SomeWM finished starting. Fires after `client.scanned`. Safe to assume all default handlers are connected. |
 | `exit` | `restart` (boolean) | SomeWM is shutting down. `restart` is `true` for a Lua hot reload in the same process. |
-| `refresh` | none | About to redraw. Avoid expensive work in this handler; it fires often. |
+| `refresh` | none | About to redraw. Avoid expensive work in this handler. It fires often. |
 | `debug::error` | `msg` | An uncaught Lua error occurred. Default handler logs to stderr. |
 
 ## Example usage
 
 ```lua
--- React to new clients
-client.connect_signal("request::manage", function(c, context, hints)
-    if c.floating then
-        awful.placement.centered(c)
-    end
-end)
+local gears = require("gears")
 
--- Add rules late, from a module
-ruled.client.connect_signal("request::rules", function()
-    ruled.client.append_rule {
-        rule = { class = "Firefox" },
-        properties = { tag = screen.primary.tags[2] },
-    }
-end)
-
--- Set default layouts at startup
-tag.connect_signal("request::default_layouts", function()
-    awful.layout.append_default_layouts {
-        awful.layout.suit.tile,
-        awful.layout.suit.floating,
-    }
+client.connect_signal("focus", function(c)
+    gears.timer.delayed_call(function()
+        if c.valid then print(c.name) end
+    end)
 end)
 ```
 

@@ -8,7 +8,7 @@ description: Complete list of default keyboard shortcuts
 
 All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 
-Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press `Mod4 + s` in a running session for the live list.
+These bindings come from the shipped [2.1.0 config](https://github.com/trip-zip/somewm/blob/v2.1.0/somewmrc.lua). Press `Mod4 + s` in a running session for the live list.
 
 ## Launcher
 
@@ -44,8 +44,8 @@ Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press
 | Keybinding | Action |
 |------------|--------|
 | `Mod4 + Space` | Next layout |
-| `Mod4 + numpad key` | Select the layout at that key’s index, if present |
 | `Mod4 + Shift + Space` | Previous layout |
+| `Mod4 + Numpad 1-9` | Select layout by index |
 | `Mod4 + h` | Decrease master width |
 | `Mod4 + l` | Increase master width |
 | `Mod4 + Shift + h` | Increase master count |
@@ -64,6 +64,8 @@ Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press
 | `Mod4 + Left/Right` | View previous/next tag |
 | `Mod4 + Escape` | Go back to previous tag |
 | `Mod4 + Shift + r` | Rename current tag |
+
+The default config creates five tags. Bindings for 6–9 do nothing until those tags exist.
 
 ## Screens
 
@@ -92,8 +94,8 @@ Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press
 
 | Keybinding | Action |
 |------------|--------|
-| `Print` | Screenshot full output |
-| `Shift + Print` | Screenshot region |
+| `Print` | Screenshot all outputs with `grim` |
+| `Shift + Print` | Screenshot a selected region with `slurp` and `grim` |
 | `Mod4 + Ctrl + p` | Interactive screenshot (region/window) |
 
 ## Media Keys
@@ -106,6 +108,8 @@ Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press
 | `XF86AudioMicMute` | Mute microphone |
 | `XF86MonBrightnessUp` | Raise brightness |
 | `XF86MonBrightnessDown` | Lower brightness |
+
+Audio shortcuts require `wpctl`, brightness shortcuts require `brightnessctl`, Print requires `grim`, and Shift+Print also requires `slurp`.
 
 ## Session
 
@@ -122,10 +126,21 @@ Source: `somewmrc.lua` in the SomeWM repository. Last synced: `6de5e1ef3`. Press
 |---------|--------|
 | `Mod4 + Left Click` (drag) | Move client |
 | `Mod4 + Right Click` (drag) | Resize client |
+| `Left Click` on client | Activate client |
+| `Right Click` on desktop | Main menu |
+| Scroll on desktop | Cycle tags |
 | `Click on tag` | View tag |
+| `Mod4 + Left Click` on tag | Move focused client to tag |
+| `Right Click` on tag | Toggle tag view |
+| `Mod4 + Right Click` on tag | Toggle focused client on tag |
 | `Scroll on taglist` | Cycle tags |
+| Left-click tasklist entry | Activate client, or minimise it if focused |
+| Right-click tasklist | Client menu |
+| Scroll on tasklist | Previous/next client |
+| Left/right-click layoutbox | Next/previous layout |
+| Scroll up/down on layoutbox | Previous/next layout |
 
 ## See Also
 
-- [Keybindings Tutorial](../tutorials/keybindings.md)
+- [Keybindings Tutorial](/docs/next/tutorials/keybindings)
 - [AwesomeWM Key Docs](https://awesomewm.org/doc/api/libraries/awful.key.html)

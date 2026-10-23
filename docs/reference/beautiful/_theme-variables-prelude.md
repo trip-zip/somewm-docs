@@ -5,7 +5,7 @@ Edits to this file are picked up on the next `npm run generate:reference`.
 
 ## Quick-Start Variables
 
-The handful of variables every theme sets. Each is also listed in its module section below.
+Common theme values. Widgets read them as defaults unless configured otherwise.
 
 | Variable | Type | Description |
 | --- | --- | --- |
@@ -26,8 +26,7 @@ The handful of variables every theme sets. Each is also listed in its module sec
 
 Standard X cursor names like `"left_ptr"`, `"fleur"`, `"cross"`, `"watch"` are accepted.
 
-:::tip Cursor theme
-Set the cursor theme via environment variables before launching:
+Set the cursor theme before launching:
 
 ```bash
 export XCURSOR_THEME="Adwaita"
@@ -42,7 +41,6 @@ root.cursor_theme("Adwaita")
 root.cursor_size(32)
 ```
 
-See [Input Devices: Cursor Theming](../../guides/input-devices.md#cursor-theming).
-:::
+See [cursor theming](../../guides/input-devices.md#cursor-theming).
 
 ---

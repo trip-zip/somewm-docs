@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
 title: Documentation
-description: SomeWM is a wlroots compositor that runs AwesomeWM's Lua API on Wayland. SomeWM 2.2 is in development; 2.1 is the current release.
+description: Build your own Wayland desktop with Lua widgets, window layouts, tags and rules.
 ---
 
 # SomeWM Documentation
 
-SomeWM is a Wayland compositor configured in Lua. You can build your own bars, widgets, popups and window layouts. In 2.1, widgets describe their content and sizing rules. SomeWM calculates placement and draws them. Your Lua code controls their data and behaviour.
+SomeWM is a programmable Wayland compositor built on AwesomeWM's Lua configuration model. Its widget system lets you build the desktop itself: bars, launchers, popups, titlebars and notifications. Make a clock open a calendar, build a control panel for your system, or write your own window layout. Start with the supplied configuration and add what you need.
 
 ## Start here
 
@@ -43,8 +43,11 @@ Start with [configuration basics](tutorials/basics.md) if you have not edited `r
 
 ## Concepts
 
-[How SomeWM draws](concepts/how-somewm-draws.md) and [Reading the tree](concepts/reading-the-tree.md) are the 2.1 model; [The Object Model](concepts/object-model.md), [Architecture](concepts/architecture.md) and [Signals](concepts/signals.md) the Lua side; [Why SomeWM](concepts/why-somewm.md), [AwesomeWM Compatibility](concepts/awesomewm-compat.md) and [Wayland vs X11](concepts/wayland-vs-x11.md) the relationship to AwesomeWM.
+- [How SomeWM draws](concepts/how-somewm-draws.md): layout and rendering
+- [Reading the tree](concepts/reading-the-tree.md): inspect layout results
+- [The Object Model](concepts/object-model.md), [Architecture](concepts/architecture.md), and [Signals](concepts/signals.md): objects and configuration
+- [Why SomeWM](concepts/why-somewm.md), [AwesomeWM Compatibility](concepts/awesomewm-compat.md), and [Wayland vs X11](concepts/wayland-vs-x11.md): design and compatibility
 
 ## Versions
 
-These pages track 2.2, in development. The version switcher has 2.1, the current release, and 1.4, which mirrors AwesomeWM master and is maintained indefinitely. The [AwesomeWM apidoc](https://awesomewm.org/apidoc/) covers inherited APIs not yet documented here.
+These pages track 2.2, in development. The version switcher has 2.1, the current release, 2.0, and 1.4, which mirrors AwesomeWM master and is maintained indefinitely. The [AwesomeWM apidoc](https://awesomewm.org/apidoc/) covers inherited APIs not yet documented here.

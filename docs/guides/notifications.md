@@ -1,125 +1,195 @@
 ---
 sidebar_position: 5
 title: Notifications
-description: "ruled.notification rules per app, urgency presets, a do-not-disturb toggle that lets critical and matched messages through, theme variables, a custom widget_template, and sending from Lua."
+description: Configure desktop notifications with naughty
 ---
 
 # Notifications
 
-`naughty` is the notification daemon; nothing else needs to run. [naughty reference](../reference/naughty/index.md) has every property.
+Configure `naughty` through notification rules, theme values and the existing `request::display` handler in `rc.lua`. The examples use `local naughty = require("naughty")` and the default config's `awful` and `modkey` locals.
 
-## Rules per app
+## Filter Notifications by App
+
+<span id="rules-per-app" />
+
+Add these rules to the existing `ruled.notification` handler:
 
 ```lua
 local ruled = require("ruled")
-
 ruled.notification.connect_signal("request::rules", function()
-    ruled.notification.append_rule { rule = { app_name = "Spotify" }, properties = { timeout = 3 } }
-    ruled.notification.append_rule { rule = { app_name = "discord" }, properties = { position = "bottom_right" } }
-    ruled.notification.append_rule { rule = { app_name = "NoisyApp" }, properties = { ignore = true } }
-end)
-```
-
-[Matching fields](../reference/naughty/index.md#rule-matching-fields) and [settable properties](../reference/naughty/index.md#rule-settable-properties) list the rest. `message` and `title` take Lua patterns.
-
-## Urgency presets
-
-```lua
-naughty.config.presets.low.bg, naughty.config.presets.low.fg, naughty.config.presets.low.timeout = "#222222", "#888888", 3
-naughty.config.presets.normal.bg, naughty.config.presets.normal.fg = "#333333", "#ffffff"
-naughty.config.presets.critical.bg, naughty.config.presets.critical.fg, naughty.config.presets.critical.timeout = "#ff0000", "#ffffff", 0   -- 0 never dismisses
-```
-
-## Do not disturb
-
-```lua
-awful.key({ modkey }, "n", function()
-    naughty.suspended = not naughty.suspended
-    naughty.notification {
-        title = naughty.suspended and "Presentation Mode" or "Notifications",
-        message = naughty.suspended and "Only critical alerts will show" or "All notifications enabled",
-        timeout = 2, ignore_suspend = true,
-    }
-end, { description = "toggle presentation mode", group = "notifications" })
-```
-
-Rules decide what gets through while suspended:
-
-```lua
-ruled.notification.connect_signal("request::rules", function()
-    ruled.notification.append_rule { rule = { urgency = "critical" }, properties = { ignore_suspend = true } }
     ruled.notification.append_rule {
-        rule_any = { category = { "device.error", "network.error" } },
-        properties = { ignore_suspend = true },
+        rule = { app_name = "^Spotify$" },
+        properties = { timeout = 3 },
     }
     ruled.notification.append_rule {
-        rule = { app_name = "Signal" },
-        rule_any = { message = { "[Pp]rincipal", "[Ee]mergency" } },
-        properties = { ignore_suspend = true, bg = "#ff6600" },
+        rule = { app_name = "^discord$" },
+        properties = { position = "bottom_right" },
     }
     ruled.notification.append_rule {
-        rule = { app_name = "Slack", title = "Direct message from: CEO.*" },
-        properties = { ignore_suspend = true },
+        rule = { app_name = "^NoisyApp$" },
+        properties = { ignore = true },
     }
 end)
 ```
 
-## Theme
+Use the app name sent with the notification, which can differ from the window's class. Strings support Lua patterns. See the [naughty reference](../reference/naughty/index.md) for matching fields and properties.
+
+## Set Up Urgency Styles
+
+<span id="urgency-presets" />
+
+Inside the notification rules handler:
 
 ```lua
+ruled.notification.append_rule {
+    rule = { urgency = "low" },
+    properties = { bg = "#222222", fg = "#888888", timeout = 3 },
+}
+ruled.notification.append_rule {
+    rule = { urgency = "normal" },
+    properties = { timeout = 5 },
+}
+ruled.notification.append_rule {
+    rule = { urgency = "critical" },
+    properties = { bg = "#ff0000", fg = "#ffffff", timeout = 0 },
+}
+```
+
+A timeout of `0` disables automatic dismissal. With `ruled.notification` enabled, use rules for urgency styling. Its preset handler replaces the legacy urgency presets.
+
+## Set Up Do Not Disturb
+
+<span id="do-not-disturb" />
+
+```lua
+awful.keyboard.append_global_keybindings({
+    awful.key({ modkey }, "F9", function()
+        naughty.suspended = not naughty.suspended
+        naughty.notification {
+            title = "Notifications",
+            message = naughty.suspended and "Paused" or "Resumed",
+            timeout = 2,
+            ignore_suspend = true,
+        }
+    end, { description = "toggle notifications", group = "notifications" }),
+})
+```
+
+Suspension queues notifications. Notifications marked `ignore_suspend = true` still appear.
+
+### Let Critical Notifications Through
+
+Inside the rules handler:
+
+```lua
+ruled.notification.append_rule {
+    rule = { urgency = "critical" },
+    properties = { ignore_suspend = true },
+}
+```
+
+### Filter by Message Content
+
+To require both the application and a message pattern, put them together in `rule`:
+
+```lua
+ruled.notification.append_rule {
+    rule = { app_name = "^Signal$", message = "[Ee]mergency" },
+    properties = { ignore_suspend = true, bg = "#ff6600" },
+}
+```
+
+Combining `rule = { app_name = ... }` with `rule_any = { message = ... }` would match either condition, including other applications. For several message patterns, append one rule per pattern.
+
+## Theme Notifications
+
+<span id="theme" />
+
+In your theme file, before it is loaded by `beautiful.init()`:
+
+```lua
+local gears = require("gears")
 theme.notification_bg = "#282828"
 theme.notification_fg = "#ebdbb2"
 theme.notification_border_color = "#504945"
 theme.notification_border_width = 2
 theme.notification_width = 300
-theme.notification_max_width = 400
 theme.notification_icon_size = 48
 theme.notification_font = "monospace 10"
-theme.notification_shape = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, 8) end
+theme.notification_shape = function(cr, width, height)
+    gears.shape.rounded_rect(cr, width, height, 8)
+end
 ```
 
-[Theme Variables](../reference/beautiful/theme-variables.md#notifications) lists them all.
+See [notification theme variables](../reference/beautiful/theme-variables.md#notifications) for the full list.
 
-## A custom layout
+## Create a Custom Notification Widget
 
-`request::display` receives each notification; build its box from `naughty.widget.icon`, `title`, `message` and `naughty.list.actions` with any [wibox layout](../reference/wibox/index.md):
+<span id="a-custom-layout" />
+
+Replace the default `request::display` handler with this one. Keeping both creates two boxes for each notification.
 
 ```lua
+local naughty = require("naughty")
+local wibox = require("wibox")
 naughty.connect_signal("request::display", function(n)
     naughty.layout.box {
         notification = n,
-        type = "notification",
-        screen = awful.screen.focused(),
         widget_template = {
             {
                 {
+                    naughty.widget.icon,
                     {
-                        naughty.widget.icon,
-                        { naughty.widget.title, naughty.widget.message, spacing = 4, layout = wibox.layout.fixed.vertical },
-                        fill_space = true, spacing = 10, layout = wibox.layout.fixed.horizontal,
+                        naughty.widget.title,
+                        naughty.widget.message,
+                        spacing = 4,
+                        layout = wibox.layout.fixed.vertical,
                     },
-                    naughty.list.actions,
-                    spacing = 10, layout = wibox.layout.fixed.vertical,
+                    spacing = 10,
+                    layout = wibox.layout.fixed.horizontal,
                 },
-                margins = 10, widget = wibox.container.margin,
+                naughty.list.actions,
+                spacing = 8,
+                layout = wibox.layout.fixed.vertical,
             },
-            bg = beautiful.notification_bg, fg = beautiful.notification_fg,
-            border_width = beautiful.notification_border_width, border_color = beautiful.notification_border_color,
-            shape = beautiful.notification_shape,
-            widget = wibox.container.background,
+            margins = 10,
+            widget = wibox.container.margin,
         },
     }
 end)
 ```
 
-## From Lua
+The icon, title, message and action list receive the notification through the template. Compose them with [wibox layouts and containers](../reference/wibox/index.md).
+
+## Send Notifications from Lua
+
+<span id="from-lua" />
 
 ```lua
 naughty.notification {
-    title = "Volume Changed", message = "Volume: 50%",
-    icon = "/usr/share/icons/Adwaita/48x48/status/audio-volume-medium.png",
-    timeout = 2, urgency = "low",
+    title = "Volume",
+    message = "Volume: 50%",
+    timeout = 2,
+    urgency = "low",
 }
 ```
 
-If nothing shows, another daemon holds the D-Bus name: `pkill dunst`, `pkill mako`, `pkill swaync`, then `dbus-send --session --print-reply --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.GetServerInformation` should answer. Electron apps may need `ELECTRON_OZONE_PLATFORM_HINT=auto`.
+## Troubleshooting
+
+If application notifications do not appear, check which program owns the notification service:
+
+```bash
+dbus-send --session --print-reply \
+  --dest=org.freedesktop.Notifications \
+  /org/freedesktop/Notifications \
+  org.freedesktop.Notifications.GetServerInformation
+```
+
+Run one notification provider per D-Bus session. If another daemon owns the service, stop that daemon and remove its autostart entry before restarting your notification setup. Also check `naughty.suspended` and rules that set `ignore = true`.
+
+## See Also
+
+- [Naughty Reference](../reference/naughty/index.md)
+- [Theme Variables](../reference/beautiful/theme-variables.md)
+- [Widgets Tutorial](../tutorials/widgets.md)
+- [AwesomeWM Naughty API](https://awesomewm.org/apidoc/libraries/naughty.html)

@@ -1,24 +1,21 @@
 ---
 sidebar_position: 3
 title: Keybindings
-description: Add a global keybinding and a per-client one, reload, press them, and find them in the help popup.
+description: Add custom keyboard shortcuts to SomeWM
 ---
-
-import YouWillLearn from '@site/src/components/YouWillLearn';
 
 # Keybindings
 
-<YouWillLearn>
+Add a browser shortcut and a window-opacity toggle to the default 2.1 config. Keep its existing bindings.
 
-- The four parts of an `awful.key`
-- A global keybinding and a per-client keybinding
-- How your bindings appear in the help popup
+Open your `rc.lua`. The default file already imports `awful` and defines `modkey = "Mod4"`. Install Firefox for the browser example, or substitute an application you have.
 
-</YouWillLearn>
+## Add a global shortcut
 
-## A global keybinding
+<span id="a-global-keybinding" />
+<span id="the-help-popup" />
 
-In `rc.lua`, find `append_global_keybindings` and add:
+After the `modkey` definition, add:
 
 ```lua
 awful.keyboard.append_global_keybindings({
@@ -28,41 +25,29 @@ awful.keyboard.append_global_keybindings({
 })
 ```
 
-Mod4 + Ctrl + r reloads; Mod4 + b opens Firefox, tiled into the current tag. Every binding has the same four parts:
+Reload with **Mod4+Ctrl+r**, then press **Mod4+b**. Firefox should open. Press **Mod4+s** and find “open browser” in the launcher group.
+
+`awful.key` creates a binding. `append_global_keybindings` registers it. The arguments specify modifiers, key, callback, and help text. `{}` means no modifiers, and `{ modkey, "Shift" }` requires both keys.
+
+## Add a shortcut for the focused window
+
+<span id="a-client-keybinding" />
+<span id="next" />
+
+Find the existing `request::default_keybindings` handler. Add this entry inside its `awful.keyboard.append_client_keybindings({ ... })` table:
 
 ```lua
-awful.key(
-    { modkey },                                            -- modifiers; {} for none
-    "b",                                                   -- key ([names](../reference/key-names.md))
-    function() awful.spawn("firefox") end,                 -- runs on press
-    { description = "open browser", group = "launcher" }   -- shown in the help popup
-)
+awful.key({ modkey, "Shift" }, "o", function(c)
+    c.opacity = c.opacity == 1 and 0.8 or 1
+end, { description = "toggle opacity", group = "client" }),
 ```
 
-## A client keybinding
+Reload, focus a window, and press **Mod4+Shift+o** twice. The window should become translucent, then opaque again. The callback receives the focused client as `c`.
 
-A client binding fires only with a window focused, and that window is passed as `c`. Find `request::default_keybindings`:
+The unmodified **Mod4+o** already moves a window to another screen, so this example adds Shift to avoid that conflict.
 
-```lua
-client.connect_signal("request::default_keybindings", function()
-    awful.keyboard.append_client_keybindings({
-        awful.key({ modkey }, "o", function(c)
-            c.opacity = c.opacity == 1 and 0.8 or 1
-        end, { description = "toggle opacity", group = "client" }),
-    })
-end)
-```
+For another key, use the `sym:` name reported by `wev` on Wayland. See [key names](../reference/key-names.md) and [default bindings](../reference/default-keybindings.md) before assigning a shortcut.
 
-Reload, focus a terminal, Mod4 + o: it turns translucent, and again solid. With another window focused the same key acts on that one.
+If a shortcut does nothing, check the key name, reload the saved file, and look for duplicate bindings or an error notification. Test the application command in a terminal too.
 
-## The help popup
-
-Mod4 + s. The `launcher` group now lists "open browser" beside the defaults, and `client` lists "toggle opacity". That is what `description` and `group` are for. Any key dismisses it.
-
-If a binding does nothing: modifier names are case-sensitive, another binding may already use the key, and the config must be reloaded. A callback error shows up as a notification.
-
-## Next
-
-- [Keybinding patterns](../guides/keybinding-patterns.md): media keys, the whole number row at once, mouse bindings, bindings as data
-- [Key Names](../reference/key-names.md): every key and modifier name
-- [Widgets](widgets.md)
+To move bindings into a separate module, see [Keybinding Patterns](../guides/keybinding-patterns.md).

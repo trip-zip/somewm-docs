@@ -1,55 +1,76 @@
 ---
 sidebar_position: 2.7
 title: "Carousel: Centering"
-description: "The four centering modes, set at startup or switched at runtime, peek width, and scrolling the viewport from code."
+description: Choose and configure carousel viewport centering modes
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Carousel: Centering <SomewmOnly />
 
-The centering mode decides how the viewport follows the focused column.
+Set how the carousel viewport follows the focused column. These settings apply to both carousel orientations.
 
-| Mode | Scrolls | For |
-| --- | --- | --- |
-| `on-overflow` (default) | only when the focused column would be partly or fully off screen; then centres it | least motion with the column always fully visible |
-| `always` | every focus change centres the column | focus always in the middle |
-| `never` | only when the column is entirely off screen | the stillest viewport |
-| `edge` | the least distance that brings the column fully into view | vim's `scrolloff=0` |
+## The Four Modes
 
-```lua
-awful.layout.suit.carousel.center_mode = "always"      -- rc.lua, before tags exist
-theme.carousel_center_mode = "always"                  -- theme.lua; wins over the property
-awful.layout.suit.carousel.set_center_mode("edge")     -- at runtime; re-arranges at once
-```
+| Mode | Behaviour |
+| --- | --- |
+| `"on-overflow"` (default) | Centre the focused column when any part is offscreen. |
+| `"always"` | Centre the focused column on every arrangement. |
+| `"never"` | Scroll only when the focused column is entirely offscreen. |
+| `"edge"` | Scroll enough to bring the column into view at the nearest edge. |
 
-Bound to keys:
+## Set at Startup
+
+After requiring `awful`, set the layout property before creating tags:
 
 ```lua
-local carousel = awful.layout.suit.carousel
-for i, mode in ipairs({ "on-overflow", "always", "never", "edge" }) do
-    awful.key({ modkey, "Control" }, tostring(i), function() carousel.set_center_mode(mode) end,
-        { description = "center mode: " .. mode, group = "carousel" })
-end
+awful.layout.suit.carousel.center_mode = "always"
 ```
 
-## Peek width
+Alternatively, set `theme.carousel_center_mode = "always"` in your theme. The theme value takes priority over the layout property, including changes through `set_center_mode()`. Clear that theme value if you want the runtime setter to control centering.
 
-`peek_width` reserves that many pixels on each side of the viewport for the edges of the neighbouring columns. `useless_gap` is added on top, so the value is visible content, not total inset. 0, the default, uses the whole viewport.
+## Switch at Runtime
+
+`set_center_mode()` updates the shared setting and rearranges the focused screen if it uses carousel:
+
+```lua
+awful.layout.suit.carousel.set_center_mode("edge")
+```
+
+## Configure Peek Width
+
+<span id="peek-width" />
+
+Reserve space at both ends of the viewport to expose neighbouring columns:
 
 ```lua
 awful.layout.suit.carousel.peek_width = 40
-theme.carousel_peek_width = 40        -- wins
 ```
 
-## Scrolling from code
+Alternatively, set `theme.carousel_peek_width = 40` in your theme. The theme value takes priority. The default is `0`.
 
-`scroll_by(tag, n)` moves the viewport by `n` viewport widths without changing focus, clamped to the strip, animated over `theme.animation_layout_duration`:
+Positive peek values also include the layout gap on each side. With a gap of `8`, a peek width of `40` removes 96 logical pixels from the effective viewport. Neighbouring content may not fill all of that space.
+
+For different spacing at the strip's outer edges, use `carousel.dynamic_peek_width` or the overriding `beautiful.carousel_dynamic_peek_width` with `"edge"` or `"never"` centering. The default `-1` keeps ordinary peek spacing. See the [carousel reference](../reference/awful/carousel.md).
+
+## Programmatic Scrolling
+
+<span id="scrolling-from-code" />
+
+`scroll_by(tag, n)` moves by a fraction of the effective viewport, without changing focus:
 
 ```lua
+local carousel = awful.layout.suit.carousel
 local t = awful.screen.focused().selected_tag
-awful.layout.suit.carousel.scroll_by(t, 1)
-awful.layout.suit.carousel.scroll_by(t, -0.5)
+if t and (t.layout == carousel or t.layout == carousel.vertical) then
+    carousel.scroll_by(t, 0.5)
+end
 ```
 
-[Carousel reference](../reference/awful/carousel.md), [Gestures](carousel-gestures.md), [Scrollable Tiling](../concepts/scrollable-tiling.md).
+Positive values move right, or down for the vertical layout. Negative values move in the opposite direction. Movement is clamped to the column strip. Layout animation uses `beautiful.animation_layout_duration`, with `0` for an immediate change. A later arrangement can recalculate the offset around the focused column.
+
+## See Also
+
+- [Carousel API](../reference/awful/carousel.md)
+- [Gesture Scrolling](carousel-gestures.md)
+- [Scrollable Tiling](../concepts/scrollable-tiling.md)

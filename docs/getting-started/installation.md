@@ -6,225 +6,133 @@ description: Build and install SomeWM on your system
 
 # Installation
 
-:::tip
-SomeWM runs nested in a window on your current session, so you can try it without logging out: [Try SomeWM without installing](../tutorials/try-somewm-without-installing.md).
-:::
+Install dependencies for your distribution, then build the development version below. You can also [try SomeWM in a nested session](../tutorials/try-somewm-without-installing.md) without installing it system-wide.
 
 ## Dependencies
 
-:::note wlroots
-The build downloads wlroots 0.20.2 and builds it into SomeWM, so no wlroots package is needed and an installed one is not used. wlroots needs wayland 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0, pixman 0.46.0 and wayland-protocols 1.47 or newer. If your system has those, nothing else is built. Each one that is older is downloaded at a fixed version and built alongside wlroots; Debian 13 builds all five this way, Ubuntu 24.04 builds those five and libdisplay-info. The first build needs network access for the downloads.
+SomeWM downloads and builds wlroots 0.20.2. It does not use an installed wlroots package. The first build needs network access.
 
-XWayland support is always built in, so xcb, xcb-icccm and Xwayland are required to build, and X11 applications need the Xwayland binary at runtime.
-:::
+The build uses system Wayland 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0, pixman 0.46.0 and wayland-protocols 1.47 or newer. Older dependencies are downloaded at pinned versions and built alongside wlroots. Ubuntu 24.04 also needs the libdisplay-info fallback.
+
+XWayland support is always built in. Install its build dependencies and the Xwayland binary to run X11 applications.
 
 ### Arch Linux
 
-#### From the AUR (recommended)
+<span id="from-the-aur-recommended" />
+
+#### From the AUR
 
 ```bash
 yay -S somewm-git
-# or with paru:
-paru -S somewm-git
 ```
 
-Then go to [Launch](first-launch.md).
+`paru -S somewm-git` is an alternative. This package follows development. For a released version, use the documentation version switcher.
 
 #### Manual Build
 
 ```bash
-# Required dependencies
-# Note: lua51-lgi is required for LuaJIT (the default Lua for SomeWM)
-sudo pacman -S \
-    luajit \
-    lua51-lgi \
-    cairo \
-    pango \
-    gdk-pixbuf2 \
-    librsvg \
-    wayland-protocols \
-    libinput \
-    libxkbcommon
-
-# XWayland, required
-sudo pacman -S xorg-xwayland libxcb xcb-util-wm
+sudo pacman -S base-devel git meson ninja pkgconf luajit lua51-lgi \
+    cairo pango gdk-pixbuf2 librsvg glib2 dbus wayland wayland-protocols \
+    libinput libxkbcommon pixman libdrm seatd libdisplay-info libliftoff \
+    hwdata mesa libglvnd lcms2 xorg-xwayland libxcb xcb-util \
+    xcb-util-wm xcb-util-renderutil xcb-util-errors
 ```
-
-The wlroots build inside SomeWM needs wlroots' own build dependencies too: the packages Arch's `wlroots0.20` depends on, among them `pixman`, `libdrm`, `seatd`, `libdisplay-info`, `libliftoff`, `hwdata` and `mesa`.
 
 ### Debian/Ubuntu
 
-The build always builds wlroots from source, and on Debian 13 and Ubuntu 24.04 also wayland, libdrm, xkbcommon, pixman and wayland-protocols at the versions wlroots needs. That needs wlroots' own build dependencies as well as SomeWM's.
-
 ```bash
-# Required dependencies
-sudo apt install \
-    build-essential \
-    meson \
-    ninja-build \
-    pkg-config \
-    luajit \
-    libluajit-5.1-dev \
-    lua-lgi \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libgdk-pixbuf-2.0-dev \
-    librsvg2-dev \
-    libglib2.0-dev \
-    libwayland-dev \
-    libwayland-bin \
-    wayland-protocols \
-    libdrm-dev \
-    libdbus-1-dev \
-    libinput-dev \
-    libxkbcommon-dev \
-    libxcb-util-dev
-
-# wlroots build dependencies, required
-sudo apt install \
-    libgbm-dev \
-    libegl-dev \
-    libgles-dev \
-    libvulkan-dev \
-    libpixman-1-dev \
-    libudev-dev \
-    libseat-dev \
-    libdisplay-info-dev \
-    libliftoff-dev \
-    hwdata
-
-# XWayland, required
-sudo apt install \
-    xwayland \
-    libxcb1-dev \
-    libxcb-icccm4-dev \
-    libxcb-composite0-dev \
-    libxcb-ewmh-dev \
-    libxcb-res0-dev \
-    libxcb-render0-dev \
-    libxcb-render-util0-dev \
-    libxcb-errors-dev \
-    libxcb-xfixes0-dev \
-    libxcb-xinput-dev
-
-# Optional: lock screen authentication
-sudo apt install libpam0g-dev
-
-# Optional: systemd session integration (somewm-session, login manager entry)
-sudo apt install systemd-dev
-
+sudo apt install build-essential git meson ninja-build pkg-config \
+    luajit libluajit-5.1-dev lua-lgi libcairo2-dev libpango1.0-dev \
+    libgdk-pixbuf-2.0-dev librsvg2-dev libglib2.0-dev libdbus-1-dev \
+    libwayland-dev libwayland-bin wayland-protocols libdrm-dev \
+    libinput-dev libxkbcommon-dev libgbm-dev libegl-dev libgles-dev \
+    libpixman-1-dev libudev-dev libseat-dev libdisplay-info-dev \
+    libliftoff-dev liblcms2-dev hwdata libffi-dev libexpat1-dev \
+    xwayland libxcb1-dev libxcb-util-dev libxcb-icccm4-dev \
+    libxcb-composite0-dev libxcb-ewmh-dev libxcb-res0-dev \
+    libxcb-render0-dev libxcb-render-util0-dev libxcb-errors-dev \
+    libxcb-xfixes0-dev libxcb-xinput-dev libxcb-dri3-dev \
+    libxcb-present-dev libxcb-shm0-dev
 ```
+
+Optional packages:
+
+- `libpam0g-dev` for built-in lockscreen authentication
+- `systemd-dev` for systemd session integration
 
 ### Fedora
 
 ```bash
-# Required dependencies
-sudo dnf install \
-    meson \
-    luajit \
-    luajit-devel \
-    lua-lgi \
-    cairo-devel \
-    pango-devel \
-    gdk-pixbuf2-devel \
-    librsvg2-devel \
-    wayland-devel \
-    wayland-protocols-devel \
-    libdrm-devel \
-    dbus-devel \
-    glib2-devel \
-    libinput-devel \
-    libxkbcommon-devel
-
-# XWayland, required
-sudo dnf install \
-    xorg-x11-server-Xwayland \
-    xorg-x11-server-Xwayland-devel \
-    libxcb-devel \
-    xcb-util-wm-devel \
-    xcb-util-renderutil-devel
+sudo dnf install gcc make git meson ninja-build pkgconf-pkg-config \
+    luajit luajit-devel lua-lgi cairo-devel pango-devel gdk-pixbuf2-devel \
+    librsvg2-devel glib2-devel dbus-devel wayland-devel wayland-protocols-devel \
+    libdrm-devel libinput-devel libxkbcommon-devel mesa-libgbm-devel \
+    libglvnd-egl-devel libglvnd-gles-devel pixman-devel systemd-devel \
+    libseat-devel libdisplay-info-devel libliftoff-devel lcms2-devel hwdata \
+    xorg-x11-server-Xwayland xorg-x11-server-Xwayland-devel \
+    libxcb-devel xcb-util-devel xcb-util-wm-devel \
+    xcb-util-renderutil-devel xcb-util-errors-devel
 ```
 
 ### Gentoo
 
-:::note
-SomeWM is not currently part of the official Gentoo Portage tree or the [GURU](https://wiki.gentoo.org/wiki/Project:GURU) project overlay. Use the third-party overlay below instead.
-:::
-
-SomeWM is packaged in the [somewm-gentoo-overlay](https://github.com/shuber2/somewm-gentoo-overlay):
+The third-party [somewm-gentoo-overlay](https://github.com/shuber2/somewm-gentoo-overlay) packages SomeWM. As root:
 
 ```bash
 eselect repository add somewm git https://github.com/shuber2/somewm-gentoo-overlay.git
 emaint sync -r somewm
-
 echo 'gui-wm/somewm ~amd64' >> /etc/portage/package.accept_keywords/somewm
 emerge -av gui-wm/somewm
 ```
 
-A `9999` ebuild tracks `main` and `1.4.9999` tracks `release/1.4`. Then go to [Launch](first-launch.md).
+Check the selected ebuild's version. A `9999` ebuild follows development rather than a fixed release.
+
+## Build and Install
+
+```bash
+git clone --branch main https://github.com/trip-zip/somewm
+cd somewm
+make
+sudo make install
+```
+
+Then follow [Launch](first-launch.md).
+
+### LGI {#lgi-troubleshooting}
+
+LGI provides Cairo, Pango and GLib bindings. It must match the Lua interpreter used by the build. LuaJIT is the default and uses Lua 5.1 modules. On Arch, this requires `lua51-lgi`. Debian/Ubuntu and Fedora package it as `lua-lgi`.
+
+If startup reports `module 'lgi' not found`, check the interpreter and module paths before installing another Lua version. `somewm -L /path/to/modules` adds a search directory for modules installed elsewhere.
 
 ### NixOS
 
-A `default.nix` is provided for building on NixOS:
+From the source checkout:
 
 ```bash
 nix-build
 ./result/bin/somewm
 ```
 
-The derivation sets up LGI and `GI_TYPELIB_PATH`; third-party Lua libraries may need more, see [NixOS details](#nixos-details).
-
-## Build and Install
-
-```bash
-git clone https://github.com/trip-zip/somewm
-cd somewm
-make
-sudo make install
-```
-
-The build checks that LGI, the Lua GObject Introspection bindings the libraries use for cairo, Pango and GLib, is installed for your Lua version, and names the package to install if not. The package must match the Lua version:
-
-| Lua Version | Arch Linux | Debian/Ubuntu | Fedora |
-|-------------|------------|---------------|--------|
-| LuaJIT (default) | `lua51-lgi` | `lua-lgi` | `lua-lgi` |
-| Lua 5.4 | `lua-lgi` | `lua-lgi` | `lua-lgi` |
-
-The wrong package fails with `module 'lgi' not found`. For an LGI installed elsewhere:
-```bash
-somewm -L /usr/lib/lua/5.1
-```
+The package installs the default configuration and Lua libraries, and wraps the binary with its Lua and typelib paths.
 
 ## NixOS Details {#nixos-details}
 
-### GI_TYPELIB_PATH and Third-Party Libraries
+<span id="gi_typelib_path-and-third-party-libraries" />
+<span id="extra-lua-modules" />
 
-Typelibs live in `/nix/store`, and `default.nix` puts pango, gdk-pixbuf, glib and gtk3 on `GI_TYPELIB_PATH`. A third-party library such as [bling](https://github.com/BlingCorp/bling) may need more (its `app_launcher` needs GTK3 for icon lookups). Extend the wrapper:
-
-```nix
-postFixup = ''
-  wrapProgram $out/bin/somewm \
-    --prefix GI_TYPELIB_PATH : "${pkgs.gtk3}/lib/girepository-1.0" \
-    --prefix GI_TYPELIB_PATH : "${pkgs.networkmanager}/lib/girepository-1.0" \
-    # Add more as needed for your Lua libraries
-'';
-```
-
-### Extra Lua Modules
-
-For extra Lua modules such as `luafilesystem`:
+GTK3 typelibs are included by default. To add GI libraries or Lua modules, save this as `with-libraries.nix` in the checkout and run `nix-build with-libraries.nix`:
 
 ```nix
-let
-  luaEnv = pkgs.luajit.withPackages (ps: with ps; [
-    lgi
-    luafilesystem  # Add extra modules here
-  ]);
-in
-# ... use luaEnv in buildInputs and wrapper
+{ pkgs ? import <nixpkgs> {} }:
+(import ./default.nix { inherit pkgs; }).override {
+  extraGIPackages = [ pkgs.networkmanager ];
+  extraLuaPackages = ps: [ ps.luafilesystem ];
+}
 ```
 
 ## Uninstallation
+
+From the checkout used to install:
 
 ```bash
 sudo make uninstall

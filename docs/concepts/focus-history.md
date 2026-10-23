@@ -1,25 +1,33 @@
 ---
 sidebar_position: 4
 title: Focus History
-description: awful.client.focus.history keeps every focused client in most-recent-first order. Every loss of focus goes through one signal, request::focus_restore, whose default handler reads that list.
+description: How recent focus and client eligibility determine focus restoration.
 ---
 
 # Focus History
 
-`awful.client.focus.history` is a list of clients in the order they were last focused, most recent first, with no depth limit. Each time a client receives focus it is removed from wherever it was and inserted at the front. When a client closes, the next one in the list that is still visible on its screen gets focus.
+<span id="one-restoration-path" />
 
-| Action | History, front to back |
+`awful.client.focus.history` records clients in most-recently-focused order. A delivered `focus` signal moves its client to the front. Closing a client removes it. There is no fixed history length.
+
+Assuming A, B and C remain visible and focusable on one screen, and each focus event has been delivered:
+
+| Action | History, newest first |
 | --- | --- |
-| focus 1, 2, 5, 4 | 4, 5, 2, 1 |
-| close 4 | 5, 2, 1; focus goes to 5 |
-| close 5 | 2, 1; focus goes to 2, skipping 3, which was never focused |
+| Focus A, then B, then C | C, B, A |
+| Close C | B, A |
+| Close B | A |
 
-The history and [the client stack](./client-stack.md) are independent: focusing moves a client to the front of the history and leaves the stack alone; raising does the reverse.
+The history and [visual stack](client-stack.md) are independent. Focusing updates history without explicitly raising. Raising changes the stack without changing history.
 
-## One restoration path
+## Signal timing
 
-A client closing, a layer-shell launcher such as rofi dismissing, the session unlocking and a monitor disconnecting all take focus away. The C core routes every one of them through one signal, `request::focus_restore`, emitted on the affected screen. The default handler, `awful.permissions.focus_restore`, activates the most recently focused client still visible on that screen. If no handler focuses anything, C falls back to the topmost client, so a broken handler degrades rather than stranding focus.
+Compositor-generated focus signals are queued. `client.focus` can therefore change before the history handler runs. Code that needs the updated history must wait until those handlers have run. See [signal dispatch](signals.md#dispatch).
 
-AwesomeWM restores focus from several separate code paths and has no layer shell; the single signal is SomeWM's.
+## Restoring focus
 
-[Control where focus goes](../guides/focus.md) has the recipes: alt-tab bindings, a custom fallback policy, filtering and debugging.
+The compositor emits `screen`'s `request::focus_restore` after events such as a client closing, a layer-shell launcher dismissing, or the session unlocking. The default handler, `awful.permissions.focus_restore`, chooses a visible, focusable client from that screen's history and requests activation without raising.
+
+If Lua leaves no client focused, C tries the topmost eligible client on that monitor. There may be no eligible client. Activation filters and replacement handlers can also change the outcome.
+
+The permissions library schedules additional checks after unmanage, tag and visibility changes. These restore focus when the current client is absent or no longer visible. The [focus guide](../guides/focus.md) covers configuration and diagnosis.

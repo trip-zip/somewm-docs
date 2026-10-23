@@ -6,7 +6,7 @@ description: Modifier keys and key name reference
 
 # Key Names
 
-`awful.key` accepts keysym names; `awful.button` accepts modifier names and button numbers. For the full enumeration of every keysym SomeWM accepts (~2,629 entries including international and dead keys), see **[All Keysyms](key-names-all.md)**.
+Names you can pass to `awful.key` and `awful.button`. For the full enumeration of every keysym SomeWM accepts (~2,629 entries including international and dead keys), see **[All Keysyms](/docs/next/reference/key-names-all)**.
 
 :::tip Case-insensitive
 SomeWM resolves keys via `xkb_keysym_from_name()` with the case-insensitive flag set. `"Return"`, `"return"`, and `"RETURN"` all resolve to the same keysym.
@@ -14,7 +14,7 @@ SomeWM resolves keys via `xkb_keysym_from_name()` with the case-insensitive flag
 
 ## Finding a Key's Name
 
-When a key is not in the tables below, ask the keyboard instead of guessing. `wev` prints the keysym for every key you press:
+Run `wev` inside SomeWM to read keysyms:
 
 ```
 $ wev
@@ -22,26 +22,24 @@ $ wev
                       sym: XF86AudioRaiseVolume (269025043), utf8: ''
 ```
 
-The `sym:` field is the string to pass to `awful.key`. Press the key you care about, read the name, ignore the rest of the output.
+Pass the `sym:` value to `awful.key`.
 
 This matters most where the name is not what is printed on the keycap. `,` reports `comma`, `;` reports `semicolon`, and Page Up reports `Prior`.
 
-`wev` is a Wayland client, so run it from inside your SomeWM session. Install it from your distribution's `wev` package. On X11 under AwesomeWM the equivalent is `xev -event keyboard`, whose `KeyPress` lines end with `keycode 123 (keysym 0x1008ff13, XF86AudioRaiseVolume)`; the name after the comma is the same string.
+Install your distribution’s `wev` package if the command is missing.
 
 ## Modifier Keys
 
-Passed as a Lua table, the first argument to `awful.key`.
+Pass modifiers as the first argument to `awful.key`.
 
 | Name | Common Name | Notes |
 | --- | --- | --- |
 | `"Mod4"` | Super / Windows / Meta | The key with the Windows logo |
-| `"Super"` | alias for `"Mod4"` | Accepted by `awful.button` only; `awful.key` takes `"Mod4"` |
 | `"Mod1"` | Alt | Left or Right Alt |
-| `"Alt"` | alias for `"Mod1"` | Accepted by `awful.button` only; `awful.key` takes `"Mod1"` |
 | `"Shift"` | Shift | Either Shift key |
 | `"Control"` | Ctrl | Either Control key |
 | `"Ctrl"` | alias for `"Control"` | Convenience alias |
-| `"Lock"` | Caps Lock | Num Lock is `"Mod2"` |
+| `"Lock"` | Caps Lock | Toggleable lock state |
 | `"Mod2"` | Mod2 | Often Num Lock on common layouts |
 | `"Mod3"` | Mod3 | Layout-dependent |
 | `"Mod5"` | Mod5 | Often AltGr / ISO Level 3 |
@@ -49,15 +47,17 @@ Passed as a Lua table, the first argument to `awful.key`.
 
 ### Combining Modifiers
 
-```lua
-{ modkey }                      -- Mod4 only
-{ modkey, "Shift" }             -- Mod4 + Shift
-{ modkey, "Control" }           -- Mod4 + Ctrl
-{ "Mod1", "Shift" }             -- Alt + Shift
-{ modkey, "Mod1" }              -- Mod4 + Alt
-{ modkey, "Control", "Shift" }  -- Mod4 + Ctrl + Shift
-{ "Any" }                       -- match regardless of modifiers
-```
+| Combination | Modifier table |
+| --- | --- |
+| Super | `{ "Mod4" }` |
+| Super + Shift | `{ "Mod4", "Shift" }` |
+| Super + Ctrl | `{ "Mod4", "Control" }` |
+| Alt + Shift | `{ "Mod1", "Shift" }` |
+| Super + Alt | `{ "Mod4", "Mod1" }` |
+| Super + Ctrl + Shift | `{ "Mod4", "Control", "Shift" }` |
+| Any modifiers | `{ "Any" }` |
+
+`"Super"` and `"Alt"` are not modifier aliases in 2.1. Use `"Mod4"` and `"Mod1"`.
 
 ## Common Key Names
 
@@ -94,8 +94,8 @@ Passed as a Lua table, the first argument to `awful.key`.
 
 | Key | Lua Name |
 |-----|----------|
-| F1 to F12 | `"F1"` through `"F12"` |
-| F13 to F35 | `"F13"` through `"F35"` (available, rarely physical) |
+| F1 – F12 | `"F1"` through `"F12"` |
+| F13 – F35 | `"F13"` through `"F35"` (available, rarely physical) |
 
 ## Letters and Numbers
 
@@ -133,7 +133,7 @@ Passed as a Lua table, the first argument to `awful.key`.
 
 | Key | Lua Name |
 |-----|----------|
-| Keypad 0 to 9 | `"KP_0"` through `"KP_9"` |
+| Keypad 0 – 9 | `"KP_0"` through `"KP_9"` |
 | Keypad Enter | `"KP_Enter"` |
 | Keypad + / - / * / / | `"KP_Add"` / `"KP_Subtract"` / `"KP_Multiply"` / `"KP_Divide"` |
 | Keypad Decimal | `"KP_Decimal"` |
@@ -177,31 +177,31 @@ Passed as a Lua table, the first argument to `awful.key`.
 
 ## Examples
 
+Constructing a key object does not register it. Global and client bindings use different registration functions:
+
 ```lua
--- Global keybinding
-awful.key({ modkey }, "Return", function()
-    awful.spawn(terminal)
-end, { description = "open terminal", group = "launcher" })
+local awful = require("awful")
 
--- Keybinding with multiple modifiers
-awful.key({ modkey, "Shift" }, "c", function(c)
-    c:kill()
-end, { description = "close", group = "client" })
+awful.keyboard.append_global_keybindings({
+    awful.key({ "Mod4" }, "Return", function()
+        awful.spawn("kitty")
+    end, { description = "open terminal", group = "launcher" }),
+})
 
--- Media key (no modifier)
-awful.key({}, "XF86AudioRaiseVolume", function()
-    awful.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+")
-end, { description = "raise volume", group = "media" })
-
--- Mouse binding
-awful.button({ modkey }, 1, function(c)
-    c:activate({ context = "mouse_click", action = "mouse_move" })
+client.connect_signal("request::default_keybindings", function()
+    awful.keyboard.append_client_keybindings({
+        awful.key({ "Mod4", "Shift" }, "c", function(c)
+            c:kill()
+        end, { description = "close", group = "client" }),
+    })
 end)
 ```
 
+See [keybinding patterns](../guides/keybinding-patterns.md) for mouse bindings and media keys.
+
 ## See Also
 
-- [All Keysyms](key-names-all.md) - Full enumeration of every xkbcommon keysym
-- [Keybindings Tutorial](../tutorials/keybindings.md) - Learn how to create keybindings
-- [Default Keybindings](default-keybindings.md) - Built-in shortcuts
-- [awful.key (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/awful.key.html) - Complete API reference
+- [All Keysyms](/docs/next/reference/key-names-all) – Full enumeration of every xkbcommon keysym
+- [Keybindings Tutorial](/docs/next/tutorials/keybindings) – Learn how to create keybindings
+- [Default Keybindings](/docs/next/reference/default-keybindings) – Built-in shortcuts
+- [awful.key (AwesomeWM docs)](https://awesomewm.org/apidoc/libraries/awful.key.html) – Complete API reference

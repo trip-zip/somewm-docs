@@ -6,7 +6,7 @@ description: How widget properties become sizes, positions and pixels on the scr
 
 # How SomeWM draws
 
-When you change a textbox's text, SomeWM needs to work out how much room the new text takes, where neighbouring widgets belong, and which pixels to update. In 2.1, it uses the Clay layout library to calculate sizes and positions, then draws the result with its renderer.
+SomeWM 2.1 uses Clay to calculate sizes and positions from widget descriptions. Its renderer draws the resulting tree. Changing a textbox's text can therefore resize its containers and move neighbouring widgets.
 
 This also applies to wibars, popups, notifications and window frames. Applications still draw their own contents. SomeWM decides where to put those contents and their borders on the screen.
 
@@ -47,7 +47,7 @@ Finally, wlroots combines the scene contents using the GPU or pixman and present
 
 ## Inspecting the result {#state-layout-and-scene}
 
-An object's properties express what your configuration requested. The tree dump shows the resulting sizes and positions. Its `realized:` section shows the scene nodes used to draw them. These are different views of the same update, useful when a widget has an unexpected size or position.
+An object's properties express what your configuration requested. The tree dump shows the resulting sizes and positions. Its `realized:` section lists render commands, including clipping and configuration markers that do not create scene nodes. These are different views of the same update, useful when a widget has an unexpected size or position.
 
 ```bash
 somewm-client clay tree
@@ -88,7 +88,7 @@ Dump labels map to these Clay definitions:
 | `attach ROOT`, `PARENT`, `OUTPUT` or `ELEMENT` | `CLAY_ATTACH_TO_ROOT`, `CLAY_ATTACH_TO_PARENT`, `CLAY_ATTACH_TO_ELEMENT_WITH_ID` (the last two names say which element) |
 | `offset x,y`, `band N` | the floating element's `offset` and `zIndex` |
 | the eight-hex id | `Clay_ElementId.id`, stable while the widget exists |
-| `transition` | `Clay_TransitionData`; Clay animates the box, SomeWM declares only the target |
+| `transition` | `Clay_TransitionData`. Clay animates the box, SomeWM declares only the target |
 | the inspector | Clay's own debug view, `Clay_SetDebugModeEnabled`, styled from `beautiful.inspector_*` |
 
 Configured limits:
@@ -96,7 +96,7 @@ Configured limits:
 | Budget | Value | Where |
 | --- | --- | --- |
 | elements per output | 65536 | `CLAY_ELEMENTS_MAX`, printed as `elements N/65536` |
-| nodes per wibox | 4096 | `WIDGET_NODES_MAX`; a larger wibox shows nothing and warns |
+| nodes per wibox | 4096 | `WIDGET_NODES_MAX`. A larger wibox shows nothing and warns |
 | scroll containers per output | 100 | `WIDGET_SCROLLS_OUTPUT_MAX` |
 
 ## What SomeWM adds

@@ -1,74 +1,139 @@
 ---
 sidebar_position: 10
 title: Shadows
-description: Turn on compositor shadows from the theme, shape them with radius, offset, spread, corner radius and colour, give panels their own settings, and override per client or wibox with rules or the shadow property.
+description: Add compositor-level shadows to windows and wiboxes
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Shadows <SomewmOnly />
 
-SomeWM draws shadows itself; no picom. A shadow belongs to a client or a wibox, never to a widget inside one, and is drawn by the renderer around the solved frame without taking room from it. They are off until the theme turns them on:
+Enable compositor shadows in your theme, then override them for individual clients or wiboxes. These settings affect whole surfaces, not widgets inside them.
+
+Shadows are drawn around the solved client or wibox frame without reserving layout space. `shadow_clip` and `clip_directional` are ignored in 2.1.
+
+## Enabling Shadows
+
+<span id="recipes" />
+
+In `theme.lua`, before loading the theme:
 
 ```lua
 theme.shadow_enabled = true
+theme.shadow_radius = 12
+theme.shadow_opacity = 0.6
+theme.shadow_color = "#000000"
 ```
 
-## Shape
+Reload the configuration to apply theme defaults. For all available settings and defaults, see the [shadow reference](../reference/shadows.md).
 
-| Variable | Effect |
+## Customizing Shadow Appearance
+
+<span id="shape" />
+
+| Setting | Effect |
 | --- | --- |
-| `shadow_radius` | blur; small is sharp, large is soft |
-| `shadow_opacity` | 0 to 1 |
-| `shadow_offset_x`, `shadow_offset_y` | where the shadow sits relative to the window. The parts under the window are hidden, so a large offset is a one-sided drop shadow and zero is an even halo. |
-| `shadow_spread` | grows the shadow past the window's edges before the blur, so it peeks out on every side even with an offset |
-| `shadow_corner_radius` | rounds the shadow's corners; match the window's |
-| `shadow_color` | any colour; an alpha byte multiplies `shadow_opacity` |
+| `shadow_radius` | Blur radius. Larger values soften the edge. |
+| `shadow_opacity` | Opacity from `0` to `1`. |
+| `shadow_offset_x`, `shadow_offset_y` | Position relative to the window. Positive values move right and down. |
+| `shadow_spread` | Expansion beyond the surface edges before blurring. |
+| `shadow_corner_radius` | Rounding of the shadow's corners. Does not round the window itself. |
+| `shadow_color` | Hex colour. An alpha byte multiplies the opacity. |
 
-The same names with `shadow_drawin_` apply to wiboxes, so panels can have lighter shadows or none:
+For a downward shadow with rounded corners:
 
 ```lua
-theme.shadow_drawin_enabled = false      -- or radius 6, opacity 0.3
+theme.shadow_offset_x = 0
+theme.shadow_offset_y = 8
+theme.shadow_spread = 4
+theme.shadow_corner_radius = 16
 ```
 
-[Shadow reference](../reference/shadows.md) has the defaults.
-
-## Per client and per wibox
-
-`c.shadow` and `wibox.shadow` take `true` (theme defaults), `false`, or a table overriding any field:
+For an even coloured glow, use zero offsets, a larger radius and a tinted colour:
 
 ```lua
-ruled.client.append_rule { rule_any = { class = { "mpv", "vlc" } }, properties = { shadow = false } }
-ruled.client.append_rule { rule_any = { fullscreen = true }, properties = { shadow = false } }
-ruled.client.append_rule {
-    rule_any = { floating = true },
-    properties = { shadow = { radius = 24, offset_x = -20, offset_y = -20, opacity = 0.9 } },
-}
-ruled.client.append_rule {
-    rule = { class = "Rofi" },
-    properties = { shadow = { color = "#5599FF", radius = 30, opacity = 0.5 } },
-}
-
-awful.key({ modkey }, "s", function()
-    if client.focus then client.focus.shadow = not client.focus.shadow end
-end, { description = "toggle shadow", group = "client" })
-
-s.mywibox.shadow = { radius = 12, offset_x = 0, offset_y = 4, opacity = 0.7 }
-local popup = wibox { width = 200, height = 50, shadow = { radius = 10, opacity = 0.6, color = "#222222" } }
+theme.shadow_offset_x = 0
+theme.shadow_offset_y = 0
+theme.shadow_radius = 24
+theme.shadow_color = "#3399FF"
+theme.shadow_opacity = 0.5
 ```
 
-From a shell: `somewm-client eval 'for _, c in ipairs(client.get()) do c.shadow = { color = "#FF0000" } end'`.
+## Different Settings for Panels vs Windows
 
-## Recipes
+Wibox defaults use the `shadow_drawin_` prefix:
 
-| Look | Settings |
-| --- | --- |
-| classic drop shadow, light from the top left | `radius = 12, offset_x = 8, offset_y = 8, opacity = 0.6` |
-| raised card | `radius = 16, offset_x = 0, offset_y = 8, spread = 4, corner_radius = 16, opacity = 0.6` |
-| soft halo | `radius = 24, offset_x = 0, offset_y = 0, opacity = 0.5` |
-| coloured glow, as a focus indicator in a `focus` handler | `color = "#3399FF", radius = 20, offset_x = 0, offset_y = 0, opacity = 0.6` |
-| tight bevel | `radius = 4, offset_x = 3, offset_y = 3, opacity = 0.9` |
+```lua
+theme.shadow_drawin_enabled = true
+theme.shadow_drawin_radius = 6
+theme.shadow_drawin_opacity = 0.3
+```
 
-Each works as `theme.shadow_*` or as a `c.shadow` table.
+Set `shadow_drawin_enabled = false` to disable default panel shadows while keeping client shadows.
 
-If no shadow appears, `somewm-client eval 'client.focus.shadow = true'` tells you whether the theme or the client is the problem; a colour needs the `#` prefix. A shadow texture is a few kilobytes, so cost is not a concern; a smaller radius is the lever if it ever is.
+## Disabling Shadows for Specific Windows
+
+Put this in your existing client rules handler:
+
+```lua
+ruled.client.append_rule {
+    rule_any = { class = { "^mpv$", "^vlc$" } },
+    properties = { shadow = false },
+}
+```
+
+Rules apply when a client is managed. To change shadows when a property such as `fullscreen` changes later, use a property signal handler.
+
+## Per-Window Control
+
+<span id="per-client-and-per-wibox" />
+
+Set a client's `shadow` to `false`, `true` for theme defaults, or a settings table:
+
+```lua
+local c = client.focus
+if c then
+    c.shadow = {
+        radius = 20,
+        offset_x = 0,
+        offset_y = 0,
+        color = "#3399FF",
+        opacity = 0.6,
+    }
+end
+```
+
+Assigning a table replaces the override. Omitted fields use the theme defaults.
+
+Reading `c.shadow` returns a configuration table or `false`. Inspect `c.shadow.enabled` when testing whether a returned table enables the shadow. A disabled configuration table is still truthy in Lua.
+
+## Adding Shadows to Wiboxes
+
+```lua
+local wibox = require("wibox")
+local popup = wibox {
+    width = 200,
+    height = 50,
+    visible = true,
+    bg = "#222222",
+    shadow = { radius = 10, opacity = 0.6, color = "#000000" },
+}
+```
+
+For an existing wibar, assign the same table to `s.mywibox.shadow`, using your bar's actual variable name.
+
+## Troubleshooting
+
+Check that the theme loaded and no rule overrides `shadow`. To test the focused window directly:
+
+```bash
+somewm-client eval 'if client.focus then client.focus.shadow = true end'
+```
+
+Use hex colours such as `#000000` or `#FF000080`. Compare with shadows disabled when investigating rendering cost rather than assuming a fixed memory or performance cost.
+
+## See Also
+
+- [Shadow Reference](../reference/shadows.md)
+- [Theme Tutorial](../tutorials/theme.md)
+- [Client Rules](client-rules.md)

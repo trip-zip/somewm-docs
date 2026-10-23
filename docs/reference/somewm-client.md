@@ -4,7 +4,7 @@ title: somewm-client Reference
 description: Complete command reference for the somewm-client IPC tool
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # somewm-client Reference <SomewmOnly />
 
@@ -18,7 +18,7 @@ somewm-client [--json] <command> [arguments...]
 
 `somewm-client` is a thin passthrough. It joins its arguments into one line, writes that to the compositor's Unix socket, and prints the reply. Command names are validated by the compositor, not the binary, so an unknown command comes back as `ERROR Unknown command: ...` rather than a usage error.
 
-More than 100 commands are registered. This page documents them by family. Run `somewm-client commands` for the authoritative list in your build. Last synced against the SomeWM source: `d053da19d`.
+Run `somewm-client commands` for the command names registered in your build.
 
 ### Global flags
 
@@ -48,7 +48,7 @@ Failures replace `OK` with `ERROR` and a message:
 ERROR Unknown command: client.minimize
 ```
 
-With `--json`, the reply becomes a single object. Note that `result` is the same text blob as the plain-mode output, escaped into one string. Handlers do not return structured data, so `--json` gives you a wrapper to test `status` against, not per-object fields to index:
+`--json` wraps the reply in an object with `status` and `result`. `result` remains a string, not structured client or screen data:
 
 ```bash
 somewm-client --json client visible
@@ -71,26 +71,19 @@ somewm-client --json client visible
 | `menubar`, `launcher` | Show the menubar application launcher (`launcher` is an alias) |
 | `eval <code>` | Evaluate Lua code and return the result |
 
-Reach for `eval` only when no dedicated command covers what you need. The commands below return parseable output and survive API changes; `eval` does neither.
-
 ### `eval` constraints
 
-Two limits catch people out, and neither produces an obvious error.
-
-**One line only.** The protocol is one command per line, so a multi-line argument does not do what it looks like. Only the first line runs; the rest is discarded. A string that opens with a newline fails outright with `Missing Lua code to evaluate`. Separate statements with semicolons:
+**One line per command.** Newlines split the socket input into separate commands. Keep the Lua chunk on one line:
 
 ```bash
-somewm-client eval "local x = 1; return x + 1"   # 2
+somewm-client eval 'local x = 1 return x + 1'
 ```
 
-**Only capi globals are in scope.** `client`, `screen`, `tag`, `mouse`, `awesome`, `root`, and `require` are available. The Lua libraries are not: `awful`, `gears`, `beautiful`, `naughty`, `wibox`, and `ruled` are all `nil` unless you require them.
+**Config locals are not in scope.** Evaluation has access to Lua globals, including `client`, `screen`, `awesome`, and `require`. A library stored in a local variable in `rc.lua` is not a global. Require it in the evaluated code:
 
 ```bash
-somewm-client eval "return type(beautiful)"            # nil, always
-somewm-client eval "return type(require('beautiful'))" # table
+somewm-client eval 'return require("beautiful").bg_normal'
 ```
-
-This makes `type(<module>)` useless as a did-it-load check unless the name is required first.
 
 ## Client Commands {#client-commands}
 
@@ -112,14 +105,14 @@ Most client commands take a target of either a numeric ID or the literal `focuse
 
 ```
 id=1 title="tmux a" class="com.mitchellh.ghostty" tags=1 floating=false
-id=2 title="Hacker News — Mozilla Firefox" class="firefox" tags=1 floating=false
+id=2 title="Hacker News - Mozilla Firefox" class="firefox" tags=1 floating=false
 ```
 
 `client visible` and `client tiled` use the same shape without `tags=` and `floating=`. `client info` prints one `Key: value` per line:
 
 ```
 ID: 2
-Title: Hacker News — Mozilla Firefox
+Title: Hacker News - Mozilla Firefox
 Class: firefox
 Instance:
 Role:
@@ -138,9 +131,9 @@ Floating: false
 
 | Command | Description |
 |---------|-------------|
-| `client focus <id\|next\|prev\|up\|down\|left\|right>` | Focus by ID, by stack order, or by direction. Required argument; `focused` is rejected |
-| `client close [<id>\|focused]` | Close gracefully |
-| `client kill [<id>\|focused] [--force]` | Kill the client |
+| `client focus <id\|next\|prev\|up\|down\|left\|right>` | Focus by ID, by client-list order, or by direction. Required argument. `focused` is rejected |
+| `client close [<id>\|focused]` | Request a graceful close |
+| `client kill [<id>\|focused] [--force]` | Request a graceful close. `--force` sends SIGKILL to the client process |
 
 ### Boolean properties
 
@@ -170,14 +163,16 @@ somewm-client client floating focused true   # set
 
 | Command | Description |
 |---------|-------------|
-| `client raise [<id>\|focused]` | Raise to the top of the stack |
-| `client lower [<id>\|focused]` | Lower to the bottom |
-| `client swap <id1> <id2>` | Swap two clients in the stack |
-| `client swapidx <±n> [<id>\|focused]` | Swap with the nth client in the stack |
-| `client zoom [<id>\|focused]` | Swap with the master client |
+| `client raise [<id>\|focused]` | Raise to the top of its layer |
+| `client lower [<id>\|focused]` | Lower to the bottom of its layer |
+| `client swap <id1> <id2>` | Swap tiling order. Broken in 2.1.0, see below |
+| `client swapidx <±n> [<id>\|focused]` | Swap with the nth client in tiling order |
+| `client zoom [<id>\|focused]` | Move to master. Broken in 2.1.0, see below |
 | `client movetotag <n> [<id>]` | Move to exactly one tag, clearing the others |
 | `client toggletag <n> [<id>]` | Toggle one tag on the client |
 | `client movetoscreen <screen> [<id>]` | Move to another screen |
+
+In 2.1.0, `client swap` and `client zoom` call unavailable functions. Use `c1:swap(c2)` or `c:to_primary_section()` from Lua instead.
 
 ## Tag Commands
 
@@ -253,11 +248,11 @@ Twenty-one properties are reachable over IPC. Run `somewm-client input` with no 
 | Keyboard | `keyboard_repeat_rate`, `keyboard_repeat_delay`, `xkb_layout`, `xkb_variant`, `xkb_options`, `xkb_model`, `xkb_rules` |
 
 :::note
-These commands set **global** input defaults. Per-device rules configured via `awful.input.rules` take priority over global settings. See [awful.input Reference](awful/input.md#input-rules) for details.
+These commands set **global** input defaults. Per-device rules configured via `awful.input.rules` take priority over global settings. See [awful.input Reference](/docs/next/reference/awful/input#input-rules) for details.
 :::
 
 :::caution
-`awful.input` carries four properties the IPC command does not expose: `dwtp`, `scroll_button`, `scroll_button_lock`, and `clickfinger_button_map`. Set those in `rc.lua`; `somewm-client input` rejects them as unknown settings.
+`awful.input` carries four properties the IPC command does not expose: `dwtp`, `scroll_button`, `scroll_button_lock`, and `clickfinger_button_map`. Set those in `rc.lua`. `somewm-client input` rejects them as unknown settings.
 :::
 
 ## Mouse Commands
@@ -267,8 +262,6 @@ These commands set **global** input defaults. Per-device rules configured via `a
 | `mouse coords [x y]` | Get or set the cursor position |
 | `mouse screen` | Screen under the cursor |
 | `mousegrabber isrunning` | Whether a mousegrabber is active |
-| `mousegrabber test [max_events]` | Count events until the limit (default 10) or all buttons are released |
-| `mousegrabber track` | Print coordinates to the compositor log until all buttons are released |
 | `mousegrabber stop` | Stop the active mousegrabber |
 
 ## Keybinding and Rule Commands
@@ -282,7 +275,9 @@ These commands set **global** input defaults. Per-device rules configured via `a
 | `rule list` | List client rules |
 | `rule add <json>` | Add a rule from JSON |
 | `rule remove <id>` | Remove a rule by ID |
-| `rule test <client_id>` | Show which rules match a client |
+| `rule test <client_id\|focused>` | Test only the `rule` fields. Ignores `rule_any`, `except`, and `except_any` |
+
+`rule add` needs `lua-cjson` for JSON objects. The built-in fallback does not parse ordinary quoted JSON object keys. Use `ruled.client.append_rule()` through `eval` if the dependency is unavailable.
 
 ## Appearance Commands
 
@@ -296,7 +291,15 @@ These commands set **global** input defaults. Per-device rules configured via `a
 | `wibar show\|hide\|toggle <screen\|all>` | Control wibar visibility |
 | `titlebar show\|hide\|toggle [<id>] [position]` | Control titlebars. `position` is `top`, `bottom`, `left`, or `right`, and may be given in place of the ID |
 
+Wibar commands only find the bar stored as `s.mywibox` on each screen. They do not enumerate every wibox.
+
+## Clay Tree
+
+`somewm-client clay tree [screen]` prints the last solved layout and render commands for all outputs, or one screen index. See [Reading the tree](../concepts/reading-the-tree.md) for fields and sizing labels.
+
 ## Screenshot Commands
+
+<span id="clay-commands" />
 
 | Command | Description |
 |---------|-------------|
@@ -304,12 +307,6 @@ These commands set **global** input defaults. Per-device rules configured via `a
 | `screenshot client <path> [<id>]` | Capture one client |
 | `screenshot screen <path> [<id>]` | Capture one screen |
 | `screenshot interactive <path>` | Capture an interactively selected region |
-
-## Clay Commands
-
-| Command | Description |
-|---------|-------------|
-| `clay tree [screen]` | Print the solved tree of every output, or of one screen by index: the header counters, one line per element with its sizing, its source word and its box, then the list of what the renderer holds. [Reading the tree](../concepts/reading-the-tree.md) explains every line |
 
 ## Session Commands {#session-commands}
 
@@ -340,8 +337,7 @@ Each line is the literal word `EVENT`, the event type, and a JSON object. Key or
 
 | Event | Payload keys |
 |-------|--------------|
-| `client_manage` | `id`, `title`, `class`, `pid` |
-| `client_unmanage` | `id`, `title`, `class` |
+| `client_manage`, `client_unmanage` | `id`, `title`, `class` |
 | `client_focus`, `client_unfocus` | `id`, `title`, `class` |
 | `client_title` | `id`, `title` |
 | `client_urgent` | `id`, `urgent`, `title`, `class` |
@@ -359,13 +355,13 @@ Event-type arguments are accepted and ignored. Subscription is a per-connection 
 
 ## Test Mode {#test-mode}
 
-Spawn a nested somewm under your current Wayland or X11 session so you can iterate on `rc.lua` without touching your real desktop. Each instance has its own name (defaults to `test`); the rest of the verbs target the named instance.
+Test mode starts a separate compositor under Wayland, X11, or a headless backend. Each instance has a name, defaulting to `test`. Other `test` commands target that name.
 
 | Command | Description |
 |---------|-------------|
-| `test start [opts]` | Spawn a sandboxed nested somewm. See options below. |
+| `test start [opts]` | Start a separate nested SomeWM instance. See options below. |
 | `test stop [--name N]` | Stop the named instance and remove its state dir. |
-| `test list [--json]` | List running instances. Connects to each socket; stale entries are flagged. |
+| `test list [--json]` | List running instances. Connects to each socket. Stale entries are flagged. |
 | `test run [--name N] -- CMD` | Spawn a command inside the nested instance (it inherits the right `WAYLAND_DISPLAY`). |
 | `test eval [--name N] LUA` | Evaluate Lua inside the nested instance, like `eval` but pointed at the named socket. |
 | `test reload [--name N]` | Reload the nested instance's config. |
@@ -377,24 +373,23 @@ Spawn a nested somewm under your current Wayland or X11 session so you can itera
 |--------|-------------|
 | `--config FILE` | Path to the `rc.lua` to load. If omitted, the nested somewm follows its normal lookup. |
 | `--name NAME` | Instance name. Default `test`. 1 to 64 characters from `[A-Za-z0-9._-]`, no leading `.`. Each instance gets its own state dir at `$XDG_RUNTIME_DIR/somewm-test/<name>/`. |
-| `--host wayland\|x11\|headless` | Outer compositor type. Defaults to `wayland` if `WAYLAND_DISPLAY` is set; otherwise required. `headless` skips display nesting (no window opens) and is used by CI harnesses; sets `WLR_RENDERER=pixman` unless already set. |
+| `--host wayland\|x11\|headless` | Outer compositor type. Defaults to `wayland`. Specify `x11` explicitly on an X11 host. `headless` skips display nesting (no window opens) and is used by CI harnesses. Typically paired with `WLR_RENDERER=pixman`. |
 | `--keybinds auto\|inhibit\|remap\|none` | How keys reach the nested somewm. `auto` tries the shortcut inhibitor protocol and falls back to `Mod4 -> Mod1` remap if the host doesn't support it. |
 | `--no-marker` | Skip the wibar marker textbox (cosmetic only). |
 | `--force` | Replace an already-running instance with the same name. |
 
-The status block printed on success reports whether the outer compositor accepted the shortcut inhibitor request. `test start` waits up to 30 seconds for the nested compositor's IPC socket to respond to a ping before giving up; if `rc.lua` fails to load, the orchestrator detects the `FATAL:` line in the log and surfaces it instead of leaving the call hanging. See [Testing with a nested compositor](../guides/testing-with-nested-compositor.md) for the workflow.
+`test start` reports shortcut-inhibitor status and waits up to 30 seconds for an IPC ping response. A `FATAL:` startup error ends that wait early. See [Testing with a nested compositor](../guides/testing-with-nested-compositor.md) for the workflow.
 
 ### Environment variables {#test-env}
 
-Environment variables used by the nested compositor:
+Set by `somewm-client test` on the nested compositor:
 
 | Variable | Purpose |
 |----------|---------|
 | `SOMEWM_TEST_NAME` | Instance name. Compositor reads this to know it is a test instance and to load the keybind-remap shim. |
-| `SOMEWM_TEST_NO_MARKER` | Set to `1` by the orchestrator for `--no-marker`. |
 | `SOMEWM_TEST_STATE_DIR` | Absolute path to the per-instance state directory. The compositor writes `keybinds_status` here. |
 | `SOMEWM_TEST_KEYBINDS_MODE` | One of `auto`, `inhibit`, `remap`, `none`. Mirrors `--keybinds`. |
-| `SOMEWM_TEST_KEYBINDS_REMAP` | Set to `1` by the compositor when it falls back to `Mod4 -> Mod1` remap. The Lua shim reads this. |
+| `SOMEWM_TEST_KEYBINDS_REMAP` | Set to `1` when the orchestrator decides to fall back to `Mod4 -> Mod1` remap. The Lua shim reads this. |
 | `SOMEWM_SOCKET` | Absolute path to the per-instance IPC socket so subsequent `somewm-client test ...` calls reach the right compositor. |
 | `XDG_RUNTIME_DIR` | Overridden to `<state-dir>/runtime` so the nested compositor's Wayland socket does not collide with the host's. |
 | `WLR_BACKENDS`, `WLR_RENDERER`, `WLR_X11_OUTPUTS`, `WLR_WL_OUTPUTS` | Selected based on `--host`. |
@@ -434,48 +429,13 @@ The `test` subcommands use a richer exit-code set than the generic codes at the 
 | 5 | Process/system error (fork failed, the nested compositor exited before the socket came up, `FATAL:` in the startup log). |
 | 6 | Filesystem error (could not create the state directory, write the pidfile, or remove the state directory). |
 
-These let scripts and CI tell "already running" from "not found" from "the compositor crashed on startup" without parsing stderr.
-
-**See also:** [Test Mode (concepts)](../concepts/test-mode.md) for the why and when, and [Workflows](../guides/testing-with-nested-compositor.md#recipes) for the full set of recipes.
+**See also:** [Test Mode (concepts)](../concepts/test-mode.md) for the why and when, and [Workflows](../guides/testing-with-nested-compositor.md#workflows) for the full set of recipes.
 
 Test mode is inspired by [AWMTT](https://github.com/serialoverflow/awmtt), a similar nested-compositor testing tool for AwesomeWM.
 
 ## Examples
 
-```bash
-# Check connection
-somewm-client ping
-
-# List windows
-somewm-client client list
-# Output:
-# id=1 title="Firefox" class="firefox" tags=1 floating=false
-# id=2 title="Terminal" class="Alacritty" tags=1 floating=false
-
-# Everything about the focused window, including its class
-somewm-client client info focused
-
-# Focus window by ID
-somewm-client client focus 1
-
-# Float the focused window
-somewm-client client floating focused true
-
-# Enable tap-to-click
-somewm-client input tap_to_click 1
-
-# View tag 3
-somewm-client tag view 3
-
-# Save a screenshot
-somewm-client screenshot save ~/shot.png
-
-# Lock the session
-somewm-client lock
-
-# Evaluate Lua, for what no command covers
-somewm-client eval "return awesome.startup_errors"
-```
+See [CLI control](../guides/cli-control.md) for client, tag, input, and screenshot examples.
 
 ## Exit Codes
 
@@ -485,8 +445,8 @@ somewm-client eval "return awesome.startup_errors"
 | 1 | The compositor replied `ERROR`, or the arguments were unusable |
 | 2 | Could not connect to the compositor socket |
 
-A missing compositor and a rejected command are the two cases worth branching on: exit 2 means nothing is listening, exit 1 means SomeWM is running and said no.
+Code 1 also covers local argument errors, so it does not prove the compositor is running.
 
 ## See Also
 
-- [CLI Control Guide](../guides/cli-control.md)
+- [CLI Control Guide](/docs/next/guides/cli-control)

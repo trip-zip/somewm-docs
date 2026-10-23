@@ -1,16 +1,19 @@
 ---
 sidebar_position: 9
 title: Put a PNG Texture on Your Wibar
-description: "bgimage paints an image once, at its own size, in the bar's top-left corner. To cover the bar, prepare an image the bar's size and set that."
+description: Prepare a background image at the bar's size and assign it with bgimage.
 ---
 
 # Put a PNG Texture on Your Wibar
 
-A wibox's `bgimage` is one image element that fills the bar, and the renderer paints the file at its own pixel size in that element's top-left corner, scaled only by the output. It is not tiled and not stretched. A 20 by 20 texture on a 1280-wide bar covers 20 pixels and the rest shows `bg`, usually under the leftmost widget, so it looks as if nothing happened. A function as `bgimage`, which older configs used to tile, is not drawn and warns `wibox.drawable: bgimage functions are not drawn`.
+Set `bgimage` to an image path or surface. SomeWM draws it once at its natural size in the top-left corner, scaled with the output. To cover the bar, prepare an image at the bar's logical dimensions. A function assigned to `bgimage` is ignored with a warning.
 
 ## Set it
 
+Inside your screen decoration handler, replace the bar constructor with:
+
 ```lua
+local awful = require("awful")
 local gsurface = require("gears.surface")
 local texture = gsurface.load(os.getenv("HOME") .. "/.config/somewm/theme/bar-texture.png")
 
@@ -21,7 +24,7 @@ s.mywibox = awful.wibar {
 }
 ```
 
-Or for every bar, `theme.wibar_bgimage = "/absolute/path.png"`; it is read when each bar is constructed, so a later change needs `s.mywibox.bgimage = ...`. `gears.surface.load` caches by path and does not error on a missing file: it logs and returns an empty surface, which draws nothing.
+Or for every bar, `theme.wibar_bgimage = "/absolute/path.png"`. It is read when each bar is constructed, so a later change needs `s.mywibox.bgimage = ...`. `gears.surface.load` caches by path and does not error on a missing file: it logs and returns an empty surface, which draws nothing.
 
 ## Cover the bar
 
@@ -32,8 +35,10 @@ magick -size 1280x32 tile:bar-texture.png bar-background.png     # tile
 magick bar-texture.png -resize 1280x32! bar-background.png       # or stretch
 ```
 
+Assign the prepared image to the existing bar:
+
 ```lua
-bgimage = gsurface.load(os.getenv("HOME") .. "/.config/somewm/theme/bar-background.png"),
+s.mywibox.bgimage = gsurface.load(os.getenv("HOME") .. "/.config/somewm/theme/bar-background.png")
 ```
 
 The bar's tree then holds one image element the bar's size:

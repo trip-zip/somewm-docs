@@ -4,19 +4,16 @@ title: lockscreen (module)
 description: Default lockscreen module reference
 ---
 
-import SomewmOnly from '@site/src/components/SomewmOnly';
+import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # lockscreen (module) <SomewmOnly />
 
-The default lockscreen module provides a ready-to-use lock screen UI built on top of the [Lock API](lock.md). It handles password entry, multi-monitor coverage, screen hotplug, and theming.
+`lockscreen.init()` creates a password prompt and cover surfaces using the [Lock API](lock.md). The default config calls it after loading the theme.
 
 ## Usage
 
 ```lua
 -- In rc.lua, after beautiful.init()
-require("lockscreen").init()
-
--- Or with custom options
 require("lockscreen").init({
     bg_color = "#000000",
     font_large = "monospace bold 64",
@@ -24,9 +21,7 @@ require("lockscreen").init({
 })
 ```
 
-:::warning
-`lockscreen.init()` must be called **after** `beautiful.init()`, since it reads `beautiful.lockscreen_*` theme variables as fallbacks.
-:::
+Call `init()` once, after `beautiful.init()`. Omit its argument to use theme defaults. Later calls are ignored, including their options.
 
 ## Configuration Options
 
@@ -41,26 +36,22 @@ require("lockscreen").init({
 | `font_large` | string | `"sans bold 48"` | `lockscreen_font_large` | Clock display font |
 | `clock_format` | string | `"%H:%M"` | `lockscreen_clock_format` | Clock format (strftime) |
 | `date_format` | string | `"%A, %B %d"` | `lockscreen_date_format` | Date format (strftime) |
-| `wallpaper` | string/surface/nil | `nil` | `lockscreen_wallpaper` | Image behind the lock UI, letterboxed and centred like the desktop wallpaper. `nil` is a flat `bg_color` |
-| `wallpaper_overlay` | string | `"#000000aa"` | `lockscreen_wallpaper_overlay` | Colour painted over the image. The alpha sets how much it dims; only used when `wallpaper` is set |
 | `lock_screen` | screen/function/nil | `nil` | none | Screen for interactive UI (nil = primary) |
 
 ### Config Resolution Order
 
-For each option, the module checks in order:
+For colour and font options, the module checks in order:
 
 1. `opts.option` (passed to `init()`)
 2. `beautiful.lockscreen_option` (theme variable)
 3. Core `beautiful` variable (e.g., `beautiful.bg_normal` for `bg_color`)
 4. Built-in default
 
-For fonts specifically: `opts.font` > `beautiful.lockscreen_font` > `beautiful.font` > `"sans 14"`.
-
 ## Keyboard Input
 
 | Key | Action |
 |-----|--------|
-| Printable characters | Append unless the password already exceeds 256 bytes |
+| Printable characters | Append one UTF-8 character. Further input is ignored once the password exceeds 256 bytes |
 | `Return` | Submit password for PAM verification |
 | `BackSpace` | Delete last character (UTF-8 aware) |
 | `Escape` | Clear entire password |
@@ -73,7 +64,7 @@ Password characters are displayed as bullets (U+25CF) rather than plaintext.
 The lock screen creates two types of surfaces:
 
 - **Interactive surface** on the primary screen (or the screen specified by `lock_screen`): shows clock, date, password input, and status text.
-- **Cover surfaces** on all other screens: the wallpaper dimmed by the overlay when one is set, otherwise an opaque `bg_color`.
+- **Cover surfaces** on all other screens: opaque background-only wiboxes that block content.
 
 On screen hotplug while locked:
 
@@ -90,14 +81,11 @@ The module connects to these signals internally:
 | `lock::deactivate` | Hide all surfaces, clear password, stop keygrabber |
 | `screen.added` | Create cover for new screen, show if locked |
 | `screen.removed` | Migrate interactive UI or remove cover |
-| `screen` `property::geometry` | Resize and reposition that screen’s lock surface |
 
-## Double-Init Guard
-
-Calling `lockscreen.init()` more than once is safe. The second call is silently ignored. This prevents duplicate signal handlers and surfaces.
+<span id="double-init-guard" />
 
 ## See Also
 
-- [Lock, Idle, and DPMS Reference](lock.md) - Core API
-- [Lockscreen Guide](../guides/lockscreen.md) - Task-oriented examples
-- [Theme Variables](beautiful/theme-variables.md) - `lockscreen_*` variables
+- [Lock, Idle, and DPMS Reference](/docs/next/reference/lock) - Core API
+- [Lockscreen Guide](/docs/next/guides/lockscreen) - Task-oriented examples
+- [Theme Variables](/docs/next/reference/beautiful/theme-variables) - `lockscreen_*` variables

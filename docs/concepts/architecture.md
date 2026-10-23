@@ -1,90 +1,57 @@
 ---
 sidebar_position: 1
 title: Architecture
-description: Lua supplies configuration and layout declarations. A scheduled C-to-Lua notification queue precedes the Clay layout pass and scene reconciliation.
+description: How the C core, Lua libraries, configuration and Clay layout work together.
 ---
 
 # Architecture
 
-SomeWM separates state changes, layout computation and scene rendering. C owns Wayland objects and protocol handling; Lua supplies configuration and policy. Queued notifications reach Lua at the refresh boundary. Each dirty output then follows a common declaration, Clay solve and scene reconciliation path.
+C handles Wayland protocols and core objects. Lua configures their behaviour. Clay calculates layout, and SomeWM's renderer updates the scene that wlroots displays.
 
 ## Who owns the work
 
-```
-┌─────────────────────────────────────┐
-│         User Configuration          │  ~/.config/somewm/rc.lua
-│                                     │  ~/.config/somewm/theme.lua
-├─────────────────────────────────────┤
-│         Lua Libraries               │  awful.*, gears.*, wibox.*
-│         (Default Behavior)          │  naughty, beautiful, ruled
-├─────────────────────────────────────┤
-│         C Core                      │  Compositor, wlroots bindings
-│         (Primitives)                │  Wayland protocols
-└─────────────────────────────────────┘
-```
+<span id="how-the-layers-meet" />
+<span id="from-state-changes-to-a-displayed-frame" />
+<span id="startup" />
+<span id="where-things-live" />
 
-**The C core** is the compositor: Wayland protocols, wlroots (rendering, input, outputs), the core objects, input routing, and the Lua bindings. It exposes `client`, `screen`, `tag`, `output`, `awesome` and `root` to Lua. You do not modify it.
+| Part | Responsibility |
+| --- | --- |
+| C core | Protocols, input, outputs and Lua bindings for `client`, `screen`, `tag`, `output`, `awesome` and `root` |
+| Lua libraries | Window policy, widgets, rules, themes, signals and layout descriptions |
+| Your `rc.lua` and modules | Choose layouts, compose widgets, register bindings and configure rules |
+| Clay | Calculate sizes and positions from the declarations |
+| Renderer and wlroots | Update scene nodes and present application surfaces and desktop content |
 
-**The Lua libraries** are AwesomeWM's, installed with SomeWM and overwritten on update, so override them from your config rather than editing them:
+SomeWM's Lua libraries originated in AwesomeWM but have changed in 2.x. Updates replace the installed libraries. Keep customisations in your configuration rather than editing installed files.
 
 | Library | Purpose |
 | --- | --- |
-| `awful.*` | window management, keybindings, layouts, spawning |
-| `gears.*` | timers, shapes, filesystem, tables |
-| `wibox.*` | widgets, containers, layouts |
-| `beautiful` | theming |
-| `naughty` | notifications |
-| `ruled` | rules for clients and notifications |
+| `awful` | Window management, bindings, layouts and spawning |
+| `gears` | Timers, shapes, filesystem and table helpers |
+| `wibox` | Widgets, containers and widget layouts |
+| `beautiful` | Theme values |
+| `naughty` | Notifications |
+| `ruled` | Rules for clients, notifications and layer surfaces |
 
-**Your configuration** is `rc.lua` (keybindings, tags, rules, layouts) and `theme.lua` (colours, fonts, sizes), both using the libraries:
+## How the parts interact
 
-```lua
-awful.keyboard.append_global_keybindings({
-    awful.key({ "Mod4" }, "Return", function() awful.spawn("alacritty") end),
-})
-```
+Lua reads properties, calls methods and connects signal handlers. For example, `c.floating = true` changes client state, `c:move_to_tag(t)` changes tag membership, and a `focus` handler reacts to a focus event. Client geometry is a method, `c:geometry()`, rather than a writable table property.
 
-## How the layers meet
+Selected C notifications wait until the current operation finishes. The main loop delivers them before `refresh` and layout. Lua-emitted signals and requests needing an immediate response run inline. See [signal timing](signals.md#dispatch).
 
-| Mechanism | Direction | Example |
-| --- | --- | --- |
-| signals | C or a library to your handlers | `client.connect_signal("focus", function(c) c.border_color = "#88c0d0" end)` |
-| properties | Lua reads state and writes changes C applies | `c.floating = true`, `c.geometry = { x = 100, y = 100, width = 800, height = 600 }` |
-| methods | Lua asks for an action | `c:kill()`, `c:move_to_tag(t)`, `t:view_only()` |
+## From state to a displayed frame
 
-The C-to-Lua boundary has explicit dispatch rules. Notifications such as geometry, focus and pointer motion are queued. `some_refresh()` drains them before emitting `refresh` and applying pending updates. This lets their handlers run after the emitting C operation returns. Requests whose answers C needs immediately remain synchronous, as do Lua-emitted signals. [Signals](./signals.md#dispatch) explains the boundary.
+A state change marks affected outputs for an update. Lua prepares widget and client descriptions. C assembles the output tree, Clay calculates geometry, and the renderer applies the resulting commands to the wlroots scene.
 
-## From state changes to a displayed frame
+![Lua declarations feed Clay layout, then SomeWM updates the scene before presentation.](/img/architecture/clay-frame-pipeline.svg)
 
-The configuration and libraries update objects and mark affected outputs dirty. At an output's frame boundary, Lua compiles pending layout descriptions. C assembles the output tree, Clay computes the sizes and positions, and the renderer reconciles the resulting commands into `wlr_scene`.
+Applications supply their own pixels. SomeWM places those surfaces alongside widget content, borders and decorations. [How SomeWM draws](how-somewm-draws.md) explains the layout and rendering stages.
 
-![Lua declarations become one output tree, Clay computes layout in C, and SomeWM reconciles the resulting commands into the wlroots scene.](/img/architecture/clay-frame-pipeline.svg)
+## Startup and reload
 
-Client layouts, bars and widget containers contribute to that same tree. Their geometry is computed in the output pass, and the scene is updated from its completed result. An application still supplies its own surface pixels. wlroots presents the scene after reconciliation.
+`rc.lua` runs before existing clients are managed. It loads the theme and registers handlers. Screen-decoration handlers create tags and bars. Client scanning then requests rules and bindings, manages existing clients, and ends with the `startup` signal. See [startup order](signals.md#startup-order).
 
-The architectural boundary is between **declaring what belongs on the output**, **computing its layout**, and **applying the solved result to the scene**. A widget property setter marks pending work; it does not paint a widget surface immediately. [How SomeWM draws](./how-somewm-draws.md) follows these stages through the main loop and explains what Clay computes.
+`awesome.restart()` rebuilds the Lua state in the same compositor process and runs the configuration again. Application connections survive, but Lua objects, timers and module state are recreated. See [debugging and reload](../guides/debugging.md).
 
-## Startup
-
-1. The C core initialises: wlroots sets up the outputs, the Lua VM starts, the libraries load.
-2. `rc.lua` runs top to bottom, once. `beautiful.init()` early in it loads the theme; `connect_signal` calls register handlers that run later.
-3. `request::desktop_decoration` fires per screen: tags and wibars are created in its handler.
-4. Existing clients are managed: `request::manage` per client.
-5. The event loop runs.
-
-A config reload runs `rc.lua` again in the same process ([Reloading](../guides/debugging.md)).
-
-## Where things live
-
-| To change | Edit | Using |
-| --- | --- | --- |
-| keybindings | `rc.lua` | `awful.keyboard.append_global_keybindings` |
-| colours and fonts | `theme.lua` | `beautiful` variables |
-| layouts | `rc.lua` | `awful.layout.layouts` |
-| window rules | `rc.lua` | `ruled.client.append_rule` |
-| tags | `rc.lua` | `awful.tag()` |
-| the bar | `rc.lua` | `awful.wibar {}` inside the screen handler |
-| notifications | `rc.lua` | `naughty.config`, `ruled.notification` |
-| input devices | `rc.lua` | `awful.input` properties |
-
-[The Object Model](./object-model.md) describes the objects the three layers share.
+[The object model](object-model.md) explains which objects a configuration acts on.

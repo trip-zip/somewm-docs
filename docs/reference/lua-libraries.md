@@ -6,15 +6,13 @@ description: Overview of AwesomeWM's Lua libraries
 
 # Lua Libraries
 
-SomeWM implements AwesomeWM's Lua API. The official [AwesomeWM API documentation](https://awesomewm.org/apidoc/) is the primary reference for all standard libraries.
-
-This section documents SomeWM-specific extensions and notes any behavioral differences from AwesomeWM.
+SomeWM 2.1 uses AwesomeWM-style Lua APIs with its own extensions and removals. Use this version's reference alongside the [compatibility list](deviations.md).
 
 ## Core Libraries
 
 | Library | Purpose | Docs |
 |---------|---------|------|
-| [awful](./awful/) | Window management, keybindings, layouts, client rules | [AwesomeWM docs](https://awesomewm.org/apidoc/) ¹ |
+| [awful](./awful/) | Window management, keybindings and layouts | [AwesomeWM docs](https://awesomewm.org/apidoc/) ¹ |
 | [beautiful](./beautiful/) | Theming and appearance | [AwesomeWM docs](https://awesomewm.org/apidoc/theme_related_libraries/beautiful.html) |
 | [wibox](./wibox/) | Widgets, containers, and the wibar | [AwesomeWM docs](https://awesomewm.org/apidoc/popups_and_bars/wibox.html) |
 | [naughty](./naughty/) | Notifications | [AwesomeWM docs](https://awesomewm.org/apidoc/libraries/naughty.html) |
@@ -29,22 +27,22 @@ These APIs are unique to SomeWM and not available in AwesomeWM:
 | API | Purpose |
 |-----|---------|
 | [awful.input](./awful/input) | Runtime input device configuration |
-| [somewm.inspector](screen.md#somewminspector) | Toggle and restyle the Clay inspector |
 | [somewm-client](./somewm-client) | IPC command-line tool |
-| [output](./output) | Physical output objects that persist across disable/enable |
-| [layer_surface](./layer_surface/) | Layer-shell surfaces (bars, launchers) and their rules |
-| [Shadows](./shadows) | Built-in drop shadows for clients and drawins |
-| [Lock, Idle & DPMS](./lock) | C-level session lock, idle, and display power APIs |
-| [Lockscreen Module](./lockscreen) | The Lua lockscreen UI module |
-| [Tag Persistence](./tag-persistence) | Signals and saved-state schema for tag persistence |
+| [Tag Persistence](./tag-persistence) | Saved state and monitor reconnection |
+| [Lockscreen Module](./lockscreen) | Bundled Lua lockscreen UI |
+| [Carousel](./awful/carousel) | Scrollable tiling layouts |
+| [output](./output) | Monitor configuration and lifecycle |
+| [Lock, idle, and DPMS](./lock) | Session locking and display power |
+| [Shadows](./shadows) | Client and wibox shadows |
+| [layer_surface](./layer_surface/) | External panels and launchers |
 
 ## Other References
 
 | Reference | Description |
 |-----------|-------------|
-| [Screen](./screen) | Screen objects, geometry, and scaling |
+| [Screen](./screen) | Geometry, scaling and lifecycle |
+| [Wayland Protocols](./wayland-protocols) | Advertised protocol versions |
+| [Config Anatomy](./rc-lua-anatomy) | Map of the default config |
 | [Key Names](./key-names) | Modifier keys and key name reference |
 | [Signals](./signals) | Event signals by object type |
-| [Default Keybindings](./default-keybindings) | Built-in keyboard shortcuts |
-| [Compatibility reference](./deviations) | Canonical status list: stubs, partials, SomeWM-only APIs |
-| [Wayland Protocols](./wayland-protocols) | Protocols somewm advertises to clients |
+| [Default Keybindings](./default-keybindings) | Shortcuts in the default config |
