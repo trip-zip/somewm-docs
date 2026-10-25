@@ -6,7 +6,7 @@ sidebar_position: 18
 
 # IPC and Scripting
 
-Every running kiln listens on a unix socket and evaluates whatever Lua you send it, in the same VM your config runs in. Anything your config can do, a shell script can do: the entire API surface is drivable from outside.
+Every running kiln listens on a unix socket and evaluates whatever Lua you send it, in the same VM your config runs in.
 
 ## 1. The socket and the protocol
 
@@ -39,14 +39,14 @@ scripts/kiln-eval 'return #client.all(), #screen.all()'
 Errors come back prefixed `ERROR:` with the Lua message.
 
 :::note
-Raw replies are not capped at 4096 bytes. The CLI `kiln-client eval` takes a
-Lua statement chunk, so use an explicit `return` when asking it for a value.
-`scripts/kiln-eval` uses the raw expression-or-statement evaluator.
+The CLI `kiln-client eval` takes a Lua statement chunk, so use an explicit
+`return` when asking it for a value. `scripts/kiln-eval` uses the raw
+expression-or-statement evaluator.
 :::
 
 ## 3. One-liners
 
-The seven config globals (`client`, `screen`, `tag`, `layer`, `notification`, `drag`, `core`) are available directly; the `kiln` module is one `require` away.
+The seven config globals (`client`, `screen`, `tag`, `layer`, `notification`, `drag`, `core`) are available directly. Over the socket, `kiln` is not a global: use `require("kiln")`. The `local kiln` in your config file is private to that file.
 
 List every client:
 
@@ -87,8 +87,8 @@ Lua: `kiln-client client list`, `kiln-client tag view 2`, `kiln-client theme
 set accent "#ff8800"`, `kiln-client notify --title build done`,
 `kiln-client reload`. It speaks the same socket, adds `--json` for scripts,
 and ships shell completions; see the
-[kiln-client reference](/kiln/reference/kiln-client). Raw eval remains the
-door to anything without a verb.
+[kiln-client reference](/kiln/reference/kiln-client). Use `eval` for anything
+without a verb.
 
 ## 4. Target a nested dev instance
 
@@ -122,12 +122,13 @@ A layout cycler, bindable in any external tool:
 ```bash
 #!/bin/sh
 # kiln-next-layout: cycle the focused tag's layout
-exec scripts/kiln-eval '
+exec kiln-client eval '
 local kiln = require("kiln")
 local t = screen.focused.selected_tag
-if t ~= nil then
-	t.layout = kiln.layout.next(t.layout)
+if t == nil then
+	return ""
 end
+t.layout = kiln.layout.next(t.layout)
 return kiln.layout.name(t.layout) or "custom"'
 ```
 
@@ -136,11 +137,9 @@ A focused-window query for a status bar:
 ```bash
 #!/bin/sh
 # focused-title: print the focused window, empty when none
-exec scripts/kiln-eval \
+exec kiln-client eval \
 	'return client.focus and (client.focus.title or client.focus.app_id) or ""'
 ```
-
-Both are plain request-reply, so they compose with watch loops, status bar exec modules, and cron alike.
 
 ## See also
 

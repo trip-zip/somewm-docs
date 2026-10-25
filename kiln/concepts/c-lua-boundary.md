@@ -6,13 +6,14 @@ sidebar_position: 6
 
 # The Native/Lua Boundary {#the-clua-boundary}
 
-The route and explicit anchor IDs retain their historical C names for stable
-links. Odin now occupies the native side of the same policy boundary; wlroots,
-Clay, rendering libraries and LuaJIT remain C dependencies.
+Odin occupies the native side of the policy boundary: the Wayland
+protocols, the backends, input devices, client buffers and the renderer are
+Odin. Clay, Mesa, libinput, xkbcommon, cairo, pango and LuaJIT remain C
+dependencies.
 
 ## Native core {#what-c-owns}
 
-The Odin core handles wlroots, input devices, client buffers, scene rendering, and PAM authentication. It exposes operations such as focusing a surface and configuring an output.
+The Odin core handles the Wayland protocols, outputs and input devices, client buffers, scene rendering, and PAM authentication. It exposes operations such as focusing a surface and configuring an output.
 
 ## Lua configuration {#what-lua-owns}
 
@@ -26,16 +27,20 @@ Lua calls native functions to focus clients, configure surfaces, and set output 
 
 ## Defaults are policy you can replace
 
-`kiln.defaults` defines the default request handlers. Assign a new function to replace `successor` or `notify_display`, which are read at call time. Other handlers are registered at startup; disconnect the old handler and connect its replacement:
+`kiln.defaults` defines the default request handlers. Assign a new function to any `kiln.defaults` field to replace that policy:
+
+```lua
+kiln.defaults.fullscreen = function(c, on)
+  -- the stock handler does `c.fullscreen = on`
+end
+```
+
+To remove a request handler without a replacement, take the stock function off the bus; the request is then ignored:
 
 ```lua
 client.off("request::fullscreen", kiln.defaults.fullscreen)
-client.on("request::fullscreen", function(c, on)
-  -- your rule; the stock one is simply `c.fullscreen = on`
-end)
 ```
-
-Removing a handler without a replacement leaves the request unhandled. See [defaults](/kiln/reference/defaults) and [Replacing default policies](/kiln/guides/replace-default-policies).
+ See [defaults](/kiln/reference/defaults) and [Replacing default policies](/kiln/guides/replace-default-policies).
 
 ## Direct core access {#core-is-real-but-not-the-surface}
 
@@ -43,7 +48,7 @@ The [`core` global](/kiln/reference/core) exposes the native API used by the sta
 
 ## Why the line is drawn here
 
-Lua configuration can be reloaded without rebuilding the compositor. It uses the same public API as the default desktop.
+Policy lives in Lua so `kiln.reload()` can replace it without restarting, and so your config and the default desktop use the same API.
 
 ## See also
 

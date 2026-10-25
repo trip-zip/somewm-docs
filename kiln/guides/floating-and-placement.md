@@ -6,7 +6,7 @@ sidebar_position: 4
 
 # Floating and Placement
 
-A floating client leaves the tiled order and carries its own box. The placement helpers, interactive move and resize, and the rules that keep a window on screen are all built on those two facts.
+A floating client leaves the tiled order and carries its own box. Placement helpers, mouse move and resize all work by writing `c.float`.
 
 ## 1. Two properties: the flag and the box
 
@@ -24,7 +24,7 @@ Writing either property redraws the client's screens; no extra call is needed.
 
 ```lua
 kiln.key {
-	mods = { "mod" }, key = "space",
+	mods = { "mod", "ctrl" }, key = "space",
 	desc = "toggle floating", group = "client",
 	press = kiln.focused(function(c)
 		c.floating = not c.floating
@@ -32,7 +32,7 @@ kiln.key {
 }
 ```
 
-`kiln.focused(fn)` wraps the handler to receive the focused client, and no-ops when nothing is focused.
+This is the default config's binding (`mod+space` cycles layouts there). `kiln.focused(fn)` wraps the handler to receive the focused client, and no-ops when nothing is focused.
 
 ## 3. Place floats with helpers
 
@@ -40,7 +40,7 @@ Every helper in `kiln.placement` has the signature `helper(c, s)` (screen option
 
 `centered`, `center_horizontal`, `center_vertical`, `left`, `right`, `top`, `bottom`, `top_left`, `top_right`, `bottom_left`, `bottom_right`
 
-Plus three smarter ones:
+Three helpers compute the position:
 
 | Helper | Does |
 |---|---|
@@ -128,7 +128,7 @@ A float-centric setup: toggle and center from keys, drag with the mouse, and dia
 local kiln = require("kiln")
 
 kiln.key {
-	mods = { "mod" }, key = "space",
+	mods = { "mod", "ctrl" }, key = "space",
 	desc = "toggle floating", group = "client",
 	press = kiln.focused(function(c)
 		c.floating = not c.floating
@@ -136,7 +136,7 @@ kiln.key {
 }
 
 kiln.key {
-	mods = { "mod", "shift" }, key = "c",
+	mods = { "mod", "ctrl" }, key = "c",
 	desc = "center float", group = "client",
 	press = kiln.focused(function(c)
 		if c.floating then

@@ -40,7 +40,7 @@ Written by the compositor when the window maps or its metadata changes. Read the
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `handle` | number | seeded | The C-side identity. Key for `core.client.*` and `core.surface`. |
+| `handle` | number | seeded | The native identity. Key for `core.client.*` and `core.surface`. |
 | `x`, `y`, `width`, `height` | number | seeded | Geometry facts. Updated on map and on every size commit. |
 | `app_id` | string | seeded | Wayland app id. |
 | `title` | string | seeded | Window title. |
@@ -62,7 +62,7 @@ Written by the standard library, rules, or your config. All read/write, all emit
 |---|---|---|---|
 | `floating` | boolean | false | Out of the tiled order; the layout declares the client as a float. |
 | `float` | table | seeded on map | The floating box `{x, y, width, height}`. Replace the whole table; one write is one `property::float`. |
-| `fullscreen` | boolean | false | The write is the whole verb: a listener mirrors the protocol hint and redraws. |
+| `fullscreen` | boolean | false | A listener sends the protocol hint and redraws. |
 | `maximized` | boolean | false | Same shape as `fullscreen`. |
 | `minimized` | boolean | false | The client stops being declared: not drawn, not hit, not focusable. Focus moves to the successor. |
 | `ontop` | boolean | false | Band choice; read by the layout at declare time. |
@@ -78,7 +78,7 @@ There is no property allowlist. Any key you write on a client stores and emits `
 
 ### Which property writes redraw
 
-Writes to `floating`, `float`, `ontop`, `urgent`, `titlebar`, `sticky`, `title`, `app_id`, and `icon` mark the client's screen dirty and redraw (so do `fullscreen`, `maximized`, and `minimized`, through their own listeners). Geometry writes do not: `width` and `height` are written on every size commit, and a redraw there would pin the screen at panel rate. A write outside the list still changes state and emits its signal, but draws nothing until the next frame; call `kiln.dirty()` if you need one now.
+Writes to `floating`, `float`, `ontop`, `band`, `urgent`, `titlebar`, `sticky`, `title`, `app_id`, and `icon` mark the client's screen dirty and redraw (so do `fullscreen`, `maximized`, and `minimized`, through their own listeners). Geometry writes do not: `width` and `height` are written on every size commit, and a redraw there would pin the screen at panel rate. A write outside the list still changes state and emits its signal, but draws nothing until the next frame; call `kiln.dirty()` if you need one now.
 
 ## Methods
 
@@ -119,7 +119,7 @@ Writes to `floating`, `float`, `ontop`, `urgent`, `titlebar`, `sticky`, `title`,
 | `map` | none | A window maps. Properties are already seeded when this fires. |
 | `unmap` | none | A window unmaps. |
 | `destroy` | none | A window is destroyed. |
-| `focus` | none | The client gains focus through `c:focus()`. |
+| `focus` | none | The client becomes `client.focus` (through `c:focus()` or a native focus change). |
 | `tagged` | the tag | The client joins a tag. |
 | `untagged` | the tag | The client leaves a tag. |
 | `property::tags` | the new list | The tag membership changed. |

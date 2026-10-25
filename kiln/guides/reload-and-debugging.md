@@ -65,19 +65,17 @@ KILN_SOCK="$kiln_demo/eval.sock" KILN_RC="$PWD/kilnrc.lua" \
   dbus-run-session -- ./build/kiln >"$kiln_demo/server.log" 2>&1
 ```
 
-Follow that exact log from another terminal while the trial is running.
+`tail -f "$kiln_demo/server.log"` from another terminal.
 
 ## 5. See what your config actually built
 
-Errors and logs tell you what broke. Clay's debug inspector tells you what your config built: the live element tree, one row per element, with the solved box for each. Toggle it with `mod+shift+i`.
+Toggle the Clay inspector with `mod+shift+i`; see [Inspect the Live Element Tree](/kiln/guides/inspector).
 
 ## 6. Test changes in a nested instance
 
-Use the private nested command above or
-[First launch](/kiln/getting-started/first-launch). Set `KILN_RC` to a reviewed
-test config, and pass that trial's socket explicitly to each client command.
-Do not guess `WAYLAND_DISPLAY`; use `kiln-client -s PATH exec foot` to
-spawn through the trial's own environment.
+Run the nested command above with `KILN_RC` pointing at the config under
+test. Address it with `kiln-client -s $kiln_demo/eval.sock ...`;
+`kiln-client -s PATH exec foot` starts a client inside it.
 
 For full HOME/config/cache isolation, use
 [Testing headless](/kiln/guides/testing-headless). A private bus and socket alone

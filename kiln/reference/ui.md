@@ -6,7 +6,7 @@ sidebar_position: 8
 
 # kiln.ui
 
-`kiln.ui` is how anything gets on screen in kiln: bars, titlebars, widgets, menus, even the clients themselves are declared as a tree of elements that the Clay solver lays out each frame. There are no widget objects and no update paths. You write a function that declares what the screen looks like right now, and kiln reruns it whenever something changes. Every constructor here maps its cfg onto Clay and adds no policy; the stock taglist, tasklist, clock and their kin are policy, and live one tier up on [`kiln.widgets`](/kiln/reference/widgets).
+`kiln.ui` is how anything gets on screen in kiln: bars, titlebars, widgets, menus, even the clients themselves are declared as a tree of elements that the Clay solver lays out each frame. You write a function that declares what the screen looks like right now, and kiln reruns it whenever something changes. `kiln.ui` declares elements for Clay. The stock widgets built from these are on [`kiln.widgets`](/kiln/reference/widgets).
 
 ```lua
 local kiln = require("kiln")
@@ -23,7 +23,7 @@ end)
 
 ## The declare-time contract
 
-Constructors only work inside a declare function: a bar function, a widget function, or a policy the runtime calls during a frame. Outside a frame they error (`declare primitives are only callable inside the frame handler`). This is deliberate: an element is not an object you build and keep, it is a statement about the current frame. To change what is on screen, change the state your declare function reads; the next frame redeclares from the new facts.
+Constructors only work inside a declare function: a bar function, a widget function, or a policy the runtime calls during a frame. Outside a frame they error (`declare primitives are only callable inside the frame handler`). To change what is on screen, change the state your declare function reads; the next frame redeclares from the new facts.
 
 Container constructors take their children as a closure, so nesting is plain Lua:
 
@@ -81,7 +81,7 @@ Everything else is a documented default, overridden by the ordinary element key:
 
 **The defaults are filled per frame, not when the bar registers.** Assign `kiln.theme.bg` live and every bar that left `color` unset draws the new value on the next frame; the same goes for `bar_height` and the rest.
 
-**There is no `height` key.** The across-edge axis is plain element sizing, `h` on a horizontal bar and `w` on a vertical one. A config carrying `height` from an older kiln gets the default silently, because unknown cfg keys pass through to the element layer, which also ignores them.
+**There is no `height` key.** The across-edge axis is plain element sizing, `h` on a horizontal bar and `w` on a vertical one. `ui.*` ignores unknown cfg keys.
 
 ## The cfg contract
 
@@ -89,7 +89,7 @@ Every `box`, `row`, `column`, and `surface` cfg accepts exactly these fields (`i
 
 | Field | Values | Meaning |
 |---|---|---|
-| `id` | string, or `{ name, index }` | Element id. Needed for handlers, `core.box` readback, and float anchoring, and it is what labels the element in the [inspector](/kiln/guides/inspector). Auto-assigned when absent and a handler is present; an element with neither is anonymous, which is supported but shows as a blank row. Two elements sharing an id in one frame is fatal, so repeated elements need `{ name, index }` with a numeric index. |
+| `id` | string, or `{ name, index }` | Element id. Needed for handlers, `core.box` readback, and float anchoring, and it is what labels the element in the [inspector](/kiln/guides/inspector). Auto-assigned when absent and a handler is present; an element with neither is anonymous, which is supported but shows as a blank row. Two elements sharing an id in one frame raises 'duplicate element id' and that frame is discarded, so repeated elements need `{ name, index }` with a numeric index. |
 | `w`, `h` | number (px), `"fit"`, `"grow"`, `"N%"`, `{ "grow", min =, max = }` | Sizing per axis. Omitted means `"fit"`: the element hugs its children. |
 | `dir` | `"row"`/`"ltr"`, `"column"`/`"ttb"` | Layout direction of the children, on any container. `ui.row` and `ui.column` set it by name; on `ui.box` it defaults to left to right. |
 | `pad` | number, `{ x =, y = }`, or `{ left =, right =, top =, bottom = }` | Padding. |
@@ -161,15 +161,14 @@ ui.box({ id = "row", w = 180, clip = { horizontal = true } }, function()
 end)
 ```
 
-**It needs a clipping ancestor, and this is the part that surprises people.** A
+**It needs a clipping ancestor.** A
 text element is sized to its own glyphs, and its render command reports that
 same width, so there is no "available width" anywhere in the declaration for a
 run to be measured against. What bounds a run is the clip its parent declared.
 Truncation is therefore a property of the pair, not of the text leaf.
 
 Without a horizontally clipping ancestor whose width is fixed independently of
-the text, `ellipsize` does nothing at all, with no error. That is the same
-precondition CSS imposes with `overflow: hidden` plus a bounded box.
+the text, `ellipsize` does nothing at all, with no error.
 
 The wrap mode does not matter. A clipping parent leaves its children at full
 width rather than compressing them, so a `wrap = "words"` run inside a
@@ -192,7 +191,7 @@ A band is a z range convention for floats. `ui.bands`:
 | `fullscreen` | 4000 |
 | `overlay` | 5000 |
 
-A float's effective z is `ui.bands[band] + z`. Equal z resolves by declaration order (the sort is stable), which is how focused-last stacking works inside a band. The in-flow tree sits at z 0, which is why `background` is negative.
+A float's effective z is `ui.bands[band] + z`. Without `band`, `z` is used as given; an unknown band name falls back to `normal`. Equal z resolves by declaration order (the sort is stable), which is how focused-last stacking works inside a band. The in-flow tree sits at z 0, which is why `background` is negative.
 
 Layer-shell surfaces declare into the band their protocol layer names: `background` to `background`, `bottom` to `below`, `top` to `above`, `overlay` to `overlay`.
 

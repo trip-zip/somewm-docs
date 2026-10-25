@@ -68,7 +68,7 @@ kiln.rule { match = { app = "mpv" },
 ```
 
 :::note
-Rules fire at map, before the client has committed a size, so a placement at rule time places the box the client asked for (or the fallback), not the size it may end up drawing at. And `screen.workarea` reflects the last layout solve: inside a screen's own declare it is authoritative, but calling a helper from a keybinding on a multi-monitor setup can read a screen that did not solve last, which falls back to the whole output and loses the bar inset.
+Rules fire at map, before the client has committed a size, so a placement at rule time places the box the client asked for (or the fallback), not the size it may end up drawing at. `screen.workarea` is nil until that screen has solved once; helpers then place against the whole output.
 :::
 
 ## See also

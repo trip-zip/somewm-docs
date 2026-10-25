@@ -29,8 +29,6 @@ ui.box({
 })
 ```
 
-Three things make this work:
-
 - **The band.** `band = "background"` puts the float below the in-flow tree (clients, bar, everything). See [nodes, floats, and bands](/kiln/concepts/nodes-floats-and-bands).
 - **The size.** `s.width` and `s.height` are the screen's logical size, so one declaration fills the output at any scale. On a HiDPI panel the image is rasterized to physical pixels per output; give it a source at least as large as your largest panel's physical resolution and it stays sharp.
 - **`passthrough = true`.** A full-screen float normally captures pointer hits, which would block clicks on the bar and the desktop. With passthrough it stays visible but never blocks; it can still carry its own handlers (a scroll handler, for example).
@@ -65,14 +63,13 @@ local function backdrop(s)
 end
 ```
 
-Three details worth stealing: `w = "grow"` fills the root box rather than
-naming the output size, so it stays correct when a bar takes a strip off
-the screen; the theme color is the fallback fill only when no image resolved
-(a fill and an image on one box are one channel, not two layers); and the
-passthrough float still carries a scroll handler, which is how wheeling over
-empty desktop cycles tags.
+Notes:
 
-Declaring it inside the bar function does not put it inside the bar: `to = "root"` attaches the float to the root of the screen's tree. The bar function is simply the per-frame declare hook a config owns.
+- `w = "grow"` fills the root, the same as `s.width`.
+- The theme color is the fallback fill only when no image resolved: a fill and an image on one box are one channel, not two layers.
+- The passthrough float still carries a scroll handler, which is how wheeling over empty desktop cycles tags.
+
+Declaring it inside the bar function does not put it inside the bar: `to = "root"` attaches the float to the root of the screen's tree. The bar function is where a config declares per-screen elements.
 
 Launch with your own image:
 
@@ -82,20 +79,21 @@ KILN_WALLPAPER=~/Pictures/wall.png kiln
 
 ## Solid color fallback
 
-A backdrop does not need an image at all. Give the box a color, and add the image fill only when a path is set:
+A backdrop does not need an image at all. Give the box the theme color when no path is set, and the image fill when one is:
 
 ```lua
 local wp = os.getenv("KILN_WALLPAPER")
+local has_image = wp ~= nil and wp ~= ""
 ui.box({
   id = "backdrop",
   float = { to = "root", band = "background", passthrough = true },
   w = s.width, h = s.height,
-  color = th.bg,
-  image = (wp ~= nil and wp ~= "") and { path = wp } or nil,
+  color = has_image and nil or th.bg,
+  image = has_image and { path = wp } or nil,
 })
 ```
 
-This is what the full bundled config does: the solid color always renders, and the image covers it when present. A backdrop like this is also a natural place for a desktop scroll handler (`on_scroll` to cycle tags, for example), since it catches events over empty workarea even with passthrough set.
+The bundled config sets `color` only when there is no image.
 
 ## Per-screen wallpapers
 

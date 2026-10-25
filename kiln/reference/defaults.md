@@ -6,7 +6,7 @@ sidebar_position: 12
 
 # kiln.defaults
 
-`kiln.defaults` holds kiln's policy decisions as 10 plain Lua functions. There is no permissions framework and no hook API: each policy is an ordinary field on the table, and a config changes the policy wholesale by replacing the function.
+`kiln.defaults` holds kiln's policy decisions as 10 plain Lua functions. Each policy is an ordinary field on the table, and a config changes the policy wholesale by replacing the function.
 
 ```lua
 local kiln = require("kiln")
@@ -17,19 +17,15 @@ client.off("request::fullscreen", kiln.defaults.fullscreen)
 
 ## The model
 
-The `request::*` client signals route to these functions, and the runtime consults them at decision points. There are two replacement shapes, both spelled out per policy below:
-
-- **Read at call time** (`successor`, `notify_display`): the runtime reads the field every time it needs the policy, so assigning a new function to the field is the whole replacement.
-- **Registered on a bus** (`activate`, `fullscreen`, `maximize`, `minimize`, `close` on client signals; `layer`, `layer_keyboard`, `layer_release` on layer signals): the stock function is subscribed at boot. To replace one, take the stock function off the bus and put yours on:
+Every policy is replaced by assigning to its field (`kiln.defaults.activate = fn`). For the five `request::*` policies (`activate`, `close`, `fullscreen`, `maximize`, `minimize`) the assignment re-subscribes the signal; `client.off("request::x", kiln.defaults.x)` removes the stock handler without a replacement.
 
 ```lua
-client.off("request::activate", kiln.defaults.activate)
-client.on("request::activate", function(c, ctx)
+kiln.defaults.activate = function(c, ctx)
     c:focus()  -- honor every ask, valid token or not
-end)
+end
 ```
 
-Removing a handler without adding a replacement is itself a policy: a request nobody acts on leaves the client exactly where it is, because nothing in C acts on requests.
+If no handler is connected, the request is ignored; nothing native acts on it.
 
 ## The 10 policies
 
@@ -62,7 +58,7 @@ Stock behavior: if `ctx.valid` (the request carries a seat-backed activation tok
 
 Answers a mapped or changed layer-shell surface with a size. Registered on the layer bus for both `map` and `commit`, so it runs on every surface change. See [layer reference](/kiln/reference/layer).
 
-Stock behavior: standard protocol sizing. A desired axis of zero that is anchored to both opposite edges stretches between them minus margins; everything else is honored as asked. Writes `l.w`/`l.h`, sends the configure, and re-declares the screen. A replacement that answers nothing leaves the surface visibly absent; C never synthesizes a configure.
+Stock behavior: standard protocol sizing. A desired axis of zero that is anchored to both opposite edges stretches between them minus margins; everything else is honored as asked. Writes `l.w`/`l.h`, sends the configure, and re-declares the screen. A replacement that answers nothing leaves the surface visibly absent; the core never synthesizes a configure.
 
 ### layer_keyboard(l)
 
@@ -86,7 +82,7 @@ Stock behavior: the built-in notification stack. See [notification reference](/k
 
 Handle `request::fullscreen`, `request::maximize`, `request::minimize`. Registered on the client bus.
 
-Stock behavior: honor the ask with the matching property write, which is the whole verb: `c.fullscreen = on`, `c.maximized = on`, `c.minimized = on`.
+Stock behavior: sets the matching property: `c.fullscreen = on`, `c.maximized = on`, `c.minimized = on`.
 
 ### close(c)
 

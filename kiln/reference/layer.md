@@ -20,7 +20,7 @@ All seeded from the protocol on map and refreshed on every commit. Treat them as
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `handle` | number | seeded | The C-side identity; the key for `core.layer_configure`. |
+| `handle` | number | seeded | The native identity; the key for `core.layer_configure`. |
 | `namespace` | string | seeded | The surface's self-declared namespace (`"waybar"`, `"wallpaper"`, ...). |
 | `output` | string or nil | seeded | The output the client asked for; nil means it left the choice to the compositor. |
 | `screen` | screen | derived | The resolved screen: the named output, else the focused screen. |
@@ -31,6 +31,7 @@ All seeded from the protocol on map and refreshed on every commit. Treat them as
 | `exclusive` | number | seeded | The exclusive zone the surface reserves. |
 | `desired_w`, `desired_h` | number | seeded | The size the surface asked for; 0 on an axis means stretch when anchored to both opposite edges. |
 | `mapped` | boolean | true on map | Liveness. |
+| `buffer_mapped` | boolean | seeded | Whether the surface has attached a buffer; only such surfaces are declared. Set by the `mapped` event, cleared on unmap. |
 | `w`, `h` | number | set by policy | The answered size, written by whichever handler calls `core.layer_configure`. |
 | `kb_granted` | boolean | false | Whether the keyboard policy currently grants the surface the seat. |
 
@@ -42,13 +43,14 @@ As with every kiln object, unknown keys store and emit `property::<key>`.
 |---|---|---|
 | `map` | none | The surface's initial commit. It blocks until a handler answers with `core.layer_configure`. |
 | `commit` | none | The surface committed new facts (anchors, margins, size, interactivity). |
+| `mapped` | none | The surface attached its first buffer; `buffer_mapped` is now true. |
 | `unmap` | none | The surface unmapped. |
 | `destroy` | none | The surface is gone. |
 | `property::<any>` | new value | Any property write that changed the value. |
 
 ## Policy
 
-Layer surfaces carry no built-in behavior; three replaceable policies on `kiln.defaults` decide everything (see [defaults](/kiln/reference/defaults)):
+Three `kiln.defaults` policies size the surface and grant the keyboard (see [defaults](/kiln/reference/defaults)):
 
 | Policy | Runs on | Decides |
 |---|---|---|

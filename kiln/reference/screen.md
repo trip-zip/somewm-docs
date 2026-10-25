@@ -25,14 +25,14 @@ end)
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `workarea` | table | derived | `{x, y, width, height}` left after bars and exclusive layer surfaces, read back from the last solve. Read only. |
-| `canvas` | table | derived | `{x, y, width, height}` of the whole root element from the last solve, bars included. Read only; nil before the first solve. |
+| `canvas` | table | derived | `core.box('root')`: the root element's box, bars included, from the layout most recently read (the last screen solved or queried with `core.hits`), which is not necessarily this screen's. Read only; nil before the first solve. |
 | `scale` | number | 1 | Fractional output scale. Read comes from the output list; writing drives the output's scale. Logical geometry is unchanged by scale. |
 | `selected_tag` | tag or nil | derived | Sugar for `selected_tags[1]`. Writing a tag means `{t}`; writing nil writes `{}`, which the tag layer refuses to leave empty. |
 | `selected_tags` | list of tags | `{}` | The selection fact. Writing it redraws, runs the tag-switch reveal animation, and pushes tag history. |
 | `name` | string | seeded | The output name (for example `"eDP-1"`). Read only. |
 | `width`, `height` | number | seeded | Output size in logical pixels, re-seeded every frame. Do not write. |
 | `tags` | list of tags | `{}` | The screen's tags, in creation order. `tag.new` appends. Read only. |
-| `bars` | list | `{}` | The registered bars, as `{cfg, fn}` pairs. `kiln.ui.bar` appends; each reserves workarea on the edge its cfg names, any of the four. Read only. |
+| `bars` | list | `{}` | The registered bars, as `{ cfg = ..., fn = ... }` entries. `kiln.ui.bar` appends; each reserves workarea on the edge its cfg names, any of the four. Read only. |
 
 ## Class functions and fields
 

@@ -6,7 +6,7 @@ sidebar_position: 14
 
 # App Launcher
 
-An application launcher is a menu of every installed `.desktop` entry, where picking a row spawns its command. kiln does not ship one as a module; you build it from the stdlib menu plus a directory scan and a file parse, both plain Lua. The one launcher-specific ingredient is `kiln.spawn_with_token(cmd)`: it launches the command with an XDG activation token, so the app you asked for arrives able to focus itself.
+kiln ships a typed launcher, `kiln.launcher.open()`, bound to `mod+p` in the default config. This recipe builds a clickable menu of the same entries instead: a stdlib menu over every installed `.desktop` entry, where picking a row spawns its command. The directory scan and the file parse are plain Lua. The one launcher-specific ingredient is `kiln.spawn_with_token(cmd)`: it launches the command with an XDG activation token, so the app you asked for arrives able to focus itself.
 
 Snippets assume the standard config preamble:
 
@@ -148,18 +148,16 @@ ui.box({
 ```
 
 ```lua
-key { mods = { "mod" }, key = "p", desc = "show the menubar", group = "launcher",
+key { mods = { "mod", "shift" }, key = "p", desc = "show the app menu", group = "launcher",
   press = function()
     local s = screen.focused
     kiln.menu.show { under = "apps-btn", screen = s, items = menubar_items() }
   end }
 ```
 
-Dismissal, nesting, and press dispatch all come from the stdlib menu; this recipe only supplies the rows. Install an app and it appears on the next open; uninstall one and it is gone.
+`mod+shift+p` is unbound in the default config; `mod+p` stays on `kiln.launcher.open()`. Dismissal, nesting, and press dispatch all come from the stdlib menu; this recipe only supplies the rows.
 
-:::tip
-Prefer typing to clicking? `kiln.prompt.run` with `kiln.prompt.completion` over the same list gives you a keyboard launcher instead: feed it the app names, look up the `exec` for the completed name in `done`. The scan and parse above are reusable as-is.
-:::
+For a typed launcher, use `kiln.launcher.open()`.
 
 ## See also
 

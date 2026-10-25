@@ -6,7 +6,7 @@ sidebar_position: 9
 
 # kiln.widgets
 
-`kiln.widgets` is the stock widgets: compositions of the [`ui.*`](/kiln/reference/ui) primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion. This is the API's one distinction: `ui.*` maps a cfg table onto Clay and adds no policy, `kiln.widgets.*` is policy a config could have written in the public element API, written once. None of them computes a position, because Clay solves everything. See [the two tiers](/kiln/concepts/the-clay-bet#the-two-tiers) for why the split exists.
+`kiln.widgets` is the stock widgets: compositions of the [`ui.*`](/kiln/reference/ui) primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion. None of them computes a position, because Clay solves everything. See [the two tiers](/kiln/concepts/the-clay-bet#the-two-tiers) for the split between `ui.*` and `kiln.widgets.*`.
 
 ```lua
 local kiln = require("kiln")
@@ -31,21 +31,23 @@ end)
 
 ## Writable by a config
 
-Every stock widget uses only API a config can reach with the same spelling, and a standing check in the kiln repo (`scripts/widget-lint.sh`) fails the build of any widget that reaches for a private door. The vocabulary, beyond `ui.*` and `kiln.widgets` itself:
+Every stock widget uses only API a config can reach with the same spelling. `make check` runs `scripts/widget-lint.sh`, which rejects any name outside this list (beyond `ui.*` and `kiln.widgets` itself):
 
 | Name | What a widget uses it for |
 |---|---|
 | [`core.box`](/kiln/reference/core) | Read back an element's solved box. The sanctioned answer to "where did Clay put it"; the slider depends on it. |
 | [`core.dirty`](/kiln/reference/core) | Mark a screen dirty so the next frame redeclares. |
-| [`core.timer`](/kiln/reference/core) | One-shot timer; the clock arms one per minute rollover. |
+| [`core.timer`](/kiln/reference/core), [`core.timer_cancel`](/kiln/reference/core) | One-shot timer and its cancel; the clock arms one per minute rollover. |
 | [`core.tray_activate`](/kiln/reference/core) | Forward a press or scroll to a status-notifier item. |
 | [`core.input.set_cursor`](/kiln/reference/core) | Set the pointer image; the resize handles set the edge cursors. |
 | `kiln.theme` | Colors and metrics. The same table `state.theme` names inside the stdlib. |
 | `client` | The client global: `client.focus`, the properties a row draws. |
-| `kiln.icon`, `kiln.grab`, `kiln.layout`, `kiln.systray` | Icon resolution, pointer grabs, the layout registry, the tray registry. |
+| `screen.all` | The screen list. |
+| `kiln.icon`, `kiln.layout`, `kiln.systray` | Icon resolution, the layout registry, the tray registry. |
+| `kiln.keygrabber`, `kiln.mousegrabber` | Grabs. The widgets reach them through `require("kiln.grab")`, the module both names come from. |
 
 :::note
-`core.box` returns nil before the first solve and for anything not in the current frame. A widget that reads its own box therefore needs a stable `id`, which is why `widgets.slider` errors without one.
+`core.box` returns nil until the element has been solved once, so a widget that reads its own box needs a stable `id`; `widgets.slider` errors without one.
 :::
 
 ## Form widgets
@@ -116,7 +118,7 @@ The stock bar cells. Each declares under a stable id the inspector and the docs 
 
 ### widgets.filter
 
-A tasklist filter is a predicate `(client, screen)`, not a class and not a registry: the extension point is "write a function", and any rc.lua predicate is these three's equal.
+A tasklist filter is a predicate `(client, screen)`, not a class and not a registry: the extension point is "write a function", and a config's own predicate works the same way.
 
 | Filter | Keeps |
 |---|---|

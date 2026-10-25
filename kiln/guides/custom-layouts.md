@@ -14,7 +14,7 @@ function my_layout(clients, area, tag)
 end
 ```
 
-The runtime calls it every frame with the tiled clients of the visible tag, in stacking order, inside a workarea container it has already opened. The function declares [ui containers](/kiln/reference/ui) and one `kiln.widgets.client(c)` leaf per client; the solver turns those declarations into geometry and configures every client to its cell. There is no arrange pass, no geometry storage, and nothing to invalidate: the function just runs again whenever the screen redraws.
+kiln calls it each time it redeclares the screen (after any change marks it dirty), with the selected tag's tiled clients in stacking order, inside a workarea container it has already opened. The function declares [ui containers](/kiln/reference/ui) and one `kiln.widgets.client(c)` leaf per client; the solver turns those declarations into geometry and configures every client to its cell. There is no arrange pass, no geometry storage, and nothing to invalidate.
 
 ## 1. The smallest layout
 
@@ -78,40 +78,21 @@ The second column is only declared when it has clients, for the empty-container 
 
 Layouts take their knobs from plain tag properties. The stock layouts read `master_width_factor` (default 0.5), `master_count` (1), `column_count` (1), `gap` (theme default), and `carousel_width` (0.5). Writing any of them redraws the screen, so a keybinding that nudges `master_width_factor` reshapes your layout live with no extra wiring.
 
-To make the left column's width configurable, size it with a percent string derived from the factor, the same way the stock `tile` does:
+To make the left column's width configurable, size it with a percent string derived from the factor, the same way the stock `tile` does. In `twocol`, compute the width and pass it to the first column (the [complete example](#complete-example) has the whole function):
 
 ```lua
-local function twocol(cs, area, t)
-	if #cs == 0 then
-		return
-	end
 	local f = (t and t.master_width_factor) or 0.5
-	local gap = (t and t.gap) or kiln.theme.gap
-	local half = math.ceil(#cs / 2)
 	-- The percent form only makes sense when both columns exist.
 	local left_w = #cs > half and (f * 100) .. "%" or "grow"
-	ui.row({ w = "grow", h = "grow", gap = gap }, function()
+	-- ...
 		ui.column({ w = left_w, h = "grow", gap = gap }, function()
-			for i = 1, half do
-				kiln.widgets.client(cs[i])
-			end
-		end)
-		if #cs > half then
-			ui.column({ w = "grow", h = "grow", gap = gap }, function()
-				for i = half + 1, #cs do
-					kiln.widgets.client(cs[i])
-				end
-			end)
-		end
-	end)
-end
 ```
 
 Now `mod` bindings that adjust `t.master_width_factor` (see the [keybindings tutorial](/kiln/tutorials/keybindings)) drive your layout too.
 
 ## 4. The model: how the stock tile works
 
-The stock `tile` is the same two moves at a slightly larger scale, and it is worth internalizing as the idiom. Simplified to its shape:
+The stock `tile`, simplified:
 
 ```lua
 local function tile(cs, area, t)
@@ -142,8 +123,6 @@ local function tile(cs, area, t)
 	end)
 end
 ```
-
-Open a container, fill it with runs of grow cells, never declare an empty run. Everything else (the split axis, variants, column counts) is arrangement of the same parts.
 
 ## 5. Register it
 
@@ -181,7 +160,7 @@ Most layouts never touch the `area` argument: sizing with `"grow"` and percent s
 - fixed pixel column widths (the stock `carousel` computes its strip offset from `area.width`)
 - centered floats sized relative to the workarea (the stock `magnifier` sizes its focused float as `area.width * f`)
 
-`area` comes from the previous frame's solve, so it is one frame stale after a bar or gap change; the first frame falls back to the whole screen. Treat it as a good approximation, not a promise, and prefer solver-driven sizing wherever the design allows.
+`area` comes from the previous frame's solve, so it is one frame stale after a bar or gap change; the first frame falls back to the whole screen. Use `area` only where pixel arithmetic is unavoidable.
 
 ## Complete example
 

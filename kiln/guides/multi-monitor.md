@@ -10,7 +10,7 @@ kiln has no multi-monitor mode. Outputs arrive and leave as ordinary screen obje
 
 ## 1. The screen lifecycle
 
-Screens are objects that arrive and leave with their outputs. Three class signals cover the lifecycle:
+Three class signals cover the lifecycle:
 
 ```lua
 screen.on("added", function(s)
@@ -27,8 +27,6 @@ end)
 ```
 
 `screen.all()` returns every live screen in the order they appeared, and `screen.focused` is the active one, following both client focus and pointer movement. Each screen has a stable `s.name`, the output connector: `"eDP-1"`, `"DP-2"`, `"HDMI-A-1"`.
-
-`added` is where a config builds its per-screen world, which is why even single-monitor configs put tags and bars inside it: the same code then handles a projector being plugged in.
 
 ## 2. Per-screen tags and bars
 
@@ -60,7 +58,7 @@ screen.on("added", function(s)
 end)
 ```
 
-On `changed`, the screen's geometry (`s.width`, `s.height`) refreshes on the next frame and bars, layer surfaces, and layouts re-solve automatically; a config only needs a `changed` listener when it keeps derived state of its own, and `core.output.list()` has the fresh facts when it does.
+On `changed`, the screen's geometry (`s.width`, `s.height`) refreshes on the next frame and bars, layer surfaces, and layouts re-solve automatically; a config only needs a `changed` listener when it keeps derived state of its own; read current geometry from `core.output.list()`.
 
 ## 3. Move clients across screens
 
@@ -93,7 +91,7 @@ Switching which screen is active without moving anything is a plain write: `scre
 
 Unplugging a monitor does not lose windows. Before `removed` fires, the runtime moves every client from the dead screen onto a surviving screen's selected tag, and moves `screen.focused` off the dead screen. Your `removed` listener runs after that, so it is for your own cleanup (state you keyed by screen name), not for rescuing clients.
 
-The stock rehoming is deliberately simple: everything lands on one tag. If you want tag arrangements restored when the monitor comes back, see [Tag Persistence](/kiln/guides/tag-persistence).
+All rehomed clients land on the survivor's selected tag. If you want tag arrangements restored when the monitor comes back, see [Tag Persistence](/kiln/guides/tag-persistence).
 
 ## 5. Static output configuration
 
@@ -101,8 +99,8 @@ kiln has no output configuration GUI protocol: tools like wdisplays and kanshi r
 
 | Verb | Does |
 |---|---|
-| `core.output.list()` | every output's facts: `name, width, height, refresh, scale, x, y, enabled`, and its `modes` list |
-| `core.output.set_mode(name, w, h, refresh?)` | pick a mode |
+| `core.output.list()` | every output's facts: `name, width, height, refresh, scale, x, y, enabled` (plus `non_desktop` for a headset), and its `modes` list |
+| `core.output.set_mode(name, w, h, refresh?)` | pick an advertised mode; a size the display does not advertise is rejected |
 | `core.output.set_position(name, x, y)` | place the output in layout coordinates |
 | `core.output.set_scale(name, f)` | set (fractional) scale |
 | `core.output.set_enabled(name, on)` | switch the output on or off |

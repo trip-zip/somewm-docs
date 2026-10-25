@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # The Clay Bet
 
-kiln is built on one idea: the entire visible surface of each screen is a single [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, the contents of your tags, menus, notifications, the wallpaper: every one of them is a node in that tree. There is no window layer and a separate widget layer, no widget pass and a separate window pass. One tree, solved as a whole, every frame that needs drawing.
+kiln is built on one idea: the entire visible surface of each screen is a single [Clay](https://github.com/nicbarker/clay) layout tree. Windows, bars, widgets, the contents of your tags, menus, notifications, the wallpaper: every one of them is a node in that tree.
 
 ## What Clay does
 
@@ -24,6 +24,8 @@ The whole sizing vocabulary is four rules, set per axis:
 A container lays its children out in one of two directions, left to right or top to bottom.
 
 ![Three cells in one row, labelled w = 180, w = "grow" and w = "25%", each drawn at the width Clay solved for it](/img/kiln/clay/01-sizing.png)
+
+*Figures captured from an earlier build; the layout is unchanged.*
 
 ```lua
 ui.row({ w = "grow", h = 108, gap = 10 }, function()
@@ -47,7 +49,7 @@ ui.row({ pad = 14, gap = 12 }, function()
 end)
 ```
 
-Those badges are themselves Clay elements, floated out of flow, which is why naming a container does not change how it was solved: both cards above are identical.
+The labels are floats, so they take no space; the two cards are solved identically.
 
 ### Going further into Clay
 
@@ -55,10 +57,8 @@ Those badges are themselves Clay elements, floated out of flow, which is why nam
 - [The Clay README](https://github.com/nicbarker/clay#readme) is the documentation: the concepts, the full API, and every element macro.
 - [nicbarker.com/clay](https://www.nicbarker.com/clay) is Clay laying out its own website, compiled to WebAssembly. The debug panel there is Clay's built-in inspector, the same one kiln embeds (see [Inspect the Live Element Tree](/kiln/guides/inspector)).
 
-Kiln uses unmodified upstream Clay `e6cc369` and its official Odin binding,
-pinned by `clay-dependency.json`. The retired C baseline retains its own v0.14
-header for comparison. Read the source pin for exact behaviour and this site
-for the public configuration API.
+kiln vendors unmodified upstream Clay (revision `e6cc369`, v0.14) and its
+official Odin binding in `clay/`. Cite `clay/clay.h` for exact behaviour.
 
 ## One tree, the whole screen
 
@@ -67,7 +67,7 @@ Every screen runs the same cycle:
 1. Something marks the screen dirty (a client mapped, a tag switched, a property changed).
 2. Lua declares a fresh node tree for that screen: your bars, the selected tag's layout with its clients, any floats, menus, and notifications.
 3. Clay solves the tree: every node gets a box.
-4. A thin retained renderer in Odin reconciles the solved boxes into `wlr_scene`, the scene graph wlroots actually presents.
+4. A thin retained renderer in Odin reconciles the solved boxes into the scene, the part list kiln's GLES renderer draws and presents.
 
 The declaration is cheap and rebuilt from scratch; the reconcile is incremental. Nothing happens between dirty frames. See [Frames and Dirty State](/kiln/concepts/frames-and-dirty) for when a frame is produced.
 
@@ -111,27 +111,23 @@ A titlebar and the window under it are siblings, differing only in who supplies 
 
 The API splits along one line, and the bar above shows both sides of it. [`ui.*`](/kiln/reference/ui) is the primitives: each constructor maps a cfg table onto one Clay concept and adds no policy. [`kiln.widgets.*`](/kiln/reference/widgets) is the stock widgets: compositions of those primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion about what a taglist or a titlebar should be.
 
-The distinction is enforced, not aspirational. Every stock widget is written in public API a config can reach with the same spelling, and a standing check in the kiln repo fails any widget that uses a private door. So the stock widgets hold no privileged position: `kiln.widgets.taglist` is what your config would have written, written once, and replacing it is one assignment, because every caller reaches it through the module table.
+`scripts/widget-lint.sh` (run by `make check`) rejects any stock widget that reads a name outside the public API. Replacing a widget is one assignment, because every caller goes through the `kiln.widgets` table.
 
-## What this deletes
+## Consequences {#what-this-deletes}
 
-**Tiling layouts contain no rectangle arithmetic.** A traditional tile layout is a page of geometry math: divide the width, subtract the gaps, round, assign. kiln's declares a master container sized as a percentage beside a stack of `grow` cells. `master_width_factor` is that percentage:
+**Tiling layouts contain no rectangle arithmetic.** A traditional tile layout is a page of geometry math: divide the width, subtract the gaps, round, assign. kiln's tile layout declares a master container sized as a percentage beside a stack of `grow` cells. `master_width_factor` is that percentage:
 
 ![The same layout function at master_width_factor 0.4 and 0.75, with the master column visibly wider in the second](/img/kiln/clay/05-mwfact.png)
 
 Layouts are ordinary Lua functions that declare nodes, so writing your own is short: see [Custom layouts](/kiln/guides/custom-layouts) and the [layout reference](/kiln/reference/layout).
 
-**Hit testing is Clay's order.** A click asks Clay what is under the point, innermost first, in the same tree that was drawn. No second bookkeeping structure can disagree with the screen: if a menu draws over a button, the menu gets the click. See [Nodes, Floats, and Bands](/kiln/concepts/nodes-floats-and-bands).
+**Hit testing is Clay's.** Widget hit testing asks Clay what is under the point, innermost first, in the tree that was drawn. Inside a client's box, the scene decides (so popups that overhang the box get clicks). See [Nodes, Floats, and Bands](/kiln/concepts/nodes-floats-and-bands).
 
 **There is no separate widget toolkit.** A widget is not an object with a draw method. It is a function that declares nodes, using the constructors the layouts and the titlebar already use. The stock ones live on [`kiln.widgets`](/kiln/reference/widgets); building your own is the [widgets tutorial](/kiln/tutorials/widgets).
 
 ## Two retained trees
 
-wlroots already ships a retained scene graph, so kiln keeps two: Clay's tree and the scene's. That redundancy is the price, and the bet is that Clay pays it by owning layout and hit testing so nothing else has to. What the model deliberately excludes is documented in [Limitations](/kiln/concepts/limitations), and how the work splits between Odin and Lua is in [The Native/Lua Boundary](/kiln/concepts/c-lua-boundary).
-
-*These figures are historical C Kiln headless captures, generated by
-`npm run generate:figures`. They illustrate the layout model, not new evidence
-for the current renderer.*
+kiln keeps two retained trees: Clay's tree and its own scene, the part list the renderer draws from and diffs for damage. Keeping both costs memory and a reconcile pass; in return, layout and widget hit testing live only in Clay. What the model deliberately excludes is documented in [Limitations](/kiln/concepts/limitations), and how the work splits between Odin and Lua is in [The Native/Lua Boundary](/kiln/concepts/c-lua-boundary).
 
 ## See also
 

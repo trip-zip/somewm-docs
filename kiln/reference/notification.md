@@ -24,7 +24,7 @@ end)
 
 ## `kiln.notify{...}`
 
-Creates a notification, or updates one in place when `id` names a live one (a volume popup is exactly this: same id, new value, no flicker). Returns the notification object.
+Creates a notification, or updates one in place when `id` names a live one. Returns the notification object.
 
 | Property | Type | Default | Description |
 |---|---|---|---|
@@ -64,7 +64,7 @@ All listed properties are live on the object: writing `title`, `message`, `urgen
 
 | Signal | Payload | Emitted when |
 |---|---|---|
-| `added` | none | A notification is created, before it is displayed. Mutate it here (a three-line rule) and the first frame draws what you wrote. |
+| `added` | none | A notification is created, before it is displayed. Mutate it here and the first frame draws what you wrote. |
 | `dismissed` | reason | The notification ended, for any reason. |
 | `invoked` | action key | An action button fired. |
 | `property::<any>` | new value | Any property write that changed the value. |

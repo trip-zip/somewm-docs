@@ -6,12 +6,7 @@ sidebar_position: 2
 
 # Inspect the Live Element Tree
 
-kiln embeds Clay's own debug panel. Not a reimplementation and not a screenshot tool: `Clay_SetDebugModeEnabled` turns on the inspector that ships inside `clay.h`, walking the same tree the solver just used to lay out the screen you are looking at. It is the same panel you can try on [nicbarker.com/clay](https://www.nicbarker.com/clay), pointed at a desktop instead of a website.
-
-![Historical C Kiln inspector capture](/img/kiln/inspector.png)
-
-This image is from C Kiln. The Odin inspector uses the pinned upstream Clay
-panel and its default palette; a new physical Odin capture is pending.
+kiln embeds Clay's own debug panel: `Clay_SetDebugModeEnabled` turns on the inspector that ships inside `clay.h`, walking the same tree the solver just used to lay out the screen you are looking at. It is the same panel you can try on [nicbarker.com/clay](https://www.nicbarker.com/clay), pointed at a desktop instead of a website.
 
 ## Open it
 
@@ -37,7 +32,7 @@ kiln-client eval 'require("kiln").inspector()'
 
 The panel takes 400px off the right of the screen it is open on, and it does not cover the desktop: the root narrows and everything reflows into what is left, so bars and tiled clients move while it is open and return when you close it.
 
-That is worth knowing before you use it to debug a layout, because the layout you are reading is being solved 400px narrower than usual. An element sized in percentages, or one that wraps, will not be showing you the numbers it has when the panel is shut.
+While it is open, the layout is solved 400px narrower than usual. An element sized in percentages, or one that wraps, will not be showing you the numbers it has when the panel is shut.
 
 ## What is in there
 
@@ -48,7 +43,7 @@ That is worth knowing before you use it to debug a layout, because the layout yo
 - Wheel over either pane to scroll it. Clicks and wheels over the panel never reach your clients or your root bindings, so you cannot misfire a binding into the desktop while reading it.
 - With nothing selected, the bottom pane lists Clay's own warnings for the frame instead.
 
-Because the tree is the whole screen, so is the panel's contents: your bars, the selected tag's layout, every tiled client, floats, menus and notifications are all rows in it. There is no separate widget tree to inspect, because there is no separate widget tree.
+Because the tree is the whole screen, so is the panel's contents: your bars, the selected tag's layout, every tiled client, floats, menus and notifications are all rows in it.
 
 Desktop screens only. The lockscreen solves into its own Clay context and cannot be inspected.
 
@@ -59,7 +54,7 @@ Some rows have no name. Those are elements declared without an `id`: `ui.box`, `
 Giving an element an id is a pure annotation. It changes nothing about layout or behaviour:
 
 ```lua
-ui.column({ id = "statusbar", h = 28, color = theme.bg }, function()
+ui.column({ id = "statusbar", h = 28, color = kiln.theme.bg }, function()
 	ui.row({ id = "statusbar.left", gap = 8 }, function()
 		-- ...
 	end)
@@ -69,7 +64,7 @@ end)
 Do it for anything you expect to come back to, for two reasons:
 
 - The row is labelled in the tree, and that same name is what [`core.hits`](/kiln/reference/core) reports under a point and what `core.box("statusbar")` reads the solved box back by.
-- The identity holds still. An unnamed element is identified by its position among its siblings, so inserting a sibling ahead of it makes it a different element: its collapsed state resets, and a selection lands on a different row. Nothing warns you, and it happens exactly when the tree is most interesting, which is when a client maps or a widget appears conditionally.
+- The identity holds still. An unnamed element is identified by its position among its siblings, so inserting a sibling ahead of it makes it a different element: its collapsed state resets, and a selection lands on a different row. This happens when a client maps or a conditional element appears.
 
 Repeated elements need the table form, with a number as the second field:
 
@@ -82,14 +77,15 @@ end
 ```
 
 Do not reuse an id in one frame. A bare `id = "task"` inside a loop conflicts
-with its siblings. Odin rejects a failed declaration and keeps the previous
-published scene; it does not promise private inspector rollback. A non-numeric
-second field is rejected as a config error.
+with its siblings. A frame with a duplicate id fails; kiln keeps showing the
+previous frame. A non-numeric second field is rejected as a config error.
 
-## Restyle it
+## Set width and state from code {#restyle-it}
 
 Panel width and enabled state go through `core.inspector`, which also reads
-the current state back. Custom colours are unsupported and raise an error:
+the current state back. Only `width` and `enabled` are accepted; any other key
+raises an error. `core.inspector` cannot change state during a declare (it
+raises an error):
 
 ```lua
 core.inspector("eDP-1", {
@@ -107,10 +103,8 @@ core.inspector("eDP-1")        --> true
 core.inspector("eDP-1", false) --> false
 ```
 
-The width is process-wide and affects all inspected outputs. Palette styling
-is deferred because the pinned upstream public binding does not expose the
-required private colours. A rejected raster may advance private selection,
-and a rejected toggle needs retry. See the [core reference](/kiln/reference/core).
+The width is process-wide and affects all inspected outputs. See the
+[core reference](/kiln/reference/core).
 
 ## See also
 

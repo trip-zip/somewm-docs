@@ -6,7 +6,7 @@ sidebar_position: 9
 
 # Input Devices
 
-Input configuration is a set of plain read/write properties on `kiln.input`. Writing one applies it; reading one returns the last value you wrote (there is no readback from the hardware). The [kiln.input reference](/kiln/reference/kiln#kilninput) lists all 11 properties with their defaults.
+Input configuration is a set of plain read/write properties on `kiln.input`. Writing one applies it; reading one returns the last value you wrote (there is no readback from the hardware). `repeat_rate` and `repeat_delay` start at 25 and 600; the others read nil until written. The [kiln.input reference](/kiln/reference/kiln#kilninput) lists all 11 properties with their defaults.
 
 ## 1. Keyboard layout
 
@@ -67,7 +67,7 @@ kiln.input.repeat_delay = 300
 kiln.input.numlock = true
 ```
 
-Rate and delay always travel together to the keyboard, which is why both have defaults: writing one keeps the other's current value.
+Writing one keeps the other's current value (defaults 25/s and 600 ms).
 
 ## 4. Set up the touchpad and mouse
 
@@ -85,7 +85,7 @@ Each write sends only that field; everything else on the device is untouched. A 
 ## 5. The all-devices caveat
 
 :::warning
-Input settings apply to every device of their kind: there is no per-device targeting. A pointer write configures all pointer devices present at that moment, and a device plugged in later starts with its own defaults until the property is written again. If you hotplug mice or keyboards regularly, re-apply your settings from a bind, or simply reload the config, which re-runs the writes.
+Input settings apply to every device of their kind: there is no per-device targeting. A pointer write configures all pointer devices present at that moment, and a device plugged in later starts with its own defaults until the property is written again. If you hotplug mice or keyboards regularly, re-apply your settings from a bind, or reload the config, which re-runs the writes.
 :::
 
 ## See also

@@ -6,21 +6,14 @@ sidebar_position: 10
 
 # Lockscreen and Idle
 
-Kiln implements a native compositor lock and the external session-lock
-protocol. The Odin implementation uses asynchronous PAM authentication for the
-native lock. The operator reported successful physical lock/unlock after being
-instructed to check coverage, rejected credentials, normal login-password
-unlock and restored input. Those individual substeps and every output were not
-independently instrumented. External physical locking remains pending; automated
-authentication uses a separate compile-time fixture. See
-[Limitations](/kiln/concepts/limitations).
-
-Keep an independent recovery connection for physical trials. Protocol and
-software tests are not a security guarantee for every hardware configuration.
+kiln has a built-in lockscreen that authenticates through PAM, and it
+implements ext-session-lock-v1 for external lockers. See
+[Limitations](/kiln/concepts/limitations) for what is untested. Keep an SSH
+session open the first time you test locking.
 
 ## 1. The lock model
 
-`kiln.lock()` engages kiln's built-in session lock. From that instant, input is quarantined by the compositor core: no keybinding, no config code, and no client can see keystrokes until the session unlocks. The native lockscreen draws a clock and a password prompt over an opaque cover; typing your password and pressing Enter authenticates against PAM, and only a PAM success opens the unlock gate. `kiln.unlock()` exists, but the compositor refuses it unless authentication has already succeeded, so the lock cannot be bypassed from a script.
+`kiln.lock()` engages kiln's built-in session lock. From that instant, the compositor stops delivering keys and pointer events to bindings, config code and clients until unlock. The native lockscreen draws a clock and a password prompt over an opaque cover; typing your password and pressing Enter authenticates against PAM, and only a PAM success opens the unlock gate. `kiln.unlock()` exists, but the compositor refuses it unless authentication has already succeeded, so the lock cannot be bypassed from a script.
 
 Bind it like any other action:
 
@@ -36,7 +29,7 @@ On the lockscreen itself: Enter submits, Backspace deletes, Escape clears the fi
 
 ## 2. Style the native lockscreen
 
-`kiln.lockscreen.configure{}` overrides any of the lockscreen's appearance keys (colors, text sizes, clock and date formats, prompt strings); unset keys keep their defaults. The [kiln.lockscreen reference](/kiln/reference/kiln#kilnlockscreen) lists all 11 keys.
+`kiln.lockscreen.configure{}` overrides any of the lockscreen's appearance keys (colors, text sizes, clock and date formats, prompt strings); unset keys keep their defaults. The [kiln.lockscreen reference](/kiln/reference/kiln#kilnlockscreen) lists every key.
 
 ```lua
 kiln.lockscreen.configure {
@@ -48,24 +41,24 @@ kiln.lockscreen.configure {
 
 ## 3. Auto-lock on idle
 
-Idle is a compositor fact with one verb and three events. `kiln.set_idle_timeout(ms)` arms a timer that fires after that much time with no input; `nil` or `0` disarms it. The events arrive on the global bus:
+kiln has one idle call and three idle events. `kiln.set_idle_timeout(ms)` arms a timer that fires after that much time with no input; `nil` or `0` disarms it. The events arrive on the global bus:
 
 - `kiln.on("idle::start", fn)` fires once when the timer elapses.
 - `kiln.on("idle::stop", fn)` fires on the first input afterwards. The two strictly alternate.
 - `kiln.on("idle::inhibit", fn)` fires with a boolean when a client's idle inhibitor becomes visible or stops being visible (a video player holds one while its window is on screen).
 
-The whole of auto-lock is arming the timer and pointing `idle::start` at the lock:
+Auto-lock:
 
 ```lua
 kiln.set_idle_timeout(5 * 60 * 1000)   -- five minutes
 kiln.on("idle::start", kiln.lock)
 ```
 
-You can point `idle::start` at anything: dim the screen first, check battery state, or skip locking on a desktop. `idle::stop` is the natural place to undo a dim.
+You can point `idle::start` at anything: dim the screen first, check battery state, or skip locking on a desktop. Undo a dim in `idle::stop`.
 
 ## 4. Respect a playing video
 
-The idle timer and the inhibit fact are deliberately separate: the timer fires on wall-clock inactivity even while an inhibitor is up, and whether a video should block locking is your call, made in a few lines:
+The idle timer and the inhibit event are deliberately separate: the timer fires on wall-clock inactivity even while an inhibitor is up, and whether a video should block locking is your call, made in a few lines:
 
 ```lua
 local inhibited = false
@@ -94,10 +87,9 @@ end)
 
 ## 5. External lockers
 
-The ext-session-lock protocol has isolated software coverage. A compatible
-external locker engages compositor-side quarantine and supplies its own surface
-and authentication; physical deployment must still be tested with recovery
-available. Point `idle::start` at the locker instead:
+An ext-session-lock client such as swaylock locks the session and handles
+its own drawing and authentication. kiln withholds input from everything else
+until it unlocks. Point `idle::start` at the locker instead:
 
 ```lua
 kiln.on("idle::start", function()
@@ -105,7 +97,7 @@ kiln.on("idle::start", function()
 end)
 ```
 
-Everything else on this page (`set_idle_timeout`, the idle events, the inhibit fact) works identically with an external locker; only the drawing and the authentication move out of kiln.
+`set_idle_timeout`, the idle events and the inhibit event work identically with an external locker; only the drawing and the authentication move out of kiln.
 
 ## Complete example
 

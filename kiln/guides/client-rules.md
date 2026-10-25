@@ -12,9 +12,8 @@ A rule runs when a client maps, before it takes focus. It is the place to say "t
 local kiln = require("kiln")
 
 kiln.rule {
-	match = { dialog = true },
-	props = { floating = true },
-	on = kiln.placement.centered,
+	match_any = { app = { "firefox" }, class = { "firefox" } },
+	props = { tag = "web" },
 }
 ```
 
@@ -32,7 +31,7 @@ kiln.rule {
 }
 ```
 
-- **`props` writes properties; `on(c)` runs code.** Placement lives in `on`, because a placement helper is just a function of the client. Sending a client to a tag never switches the view to that tag; if you want to follow it, do so in `on(c)`.
+- **`props` writes properties; `on(c)` runs code.** Placement goes in `on`: helpers are functions that take the client and write `c.float`. Sending a client to a tag never switches the view to that tag; if you want to follow it, do so in `on(c)`.
 
 :::warning
 A rule with no selector at all matches nothing, not everything. To match every client, use an explicit always-true predicate: `match = { fn = function() return true end }`.
@@ -40,7 +39,7 @@ A rule with no selector at all matches nothing, not everything. To match every c
 
 ## Ordering: every match applies
 
-Rules are not first-match. Every rule that matches a client applies, in the order the rules were declared, and a later rule overrides an earlier one's props. That makes broad-then-specific stacking natural: a catch-all placement rule first, app-specific overrides after it.
+Rules are not first-match. Every rule that matches a client applies, in the order the rules were declared, and a later rule overrides an earlier one's props. Declare catch-all rules first and app-specific overrides after them.
 
 ```lua
 -- Every client: place new floats in free space, and never off screen.
@@ -59,16 +58,7 @@ Rules only apply to normal windows; X11 override-redirect surfaces (menus, toolt
 
 ## Worked example: browser to its own tag
 
-Assuming a tag named `"web"` exists (created in your `screen.on("added")` handler):
-
-```lua
-kiln.rule {
-	match_any = { app = { "firefox" }, class = { "firefox" } },
-	props = { tag = "web" },
-}
-```
-
-To jump to the browser when it opens, add the follow in `on`:
+The opening rule assumes a tag named `"web"` exists (created in your `screen.on("added")` handler). To jump to the browser when it opens, add the follow in `on`:
 
 ```lua
 kiln.rule {
@@ -119,7 +109,7 @@ kiln.rule {
 }
 ```
 
-`sticky = true` keeps it visible on every tag of its screen, so it follows you around like a drop-down terminal. The `^...$` anchors keep the pattern from also matching a longer app id.
+`sticky = true` keeps it visible on every tag of its screen. The `^...$` anchors keep the pattern from also matching a longer app id.
 
 ## See also
 

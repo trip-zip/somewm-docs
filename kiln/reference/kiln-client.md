@@ -6,17 +6,13 @@ sidebar_position: 19
 
 # kiln-client
 
-The command is **`kiln-client`**, built as `build/kiln-client`. Installation
-includes bash, zsh and fish completions. Select the intended instance with
-`-s PATH` or `KILN_SOCK`. `output list` displays refresh in Hz;
-`output mode` currently forwards the backend's **mHz** value despite its help
-argument being called `hz`.
-
-`kiln-client` is the CLI over kiln's IPC socket: a fixed verb surface plus a
-reflection layer over the object classes, so scripts and keybind-external
-tools reach the config API without writing Lua. It speaks the same socket as
-`kiln-eval`; commands travel wrapped in `kiln_ipc(...)` so a verb and a Lua
-chunk stay distinct on the wire.
+`kiln-client` sends commands to kiln's IPC socket: a fixed verb surface plus a
+reflection layer over the object classes, so shell scripts can drive kiln
+without writing Lua. It is built as `build/kiln-client`; installation includes
+bash, zsh and fish completions. Select the instance with `-s PATH` or
+`KILN_SOCK`. Commands travel wrapped in `kiln_ipc(...)` so a verb and a Lua
+chunk stay distinct on the wire; `scripts/kiln-eval` in the source tree sends
+raw Lua to the same socket and is not installed.
 
 ```bash
 kiln-client tag view web
@@ -41,8 +37,7 @@ Any other `--long` word is treated as the verb's own flag (`notify --urgency
 critical ...`) and stops option parsing. Errors print `ERROR ...` and exit
 nonzero.
 
-The tool documents itself against the running compositor, so the output below
-can never be more current than what your build answers:
+`help` and `commands` list what the running compositor supports:
 
 ```bash
 kiln-client commands        # every verb, one per line
@@ -124,7 +119,7 @@ kiln-client reflect client  # every method, getter, and setter of a class
 | `screen scale [screen] [factor]` | Scale, read or written |
 | `screen workarea [screen]` | The box left after bars and layer reservations |
 | `output list` | Every output as the hardware reports it |
-| `output mode <output> <w> <h> [hz]` / `position <output> <x> <y>` / `scale <output> <factor>` / `enabled <output> <on\|off>` / `adaptive_sync <output> <on\|off>` | Output configuration |
+| `output mode <output> <w> <h> [hz]` (`[hz]` is actually mHz: 60000 = 60 Hz; `output list` shows Hz) / `position <output> <x> <y>` / `scale <output> <factor>` / `enabled <output> <on\|off>` / `adaptive_sync <output> <on\|off>` | Output configuration |
 
 ### Reflection
 
@@ -179,6 +174,6 @@ property names and never go stale against your build.
 ## See also
 
 - [Environment and IPC](/kiln/reference/environment-and-ipc) for the socket
-  and the raw `kiln-eval` path
+  protocol
 - [IPC and scripting](/kiln/guides/ipc-and-scripting) for recipes
 - [core](/kiln/reference/core) for what `eval` can ultimately reach

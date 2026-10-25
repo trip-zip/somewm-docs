@@ -6,6 +6,8 @@ sidebar_position: 16
 
 # Spawn Lifecycle
 
+kiln does not link spawned processes to the windows they open; these recipes match windows by `app_id`.
+
 Snippets assume the standard config preamble:
 
 ```lua
@@ -23,7 +25,7 @@ autostarted = autostarted or false
 
 if not autostarted then
   autostarted = true
-  kiln.spawn("mako")
+  kiln.spawn("nm-applet")
   kiln.spawn({ "foot", "--server" })
 end
 ```

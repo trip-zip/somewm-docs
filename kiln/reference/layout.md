@@ -26,11 +26,11 @@ screen.focused.selected_tag.layout = kiln.layout.corner.se
 | `area` | The workarea box from the last solve, inset by the gap: `{ x, y, width, height }`. Most layouts ignore it; carousel and magnifier use it for their arithmetic. |
 | `tag` | The tag being laid out, for reading its layout parameters. |
 
-The function declares elements (usually `kiln.widgets.client` cells inside `ui.row`/`ui.column` containers) and returns nothing. There is no geometry API to call and no client positions to compute: a layout describes structure, and the solver produces the pixels.
+The function declares elements (usually `kiln.widgets.client` cells inside `ui.row`/`ui.column` containers) and returns nothing. Most layouts compute no positions: a layout describes structure, and the solver produces the pixels.
 
 ## How layouts tile
 
-Built-in layouts express tiling as sizing declarations, not arithmetic. A cell is `"grow"` when it should take an equal share, or `"N%"` when a factor applies (the master's `master_width_factor` becomes a percent width), and the Clay solver divides the workarea among the declared cells. Splitting a region in half is just declaring two grow children; a master beside a stack is a percent cell beside a grow cell. This is why the built-in layouts are short, and why a custom layout is a page of Lua rather than a geometry engine. See [Custom layouts](/kiln/guides/custom-layouts) and [The Clay Bet](/kiln/concepts/the-clay-bet).
+Built-in layouts express tiling as sizing declarations, not arithmetic. A cell is `"grow"` when it should take an equal share, or `"N%"` when a factor applies (the master's `master_width_factor` becomes a percent width), and the Clay solver divides the workarea among the declared cells. Splitting a region in half is just declaring two grow children; a master beside a stack is a percent cell beside a grow cell. See [Custom layouts](/kiln/guides/custom-layouts) and [The Clay Bet](/kiln/concepts/the-clay-bet).
 
 ## The families
 

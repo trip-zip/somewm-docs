@@ -8,7 +8,7 @@ sidebar_position: 17
 
 Unplug a monitor and kiln keeps every window alive: the departing screen's clients are moved onto a surviving screen's selected tag, all of them, in one pile. Plug the monitor back in and it comes up as a fresh screen: your `screen.on("added")` handler builds its default tags, and the clients stay in the pile on the survivor. Nothing is lost, but nothing is remembered either.
 
-This guide builds the memory: a config table keyed by output name that records which tags a screen had and which client lived on which tag, then restores the arrangement when the output returns. It works because output names ("eDP-1", "DP-3") are stable across replug within a session.
+The recipe below keeps a table keyed by output name that records which tags a screen had and which client lived on which tag, then restores the arrangement when the output returns. It works because output names ("eDP-1", "DP-3") are stable across replug within a session.
 
 Snippets assume the standard config preamble:
 
@@ -22,7 +22,7 @@ local th = kiln.theme
 
 When an output disappears, the runtime does this, in order: the screen leaves `screen.all()`, focus moves to a survivor, every client on the dead screen is retagged onto the survivor's selected tag, and only then does the screen emit `removed`.
 
-The ordering matters for this recipe. In your `removed` handler, `s.tags` is intact: the tag objects are still there with their names, layouts, and per-tag settings, so the tag structure can be recorded at removal time. But their `clients` lists are already empty, because the rehoming ran first. Client membership therefore has to be recorded while the screen is alive, not read at the funeral.
+The ordering matters for this recipe. In your `removed` handler, `s.tags` is intact: the tag objects are still there with their names, layouts, and per-tag settings, so the tag structure can be recorded at removal time. But their `clients` lists are already empty, because the rehoming ran first. Client membership therefore has to be recorded while the screen is alive, not read in `removed`.
 
 ## Step 1: the record
 
@@ -47,7 +47,7 @@ end
 
 ## Step 2: track client membership live
 
-Every tag change emits `tagged` and `untagged` on the client, with the tag as payload. Mirror them into the record. The one subtlety is the removal rehome itself: when the runtime pulls clients off the dying screen, `untagged` fires for tags whose screen is already gone from `screen.all()`. Skip those, and the dead output's record keeps the last real arrangement:
+Every tag change emits `tagged` and `untagged` on the client, with the tag as payload. Mirror them into the record. During removal, `untagged` fires for tags whose screen has already left `screen.all()`; skip those so the record keeps the last arrangement:
 
 ```lua
 local function screen_alive(s)
@@ -81,7 +81,7 @@ client.on("destroy", function(c)
 end)
 ```
 
-Note the rehome also fires `tagged` for the survivor's tag, which updates the survivor's record, not the dead output's. The freeze falls out of keying by output name.
+Note the rehome also fires `tagged` for the survivor's tag, which updates the survivor's record, not the dead output's. Because the record is keyed by output name, the survivor's `tagged` events do not overwrite the removed output's entries.
 
 ## Step 3: snapshot the tags at removal
 

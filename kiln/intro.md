@@ -7,17 +7,11 @@ slug: /
 
 # Kiln
 
-Kiln is a Wayland compositor written in Odin and configured in Lua. Windows, bars, widgets, menus and notifications share one
-[Clay](https://github.com/nicbarker/clay) layout tree per output. Lua defines
-policy; Odin handles the compositor and retained rendering over wlroots.
-
-The maintainer runs Kiln on a real desktop. The API remains experimental;
-[known limitations](/kiln/concepts/limitations) distinguish software coverage,
-operator-reported physical use and pending hardware checks. Build and run it
-with `make` and `make run`, or use `./run-tty` from a free physical TTY.
-
-The screenshots below are historical C Kiln captures. New Odin desktop
-captures have not yet replaced them.
+Kiln is a Wayland compositor written in Odin and configured in Lua. Windows,
+bars, widgets, menus and notifications share one
+[Clay](https://github.com/nicbarker/clay) layout tree per output. Your Lua
+config declares the layout tree, bindings and rules. Odin implements the
+Wayland protocols, the renderer and the DRM, nested and headless backends.
 
 ![The default kiln desktop: two terminals tiled under the bar](/img/kiln/desktop.png)
 
@@ -42,7 +36,8 @@ Press `mod+shift+i` to inspect the desktop’s layout with Clay’s debug inspec
 See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) for compatibility and configuration differences.
 
 :::info
-The API is not yet stable and may change between releases.
+The API is not yet stable and may change between releases. See
+[Limitations](/kiln/concepts/limitations) for what does not work yet.
 :::
 
 ## Where things live
@@ -56,5 +51,4 @@ The API is not yet stable and may change between releases.
 
 Short answers to common questions are in the [FAQ](/kiln/faq). The source lives
 at [github.com/trip-zip/kiln](https://github.com/trip-zip/kiln). Kiln is MIT
-licensed. The retired C implementation remains in Git history at
-`c-baseline-82ad185` for reproducible comparisons.
+licensed.

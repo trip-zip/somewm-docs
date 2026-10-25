@@ -6,7 +6,7 @@ sidebar_position: 18
 
 # Environment and IPC
 
-A running kiln is scriptable from the outside: it loads its config from a fixed search order, exports its socket path to every child process, and evaluates any Lua written to that socket, which makes the socket a live REPL into the compositor.
+A running kiln is scriptable from the outside: it loads its config from a fixed search order, exports its socket path to every child process, and evaluates any Lua written to that socket.
 
 ```bash
 # ask a running kiln a question from a shell
@@ -19,9 +19,15 @@ Read by the compositor:
 
 | Variable | Description |
 |---|---|
+| `KILN_BACKEND` | `headless`, `nested` or `drm`. Unset: `nested` when `WAYLAND_DISPLAY` is set, otherwise `drm`. Nested needs a parent that offers `wl_compositor` 4, `xdg_wm_base` and `zwp_linux_dmabuf_v1` 4; DRM needs a logind session. |
+| `KILN_HEADLESS_OUTPUTS` | Number of 1280x720 headless outputs to create (default 1). |
+| `KILN_DRM_DEVICE` | The card to drive (`/dev/dri/cardN`). Default: the first card with a render node and a non-writeback connector. |
+| `KILN_XWAYLAND` | The Xwayland executable (default `Xwayland`, found on `PATH`). |
 | `KILN_RC` | Explicit path to the config file to load; overrides the search order below. |
 | `KILN_SOCK` | Path for the IPC socket. Default: `$XDG_RUNTIME_DIR/kiln.sock` (falling back to `/tmp/kiln.sock`). Set it to give an instance a private socket, for example a nested session next to a headless test run. |
 | `KILN_IMAGE_BUDGET_MB` | Image decode cache budget in MB (default 64). A working set larger than the budget stays correct but re-decodes per frame. |
+| `KILN_PAINT_DEBUG` | `1` logs every render pass with its damage and repaint boxes. |
+| `WAYLAND_DEBUG` | `1` or `server` traces the protocol messages kiln exchanges with its clients. Other values are ignored. |
 | `LC_ALL`, `LC_CTYPE`, `LANG` | Checked in that order to build the keyboard compose table (dead keys). A locale with no compose table, such as `C`, leaves compose off. |
 
 Set for child processes (everything launched via `core.spawn` and friends):
@@ -29,7 +35,7 @@ Set for child processes (everything launched via `core.spawn` and friends):
 | Variable | Description |
 |---|---|
 | `WAYLAND_DISPLAY` | The compositor's Wayland socket, so spawned clients connect to this kiln. |
-| `DISPLAY` | The Xwayland display, when XWayland is available (the X server itself starts lazily on the first X client). |
+| `DISPLAY` | The Xwayland display, when XWayland is available. The display number is reserved at startup; the X server itself starts on the first X client. |
 | `XDG_ACTIVATION_TOKEN` | Set only for `core.spawn_with_token` children, so the launched client can raise itself as user-initiated. |
 
 Read by the default config, not the compositor:
@@ -52,6 +58,7 @@ First hit wins:
 | Flag | Description |
 |---|---|
 | `-s <command>` | Run a startup command once the compositor is up. |
+| `-h` | Print the usage line and exit. |
 
 ```bash
 kiln -s 'foot'
@@ -67,10 +74,10 @@ The protocol:
 2. Half-close the write side (send EOF). The compositor evaluates on half-close.
 3. Read one reply, then the connection closes.
 
-Evaluation tries expression form first (so `1+1` answers `2`), then statement form, so both expressions and statements work. The reply is the results tab-joined through `tostring` with a trailing newline, or `ERROR: <msg>` on a load or runtime error, without the historical 4096-byte reply cap. Partial writes are drained asynchronously. The CLI’s `eval` verb takes a Lua chunk, so write `eval 'return 6*7'` there; the raw socket evaluator and stock Lua prompt accept `6*7`.
+Evaluation tries expression form first (so `1+1` answers `2`), then statement form, so both expressions and statements work. The reply is the results tab-joined through `tostring` with a trailing newline, or `ERROR: <msg>` on a load or runtime error, Replies have no size limit. The CLI's `eval` verb takes a Lua chunk, so write `eval 'return 6*7'` there; the raw socket (and `scripts/kiln-eval` in the source tree) accepts `6*7`.
 
-Use the installed CLI (or `./build/kiln-client` in the source tree). Set
-`KILN_SOCK` or pass `-s PATH` to select the intended instance:
+Use the installed CLI (or `./build/kiln-client` in the source tree). Select
+the instance with `KILN_SOCK` or `kiln-client -s PATH` (not the same as `kiln -s`):
 
 ```bash
 kiln-client eval 'return core.output.list()[1].name'

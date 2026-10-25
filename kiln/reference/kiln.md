@@ -1,12 +1,12 @@
 ---
 title: kiln
-description: The kiln module, the root of kiln's config API, with its fields, functions, submodules, and input settings.
+description: The kiln stdlib module, with its fields, functions, submodules, and input settings.
 sidebar_position: 7
 ---
 
 # kiln
 
-`kiln` is the root of kiln's configuration API: everything a config does goes through this table or one of its submodules. Load it once at the top of your `rc.lua`:
+`kiln` is the stdlib module; the object classes (`client`, `screen`, `tag`, `layer`) and `core` are globals. Load it once at the top of your `rc.lua`:
 
 ```lua
 local kiln = require("kiln")
@@ -37,6 +37,11 @@ kiln.spawn("foot")
 | `kiln.icon` | Application icon lookup: `path(name)` and `client(c)`. See [kiln.icon](#kilnicon) below. |
 | `kiln.asset` | Generated images, content-addressed: turn an SVG document into a PNG path the image leaf can name. See [kiln.asset](#kilnasset) below. |
 | `kiln.object` | The class factory and handle registry (`attach`, `detach`, `lookup`). See [the object model](/kiln/concepts/object-model). |
+| `kiln.launcher` | The application launcher: `open(s?)`, `close()`, `apps()`, and the replaceable `filter(text)` (default `default_filter`). See [App launcher](/kiln/guides/app-launcher). |
+| `kiln.poll` | `kiln.poll{ cmd, every, parse, screen }` re-runs `cmd` every `every` seconds (default 5), sets `.value` to `parse(lines)` (default: the first line) and `.lines`, and dirties `screen` (or every screen) when the value changes. `:stop()` ends it. |
+| `kiln.systray` | The tray registry: `items()` returns the status-notifier items (`service`, `id`, `title`, `status`, `icon`) in registration order. |
+| `kiln.visible_clients(s)` | The clients screen `s` draws: mapped, not minimized, on one of its selected tags or sticky, each owned by `s`. |
+| `kiln.on_declare(fn)`, `kiln.off_declare(fn)` | Declare hooks: `fn(s)` runs on every frame of every screen after the built-in desktop elements, before tooltips. An error in a hook rejects that frame. Hooks a config adds are dropped on reload. `on_declare` returns `fn`. |
 
 Key bindings, mouse buttons, and client rules (`kiln.key`, `kiln.button`, `kiln.rule`, `kiln.focused`) have their own page: [Keys, Buttons, and Rules](/kiln/reference/keybindings-and-rules).
 
@@ -46,7 +51,7 @@ Key bindings, mouse buttons, and client rules (`kiln.key`, `kiln.button`, `kiln.
 |---|---|
 | `kiln.spawn(cmd)` | Fire and forget. `cmd` is an argv table or a shell string. |
 | `kiln.spawn.pipe(cmd, cbs)` | Async spawn with output callbacks. Returns an id. `cbs` may carry `on_line(line)` (stdout, one call per complete line, trailing unterminated line flushed at exit), `on_err(chunk)` (stderr, raw chunk, not line-split), and `on_exit(code)`. |
-| `kiln.spawn.watch(cmd, interval, cb)` | Run `cmd`, feed each stdout line to `cb`, and re-run it `interval` seconds after each exit. Returns a handle; `handle:stop()` cancels the re-arm. |
+| `kiln.spawn.watch(cmd, interval, cb)` | Run `cmd`, feed each stdout line to `cb`, and re-run it `interval` seconds after each exit. `cb` may also be `{ line = fn(line), done = fn(code) }`. Returns a handle; `handle:stop()` cancels the re-arm. |
 | `kiln.spawn_with_token(cmd)` | Like `spawn`, but the child gets an `XDG_ACTIVATION_TOKEN` in its environment, so its activation request arbitrates as user-initiated. |
 
 See [Spawn lifecycle](/kiln/guides/spawn-lifecycle) for how pipes and watches behave across reload.
@@ -71,6 +76,7 @@ See [Spawn lifecycle](/kiln/guides/spawn-lifecycle) for how pipes and watches be
 | Function | Description |
 |---|---|
 | `kiln.on(name, fn)` | Subscribe on the global bus. |
+| `kiln.off(name, fn)` | Remove a subscription. |
 
 | Signal | Payload | Emitted when |
 |---|---|---|
@@ -79,12 +85,14 @@ See [Spawn lifecycle](/kiln/guides/spawn-lifecycle) for how pipes and watches be
 | `idle::stop` | | Input resumed after idle. |
 | `idle::inhibit` | `on` | An idle inhibitor (a video player, for example) engaged or released. |
 
+The full list (`session::*`, `drag::*`, `spawn::*`, `frame::tick`, `input::*`) is in the [signal index](/kiln/reference/signals#kilnon-global-bus).
+
 ## Session lock and idle
 
 | Function | Description |
 |---|---|
 | `kiln.lock()` | Engage the native session lock. From the instant it returns, no binding is reachable and no client sees input. |
-| `kiln.unlock()` | Release the lock. Refused by C unless a prior `core.authenticate` succeeded, so a config cannot bypass authentication. |
+| `kiln.unlock()` | Release the lock. Refused by the native core unless the last `core.authenticate` request reported success, so a config cannot bypass authentication. |
 | `kiln.set_idle_timeout(ms)` | Arm the idle timer for `ms` of no input; the `idle::*` signals above fire from it. `nil` or `0` disarms. |
 
 Wire idle to the lock in a few lines; see [Lockscreen and idle](/kiln/guides/lockscreen-and-idle).
@@ -108,7 +116,7 @@ kiln.input.keymap = { layout = "us", variant = "colemak" }
 kiln.input.tap_to_click = true
 ```
 
-Writes forward to C immediately; reads return the last written value (there is no readback from C by design, so the store is the record of what was asked for). Every setting applies to every device of its kind: there is no per-device configuration.
+Writes take effect immediately. Reads return the last value written; kiln does not read settings back from the devices. Every setting applies to every device of its kind: there is no per-device configuration.
 
 | Property | Type | Default | Description |
 |---|---|---|---|
@@ -152,6 +160,7 @@ Easing over the true frame delta. While any key on a screen animates, that scree
 | `date_format` | `"%A, %B %d"` |
 | `prompt` | `"Enter password to unlock"` |
 | `fail` | `"Authentication failed"` |
+| `pending` | `"Authenticating..."` |
 
 ## kiln.prompt
 
@@ -189,7 +198,7 @@ The tooltip opens above or below the element depending on which half of the scre
 | Function | Description |
 |---|---|
 | `kiln.icon.path(name)` | Resolve an application name to an icon file path, or `nil`. Consults the app's `.desktop` `Icon=` line, then the icon theme and pixmaps directories. Memoized, misses included. |
-| `kiln.icon.client(c)` | The best icon for a client: `c.icon` if C already holds one (X11 pixel data), else the lookup on `c.app_id`, else on `c.class` and its lowercase form. |
+| `kiln.icon.client(c)` | The best icon for a client: `c.icon` if the compositor supplied one, else the lookup on `c.app_id`, else on `c.class` and its lowercase form. |
 
 ## kiln.asset
 
@@ -218,12 +227,12 @@ end
 content: images that change on a theme switch or a mode change, never anything
 that varies per frame.
 
-**Three calls rather than one, because the fork is the expensive part.** Twenty
+**Batch requests: each `flush` forks one process.** Twenty
 glyphs are one process only if the requests pile up before the flush, so
 request them all, flush once, then resolve each. Reach for `svg` only when
 there is a single document.
 
-**`nil` is an answer, not an error.** A render can fail because `rsvg-convert`
+**Every call can return nil.** A render can fail because `rsvg-convert`
 is missing, and a path that decodes to nothing renders blank rather than
 raising, so every call site should draw its non-image fallback when the answer
 is `nil`. A malformed gradient spec is different: that raises, because it is a

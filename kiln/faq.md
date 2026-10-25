@@ -6,23 +6,21 @@ sidebar_position: 99
 
 # FAQ
 
-kiln makes a few choices that surprise newcomers: no compat layer, no drawing API, inverted close/kill semantics. The short answers live here; each links to the page that covers the topic in depth.
-
 ## Is kiln compatible with AwesomeWM configs or widgets?
 
 No, by design. kiln has no compatibility layer, and AwesomeWM widget libraries (vicious, lain, bling, and the rest) are built on wibox and cairo, an imperative machinery kiln deliberately does not have. The concepts carry over; the code does not. See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm).
 
 ## How is kiln related to SomeWM?
 
-kiln started as an experiment from SomeWM, an AwesomeWM-style framework for Wayland, re-based on the Clay layout library: an experiment in whether a compositor can use Clay as its base layer for layout, widgets, and hit testing. It keeps SomeWM's desktop concepts (clients, tags, layouts, rules) but replaces the API with its own declarative one, with no compat layer in either direction. See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) and [The Clay Bet](/kiln/concepts/the-clay-bet).
+kiln began as a SomeWM fork that tests whether Clay can do a compositor's layout, widgets and hit testing. It keeps SomeWM's desktop concepts (clients, tags, layouts, rules) but replaces the API with its own declarative one, with no compat layer in either direction. See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) and [The Clay Bet](/kiln/concepts/the-clay-bet).
 
 ## Can I draw gradients, arcs, or custom shapes?
 
-Not as drawing primitives. The paint vocabulary is rectangles, corner radius, borders, images, text, and color (with alpha). There are no gradient, arc, shadow, rotation, or arbitrary-shape primitives, and no cairo escape hatch: everything on screen is composed from that vocabulary. The escape hatch is an image: `kiln.asset` renders any SVG (including generated gradients via `kiln.asset.gradient`) to a cached PNG, which is how the default desktop draws its wallpaper and glyphs. See [Limitations](/kiln/concepts/limitations).
+Not as drawing primitives. The paint vocabulary is rectangles, corner radius, borders, images, text, and color (with alpha). There is no cairo drawing API. For anything else, render an SVG to a PNG with `kiln.asset` (`kiln.asset.gradient` for ramps) and declare it as an image; that is how the default desktop draws its wallpaper and glyphs. See [Limitations](/kiln/concepts/limitations).
 
 ## How do I script or query kiln from the shell?
 
-kiln listens on a unix socket (`$XDG_RUNTIME_DIR/kiln.sock`, overridable with `KILN_SOCK`). Send Lua text, get the result back: it is a live REPL into the config VM, so everything in these docs is drivable from a script. The installed `kiln-client` command handles the socket protocol:
+kiln listens on a unix socket (`$XDG_RUNTIME_DIR/kiln.sock`, overridable with `KILN_SOCK`). The socket evaluates the Lua you send in the running config's Lua state and returns the result. The installed `kiln-client` command handles the socket protocol:
 
 ```bash
 kiln-client eval 'require("kiln").notify{title = "hello", message = "from the shell"}'
@@ -32,10 +30,9 @@ See [IPC and Scripting](/kiln/guides/ipc-and-scripting).
 
 ## Do screen sharing, screenshots, and recording work?
 
-Kiln implements screencopy and internal screenshots, with isolated capture
-coverage. Recorder/portal integration needs its own verification. Gamma control
-is present but physical gamma testing remains pending. See
-[Screenshots](/kiln/guides/screenshots) and [Limitations](/kiln/concepts/limitations).
+Kiln implements wlr-screencopy, so grim works. It implements wlr-gamma-control
+(wlsunset, gammastep). Screen sharing through xdg-desktop-portal-wlr is
+untested. See [Screenshots](/kiln/guides/screenshots) and [Limitations](/kiln/concepts/limitations).
 
 ## Do display-configuration GUIs like wdisplays work?
 
@@ -48,29 +45,22 @@ With a rule. Rules match clients on map and apply properties:
 ```lua
 kiln.rule{
   match = { app = "mpv" },
-  props = { tag = "3", floating = true },
+  props = { tag = "media", floating = true },
 }
 ```
 
-[Client Rules](/kiln/guides/client-rules) covers what clauses can match and how rules stack.
+`tag` is a tag name; the default config's tags are `dev`, `web`, `chat`, `files` and `media`. [Client Rules](/kiln/guides/client-rules) covers what clauses can match and how rules stack.
 
 ## Why does my bar or widget not update?
 
-kiln only redraws a screen when something marks it dirty. Most stdlib property writes do that for you, but a plain value changing inside your widget function does not: the frame that would show it never happens. Declare what your widget depends on with `ui.widget{watch = {"client::focus"}, every = 30, fn}` so signals or a timer re-answer it, or call `kiln.dirty()` to force a frame. See [Frames and Dirty](/kiln/concepts/frames-and-dirty).
+kiln only redraws a screen when something marks it dirty. Most stdlib property writes do that for you, but a plain value changing inside your widget function does not: the frame that would show it never happens. Declare what your widget depends on with `ui.widget{watch = {"client::focus"}, every = 30, fn}` so a listed signal or the timer marks the screen dirty and your function runs again, or call `kiln.dirty()` to force a frame. See [Frames and Dirty](/kiln/concepts/frames-and-dirty).
 
 ## Can I log into kiln from a display manager?
 
-Installation supplies `kiln.desktop`, named **Kiln**. A system
-installation can be discovered by a display manager; user-prefix discovery
-depends on that manager. Kiln also runs from a free TTY or nested inside an
-existing desktop. For a nested session from the source checkout:
-
-```bash
-kiln_demo=$(mktemp -d /tmp/kiln-demo.XXXXXX)
-KILN_SOCK="$kiln_demo/eval.sock" dbus-run-session -- ./build/kiln
-```
-
-See [First Launch](/kiln/getting-started/first-launch).
+Yes. `make install` puts `kiln.desktop` in `$(datadir)/wayland-sessions`.
+Display managers scan `/usr/share` and usually `/usr/local/share`, not
+`~/.local/share`. Kiln also runs from a free TTY or nested inside an existing
+desktop. See [First Launch](/kiln/getting-started/first-launch).
 
 ## Where is the config file?
 
@@ -78,14 +68,13 @@ See [First Launch](/kiln/getting-started/first-launch).
 
 ## How do I reload the config without restarting?
 
-Call `kiln.reload()`. It re-runs your config in the live compositor: clients, tags, and screens survive. Bind it to a key, or trigger it over IPC:
+Call `kiln.reload()`. It re-runs your config in the live compositor. Clients and screens survive. Tags are recreated by your config, and clients are re-sorted onto them. Bind it to a key, or trigger it over IPC:
 
 ```bash
 kiln-client eval 'require("kiln").reload()'
 ```
 
-(Over the socket, use `require("kiln")`: the `kiln` variable is local to your
-config file, not a global.) Note that reload re-runs the config file only;
+Over the socket, use `require("kiln")`, as [IPC and Scripting](/kiln/guides/ipc-and-scripting) explains. Reload re-runs the config file only;
 stdlib modules are not re-required. See [Reload and Debugging](/kiln/guides/reload-and-debugging).
 
 ## What is the difference between c:close() and c:kill()?

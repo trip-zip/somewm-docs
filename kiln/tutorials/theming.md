@@ -13,7 +13,7 @@ kiln has no theme file, no theme format, and no style engine. It has a table.
 `kiln.theme` is one plain Lua table of colors and metrics. Everything the
 stdlib draws (the focus ring, the bar, taglist cells, titlebars, menus,
 tooltips, notifications, the prompt) reads it at declare time, on every dirty
-frame. Assign to the table, mark the screen dirty, and the next frame wears
+frame. Assign to the table, mark the screen dirty, and the next frame uses
 the new values.
 
 Because it is a plain table (not a signal-emitting object), writing to it
@@ -26,8 +26,8 @@ comes after the config runs); at runtime you follow a write with
 The full list with defaults lives in the
 [theme variable reference](/kiln/reference/theme-variables). The groups:
 
-- Palette: `bg`, `fg`, `accent`, and friends. `accent` works hardest: focus
-  ring, selected tag, focused tasklist entry, caret, selection.
+- Palette: `bg`, `fg`, `accent`, and friends. `accent` colors the focus
+  border, selected tag, focused task, caret and selection.
 - Metrics: sizes and spacing, from `font_size` and `gap` to `bar_height`
   and `border_width`.
 - Titlebars and popups: the `titlebar_*`, `menu_*`, `prompt_*`, and
@@ -35,20 +35,20 @@ The full list with defaults lives in the
 
 ## 3. Edit theme values in your rc
 
-The default config does exactly this, near the top, applying a whole palette
-at once (it ships three: gruvbox, catppuccin, nord, with the chosen name
-persisted to `~/.config/kiln/theme`):
+Set keys directly:
 
 ```lua
 local kiln = require("kiln")
 local th = kiln.theme
 
-kiln.modkey = "super"
 th.bg = "#1e1e2e"
 th.accent = "#cba6f7"
 ```
 
-Any key you do not set keeps its default. Colors are `"#rrggbb"` or
+The default config instead keeps three palettes (gruvbox, catppuccin, nord)
+in one table and copies the chosen one into `th` with a `pairs` loop; the
+chosen name is persisted to `~/.config/kiln/theme`. Any key you do not set
+keeps its default. Colors are `"#rrggbb"` or
 `"#rrggbbaa"` strings.
 
 One subtlety: values the stdlib reads at declare time follow later changes
@@ -56,14 +56,13 @@ automatically, but values you copy into a cfg table are fixed at that call.
 In `ui.bar(s, { color = th.bg }, ...)` the bar captured the current `th.bg`;
 change the theme later and that bar keeps its captured color until the config
 reloads. Omit `color` from the cfg and the bar reads `theme.bg` live instead:
-a bar's defaults are filled per frame, which is a guarantee, not an accident.
-See [the bar defaults](/kiln/reference/ui#bars).
+a bar's defaults are filled per frame. See [the bar defaults](/kiln/reference/ui#bars).
 
 ## 4. Per-tag gap
 
 `theme.gap` sets the workarea inset and the space between layout cells
-everywhere. A tag can override it: `t.gap` wins on that tag, and writing it
-redraws immediately (tag layout parameters are on the dirty list).
+everywhere. A tag can override it: `t.gap` wins on that tag, and writing
+`t.gap` redraws the screen if that tag is selected.
 
 ```lua
 screen.on("added", function(s)
@@ -76,7 +75,7 @@ A zero-gap `max` tag gives you edge-to-edge video while every other tag keeps
 its breathing room. Try it live on the current tag:
 
 ```bash
-scripts/kiln-eval 'screen.focused.selected_tag.gap = 0'
+kiln-client eval 'screen.focused.selected_tag.gap = 0'
 ```
 
 ## 5. Live-tweak over IPC
@@ -85,23 +84,21 @@ Every kiln exposes a Lua socket, so theme iteration needs no reload loop.
 Change the accent and watch the very next frame:
 
 ```bash
-scripts/kiln-eval 'local kiln = require("kiln") kiln.theme.accent = "#ff9e64" kiln.dirty()'
-scripts/kiln-eval 'local kiln = require("kiln") kiln.theme.gap = 16 kiln.dirty()'
-scripts/kiln-eval 'local kiln = require("kiln") kiln.theme.client_radius = 10 kiln.dirty()'
+kiln-client eval 'local kiln = require("kiln") kiln.theme.accent = "#ff9e64" kiln.dirty()'
+kiln-client eval 'local kiln = require("kiln") kiln.theme.gap = 16 kiln.dirty()'
+kiln-client eval 'local kiln = require("kiln") kiln.theme.client_radius = 10 kiln.dirty()'
 ```
 
-(The `require("kiln")` is needed because `kiln` is a local in your rc, not a
-global the socket can see; requiring returns the same live module.)
+Over the socket, use `require("kiln")`, as
+[IPC and scripting](/kiln/guides/ipc-and-scripting) explains.
 
-Focus ring, selected tag, tasklist highlight all flip together. When a
-combination sticks, copy the assignments into your rc. Remember `kiln.dirty()`:
-without it the values change but nothing redraws until something else
-dirties the screen. More on the socket in
-[IPC and scripting](/kiln/guides/ipc-and-scripting).
+Focus border, selected tag and tasklist highlight all flip together. When a
+combination sticks, copy the assignments into your rc.
 
 ## Complete example
 
-A cohesive cool-gray theme with a teal accent, as the top of an rc:
+A nord-style palette with a teal accent. Put these after the default config's
+palette loop, or in an rc without one:
 
 ```lua
 local kiln = require("kiln")
@@ -127,10 +124,6 @@ th.font_size = 13
 th.gap = 10
 th.bar_height = 30
 ```
-
-Everything downstream (bar, taglist, titlebars, menus, notifications,
-prompt) picks these up with no further wiring, because they are all declared
-from the same table on the next frame.
 
 ## See also
 

@@ -77,7 +77,7 @@ kh_boot() {
 	# KILN_DATADIR copy. Booted anywhere else, an rc outside the repo runs
 	# whatever stdlib was last installed, and these docs would verify
 	# against that instead of current main.
-	( cd "$KILN_REPO" && WLR_BACKENDS=headless WLR_LIBINPUT_NO_DEVICES=1 \
+	( cd "$KILN_REPO" && KILN_BACKEND=headless \
 		XDG_CONFIG_HOME="$KH_WORK/cfg" KILN_SOCK="$KH_SOCK" KILN_RC="$kh_rc" \
 		exec "$KH_BIN" ) >"$KH_LOG" 2>&1 &
 	KH_PID=$!
@@ -117,6 +117,6 @@ kh_spawn_client() {
 # clean. kiln keeps the previous frame on a declare failure rather than
 # crashing, so a broken config is otherwise easy to miss.
 kh_errors() {
-	grep -iE '\[error\]|declare failed|attempt to |stack traceback' "$KH_LOG" 2>/dev/null \
+	grep -E '^Lua (frame|event|timer|reload|initialization): |^kiln: error|\[error\]|declare failed|attempt to |stack traceback' "$KH_LOG" 2>/dev/null \
 		| grep -v 'EGL\|GLES' || true
 }

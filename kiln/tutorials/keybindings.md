@@ -6,8 +6,8 @@ sidebar_position: 2
 
 # Keybindings
 
-`kiln.key{}` is how input reaches your config. One call registers one chord,
-and the same call carries the description that the hotkeys popup reads back.
+`kiln.key{}` binds a keyboard chord to a Lua handler and records its
+`desc`/`group` for the hotkeys sheet.
 
 ## Prerequisites
 
@@ -27,11 +27,10 @@ key { mods = { "mod" }, key = "d",
 ```
 
 One call, one chord. `mods` is a list of modifier names, `key` is the key
-name, `press` runs on the press edge. Reload (or paste this through
-`scripts/kiln-eval`) and `mod+d` spawns a launcher.
+name, `press` runs on the press edge. Reload and `mod+d` spawns a launcher.
 
-Bound chords are consumed by the compositor: the press never reaches the
-focused client, so a binding cannot half-leak into a terminal.
+Bound chords are consumed by the compositor, so the focused client never sees
+the press or release of a bound chord.
 
 ## 2. Mods and kiln.modkey
 
@@ -74,8 +73,7 @@ binding registry, which `kiln.key.all()` returns, and the default config's
 
 Reload, then press `mod+s`. Your binding is on the sheet: a **launch** group
 with an "app launcher" row, next to everything the default config declared.
-Press `mod+s` again to dismiss it. Every binding you annotate documents
-itself this way. The popup ships in the stdlib (`kiln.hotkeys`), and the
+Press `mod+s` again to dismiss it. The popup ships in the stdlib (`kiln.hotkeys`), and the
 same registry powers a custom one; see the
 [hotkeys popup guide](/kiln/guides/hotkeys-popup).
 
@@ -91,13 +89,13 @@ key { mods = { "mod" }, key = "1-9", desc = "view tag", group = "tag",
 		if t then t:view() end
 	end }
 
-key { mods = { "mod", "ctrl" }, key = "a-z", desc = "mark", group = "demo",
+key { mods = { "mod", "alt" }, key = "a-z", desc = "mark", group = "demo",
 	press = function(letter)
 		kiln.notify { title = "pressed", message = letter }
 	end }
 ```
 
-Reload and press `mod+ctrl+m`. A notification pops up with the letter you
+Reload and press `mod+alt+m`. A notification pops up with the letter you
 pressed; try a few others and the message follows the key. The registry keeps
 each range as one entry, so the cheat sheet shows a single `1-9  view tag`
 row instead of nine.
@@ -116,14 +114,10 @@ key { mods = { "mod" }, key = "f", desc = "fullscreen", group = "client",
 ```
 
 Reload, focus a window, and press `mod+f`: it fills the screen; again and it
-tiles back. Press `mod+q` on an empty tag and nothing happens, quietly: that
-is the guard doing its job, not an error being swallowed.
+tiles back. With no focused client, `mod+q` does nothing.
 
-:::warning
-`c:close()` is the polite close (the client is asked to quit). `c:kill()`
-sends SIGKILL. This is the opposite of AwesomeWM, where `c:kill()` is the
-polite one.
-:::
+`c:close()` is the polite close; `c:kill()` sends SIGKILL (see the
+[client reference](/kiln/reference/client)).
 
 ## 7. Mouse bindings
 
@@ -144,7 +138,7 @@ button { mods = {}, button = 2, on = "root",
 The first two are the default config's move and resize drags: hold `mod` and
 drag with the left button and the window follows the pointer; drag with the
 right button and it resizes from whichever corner is nearest. Buttons: 1
-left, 2 middle, 3 right. A plain unbound click on a client simply focuses it.
+left, 2 middle, 3 right. A click with no matching binding focuses the client.
 Presses on bar cells are handled by the cells' own `on_press` handlers, not
 by `button{}`; see the [bar tutorial](/kiln/tutorials/a-bar-from-scratch).
 
@@ -154,16 +148,15 @@ by `button{}`; see the [bar tutorial](/kiln/tutorials/a-bar-from-scratch).
 binding. `kiln.reload()` calls both before re-running your config, which is
 why editing the file and reloading never duplicates anything.
 
-Re-running a `key{}` call over IPC is safe: rebinding a chord replaces its
-registry row in place, so the cheat sheet never shows duplicates. Still,
+Rebinding a chord replaces its registry row in place, so the cheat sheet
+never shows duplicates. Over IPC, write `require("kiln").key{...}` (see
+[IPC and scripting](/kiln/guides/ipc-and-scripting)). Still,
 
 ```bash
-scripts/kiln-eval 'require("kiln").reload()'
+kiln-client eval 'require("kiln").reload()'
 ```
 
-is the cleanest way to apply binding edits from a file. (`require("kiln")`
-returns the same module your rc holds as `kiln`; the local itself is not
-visible to the socket.)
+is the cleanest way to apply binding edits from a file.
 
 ## Complete example
 
@@ -172,6 +165,12 @@ local kiln = require("kiln")
 local key, button = kiln.key, kiln.button
 
 kiln.modkey = "super"
+
+screen.on("added", function(s)
+	for i = 1, 9 do
+		tag.new { name = tostring(i), screen = s }
+	end
+end)
 
 key { mods = { "mod" }, key = "Return", desc = "terminal", group = "launch",
 	press = function() kiln.spawn(os.getenv("TERMINAL") or "foot") end }

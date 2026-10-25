@@ -7,8 +7,8 @@ sidebar_position: 3
 # A Bar from Scratch
 
 A kiln bar is not a window or a surface. It is a container of nodes in the
-screen's one layout tree, and it reserves workarea by construction: the frame
-stacks bars and workarea in one flow, so clients never sit under your bar.
+screen's one layout tree. The stock frame lays out bars and the workarea in
+one Clay column, so clients are never placed under a bar.
 
 ## Prerequisites
 
@@ -24,8 +24,9 @@ local th = kiln.theme
 
 ## 1. The smallest possible bar
 
-Bars are registered per screen, inside the `added` handler, right where the
-default config does it:
+Bars are registered per screen, inside the `added` handler. Replace the
+default config's `screen.on("added")` block with this one (adding a second
+handler would give you a second bar and a sixth tag):
 
 ```lua
 screen.on("added", function(s)
@@ -55,9 +56,8 @@ apply changes with `kiln.reload()`, which rebuilds the bar list cleanly.
 
 The `fn` you passed is a declare function. It runs again on every dirty frame
 of that screen, and each run states the bar's entire content from scratch.
-There is no update path, no widget objects to mutate, no cache to invalidate:
-when a tag is selected, a client maps, or a title changes, the screen is
-marked dirty and your function simply runs again against the current facts.
+When the screen is marked dirty (tag selected, client mapped, title changed),
+`fn` runs again and declares the whole bar.
 
 That is why `widgets.clock()` can be one line: it declares today's text, and a
 timer aligned to the minute rollover marks the screen dirty when the text
@@ -65,8 +65,7 @@ would change. See [Frames and dirty](/kiln/concepts/frames-and-dirty).
 
 Inside a top or bottom bar, your cells are laid out left to right; a left or
 right bar lays them out top to bottom. The bar's body is a `ui.row` or
-`ui.column` built from the bar's own cfg, so there is nothing about its layout
-you cannot reach.
+`ui.column` built from the bar's own cfg.
 
 ## 3. Add a taglist and push the clock right
 
@@ -132,29 +131,13 @@ default.
 		end)
 ```
 
-:::note
-Older kiln configs sized a bar with a `height` key. That key no longer
-exists: the across-edge axis is plain element sizing, `h` here, and an
-unknown key is silently ignored, so a leftover `height = 24` gets you a
-32 px bar with no error. Rename it to `h`.
-:::
+The defaults are read from `kiln.theme` each frame, so a theme edit restyles
+every bar that left the field unset; see [Theming](/kiln/tutorials/theming).
 
-Because the defaults are filled per frame, a live theme edit governs bars
-that are already registered: set `kiln.theme.bg` and every bar that left
-`color` unset repaints on the next frame. Colors and sizes the stock cells
-use come from `kiln.theme` too (`bg`, `bg2`, `fg`, `accent`, `muted`,
-`font_size`, `bar_height`), so restyling globally is usually a theme edit
-rather than a bar edit. See [Theming](/kiln/tutorials/theming).
+## 6. Center the clock on the screen {#center-the-clock-honestly}
 
-## 6. Center the clock honestly
-
-The spacer layout from step 4 has a flaw you can watch happen: the clock
-sits at the right edge, and anything you center with two spacers is centered
-in the leftover space, not on the screen. Open a few clients and the growing
-tasklist shoves your "centered" cell toward the right edge.
-
-The honest fix is to say what you mean in the tree: three regions of a third
-each, and the clock centered in the middle one.
+Two spacers center a cell in the leftover space, so a growing tasklist pushes
+it right. Split the bar into three 33.33% regions instead:
 
 ```lua
 	ui.bar(s, { edge = "top" }, function()
@@ -185,9 +168,8 @@ open or not.
 
 ## 7. Turn it sideways
 
-`edge = "left"` is a real bar, not a rotation trick: it reserves workarea on
-the left, its body is a `ui.column`, and `theme.bar_height` now sets its
-width.
+`edge = "left"` reserves workarea on the left, uses a `ui.column`, and takes
+its width from `theme.bar_height`.
 
 ```lua
 	ui.bar(s, { edge = "left" }, function()
@@ -197,8 +179,7 @@ width.
 	end)
 ```
 
-The same spacer idiom works turned 90 degrees, because it was never
-horizontal to begin with: `"grow"` on a column's main axis is height. Cells
+`ui.spacer()` grows along the column, so it pushes later cells down. Cells
 that assume a wide bar (the tasklist's ellipsized titles, the clock's text)
 are a poor fit for a 32 px wide column; vertical bars usually carry glyphs.
 
@@ -206,7 +187,8 @@ are a poor fit for a 32 px wide column; vertical bars usually carry glyphs.
 
 Every stock cell is built from primitives you can use directly:
 `ui.box(cfg, children?)`, `ui.row(cfg, children?)`, `ui.column(cfg,
-children?)`, and the `ui.text(str, cfg?)` leaf. A launcher button:
+children?)`, and the `ui.text(str, cfg?)` leaf. A launcher button; add this
+inside your bar function:
 
 ```lua
 		ui.box({
@@ -279,9 +261,9 @@ screen.on("added", function(s)
 end)
 ```
 
-This is essentially the default config's bar: the same three regions, with
-the clock cell showing the tooltip trick (`ui.tooltip` returns an `on_hover`
-handler; the text function is read live at declare).
+The clock uses `ui.tooltip`, which returns an `on_hover` handler. The default
+config's bar also adds the launcher glyph, the backdrop and a clipped right
+region.
 
 ## See also
 

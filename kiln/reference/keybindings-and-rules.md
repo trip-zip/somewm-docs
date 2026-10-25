@@ -111,7 +111,7 @@ Three keys are special and applied first:
 - `screen`: by name or by screen object. With `tag` it scopes the name lookup; alone, the client goes to that screen's selected tag.
 - `focus = false`: blocks activation, so the client maps without taking focus.
 
-Everything else is a plain property write (`c[k] = v`): `floating = true`, `fullscreen = true`, `ontop = true`, `titlebar = false`, and any other [client property](/kiln/reference/client). The writes are order-independent by construction.
+Everything else is a plain property write (`c[k] = v`): `floating = true`, `fullscreen = true`, `ontop = true`, `titlebar = false`, and any other [client property](/kiln/reference/client). Each prop is written once, after `tag`/`screen`/`focus`.
 
 The `on(c)` callback runs after props, which is where a [placement helper](/kiln/reference/placement) slots in directly:
 

@@ -36,7 +36,7 @@ end }
 | `gap` | number | `theme.gap` | Gap between cells, per tag. |
 | `carousel_width` | number | 0.5 | Center cell fraction; read by the carousel layout only. |
 
-Writing `layout`, `master_width_factor`, `master_count`, `column_count`, `gap`, or `carousel_width` redraws the screen when the tag is selected; the write is the whole verb, there is no separate arrange call.
+Writing `layout`, `master_width_factor`, `master_count`, `column_count`, `gap`, or `carousel_width` redraws the screen when the tag is selected; there is no arrange call.
 
 ## Methods
 

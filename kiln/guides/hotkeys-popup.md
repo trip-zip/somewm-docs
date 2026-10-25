@@ -20,16 +20,15 @@ local th = kiln.theme
 
 ## The built-in sheet
 
-The stdlib ships a cheat sheet that reads that registry at declare, so it
-lists whatever your config binds, always current:
+Bind `kiln.hotkeys.toggle`:
 
 ```lua
 key { mods = { "mod" }, key = "s", desc = "show help", group = "kiln",
   press = kiln.hotkeys.toggle }
 ```
 
-That is the whole wiring, and it is exactly what the default config does. The
-API is three functions and one field:
+The default config binds it to `mod+s`. The API is three functions and one
+field:
 
 | Symbol | Meaning |
 |---|---|
@@ -49,15 +48,13 @@ The stock sheet:
   leaks to the binding underneath. A press outside the sheet dismisses too.
 
 A range binding (`key = "1-9"`) is one row reading `"1-9"`, not nine expanded
-rows. There is no update path to manage: the registry is the model and the
-declare is the render, so a binding added at any time is on the sheet the
-next time it opens.
+rows. The sheet reads `kiln.key.all()` each time it is declared, so bindings
+added later appear the next time it opens.
 
 ## Rolling your own
 
-The rest of this page replaces the stock sheet with your own layout. The
-same registry powers it: `kiln.key.all()` returns a copy of every binding as
-written.
+The same registry powers a replacement: `kiln.key.all()` returns a copy of
+every binding as written.
 
 ### Step 1: read the registry
 
@@ -94,23 +91,25 @@ end
 
 ### Step 3: declare the overlay
 
-The popup is ordinary nodes in the screen's tree, declared while a boolean is
-set and not declared at all when it is not. Two floats in the `overlay` band: a
-screen-sized scrim that dismisses on any press outside, and the sheet one z
-above it:
+The popup is ordinary nodes in the screen's tree, declared while a variable
+holds the screen it is open on and not declared at all when it is nil. Every
+screen's bar calls the declare, so the check against `s` keeps the sheet on
+one screen, as the stock `kiln.hotkeys.open` does. Two floats in the
+`overlay` band: a screen-sized scrim that dismisses on any press outside, and
+the sheet one z above it:
 
 ```lua
-local hotkeys_open = false
+local hotkeys_open = nil   -- the screen the sheet is open on, or nil
 
 local function declare_hotkeys(s)
-  if not hotkeys_open then return end
+  if hotkeys_open ~= s then return end
   ui.box({
     id = "my-hotkeys-scrim",
     float = { to = "root", band = "overlay" },
     w = s.width, h = s.height,
     color = "#00000080",
     on_press = function()
-      hotkeys_open = false
+      hotkeys_open = nil
       kiln.dirty(s.name)
     end,
   })
@@ -150,9 +149,10 @@ client handle, a tag index); a string there is not valid.
 
 ### Step 4: wire it in and toggle it
 
-Call `declare_hotkeys(s)` at the end of your bar function so the sheet rides
-every frame while open. Then bind a toggle, and put the binding in the same
-registry so the sheet lists its own summon key:
+Call `declare_hotkeys(s)` at the end of your bar function so the sheet is
+declared on each redraw while open. Then bind a toggle, and put the binding in
+the same registry so the sheet lists its own summon key. `mod+shift+s` is
+unbound in the default config, which keeps `mod+s` on the stock sheet:
 
 ```lua
 ui.bar(s, { edge = "top", color = th.bg }, function()
@@ -160,14 +160,15 @@ ui.bar(s, { edge = "top", color = th.bg }, function()
   declare_hotkeys(s)
 end)
 
-key { mods = { "mod" }, key = "s", desc = "show keys", group = "system",
+key { mods = { "mod", "shift" }, key = "s", desc = "show keys", group = "system",
   press = function()
-    hotkeys_open = not hotkeys_open
-    kiln.dirty(screen.focused.name)
+    local was = hotkeys_open
+    hotkeys_open = was == nil and screen.focused or nil
+    kiln.dirty((was or screen.focused).name)
   end }
 ```
 
-`kiln.dirty` forces the redraw: the boolean is plain Lua state, and changing
+`kiln.dirty` forces the redraw: the variable is plain Lua state, and changing
 it does not redraw anything on its own.
 
 ### Step 5 (optional): dismiss on any key
@@ -181,7 +182,7 @@ released:
 local hotkeys_grab = nil
 
 local function close_hotkeys()
-  hotkeys_open = false
+  hotkeys_open = nil
   if hotkeys_grab ~= nil then
     hotkeys_grab:stop()
     hotkeys_grab = nil
@@ -190,7 +191,7 @@ local function close_hotkeys()
 end
 
 local function open_hotkeys(s)
-  hotkeys_open = true
+  hotkeys_open = s
   hotkeys_grab = kiln.keygrabber {
     key = function(ev)
       if ev.pressed then close_hotkeys() end
@@ -199,9 +200,9 @@ local function open_hotkeys(s)
   kiln.dirty(s.name)
 end
 
-key { mods = { "mod" }, key = "s", desc = "show keys", group = "system",
+key { mods = { "mod", "shift" }, key = "s", desc = "show keys", group = "system",
   press = function()
-    if hotkeys_open then close_hotkeys()
+    if hotkeys_open ~= nil then close_hotkeys()
     else open_hotkeys(screen.focused) end
   end }
 ```

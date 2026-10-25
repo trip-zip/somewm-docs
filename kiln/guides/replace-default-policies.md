@@ -12,11 +12,9 @@ Everything kiln decides on your behalf is a function in `kiln.defaults`, and eve
 
 They cover focus succession (`successor`), activation (`activate`), layer-shell handling (`layer`, `layer_keyboard`, `layer_release`), the notification UI (`notify_display`), and the four external requests (`fullscreen`, `maximize`, `minimize`, `close`). The [defaults reference](/kiln/reference/defaults) documents each one's signature, when it runs, how it is registered, and what the stock version does.
 
-## 2. The two replacement patterns
+## 2. Replace by assignment {#2-the-two-replacement-patterns}
 
-The general recipe is always: understand what the stock function does (its section in the [defaults reference](/kiln/reference/defaults)), write your own with the same signature, install it. How you install it depends on how the policy is invoked.
-
-**Called through the table.** `successor` and `notify_display` are looked up on `kiln.defaults` at call time, so replacing them is one assignment:
+The recipe is always: read what the stock function does (its section in the [defaults reference](/kiln/reference/defaults)), write your own with the same signature, assign it:
 
 ```lua
 kiln.defaults.successor = function(gone)
@@ -24,16 +22,9 @@ kiln.defaults.successor = function(gone)
 end
 ```
 
-**Connected to a signal.** `activate`, `fullscreen`, `maximize`, `minimize`, `close`, and the `layer` trio are registered as signal listeners at boot. Assigning the table field does not touch the listener that is already on the bus, so swap it there:
+All ten are replaced this way. `successor`, `notify_display` and the `layer` trio are looked up on `kiln.defaults` at call time. The five request defaults (`activate`, `close`, `fullscreen`, `maximize`, `minimize`) are signal listeners on `client`; assigning `kiln.defaults.fullscreen` disconnects the old function from `request::fullscreen` and connects the new one. A request default must be a function: assigning `nil` raises an error. Assign a function that does nothing to refuse a request.
 
-```lua
-client.off("request::fullscreen", kiln.defaults.fullscreen)
-client.on("request::fullscreen", my_fullscreen)
-```
-
-The same off/on pair works for each: `request::activate`, `request::maximize`, `request::minimize`, and `request::close` on `client`, and `map`/`commit`/`unmap`/`destroy` on `layer` for the layer policies. Taking a handler off the bus and connecting nothing is also legal: that is how you refuse a request outright, since nothing else acts on it.
-
-Config reload restores the stock listeners and then re-runs your config file, so replacements declared in the config survive reloads automatically.
+Config reload restores the stock defaults and then re-runs your config file, so replacements declared in the config survive reloads automatically.
 
 ## 3. Worked example: focus succession
 
@@ -77,13 +68,12 @@ end
 The stock `activate` marks non-user-initiated requests urgent. To deny background apps any effect at all, honoring only requests backed by a real activation token (for example a window you launched with `kiln.spawn_with_token`):
 
 ```lua
-client.off("request::activate", kiln.defaults.activate)
-client.on("request::activate", function(c, ctx)
+kiln.defaults.activate = function(c, ctx)
 	if ctx.valid then
 		c:focus()
 	end
 	-- Invalid asks: no focus, no urgent flag, nothing.
-end)
+end
 ```
 
 `ctx.valid` is true when the request carries a seat-backed activation token; `ctx.app_id` names who asked, if you want to allowlist specific apps instead.
@@ -93,20 +83,15 @@ end)
 Some apps insist on fullscreening themselves (video players on double-click). This replacement tells the client it is fullscreen, so it hides its own controls and plays full-surface, but keeps it exactly where the layout put it:
 
 ```lua
-client.off("request::fullscreen", kiln.defaults.fullscreen)
-client.on("request::fullscreen", function(c, on)
+kiln.defaults.fullscreen = function(c, on)
 	-- Mirror the state to the client so it draws itself fullscreen,
 	-- but never set c.fullscreen: the layout keeps tiling it.
 	core.client.set_fullscreen_hint(c.handle, on and true or false)
 	c.titlebar = not on
-end)
+end
 ```
 
 `core.client.set_fullscreen_hint` is the low-level verb the stock property listener uses; here it is applied without the band promotion that real fullscreen gets. Hiding the titlebar while "fullscreen" keeps the illusion tidy. Your own `mod+f` binding can still use `c:toggle_fullscreen()` for genuine fullscreen, since that writes the property directly rather than raising a request.
-
-:::tip
-This split is the general shape of request policy: the client's ask arrives as a `request::*` signal, your handler decides, and the property write (or its absence) is the whole outcome. A handler that does nothing is a veto.
-:::
 
 ## See also
 

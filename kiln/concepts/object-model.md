@@ -25,7 +25,7 @@ client.on("property::my_project", function(c, v)
 end)
 ```
 
-A misspelled property name creates a new property without an error. Writes outside the [dirty lists](/kiln/concepts/frames-and-dirty) change state without triggering a redraw.
+A misspelled property name creates a new property without an error. Writes to a destroyed object are ignored. Writes outside the [dirty lists](/kiln/concepts/frames-and-dirty) change state without triggering a redraw.
 
 ## Two buses per signal
 

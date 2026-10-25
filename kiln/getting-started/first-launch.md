@@ -7,8 +7,9 @@ sidebar_position: 2
 # First Launch
 
 kiln picks its backend automatically. Launched from inside an existing Wayland
-or X session it opens as a nested window, which is the comfortable way to
-explore. Launched from a bare TTY it runs directly on DRM as your session.
+session it opens as a nested window titled `kiln`, which is the comfortable
+way to explore. Launched from a bare TTY it takes your logind session and
+runs directly on DRM.
 
 ## Starting kiln
 
@@ -18,30 +19,28 @@ KILN_SOCK="$kiln_demo/eval.sock" KILN_RC="$PWD/kilnrc.lua" \
   dbus-run-session -- ./build/kiln -s foot
 ```
 
-The private bus serves two things: clients you spawn
-(portals, apps that expect D-Bus), and kiln's own D-Bus integrations, which is
-how desktop notifications and system tray items reach the compositor. Without
-a bus, apps still run but anything D-Bus-shaped is missing. The command above creates a private bus and IPC path. `make run` also wraps
-D-Bus, but uses the default IPC path and your normal config. Run from the source
-checkout. Neither command rotates logs.
+`dbus-run-session` gives kiln and its clients a session bus. Notifications,
+the tray and portals need it. Run this from the source checkout; logs go to
+the terminal. `make run` also wraps D-Bus, with your normal config and a
+private socket.
 
-After `make && sudo make install`, start the installed `kiln` command from a
-free TTY as your normal user. It uses the login's D-Bus user session, selects
-DRM/libinput and loads your config. No backend variables or launcher wrapper
-are needed. On systems without a login-provided bus, use `dbus-run-session -- kiln`.
-Super+Return opens a terminal and Super+Shift+q quits.
+Installed: run `kiln` from a free TTY (wrap it in `dbus-run-session` if your
+login provides no bus).
 
-For a development TTY session, `./run-tty` builds the normal binary
-and launches foot with the actual config/theme, a private bus and IPC socket.
-It preserves the login runtime directory and records the trial directory in
-`build/last-tty-trial`. Read the checkout's `TESTING.md` before physical tests;
-this launcher is for a free seat, not a second desktop on an occupied seat.
+`./run-tty` builds kiln and starts it on DRM with your `~/.config/kiln/rc.lua`
+(or `$KILN_RC`), a private bus and socket, and `-s foot`. Output goes to
+`/tmp/kiln-seat-trial.*/server.log`; the directory name is saved in
+`build/last-tty-trial`. Use it on a free seat only.
 
 Flags and environment:
 
 - `-s <command>` runs a startup command once the compositor is up. Useful for
   launching a terminal or a session script on a TTY boot.
 - `KILN_RC=<path>` loads an explicit config file, overriding the search order.
+- `KILN_SOCK=<path>` sets the IPC socket path (default
+  `$XDG_RUNTIME_DIR/kiln.sock`).
+- `KILN_BACKEND` overrides the choice (`headless`, `nested`, `drm`); `nested`
+  is used when `WAYLAND_DISPLAY` is set, otherwise `drm`.
 
 ## Which config runs
 
@@ -61,8 +60,8 @@ The stock desktop is the default `rc.lua`:
   centered, rendered per output (this needs `rsvg-convert` on your PATH). Set
   `KILN_WALLPAPER` to an image path to use that instead.
 - The catppuccin palette. The main menu (`mod+w`, or right-click the desktop)
-  has a theme submenu with gruvbox and nord as well; the choice persists to
-  `~/.config/kiln/theme` across restarts.
+  has a `kiln` submenu whose `theme` entry offers gruvbox and nord as well;
+  the choice persists to `~/.config/kiln/theme` across restarts.
 
 Clients tile into the selected tag's layout as you open them. Clicking a
 client focuses it, and focus also follows the mouse.
@@ -71,7 +70,7 @@ client focuses it, and focus also follows the mouse.
 
 The modkey is `super` (the stdlib default is `alt`; the shipped config
 overrides it). Press `mod+s` at any time to pop up the built-in cheat sheet,
-which is generated from the live bindings and always complete. The essentials:
+which is generated from the live bindings. The essentials:
 
 | Chord | Action |
 |---|---|
@@ -87,10 +86,10 @@ which is generated from the live bindings and always complete. The essentials:
 | `mod+x` | Lua prompt; try `6*7` |
 | `mod+ctrl+r` | reload the config |
 | `mod+shift+q` | quit kiln |
+| `alt+Escape` | also quits kiln |
 
 Everything else (focus, layouts, floating, media keys, screenshots, the
-lock chord) is on the `mod+s` sheet, which never goes stale: it reads the
-binding registry live.
+lock chord) is on the `mod+s` sheet.
 
 Mouse bindings:
 

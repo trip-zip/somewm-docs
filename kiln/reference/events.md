@@ -1,12 +1,12 @@
 ---
 title: Origin Events
-description: The 40 raw events C pushes into the single event handler, grouped by class with payload fields.
+description: The 43 raw events the native core pushes into the single event handler, grouped by class with payload fields.
 sidebar_position: 17
 ---
 
 # Origin Events
 
-Every fact the compositor learns arrives in Lua as one origin event: C pushes a table with the envelope `{ class = ..., name = ..., ...payload }` into the single handler installed with `core.set_event_handler`. The stdlib owns that handler and translates events into the object signals a config actually subscribes to, so a config normally never sees these. They are documented here for two audiences: anyone replacing stdlib behavior at the raw boundary, and anyone debugging over IPC who wants to know exactly what C said.
+Every fact the compositor learns arrives in Lua as one origin event: the native core pushes a table with the envelope `{ class = ..., name = ..., ...payload }` into the single handler installed with `core.set_event_handler`. The stdlib owns that handler and translates events into the object signals a config actually subscribes to, so a config normally never sees these.
 
 ```lua
 -- what a raw event looks like inside the handler
@@ -15,7 +15,7 @@ local ev = { class = "client", name = "map", handle = 7,
   app_id = "foot", title = "foot" }
 ```
 
-The envelope always carries `class` and `name`; payload fields ride flat beside them. `mods`, where present, is a table of four booleans: `shift`, `ctrl`, `alt`, `super`. There are 40 events in 11 classes.
+The envelope always carries `class` and `name`; payload fields ride flat beside them. `mods`, where present, is a table of four booleans: `shift`, `ctrl`, `alt`, `super`. There are 43 events in 11 classes.
 
 ## client
 
@@ -44,6 +44,7 @@ The envelope always carries `class` and `name`; payload fields ride flat beside 
 | `motion` | `x, y, screen, client` | The pointer moved. Same `client` rule as `button`. |
 | `axis` | `dx, dy, x, y, screen, client, mods` | A scroll. Same `client` rule as `button`. |
 | `pointer_enter` | `handle` | The pointer crossed onto a client; `handle` is `nil` when it is over no client. |
+| `focus` | `handle` | Native keyboard focus changed. `handle` is the surface that now holds it, `nil` when nothing does. |
 
 ## output
 
@@ -57,8 +58,9 @@ The envelope always carries `class` and `name`; payload fields ride flat beside 
 
 | Event | Payload | Emitted when |
 |---|---|---|
-| `map` | `handle, namespace, output, layer, interactivity, anchors, margin, exclusive, width, height` | A layer-shell surface mapped. `output` is `nil` when the client let the compositor choose. `anchors` is `{top, bottom, left, right}` booleans; `margin` is `{top, right, bottom, left}` numbers. Answer with `core.layer_configure`. |
+| `map` | `handle, namespace, output, layer, interactivity, anchors, margin, exclusive, width, height, buffer_mapped` | A layer-shell surface mapped. `output` is `nil` when the client let the compositor choose. `anchors` is `{top, bottom, left, right}` booleans; `margin` is `{top, right, bottom, left}` numbers. Answer with `core.layer_configure`. |
 | `commit` | same as `map` | The surface committed new layer state. |
+| `mapped` | same as `map`, with `buffer_mapped = true` | The surface attached its first buffer and is now drawable. Only such surfaces are declared. |
 | `unmap` | `handle` | The surface is hidden. |
 | `destroy` | `handle` | The surface is gone. |
 
@@ -68,6 +70,7 @@ The envelope always carries `class` and `name`; payload fields ride flat beside 
 |---|---|---|
 | `lock` | `kind` | The session locked. `kind` is `"ext"` (an external locker) or `"native"` (`core.lock`). Informational: Lua cannot veto a lock. |
 | `unlock` | none | The session unlocked. |
+| `authenticated` | `id, success, reason` | A `core.authenticate` request finished. `id` is the request id it returned; `reason` is the PAM message on failure. |
 | `key` | as input `key` | A key while natively locked. Delivered only to the lockscreen path, never reaches bindings or clients. |
 
 ## drag
@@ -116,5 +119,5 @@ The envelope always carries `class` and `name`; payload fields ride flat beside 
 
 - [Signals](/kiln/reference/signals): the object-signal layer these translate into, which is what configs subscribe to
 - [core](/kiln/reference/core): the verbs you answer these events with
-- [The C/Lua boundary](/kiln/concepts/c-lua-boundary): why events are the only way facts cross
+- [The Native/Lua boundary](/kiln/concepts/c-lua-boundary): why events are the only way facts cross
 - [IPC and scripting](/kiln/guides/ipc-and-scripting): observing a live session from a shell

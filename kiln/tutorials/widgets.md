@@ -6,7 +6,8 @@ sidebar_position: 4
 
 # Widgets
 
-`ui.widget` creates a function that declares UI elements, with timers or signal listeners to trigger redraws. Call it from your bar function.
+`ui.widget{fn, every=, watch=}` arms a timer and signal listeners that mark
+screens dirty, and returns `fn` for your bar function to call.
 
 [`kiln.widgets`](/kiln/reference/widgets) provides stock widgets such as the taglist and clock.
 
@@ -43,16 +44,14 @@ local seconds_clock = ui.widget {
 ```
 
 The spec's first positional entry (or a `fn` field) is the declare function;
-`every = 1` marks every screen dirty each second. Then, in your bar:
+`every = 1` marks every screen dirty each second. Call `seconds_clock()`
+inside your existing bar function:
 
 ```lua
-	ui.bar(s, { edge = "top" }, function()
-		ui.spacer()
 		seconds_clock()
-	end)
 ```
 
-Reload. The clock appears on the right and updates every second.
+Reload. The clock appears in the bar and updates every second.
 
 ## 2. External data: a battery reader with spawn.watch
 
@@ -86,22 +85,30 @@ watches automatically, so an edited config never doubles its pollers. See
 
 `watch` wires object signals to redraws. Entries are `"Class::signal"` where
 the class is one of the globals (`client`, `screen`, `tag`, `layer`,
-`notification`):
+`notification`). Focus and title changes already redraw the screen; a
+property of your own does not. Writing any unknown key on a client stores it
+and emits `property::<key>`, so a `mark` flag set from a key becomes a
+watchable signal:
 
 ```lua
-local focus_indicator = ui.widget {
-	watch = { "client::focus", "client::property::title" },
+kiln.key { mods = { "mod" }, key = "b", desc = "toggle mark", group = "client",
+	press = kiln.focused(function(c) c.mark = not c.mark end) }
+
+local marked = ui.widget {
+	watch = { "client::property::mark" },
 	function()
-		local c = client.focus
-		ui.text(c and (c.title or c.app_id or "") or "nothing focused",
-			{ size = 12, color = th.muted })
+		local n = 0
+		for _, c in ipairs(client.all()) do
+			if c.mark then n = n + 1 end
+		end
+		ui.text(n .. " marked", { size = 12, color = th.muted })
 	end,
 }
 ```
 
-Add it to your bar, reload, and switch between windows. The label shows the focused window's title, or "nothing focused" on an empty tag. Listeners are registered once per signal name; see the [signals reference](/kiln/reference/signals).
-
-Focus and title changes already trigger redraws. `watch` is needed for custom properties that do not.
+Add `marked()` to your bar, reload, and press `mod+b` on a few windows. The
+count follows each press. Listeners are registered once per signal name; see
+the [signals reference](/kiln/reference/signals).
 
 ## 4. Keyed lists with ui.each
 
@@ -130,7 +137,7 @@ local notification_chips = ui.widget {
 Wire the chips into your bar, reload, and send yourself a notification:
 
 ```bash
-scripts/kiln-eval 'require("kiln").notify { title = "hello" }'
+kiln-client eval 'require("kiln").notify { title = "hello" }'
 ```
 
 A chip labelled "hello" appears in the bar. Click it to dismiss the notification and remove the chip.
@@ -199,7 +206,7 @@ screen.on("added", function(s)
 end)
 ```
 
-Reload. The meter shows the charge and changes colour below 20%. Without a battery, it displays "no battery".
+Reload. The meter shows the charge and changes color below 20%. Without a battery, it displays "no battery".
 
 ## See also
 

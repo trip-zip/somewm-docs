@@ -20,7 +20,7 @@ kiln.menu.show {
 }
 ```
 
-Each item is label first, payload second, and the payload's type is the whole schema: a function is an action, a nested table is a submenu, and an optional `icon = "/path"` draws an image before the label. The full cfg and item schema are in the [kiln.menu reference](/kiln/reference/menu); this guide is the recipes.
+Each item is label first, payload second: a function payload is an action, a table payload is a submenu, and an optional `icon = "/path"` draws an image before the label. The full cfg and item schema are in the [kiln.menu reference](/kiln/reference/menu).
 
 ## Attach a menu to a bar button
 
@@ -53,11 +53,11 @@ screen.on("added", function(s)
 end)
 ```
 
-The open-or-close check makes the button a toggle: pressing it while its menu is up dismisses instead of reopening. `kiln.menu.open` is non-nil exactly while a menu is up, which is what makes the check work.
+The open-or-close check makes the button a toggle: pressing it while its menu is up dismisses instead of reopening. `kiln.menu.open` is non-nil while a menu is open.
 
 ## A root menu on right-click
 
-A button bind with `on = "root"` fires when the press lands on empty desktop, which is the classic place for a main menu:
+A button bind with `on = "root"` fires when the press lands on empty desktop, which is the classic place for a main menu. The default config binds right-click on the root to its main menu, so this replaces the stock root menu:
 
 ```lua
 kiln.button { mods = {}, button = 3, on = "root",

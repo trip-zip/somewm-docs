@@ -20,7 +20,7 @@ kiln.on("error", function(signal, err) kiln.notify { title = signal, message = e
 | `map` | none | A window maps; properties already seeded. |
 | `unmap` | none | A window unmaps. |
 | `destroy` | none | A window is destroyed. |
-| `focus` | none | The client gains focus through `c:focus()`. |
+| `focus` | none | The client becomes `client.focus` (through `c:focus()` or a native focus change). |
 | `tagged` | the tag | The client joins a tag. |
 | `untagged` | the tag | The client leaves a tag. |
 | `mouse::enter` | none | The pointer enters the client. |
@@ -57,6 +57,7 @@ Tags emit only property signals. Selection changes surface as `property::selecte
 |---|---|---|
 | `map` | none | The surface's initial commit; blocks until a policy answers. |
 | `commit` | none | The surface committed new facts. |
+| `mapped` | none | The surface attached its first buffer; `buffer_mapped` is now true. |
 | `unmap` | none | The surface unmapped. |
 | `destroy` | none | The surface is gone. |
 | `property::<any>` | new value | A property write changed the value. |
@@ -81,7 +82,7 @@ The `drag` global is a plain signal bus (`drag.on`, `drag.off`), not an object c
 
 ## kiln.on (global bus)
 
-Subscribe with `kiln.on(name, fn)`.
+Subscribe with `kiln.on(name, fn)`; `kiln.off(name, fn)` removes. Where the payload is "the event", it is the raw [origin event](/kiln/reference/events) table.
 
 | Signal | Payload | Emitted when |
 |---|---|---|
@@ -89,6 +90,14 @@ Subscribe with `kiln.on(name, fn)`.
 | `idle::start` | none | The armed idle timeout elapsed with no input. |
 | `idle::stop` | none | Input resumed after idle. |
 | `idle::inhibit` | boolean | A visible idle inhibitor appeared (true) or went away (false). |
+| `session::lock` | the event (`kind`) | The session locked, natively or by an external locker. |
+| `session::unlock` | the event | The session unlocked. |
+| `session::authenticated` | the event (`id`, `success`, `reason`) | A `core.authenticate` request finished. |
+| `drag::start`, `drag::end` | the event | A drag-and-drop began or ended (also on the `drag` bus). |
+| `spawn::out` | the event (`id`, `fd`, `data`) | A `kiln.spawn.pipe` child wrote output. |
+| `spawn::exit` | the event (`id`, `code`) | The child exited. |
+| `frame::tick` | the event (`screen`, `dt`) | An armed frame clock completed a cycle. |
+| `input::<name>` | the event | Every input origin event (`key`, `button`, `motion`, `axis`, `pointer_enter`, `focus`), after the stdlib has handled it. |
 
 ## See also
 

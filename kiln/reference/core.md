@@ -1,15 +1,15 @@
 ---
 title: core
-description: The raw C boundary, 57 functions across core.*, core.client.*, core.input.*, and core.output.*.
+description: The raw native boundary, 58 functions across core.*, core.client.*, core.input.*, and core.output.*.
 sidebar_position: 16
 ---
 
 # core
 
-`core` is the raw C surface of the compositor: 57 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, widgets, focus, rules) is built by calling these.
+`core` is the raw native surface of the compositor: 58 functions across `core.*`, `core.client.*`, `core.input.*`, and `core.output.*`. Everything the stdlib does (layout, widgets, focus, rules) is built by calling these.
 
 :::note
-`core.*` is the raw C boundary the stdlib is built on. Configs should prefer the object model (`client`, `tag`, `screen`, `layer`, `notification`) and `kiln.*`, but everything here is reachable from config code and over IPC. Five names are also the sanctioned vocabulary for [widget authors](/kiln/reference/widgets): `core.box`, `core.dirty`, `core.timer`, `core.tray_activate`, and `core.input.set_cursor`. Every stock widget confines itself to these, and a standing check in the kiln repo keeps it that way.
+`core.*` is the raw native boundary the stdlib is built on. Configs should prefer the object model (`client`, `tag`, `screen`, `layer`, `notification`) and `kiln.*`, but everything here is reachable from config code and over IPC. The subset stock widgets may use is listed under [Writable by a config](/kiln/reference/widgets#writable-by-a-config).
 :::
 
 ```lua
@@ -27,19 +27,19 @@ These build the Clay element tree and error outside a frame or lock handler ("de
 
 | Function | Description |
 |---|---|
-| `core.open(decl)` | Open a Clay element. `decl` is a raw Clay declaration table: `id`, `layout` (`sizing`, `padding`, `childGap`, `childAlignment`, `layoutDirection`), `backgroundColor`, `cornerRadius`, `aspectRatio`, `image`, `floating` (incl. `clipTo = "none"` or `"attached_parent"`), `clip`, `border`. Must be balanced by `core.close()`. |
+| `core.open(decl)` | Open a Clay element. `decl` is a raw Clay declaration table: `id`, `layout` (`sizing`, `padding`, `childGap`, `childAlignment`, `layoutDirection`), `backgroundColor`, `cornerRadius`, `aspectRatio`, `image`, `floating` (incl. `clipTo = "none"` or `"attached_parent"`), `clip`, `border`. Must be balanced by `core.close()`. Errors: a `custom`, `text`, `overlayColor`, `transition` or `userData` key raises "unsupported drawing feature"; a non-finite or out-of-range number raises (sizes and radii must be non-negative, `percent` in 0..1, padding and gap at most 65535, `zIndex` in -32768..32767); an id already declared this frame raises "duplicate element id" and the frame is dropped. |
 | `core.close()` | Close the innermost open element. Errors without a matching `core.open`. |
-| `core.text(str, cfg)` | Declare a text leaf. `cfg` fields: `textColor`, `fontId` (an id from `core.font`; 0 is the default font), `fontSize` (default 16), `letterSpacing`, `lineHeight`, `wrapMode`, `textAlignment`. |
-| `core.font(desc)` | Intern a Pango font description ("Sans Bold", "Monospace") to the id a text declaration carries as `fontId`. The same description always returns the same id. Callable outside a frame, unlike the declare primitives; `ui.text` calls it through a cache for its `font` cfg. |
+| `core.text(str, cfg)` | Declare a text leaf. `cfg` fields: `textColor`, `fontId` (an id from `core.font`; 0 is the default font), `fontSize` (default 16), `letterSpacing`, `lineHeight`, `wrapMode`, `textAlignment`, `ellipsize`. |
+| `core.font(desc)` | Intern a Pango font description ("Sans Bold", "Monospace") to the id a text declaration carries as `fontId`. The same description always returns the same id. A size in `desc` raises; pass size on the text cfg. Callable outside a frame, unlike the declare primitives; `ui.text` calls it through a cache for its `font` cfg. |
 | `core.surface(handle, decl?)` | Place a client surface as a self-closing leaf. Without `decl` it grows in both axes. The element id derives from the handle, so the key is stable across frames. Declaring the same handle twice in one frame is an error. |
 
 ### Readback
 
-Reading the box Clay answered with is allowed; computing where a box should be is not. `core.box` is how a widget turns a pointer position into a value with no layout arithmetic of its own: `kiln.widgets.slider` reads its own solved track and divides, which is also why it demands a stable id. Before the first solve there is no box and no honest answer, so the read returns nil rather than a guess.
+`core.box` lets a widget turn a pointer position into a value without doing layout arithmetic; `kiln.widgets.slider` reads its solved track this way. Before the first solve it returns nil.
 
 | Function | Description |
 |---|---|
-| `core.hits(screen, x, y)` | Element ids under a layout point, innermost first, as `{ { name, index }, ... }` (max 32), from the last solve. The liveness test: only elements the live tree put under the point answer. |
+| `core.hits(screen, x, y)` | Element ids under a layout point on the screen named `screen`, innermost first, as `{ { name = ..., index = ... }, ... }` (max 32), from the last solve. The liveness test: only elements the live tree put under the point answer. |
 | `core.box(id)` | The solved box of an element as `{ x, y, width, height }`, half-up-rounded integers. `id` is a string or `{ name, index }`. Callable any time: inside the frame handler it reads the previous solve (boxes are only rewritten when the solve ends). Clay's element map is persistent, so an id that left the tree keeps answering with its final box; `nil` only for an id never declared, or before the first solve. Not a liveness test, use `core.hits` for that. |
 | `core.screenshot(screen, path?)` | Read the screen's composed scene into the image cache and return the cache key (usable as an image source). With `path`, also write a PNG there. `nil` on a stale screen name or failed readback. |
 | `core.output.list()` | Output enumeration, see [core.output.*](#coreoutput) below. |
@@ -59,8 +59,8 @@ One of each; setting again replaces. The stdlib owns all three, so a config neve
 | Function | Description |
 |---|---|
 | `core.dirty(screen?)` | Mark one screen (by name) or every screen dirty, scheduling a re-solve. |
-| `core.tick(screen, on)` | Arm or disarm that output's frame clock. While on, C keeps a frame scheduled and delivers `frame::tick` with the true delta each cycle; easing and delta clamping are Lua's job. |
-| `core.set_key_bindings(chords)` | Replace the whole consume set: `{ { mods = {"alt"}, key = "Return" }, ... }`. Mod names: `shift`, `ctrl`, `alt`, `super`. C consumes exactly these chords; every other key forwards to the focused client. Locked modifiers (NumLock, CapsLock) are ignored in the match. Errors on an unknown key name. |
+| `core.tick(screen, on)` | Arm or disarm that output's frame clock. While on, the core keeps a frame scheduled and delivers `frame::tick` with the true delta each cycle; easing and delta clamping are Lua's job. |
+| `core.set_key_bindings(chords)` | Replace the whole consume set: `{ { mods = {"alt"}, key = "Return" }, ... }`. Mod names: `shift`, `ctrl`, `alt`, `super`. The core consumes exactly these chords; every other key forwards to the focused client. Locked modifiers (NumLock, CapsLock) are ignored in the match. Errors on an unknown key name. |
 | `core.timer(ms, fn)` | One-shot timer; returns a numeric id. `ms <= 0` fires on the next loop turn. |
 | `core.timer_cancel(id)` | Disarm a pending timer. A fired or unknown id no-ops. |
 | `core.quit()` | Terminate the compositor. Deferred to the event loop, so it works even at config load time. |
@@ -69,7 +69,7 @@ One of each; setting again replaces. The stdlib owns all three, so a config neve
 | `core.image_reload(path)` | Drop the cached decode so the next declare re-reads the file. The only image invalidation; marking dirty afterwards is the caller's job. |
 | `core.inspector(screen)` | Whether the Clay debug inspector is up on that screen. `screen` is a name, as everywhere in `core`; `kiln.inspector` is the one that takes a screen object. |
 | `core.inspector(screen, on)` | Show or hide it. Returns the state after the call, read back from Clay: the panel can close itself from its own header button, so the answer is never a stored copy. Desktop screens only; the lockscreen cannot be inspected. |
-| `core.inspector(screen, cfg)` | Optional `enabled` and `width` in px (default 400, range 0-16384). Width is process-wide. Custom palette keys are rejected; styling remains deferred. |
+| `core.inspector(screen, cfg)` | Optional `enabled` and `width` in px (default 400, range 0-16384). Width is process-wide. Any other key raises "unsupported inspector style option". Changing state during a declare raises "inspector cannot change during declaration". |
 | `core.inspector_scroll(screen, dx, dy)` | Feed the panel a wheel delta for its next solve. Routed by Lua only when the hits under the cursor name the panel, so it never has to decide whether a scroll was meant for the inspector. |
 | `core.inspector_scroll(screen)` | The tree pane's current y offset. |
 
@@ -86,25 +86,26 @@ One of each; setting again replaces. The stdlib owns all three, so a config neve
 | Function | Description |
 |---|---|
 | `core.lock()` | Engage the native lockscreen. Returns false if a lock (native or external) is already active. |
-| `core.unlock()` | Disengage the native lockscreen. Refused (returns false) unless a prior `core.authenticate` succeeded; the gate is enforced in C, so Lua cannot unlock without a verified password. |
-| `core.authenticate(password)` | Verify via PAM, synchronously. Returns whether it matched; success opens the C unlock gate. |
+| `core.unlock()` | Disengage the native lockscreen. Refused (returns false) unless the last `core.authenticate` request reported success; the gate is enforced natively, so Lua cannot unlock without a verified password. |
+| `core.authenticate(password)` | Starts a PAM check in a worker and returns a request id, or nil when it cannot start (not natively locked, or a check already running). The result arrives as a `session` `authenticated` event (`id`, `success`, `reason`); on success, `core.unlock()` is allowed. |
 
 ### Notify, tray, and layer plumbing
 
 | Function | Description |
 |---|---|
-| `core.notify_closed(id, reason)` | Send `NotificationClosed` on the bus. `reason` is the protocol integer; C does not check whether the id ever named anything. |
+| `core.notify_closed(id, reason)` | Send `NotificationClosed` on the bus. `reason` is the protocol integer; the core does not check whether the id ever named anything. |
 | `core.notify_action(id, key)` | Send `ActionInvoked` for a pressed notification action. Whether the notification then closes is Lua's call, made with `notify_closed`. |
 | `core.tray_activate(service, kind, a?, b?)` | Forward one method call to a tray item (activate, scroll, and so on). |
 | `core.layer_configure(handle, w, h)` | Answer a `layer::map` or `layer::commit` fact with a size. The only configure path a layer surface has. |
 
 ## core.client.*
 
-All eleven take the numeric client handle (the `handle` field from client events).
+All but `focused` take the numeric client handle (the `handle` field from client events).
 
 | Function | Description |
 |---|---|
 | `core.client.focus(handle?)` | Give keyboard focus; `nil` defocuses everything. |
+| `core.client.focused()` | The handle of the surface that holds keyboard focus, or nil. |
 | `core.client.configure(handle, w, h)` | Send a size to the client. |
 | `core.client.close(handle)` | Polite close request (the client may ignore it). |
 | `core.client.kill(handle)` | Force kill the client's process. |
@@ -121,7 +122,7 @@ All eleven take the numeric client handle (the `handle` field from client events
 | Function | Description |
 |---|---|
 | `core.input.grab_pointer(on)` | Hand the cursor to Lua policy, or return it. While on, pointer events keep flowing to the event handler and none reach clients. |
-| `core.input.grab_keyboard(on)` | While on, keys keep entering the event queue and none reaches a client, so a Lua grabber reads them ahead of bindings. C tracks no grabber and no stack; the claim is Lua's. |
+| `core.input.grab_keyboard(on)` | While on, keys keep entering the event queue and none reaches a client, so a Lua grabber reads them ahead of bindings. The core tracks no grabber and no stack; the claim is Lua's. |
 | `core.input.set_cursor(name)` | Set the cursor image by xcursor name. |
 | `core.input.set_cursor_theme(name?, size?)` | Swap the xcursor theme. `nil` name restores the environment default; `size` defaults to 24. |
 | `core.input.set_keymap{rules, model, layout, variant, options}` | One whole-keymap replacement applied to every keyboard, no readback. The compose table is built from the locale, not the keymap, so it survives untouched. |
@@ -133,8 +134,8 @@ All eleven take the numeric client handle (the `handle` field from client events
 
 | Function | Description |
 |---|---|
-| `core.output.list()` | Enumerate outputs (max 16). Returns `{ { name, width, height, refresh, scale, x, y, enabled, modes = { { width, height, refresh }, ... } }, ... }`. Enumeration is discovery; runtime changes arrive as `output` events, not from re-reading this. |
-| `core.output.set_mode(name, w, h, refresh?)` | Set the output mode. `refresh` omitted or 0 picks a matching advertised mode, or sets a custom one at whatever rate the backend gives. |
+| `core.output.list()` | Enumerate outputs (max 16). Returns `{ { name, width, height, refresh, scale, x, y, enabled, modes = { { width, height, refresh }, ... } }, ... }`; `refresh` is in millihertz. A non-desktop output (a VR headset) also carries `non_desktop = true` and starts disabled. Enumeration is discovery; runtime changes arrive as `output` events, not from re-reading this. |
+| `core.output.set_mode(name, w, h, refresh?)` | Set the output mode. `refresh` is in mHz (60000 for 60 Hz); omitted or 0 picks the first advertised mode of that size. A size with no advertised timing is rejected. |
 | `core.output.set_scale(name, f)` | Set the output scale factor. |
 | `core.output.set_position(name, x, y)` | Move the output in the global layout. |
 | `core.output.set_enabled(name, on)` | Enable or disable the output. |
@@ -142,8 +143,8 @@ All eleven take the numeric client handle (the `handle` field from client events
 
 ## See also
 
-- [Origin events](/kiln/reference/events): everything C pushes into the event handler
+- [Origin events](/kiln/reference/events): everything the core pushes into the event handler
 - [Environment and IPC](/kiln/reference/environment-and-ipc): drive all of this from a shell
-- [The C/Lua boundary](/kiln/concepts/c-lua-boundary): why the split falls where it does
+- [The Native/Lua boundary](/kiln/concepts/c-lua-boundary): why the split falls where it does
 - [Frames and dirty](/kiln/concepts/frames-and-dirty): when the frame handler runs
 - [ui](/kiln/reference/ui): the node tree that compiles to the declare primitives

@@ -6,7 +6,7 @@ sidebar_position: 15
 
 # Data Widgets
 
-kiln has no canvas or drawing API, and bar meters do not need one. The standard forms (a progress bar, a slider, a toggle) ship on [`kiln.widgets`](/kiln/reference/widgets) as controlled widgets: your config owns the value, the widget draws it. The data lives in plain Lua variables; a shell command polled by `kiln.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers. When no stock widget matches the shape you want, it is boxes all the way down, and the history graph below shows that path.
+kiln has no canvas or drawing API, and bar meters do not need one. The standard forms (a progress bar, a slider, a toggle) ship on [`kiln.widgets`](/kiln/reference/widgets) as controlled widgets: your config owns the value, the widget draws it. The data lives in plain Lua variables; a shell command polled by `kiln.spawn.watch` updates them and marks the screen dirty, and the next frame declares the new numbers. Shapes with no stock widget are built from `ui.box`; the history graph below is an example.
 
 Snippets assume the standard config preamble:
 
@@ -48,11 +48,11 @@ The returned handle has a `:stop()` if you ever need to cancel the poll.
 widgets.progress({ id = "mem-bar", value = mem, w = 120 })
 ```
 
-Underneath it is exactly two boxes, an outer track and an inner fill sized as a fraction of it, which matters when you outgrow it: the [reference](/kiln/reference/widgets#form-widgets) lists its cfg, and the history graph below is what building a shape the stock widgets lack looks like.
+It is two boxes, a track and a fill sized to `value`. The [reference](/kiln/reference/widgets#form-widgets) lists its options.
 
 ## A history graph
 
-There is no stock graph, and this is the bespoke path. A graph is a row of thin grow boxes whose heights come from a ring buffer. Give each sample a monotonic sequence number so its identity is stable as it slides left, and declare the row through `ui.each`, keyed by that number:
+A graph is a row of thin grow boxes whose heights come from a ring buffer. Give each sample a monotonic sequence number so its identity is stable as it slides left, and declare the row through `ui.each`, keyed by that number:
 
 ```lua
 local cpu_hist, cpu_seq = {}, 0
@@ -98,7 +98,7 @@ end
 
 ## A slider
 
-`widgets.slider` is a progress bar that writes back: press or drag anywhere on the track and `changed` receives the new 0 to 1 value. The drag is a mousegrabber the widget manages, reading the track's solved box through `core.box`, and it ends on the release of the button that started it. Wired to volume:
+`widgets.slider` is a progress bar that writes back: press or drag anywhere on the track and `changed` receives the new 0 to 1 value. `id` is required: the slider reads its own solved box. The drag ends when the button that started it is released. Wired to volume:
 
 ```lua
 local vol = 0.5
@@ -113,7 +113,7 @@ widgets.slider({ id = "vol-slider", w = 100, value = vol,
   end })
 ```
 
-The slider holds no copy of the value: it draws `value` and reports through `changed`, so the fill is honest the frame after your variable changes and never before. To keep it honest against volume changed elsewhere, add a `kiln.spawn.watch` on `wpctl get-volume @DEFAULT_AUDIO_SINK@` that parses the number back into `vol`.
+The slider holds no copy of the value: it draws `value` and reports through `changed`. The fill shows `value` as of the last declare. To track volume changed outside kiln, add a `kiln.spawn.watch` on `wpctl get-volume @DEFAULT_AUDIO_SINK@` that writes `vol`.
 
 ## A toggle
 
@@ -128,8 +128,6 @@ widgets.toggle({ id = "dnd-toggle",
     kiln.dirty()
   end })
 ```
-
-Any boolean works the same way: draw from the state, flip in `press`, dirty.
 
 ## Complete example
 

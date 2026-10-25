@@ -16,32 +16,22 @@ cd kiln
 
 ## Dependencies
 
-The verified compiler is Odin `dev-2026-10-nightly:779c8c0`. Use GNU make,
-Python 3, gcc and ar, with system libraries matching the bindings:
+Kiln builds with Odin nightly dev-2026-10 (779c8c0), GNU make, gcc and ar.
+`make test` also needs Python 3. The system libraries match the bindings:
 
-- wlroots 0.20.2 and its graphics/device dependencies
-- wayland-server, libinput, xkbcommon
+- Mesa: EGL, GLES 2 and GBM
+- libinput, xkbcommon
 - LuaJIT 2.1, cairo, pango/pangocairo, gdk-pixbuf, GLib/GObject
-- libsystemd, PAM, xcb, xcb-ewmh, xcb-icccm
+- libsystemd (sd-bus, for the logind session, notifications and the tray),
+  PAM (authentication), xcb, xcb-ewmh
 
-XWayland is needed for X11 clients. The stock desktop uses `rsvg-convert`, fonts
-and foot (or `$TERMINAL`). Media/screenshot bindings also use `wpctl`,
-`brightnessctl`, `grim` and `slurp` when invoked.
-
-This is Odin compositor code linked to C libraries. There is no bundled
-wlroots fallback, Meson configuration or `-Dxwayland`/`-Ddbus`/`-Dpam` feature
-switch in this build. Normal authentication uses PAM; fixture builds are only
-for automated tests.
+Kiln speaks Wayland, DRM and logind itself. Running on hardware needs a logind session (seatd is not
+supported) and a GPU with atomic mode setting. XWayland is needed for X11
+clients. The stock desktop uses `rsvg-convert`, the `Sans` font through fontconfig,
+and foot (or `$TERMINAL`). Media/screenshot bindings also use `wpctl`, `brightnessctl`,
+`grim` and `slurp` when invoked.
 
 ## Build
-
-Keep an unmodified Clay checkout at the pinned revision. For a new dependency
-checkout (skip this if your existing checkout already matches):
-
-```sh
-git clone https://github.com/nicbarker/clay.git "$HOME/tools/clay"
-git -C "$HOME/tools/clay" checkout e6cc36941ab2af5d81107617039d6f527a1c660b
-```
 
 From the Kiln source directory:
 
@@ -49,21 +39,11 @@ From the Kiln source directory:
 make
 ```
 
-Clay must be at `e6cc36941ab2af5d81107617039d6f527a1c660b`, with its matching
-official Odin binding. `clay-dependency.json` pins both hashes. The build checks
-these and builds the external header into `clay.a`; it does not patch Clay.
-For another checkout path:
-
-```sh
-make CLAY_ROOT=/absolute/path/to/clay
-```
-
-The binaries are `build/kiln` and `build/kiln-client`. See
+Clay is vendored in `clay/` and `make` builds it. The binaries are `build/kiln` and `build/kiln-client`. See
 [First launch](/kiln/getting-started/first-launch) for a private nested session.
-`make run` builds and starts Kiln under a D-Bus session using your normal
-config and default IPC path. For a second nested instance, choose a private
-socket as shown in [First launch](/kiln/getting-started/first-launch).
-Logs go to the terminal.
+`make run` starts Kiln under `dbus-run-session` with your normal config and a
+private socket, so it does not collide with a running Kiln. Logs go to the
+terminal.
 
 ## Install
 
@@ -75,9 +55,8 @@ Build as your normal user. Installation copies that build to `/usr/local`
 without invoking Odin or rebuilding Clay as root. Reinstalling leaves the
 running compositor on its existing executable; the next launch uses the update.
 
-From a free TTY, log in as your normal user and run `kiln`. It selects the
-physical display/input backends and loads your config. Super+Return opens a
-terminal; Super+Shift+q quits. No source checkout or launcher script is needed.
+Then start `kiln` from a free TTY; see
+[First launch](/kiln/getting-started/first-launch).
 
 The installed command names are `kiln` and `kiln-client`. Installation
 also supplies bash/zsh/fish completions, `share/wayland-sessions/kiln.desktop`
@@ -85,7 +64,8 @@ also supplies bash/zsh/fish completions, `share/wayland-sessions/kiln.desktop`
 `share/kiln`. A user prefix does not guarantee display-manager discovery;
 system login menus normally scan system session directories.
 
-For a user prefix, use matching build and install settings:
+For a user prefix, use matching build and install settings. Run `make clean`
+first if you already built with another prefix:
 
 ```sh
 make prefix="$HOME/.local"
@@ -101,24 +81,20 @@ Uninstall with the same paths:
 make uninstall prefix="$HOME/.local"
 ```
 
-The manifest restricts removal to this installation's files. There is one
-compositor command, `kiln`, and one CLI, `kiln-client`. MIT and dependency
-notices are installed under `share/licenses/kiln`.
+`make uninstall` removes the two binaries, `$(datadir)/kiln`, the session
+file, the completions and the licence directory. MIT and dependency notices
+are installed under `share/licenses/kiln`.
 
-Keep an existing `~/.config/kiln/rc.lua` and theme. The new implementation uses
-the same config directory and `require("kiln")`. For a new config, copy the
-source `kilnrc.lua` or installed `share/kiln/rc.lua` into that directory
-without overwriting an existing file.
+For a new config, copy `kilnrc.lua` (or the installed `share/kiln/rc.lua`) to
+`~/.config/kiln/rc.lua`; `cp -n` will not overwrite an existing one.
 
 ## Other make targets
 
-`make check` checks/vets packages, `make test` runs package tests and ABI/Clay
-checks, and `make compat-test` runs the private compositor compatibility suite.
-`make audit-soak` runs the longer combined fixture exercise. Comparison checks extract the retired C baseline from this repository's
-preserved history into `build/c-baseline`; no separate C checkout is needed.
-`make c-baseline` builds that pinned source. Use a full Git clone for tests.
-The source repository's `TESTING.md` lists fixture tools and focused commands.
-`make clean` removes the build directory.
+`make check` typechecks and vets every package. `make test` runs every
+package's tests, then boots a headless instance and drives it over IPC.
+`make test-nested` runs that same driven suite as a window in the desktop
+you run it from. `make protocols` regenerates the Odin protocol tables from
+the vendored XML. `make clean` removes the build directory.
 
 ## See also
 
