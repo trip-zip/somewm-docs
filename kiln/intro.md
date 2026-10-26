@@ -1,35 +1,71 @@
 ---
 title: Kiln
-description: A Wayland compositor where your entire desktop is one declarative Lua config over a Clay layout tree.
+description: A tiling Wayland compositor configured in one Lua file, where the bar, menus and notifications are declared the same way as the windows.
 sidebar_position: 1
 slug: /
 ---
 
 # Kiln
 
-Kiln is a Wayland compositor written in Odin and configured in Lua. Windows,
-bars, widgets, menus and notifications share one
-[Clay](https://github.com/nicbarker/clay) layout tree per output. Your Lua
-config declares the layout tree, bindings and rules. Odin implements the
-Wayland protocols, the renderer and the DRM, nested and headless backends.
+Kiln is a tiling Wayland compositor for Linux. It arranges your windows on
+each monitor, keyboard shortcuts drive it, and one Lua file configures it.
 
 ![The default kiln desktop: two terminals tiled under the bar](/img/kiln/desktop.png)
 
 <span id="your-desktop-is-a-config" />
 
+## What is different about it
+
+On most desktops the window manager, the bar, the launcher and the
+notification popups are separate programs, each with its own config format and
+its own copy of your colours. In kiln they are one thing: elements your config
+puts on screen, drawn by kiln. The desktop in the screenshot (bar, tags, clock,
+titlebars, menus, notifications, launcher, lock screen) is a single Lua file
+of about 1000 lines, written with the same API your config uses.
+
+A bar is five lines:
+
+```lua
+ui.bar(s, { edge = "top" }, function()
+  widgets.taglist(s)
+  ui.spacer()
+  widgets.clock()
+end)
+```
+
+A window is placed the same way as that clock: it is a box in the same layout.
+[Your first config](/kiln/getting-started/your-first-config) builds a working
+desktop in 28 lines.
+
+## How a frame happens {#it-really-is-a-clay-tree}
+
+Your config never draws and never updates anything. When something changes (a
+window opens, you switch tag, the clock ticks), kiln calls your config's
+functions again and they describe what the screen should contain: a tree of
+boxes, each with a sizing rule such as 180 pixels, a quarter of its parent, or
+whatever is left. A layout engine, [Clay](https://github.com/nicbarker/clay),
+turns that tree into pixel rectangles. Kiln draws the rectangles and places
+each application's window in the box your config gave it.
+
+Because the whole screen is one tree, there is no separate code for where
+windows go and where widgets go, and a click is answered by asking the tree
+what is under the pointer. A tiling layout is short because a master column
+beside a stack is two boxes with sizing rules. Press `mod+shift+i` on the
+running desktop to see the tree in Clay's inspector:
+
+![Clay's debug inspector open over the kiln desktop](/img/kiln/inspector.png)
+
+[The Clay Bet](/kiln/concepts/the-clay-bet) has the consequences of this
+design.
+
 ## Start here
 
 1. [Install kiln](/kiln/getting-started/installation) from source.
-2. [Launch it nested](/kiln/getting-started/first-launch) inside your current session.
-3. Edit your config with [the basics tutorial](/kiln/tutorials/basics).
+2. [Launch it nested](/kiln/getting-started/first-launch) as a window inside your current session.
+3. [Write your first config](/kiln/getting-started/your-first-config), then read [the default config](/kiln/getting-started/rc-anatomy) with that in hand.
 
-`mod+Return` opens a terminal, `mod+s` shows every binding on one sheet, `mod+shift+q` quits.
-
-## Inspect the desktop {#it-really-is-a-clay-tree}
-
-Press `mod+shift+i` to inspect the desktop’s layout with Clay’s debug inspector.
-
-![Clay's debug inspector open over the kiln desktop](/img/kiln/inspector.png)
+`mod+Return` opens a terminal, `mod+s` shows every binding on one sheet,
+`mod+shift+q` quits.
 
 ## Coming from AwesomeWM or SomeWM
 

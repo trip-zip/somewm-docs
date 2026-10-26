@@ -1,7 +1,7 @@
 ---
 title: Anatomy of rc.lua
 description: "The default config, walked top to bottom in file order: every section, its real code, and what each piece wires up."
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # Anatomy of rc.lua

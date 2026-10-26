@@ -10,6 +10,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'getting-started/installation',
         'getting-started/first-launch',
+        'getting-started/your-first-config',
         'getting-started/rc-anatomy',
       ],
     },
