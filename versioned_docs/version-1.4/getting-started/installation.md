@@ -20,7 +20,20 @@ wlroots 0.20 requires wayland-server 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0, wa
 
 #### AUR packages {#from-the-aur-recommended}
 
-`somewm-git` builds the current development branch. To install 1.4, use the source build below.
+`somewm` installs the 1.4 release. `somewm-git` builds the current development branch.
+
+```bash
+yay -S somewm
+```
+
+The package builds against LuaJIT. To build against another Lua, install its LGI package and set `SOMEWM_LUA`:
+
+```bash
+sudo pacman -S lua54-lgi
+SOMEWM_LUA=5.4 yay -S somewm
+```
+
+`SOMEWM_LUA` accepts `luajit`, `5.1`, `5.3`, `5.4` and `5.5`. yay still installs LuaJIT, because the AUR lists the default dependencies. Add `--rebuild` if yay already built this version with a different Lua.
 
 #### Manual Build
 
@@ -168,6 +181,8 @@ sudo make install
 ```
 
 The build checks that LGI matches the selected Lua version and reports missing packages. The default install prefix is `/usr/local`.
+
+A manual build uses the first Lua it finds: LuaJIT, then 5.5, 5.4, 5.3, 5.2 and 5.1. To choose one, name it on the first build, for example `make LUA_PKG=lua5.4`. An existing `build/` directory keeps its Lua; delete it to change.
 
 ## LGI Troubleshooting
 
