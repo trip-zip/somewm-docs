@@ -1,7 +1,7 @@
 ---
 title: Kiln vs SomeWM
 description: How kiln relates to SomeWM and AwesomeWM, what carries over conceptually, and when to choose which.
-sidebar_position: 7
+sidebar_position: 8
 ---
 
 # Kiln vs SomeWM

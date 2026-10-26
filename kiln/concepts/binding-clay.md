@@ -1,7 +1,7 @@
 ---
 title: Binding Clay (C baseline)
 description: "How the retired C implementation drove Clay from Lua: one context per output, declarations over FFI, and a client window as a CUSTOM leaf."
-sidebar_position: 2
+sidebar_position: 9
 ---
 
 # Binding Clay

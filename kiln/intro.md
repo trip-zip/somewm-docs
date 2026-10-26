@@ -83,7 +83,7 @@ The API is not yet stable and may change between releases. See
 | [Tutorials](/kiln/tutorials/basics) | You are new and want to build up a config step by step |
 | [How-To Guides](/kiln/guides/client-rules) | You have a specific task in hand |
 | [Reference](/kiln/reference/) | You need the exact property, method, signal, or default |
-| [Concepts](/kiln/concepts/the-clay-bet) | You want to understand how kiln works and why |
+| [Concepts](/kiln/concepts/layout-with-clay) | You want to understand how kiln works and why |
 
 Short answers to common questions are in the [FAQ](/kiln/faq). The source lives
 at [github.com/trip-zip/kiln](https://github.com/trip-zip/kiln). Kiln is MIT

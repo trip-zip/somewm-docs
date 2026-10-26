@@ -85,6 +85,8 @@ A bar appears along the top and the terminals move down to make room. Its
 function lists what the bar contains, left to right: the tag list, then a
 spacer, then the clock. `ui.spacer()` takes all the width the others leave, so
 the clock sits at the right edge.
+[Layout with Clay](/kiln/concepts/layout-with-clay) has the four sizing
+rules every element uses.
 
 Kiln calls this function whenever the screen needs redrawing (a window opened,
 a tag changed, the minute rolled over). It does not keep bar objects that you

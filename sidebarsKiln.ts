@@ -55,14 +55,14 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Concepts',
       items: [
-        'concepts/the-clay-bet',
-        'concepts/binding-clay',
+        'concepts/layout-with-clay',
         'concepts/frames-and-dirty',
         'concepts/object-model',
         'concepts/nodes-floats-and-bands',
         'concepts/c-lua-boundary',
-        'concepts/kiln-vs-somewm',
+        'concepts/the-clay-bet',
         'concepts/limitations',
+        'concepts/kiln-vs-somewm',
       ],
     },
     {

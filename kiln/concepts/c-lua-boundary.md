@@ -1,7 +1,7 @@
 ---
 title: The Native/Lua Boundary
 description: How the native core handles protocols and rendering while Lua defines window management and UI behaviour.
-sidebar_position: 6
+sidebar_position: 5
 ---
 
 # The Native/Lua Boundary {#the-clua-boundary}
