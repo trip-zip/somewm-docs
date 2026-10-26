@@ -28,6 +28,15 @@ yay -S somewm-git
 
 `paru -S somewm-git` is an alternative. This package follows development, not the pinned 2.1.0 release. For that release, use the manual build below.
 
+The package builds against LuaJIT. To build against another Lua, install its LGI package and set `SOMEWM_LUA`:
+
+```bash
+sudo pacman -S lua54-lgi
+SOMEWM_LUA=5.4 yay -S somewm-git
+```
+
+`SOMEWM_LUA` accepts `luajit`, `5.1`, `5.3`, `5.4` and `5.5`. yay still installs LuaJIT, because the AUR lists the default dependencies. Add `--rebuild` if yay already built this version with a different Lua.
+
 #### Manual Build
 
 ```bash
@@ -95,6 +104,8 @@ cd somewm
 make
 sudo make install
 ```
+
+A manual build uses the first Lua it finds: LuaJIT, then 5.5, 5.4, 5.3, 5.2 and 5.1. To choose one, name it on the first build, for example `make LUA_PKG=lua5.4`. An existing `build/` directory keeps its Lua; delete it to change.
 
 Then follow [Launch](first-launch.md).
 
