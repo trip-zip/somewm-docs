@@ -109,7 +109,7 @@ The width is process-wide and affects all inspected outputs. See the
 ## See also
 
 - [Reload and Debugging](/kiln/guides/reload-and-debugging)
-- [The Clay Bet](/kiln/concepts/the-clay-bet)
+- [One tree per screen](/kiln/concepts/one-tree)
 - [Binding Clay](/kiln/concepts/binding-clay)
 - [ui reference](/kiln/reference/ui)
 - [core reference](/kiln/reference/core)

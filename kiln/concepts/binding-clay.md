@@ -7,7 +7,7 @@ sidebar_position: 9
 # Binding Clay
 
 :::info
-This page describes kiln's earlier C implementation, which has been replaced. The current Odin compositor uses the same model but none of this code; see [The Clay Bet](/kiln/concepts/the-clay-bet). The Clay behaviours under [What we learned about Clay](#what-we-learned-about-clay) are upstream Clay facts and still apply.
+This page describes kiln's earlier C implementation, which has been replaced. The current Odin compositor uses the same model but none of this code; see [One tree per screen](/kiln/concepts/one-tree). The Clay behaviours under [What we learned about Clay](#what-we-learned-about-clay) are upstream Clay facts and still apply.
 :::
 
 The C implementation vendored [Clay](https://github.com/nicbarker/clay) v0.14 at `third_party/clay.h`, byte for byte identical to upstream. Nothing in the header was patched, and there was no fork. Everything that would normally have been a patch was done around the header instead.
@@ -164,7 +164,7 @@ Three behaviors that cost real debugging time and are not obvious from the API:
 
 ## See also
 
-- [The Clay Bet](/kiln/concepts/the-clay-bet)
+- [One tree per screen](/kiln/concepts/one-tree)
 - [Frames and Dirty State](/kiln/concepts/frames-and-dirty)
 - [The Native/Lua Boundary](/kiln/concepts/c-lua-boundary)
 - [ui reference](/kiln/reference/ui)

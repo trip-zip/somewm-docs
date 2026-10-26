@@ -86,5 +86,5 @@ Widget libraries written for other compositors will never load in kiln: the impe
 ## See also
 
 - [Kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm)
-- [The Clay Bet](/kiln/concepts/the-clay-bet)
+- [One tree per screen](/kiln/concepts/one-tree)
 - [FAQ](/kiln/faq)

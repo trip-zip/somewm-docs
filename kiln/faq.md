@@ -12,7 +12,7 @@ No, by design. kiln has no compatibility layer, and AwesomeWM widget libraries (
 
 ## How is kiln related to SomeWM?
 
-kiln began as a SomeWM fork that tests whether Clay can do a compositor's layout, widgets and hit testing. It keeps SomeWM's desktop concepts (clients, tags, layouts, rules) but replaces the API with its own declarative one, with no compat layer in either direction. See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) and [The Clay Bet](/kiln/concepts/the-clay-bet).
+kiln began as a SomeWM fork that tests whether Clay can do a compositor's layout, widgets and hit testing. It keeps SomeWM's desktop concepts (clients, tags, layouts, rules) but replaces the API with its own declarative one, with no compat layer in either direction. See [kiln vs SomeWM](/kiln/concepts/kiln-vs-somewm) and [One tree per screen](/kiln/concepts/one-tree).
 
 ## Can I draw gradients, arcs, or custom shapes?
 

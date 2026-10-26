@@ -30,7 +30,7 @@ The function declares elements (usually `kiln.widgets.client` cells inside `ui.r
 
 ## How layouts tile
 
-Built-in layouts express tiling as sizing declarations, not arithmetic. A cell is `"grow"` when it should take an equal share, or `"N%"` when a factor applies (the master's `master_width_factor` becomes a percent width), and the Clay solver divides the workarea among the declared cells. Splitting a region in half is just declaring two grow children; a master beside a stack is a percent cell beside a grow cell. See [Custom layouts](/kiln/guides/custom-layouts) and [The Clay Bet](/kiln/concepts/the-clay-bet).
+Built-in layouts express tiling as sizing declarations, not arithmetic. A cell is `"grow"` when it should take an equal share, or `"N%"` when a factor applies (the master's `master_width_factor` becomes a percent width), and the Clay solver divides the workarea among the declared cells. Splitting a region in half is just declaring two grow children; a master beside a stack is a percent cell beside a grow cell. See [Custom layouts](/kiln/guides/custom-layouts) and [One tree per screen](/kiln/concepts/one-tree).
 
 ## The families
 
@@ -73,6 +73,6 @@ Layout parameters are plain tag properties. Set them per tag; each has a default
 ## See also
 
 - [Custom layouts](/kiln/guides/custom-layouts)
-- [The Clay Bet](/kiln/concepts/the-clay-bet)
+- [One tree per screen](/kiln/concepts/one-tree)
 - [tag](/kiln/reference/tag)
 - [kiln.ui](/kiln/reference/ui)

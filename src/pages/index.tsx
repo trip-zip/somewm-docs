@@ -151,8 +151,8 @@ function Kiln() {
           <Link className={styles.btnSecondary} to="/kiln">
             Explore kiln
           </Link>
-          <Link className={styles.btnSecondary} to="/kiln/concepts/the-clay-bet">
-            Read the Clay bet
+          <Link className={styles.btnSecondary} to="/kiln/concepts/one-tree">
+            Why one tree
           </Link>
         </div>
       </div>

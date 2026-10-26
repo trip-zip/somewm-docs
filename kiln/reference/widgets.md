@@ -6,7 +6,7 @@ sidebar_position: 9
 
 # kiln.widgets
 
-`kiln.widgets` is the stock widgets: compositions of the [`ui.*`](/kiln/reference/ui) primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion. None of them computes a position, because Clay solves everything. See [the two tiers](/kiln/concepts/the-clay-bet#the-two-tiers) for the split between `ui.*` and `kiln.widgets.*`.
+`kiln.widgets` is the stock widgets: compositions of the [`ui.*`](/kiln/reference/ui) primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion. None of them computes a position, because Clay solves everything. See [the two tiers](/kiln/concepts/one-tree#the-two-tiers) for the split between `ui.*` and `kiln.widgets.*`.
 
 ```lua
 local kiln = require("kiln")

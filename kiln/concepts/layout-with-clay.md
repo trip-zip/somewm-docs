@@ -109,7 +109,7 @@ official Odin binding in `clay/`. Cite `clay/clay.h` for exact behaviour.
 
 ## See also
 
-- [The Clay Bet](/kiln/concepts/the-clay-bet): why the whole screen is one tree
+- [One tree per screen](/kiln/concepts/one-tree): why the whole screen is one tree
 - [ui reference](/kiln/reference/ui)
 - [A bar from scratch](/kiln/tutorials/a-bar-from-scratch)
 - [Custom layouts](/kiln/guides/custom-layouts)

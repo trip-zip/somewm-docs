@@ -41,7 +41,7 @@ kiln's API is functional but not frozen; expect breaking changes. SomeWM is the 
 
 ## See also
 
-- [The Clay Bet](/kiln/concepts/the-clay-bet)
+- [One tree per screen](/kiln/concepts/one-tree)
 - [Inspect the Live Element Tree](/kiln/guides/inspector)
 - [Limitations](/kiln/concepts/limitations)
 - [Anatomy of rc.lua](/kiln/getting-started/rc-anatomy)

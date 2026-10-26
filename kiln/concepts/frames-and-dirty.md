@@ -40,7 +40,7 @@ Easing, durations and animation state are all in `kiln.animation`; the native co
 
 ## See also
 
-- [The Clay Bet](/kiln/concepts/the-clay-bet)
+- [One tree per screen](/kiln/concepts/one-tree)
 - [The Object Model](/kiln/concepts/object-model)
 - [The Native/Lua Boundary](/kiln/concepts/c-lua-boundary)
 - [Widgets tutorial](/kiln/tutorials/widgets)

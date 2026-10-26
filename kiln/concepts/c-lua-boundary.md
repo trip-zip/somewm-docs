@@ -52,7 +52,7 @@ Policy lives in Lua so `kiln.reload()` can replace it without restarting, and so
 
 ## See also
 
-- [The Clay Bet](/kiln/concepts/the-clay-bet)
+- [One tree per screen](/kiln/concepts/one-tree)
 - [The Object Model](/kiln/concepts/object-model)
 - [defaults reference](/kiln/reference/defaults)
 - [core reference](/kiln/reference/core)

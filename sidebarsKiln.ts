@@ -60,7 +60,7 @@ const sidebars: SidebarsConfig = {
         'concepts/object-model',
         'concepts/nodes-floats-and-bands',
         'concepts/c-lua-boundary',
-        'concepts/the-clay-bet',
+        'concepts/one-tree',
         'concepts/limitations',
         'concepts/kiln-vs-somewm',
       ],

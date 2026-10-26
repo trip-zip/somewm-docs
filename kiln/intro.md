@@ -34,6 +34,11 @@ end)
 ```
 
 A window is placed the same way as that clock: it is a box in the same layout.
+In AwesomeWM a window's rectangle comes from the tag layout, a widget's from
+the wibox layout and a floating thing's from placement, three systems with
+three sets of rules that run at three different times, and nothing can hold
+a window and a widget together. In kiln there is one layout, and a titlebar,
+a terminal and a clock are cells in it.
 [Your first config](/kiln/getting-started/your-first-config) builds a working
 desktop in 28 lines.
 
@@ -55,8 +60,8 @@ running desktop to see the tree in Clay's inspector:
 
 ![Clay's debug inspector open over the kiln desktop](/img/kiln/inspector.png)
 
-[The Clay Bet](/kiln/concepts/the-clay-bet) has the consequences of this
-design.
+[One tree per screen](/kiln/concepts/one-tree) has what this replaces and
+what it costs.
 
 ## Start here
 

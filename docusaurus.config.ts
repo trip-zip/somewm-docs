@@ -26,6 +26,14 @@ const config: Config = {
 
   plugins: [
     [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          { from: '/kiln/concepts/the-clay-bet', to: '/kiln/concepts/one-tree' },
+        ],
+      },
+    ],
+    [
       '@docusaurus/plugin-content-docs',
       {
         id: 'kiln',
