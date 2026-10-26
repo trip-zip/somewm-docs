@@ -167,7 +167,7 @@ Calling a removed function raises `attempt to call ... (a nil value)`. Setting a
 | `wibox.hierarchy` and all its methods | The old hierarchy API has no replacement. Inspect calculated widget boxes in the tree dump and inspector. |
 | `wibox.widget.base.fit_widget`, `layout_widget`, `place_widget_at`, `place_widget_via_matrix`, `rect_to_device_geometry`, and `no_parent_I_know_what_I_am_doing` | Use [widget layouts and containers](wibox/index.md). Clay computes their geometry. |
 | `wibox.widget.draw_to_cairo_context`, `draw_to_image_surface`, `draw_to_svg_file`, `wibox:to_widget`, `wibox:save_to_svg` | Use [screen capture](../guides/screenshots.md): `root.content()`, `screen.content` or `somewm-client screenshot`. |
-| `wibox.widget.textbox:get_preferred_size`, `get_preferred_size_at_dpi`, `get_height_for_width`, `get_height_for_width_at_dpi`, `wibox.widget.textbox.get_markup_geometry`, `menubar.utils.compute_text_width`, `menubar.utils.compute_textbox_width` | The solver measures text. Let the textbox fit, or give it a `forced_width`. |
+| `wibox.widget.textbox:get_height_for_width`, `get_height_for_width_at_dpi` | The container sizes itself. Give a popup a `maximum_width`. |
 | the drawable `refresh` method and `surface` property, the drawin `surface_scale` and `shape_border` properties | Drawables no longer have surfaces. The renderer draws a shaped wibox's border from `border_width` and `border_color`. |
 | the scroll container's `context`, `first_x`, `first_y`, `fit_width`, `fit_height`, `hierarchy`, `surface_width`, `surface_height` | The container is a scroll element of the tree. |
 | the wibox `__tostring` | `tostring(wibox)` prints the table. |
