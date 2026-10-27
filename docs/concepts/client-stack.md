@@ -1,10 +1,10 @@
 ---
 sidebar_position: 3
-title: Client Stacking
+title: Client stacking
 description: How visual stacking differs from focus and tiling order.
 ---
 
-# Client Stacking
+# Client stacking
 
 Stacking controls which overlapping clients appear in front. SomeWM keeps one client stack across screens and tags. Switching tags changes visibility without resetting that order.
 

@@ -1,10 +1,10 @@
 ---
 sidebar_position: 9
-title: Keyboard Layout Switching
+title: Switch keyboard layouts
 description: Configure multiple keyboard layouts and switch between them
 ---
 
-# Keyboard Layout Switching
+# Switch keyboard layouts
 
 Configure a comma-separated list of layouts in `rc.lua`, then register a keybinding to cycle through them.
 

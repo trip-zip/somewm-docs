@@ -1,10 +1,10 @@
 ---
 sidebar_position: 4
-title: Focus History
+title: Focus history
 description: How recent focus and client eligibility determine focus restoration.
 ---
 
-# Focus History
+# Focus history
 
 <span id="one-restoration-path" />
 

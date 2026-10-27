@@ -1,10 +1,10 @@
 ---
 sidebar_position: 11
-title: All Keysyms
+title: All keysyms
 description: Full enumeration of xkbcommon keysym names accepted by SomeWM
 ---
 
-# All Keysyms
+# All keysyms
 
 The tables list 2,629 keysyms from `xkbcommon-keysyms.h`, grouped into 37 categories. Use the name shown in the first column, without the C header’s `XKB_KEY_` prefix.
 

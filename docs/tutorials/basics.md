@@ -1,10 +1,10 @@
 ---
 sidebar_position: 1
-title: Basics
+title: Learn the basics
 description: Open and tile windows, switch tags, and change your terminal in SomeWM 2.1.
 ---
 
-# Basics
+# Learn the basics
 
 Start with SomeWM 2.1's default config and an installed `foot`. Open windows, tile them, move between tags, then change the terminal shortcut.
 

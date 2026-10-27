@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2
-title: Theme Variables
+title: Theme variables
 description: Complete reference of beautiful theme variables in SomeWM
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Theme Variables
+# Theme variables
 
 The `beautiful` table supplies theme defaults to Lua modules. Annotations come from `@beautiful` LDoc tags in the [SomeWM source](https://github.com/trip-zip/somewm/tree/ea3a2a1a9e/lua). Source: `ea3a2a1a9e`. **477 documented**, 88 used-but-undocumented.
 

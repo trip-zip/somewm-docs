@@ -1,10 +1,10 @@
 ---
 sidebar_position: 5
-title: Notifications
+title: Configure notifications
 description: Configure desktop notifications with naughty
 ---
 
-# Notifications
+# Configure notifications
 
 Configure `naughty` through notification rules, theme values and the existing `request::display` handler in `rc.lua`. The examples use `local naughty = require("naughty")` and the default config's `awful` and `modkey` locals.
 

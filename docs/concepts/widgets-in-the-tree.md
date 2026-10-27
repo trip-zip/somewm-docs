@@ -1,10 +1,10 @@
 ---
 sidebar_position: 4
-title: Widgets in SomeWM 2.1
+title: How widgets are laid out
 description: How built-in and custom widgets get their content, size and position in SomeWM 2.1.
 ---
 
-# Widgets in SomeWM 2.1
+# How widgets are laid out
 
 A widget combines content, sizing rules and Lua behaviour. You can build your own by combining built-in widgets, supplying a Clay description, or displaying an image drawn with Cairo. [Create or port a custom widget](../guides/custom-widgets.md) has working examples of each approach.
 

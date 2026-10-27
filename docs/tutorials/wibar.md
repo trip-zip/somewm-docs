@@ -1,10 +1,10 @@
 ---
 sidebar_position: 5
-title: Wibar
+title: Build a bar
 description: Build a custom status bar from scratch
 ---
 
-# Wibar
+# Build a bar
 
 Replace the default 2.1 bar with a small module, keeping its existing taglist, tasklist, prompt, and layoutbox. Start with the default `rc.lua` so those widgets are already defined.
 

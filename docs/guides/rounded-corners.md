@@ -1,12 +1,12 @@
 ---
 sidebar_position: 3
-title: Rounded Corners
+title: Round client corners
 description: Round client corners with a rule, remove the square border, and try a radius on open windows without reloading.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Rounded Corners <SomewmOnly />
+# Round client corners <SomewmOnly />
 
 Set `client.shape` in a rule to round window corners.
 

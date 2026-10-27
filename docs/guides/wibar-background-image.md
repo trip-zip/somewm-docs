@@ -1,10 +1,10 @@
 ---
 sidebar_position: 9
-title: Put a PNG Texture on Your Wibar
+title: Put a PNG texture on your wibar
 description: Prepare a background image at the bar's size and assign it with bgimage.
 ---
 
-# Put a PNG Texture on Your Wibar
+# Put a PNG texture on your wibar
 
 Set `bgimage` to an image path or surface. SomeWM draws it once at its natural size in the top-left corner, scaled with the output. To cover the bar, prepare an image at the bar's logical dimensions. A function assigned to `bgimage` is ignored with a warning.
 

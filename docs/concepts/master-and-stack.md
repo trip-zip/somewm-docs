@@ -1,10 +1,10 @@
 ---
 sidebar_position: 4
-title: Master and Stack
+title: Master and stack
 description: How tile assigns clients to primary and secondary areas.
 ---
 
-# Master and Stack
+# Master and stack
 
 The `tile` layout divides the workarea into a master area and a secondary area called the stack. This stack is a layout region, separate from [visual stacking order](client-stack.md).
 

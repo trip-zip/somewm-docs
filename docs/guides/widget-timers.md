@@ -1,10 +1,10 @@
 ---
 sidebar_position: 8
-title: Widget Timers and Updates
+title: Update widgets from timers and commands
 description: Keep widgets updated with timers and signals
 ---
 
-# Widget Timers and Updates
+# Update widgets from timers and commands
 
 Use a timer for periodic data and a signal when the producer can report changes. Built-in property setters request layout and rendering updates. Keep command execution asynchronous so a slow command does not block the compositor.
 

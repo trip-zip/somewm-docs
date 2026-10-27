@@ -1,10 +1,10 @@
 ---
 sidebar_position: 3
-title: Debugging Your Config
+title: Debug your config
 description: Find and fix errors in your Lua configuration
 ---
 
-# Debugging Your Config
+# Debug your config
 
 Check the config, reproduce the error in a nested compositor, then inspect its log and runtime state.
 

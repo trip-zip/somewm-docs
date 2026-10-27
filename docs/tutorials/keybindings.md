@@ -1,10 +1,10 @@
 ---
 sidebar_position: 3
-title: Keybindings
+title: Add keybindings
 description: Add custom keyboard shortcuts to SomeWM
 ---
 
-# Keybindings
+# Add keybindings
 
 Add a browser shortcut and a window-opacity toggle to the default 2.1 config. Keep its existing bindings.
 

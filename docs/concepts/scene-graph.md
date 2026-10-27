@@ -1,10 +1,10 @@
 ---
 sidebar_position: 3
-title: Scene Graph
+title: Scene graph
 description: How bands and client stacking determine drawing order in the wlroots scene.
 ---
 
-# Scene Graph
+# Scene graph
 
 SomeWM updates the wlroots scene from [Clay’s layout result](./how-somewm-draws.md). Each floating root has a band, stored as Clay’s `zIndex`, which determines its drawing order.
 

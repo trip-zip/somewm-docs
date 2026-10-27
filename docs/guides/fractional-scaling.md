@@ -1,12 +1,12 @@
 ---
 sidebar_position: 7
-title: Fractional Scaling
+title: Scale a HiDPI display
 description: Configure HiDPI displays with fractional scaling
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Fractional Scaling <SomewmOnly />
+# Scale a HiDPI display <SomewmOnly />
 
 Increase `screen.scale` to make content larger on a high-resolution output. Start with a value such as `1.25`, `1.5` or `2.0`, then check text and widget sizes on that display.
 

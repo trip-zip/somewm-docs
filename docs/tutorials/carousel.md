@@ -1,12 +1,12 @@
 ---
 sidebar_position: 5.5
-title: Carousel Layout
+title: Try the carousel layout
 description: Your first session with the scrollable tiling carousel
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Carousel Layout <SomewmOnly />
+# Try the carousel layout <SomewmOnly />
 
 Set up a scrollable row of window columns, then resize and stack three terminals. Start with the default 2.1 `rc.lua` and an installed terminal.
 

@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2.7
-title: "Carousel: Centering"
+title: "Carousel: center the viewport"
 description: Choose and configure carousel viewport centering modes
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Carousel: Centering <SomewmOnly />
+# Carousel: center the viewport <SomewmOnly />
 
 Set how the carousel viewport follows the focused column. These settings apply to both carousel orientations.
 

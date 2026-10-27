@@ -1,12 +1,12 @@
 ---
 sidebar_position: 3
-title: Multi-Monitor Setup
+title: Set up multiple monitors
 description: Configure multiple screens and outputs
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Multi-Monitor Setup
+# Set up multiple monitors
 
 Use a screen decoration handler to create tags and a wibar for each active screen. Configure physical displays through their `output` objects.
 

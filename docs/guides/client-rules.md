@@ -1,10 +1,10 @@
 ---
 sidebar_position: 2
-title: Client Rules
+title: Write client rules
 description: Control where windows appear and how they behave
 ---
 
-# Client Rules
+# Write client rules
 
 Add rules inside the existing `ruled.client` `request::rules` handler in `rc.lua`. Rules set properties when a window is managed. They do not continuously enforce those properties afterward.
 

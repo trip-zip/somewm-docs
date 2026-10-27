@@ -1,12 +1,12 @@
 ---
 sidebar_position: 0
-title: The Object Model
+title: The object model
 description: How outputs, screens, tags, clients and widgets relate.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# The Object Model
+# The object model
 
 Outputs describe connected displays. Screens hold tags and panels. Tags select which application windows are visible, and widgets provide the content of panels, popups and titlebars.
 

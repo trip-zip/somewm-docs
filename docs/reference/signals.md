@@ -1,12 +1,12 @@
 ---
 sidebar_position: 4
-title: Signals Reference
+title: Signals
 description: Signals emitted by SomeWM and the AwesomeWM Lua libraries
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Signals Reference
+# Signals
 
 Signals are grouped by the object or module that emits them. See [signal concepts](../concepts/signals.md) for connecting handlers and replacing defaults.
 

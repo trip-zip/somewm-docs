@@ -1,12 +1,12 @@
 ---
 sidebar_position: 0
-title: Try SomeWM Without Logging Out
+title: Try SomeWM without logging out
 description: Run a nested SomeWM in a window from your current desktop. No reboot, no logout.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Try SomeWM Without Logging Out <SomewmOnly />
+# Try SomeWM without logging out <SomewmOnly />
 
 Run SomeWM in a window, open a terminal inside it, and stop the nested session. You need SomeWM 2.1 and `somewm-client` on your `PATH`, a graphical session, and a terminal emulator such as Alacritty.
 

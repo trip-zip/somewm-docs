@@ -1,12 +1,12 @@
 ---
 sidebar_position: 9
-title: Tag Persistence
+title: Keep tags across monitor hotplug
 description: Customize tag save and restore across monitor hotplug
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Tag Persistence <SomewmOnly />
+# Keep tags across monitor hotplug <SomewmOnly />
 
 Keep the default save and restore handlers to recover tags when a monitor reconnects. Replace both when you need additional properties or a different monitor key.
 

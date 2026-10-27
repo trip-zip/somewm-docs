@@ -1,10 +1,10 @@
 ---
 sidebar_position: 3
-title: Default Keybindings
+title: Default keybindings
 description: Complete list of default keyboard shortcuts
 ---
 
-# Default Keybindings
+# Default keybindings
 
 All keybindings use **Mod4** (Super/Windows key) as the primary modifier.
 

@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2.9
-title: "Carousel: Stacking"
+title: "Carousel: stack windows in a column"
 description: Stack, split, and rearrange windows across carousel columns
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Carousel: Stacking <SomewmOnly />
+# Carousel: stack windows in a column <SomewmOnly />
 
 Group windows into columns or move them between columns using the operations below. They act on the focused client and require carousel on the focused screen.
 

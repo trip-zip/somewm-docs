@@ -1,10 +1,10 @@
 ---
 sidebar_position: 23
-title: Defer startup with request::rules
+title: "Defer startup with request::rules"
 description: Register startup rules from modules and control their order
 ---
 
-# Defer startup with `request::rules`
+# Defer startup with request::rules
 
 Connect to `request::rules` when a module adds startup rules. Require the module from `rc.lua` so its handler is registered before startup reaches that stage.
 

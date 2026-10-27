@@ -1,10 +1,10 @@
 ---
 sidebar_position: 4
-title: Autostart Applications
+title: Start applications at login
 description: Start apps automatically when SomeWM launches
 ---
 
-# Autostart Applications
+# Start applications at login
 
 Add startup commands near the end of `rc.lua`. Use `awful.spawn` for an executable and arguments, or `awful.spawn.with_shell` when the command needs shell syntax.
 

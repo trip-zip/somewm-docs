@@ -1,10 +1,10 @@
 ---
 sidebar_position: 2
-title: Wibar Properties
+title: Wibar properties
 description: Wibar configuration options reference
 ---
 
-# Wibar Properties
+# Wibar properties
 
 `awful.wibar` attaches a wibox to a screen edge. By default it reserves workarea space, so tiled clients do not cover it. Constructor arguments override `beautiful.wibar_*` theme values.
 

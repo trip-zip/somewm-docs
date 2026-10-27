@@ -1,10 +1,10 @@
 ---
 sidebar_position: 10
-title: Key Names
+title: Key names
 description: Modifier keys and key name reference
 ---
 
-# Key Names
+# Key names
 
 Names you can pass to `awful.key` and `awful.button`. For the full enumeration of every keysym SomeWM accepts (~2,629 entries including international and dead keys), see **[All Keysyms](/docs/next/reference/key-names-all)**.
 

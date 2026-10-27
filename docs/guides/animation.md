@@ -1,6 +1,6 @@
 ---
 sidebar_position: 11
-title: Animation
+title: Animate clients, popups and widgets
 description: Configure layout, client, popup and widget animations.
 ---
 
@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly'
 import AnimationDemo from '@site/src/components/AnimationDemo'
 import AnimationComparison from '@site/src/components/AnimationComparison.mdx'
 
-# Animation <SomewmOnly />
+# Animate clients, popups and widgets <SomewmOnly />
 
 Set a duration in seconds to enable animation. Use 0 to disable it. SomeWM uses Clay transitions for layout, visibility and widget-property changes.
 

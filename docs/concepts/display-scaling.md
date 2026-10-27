@@ -1,12 +1,12 @@
 ---
 sidebar_position: 7
-title: Display Scaling
+title: Display scaling
 description: How output scale, logical geometry and theme DPI differ.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Display Scaling <SomewmOnly />
+# Display scaling <SomewmOnly />
 
 <span id="setting-the-scale" />
 

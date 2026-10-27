@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2
-title: CLI Control
+title: Control SomeWM from the command line
 description: Control SomeWM from the command line with somewm-client
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# CLI Control <SomewmOnly />
+# Control SomeWM from the command line <SomewmOnly />
 
 Run `somewm-client` inside your SomeWM session to inspect or change compositor state. To keep experiments separate from your desktop, use a [nested instance](testing-with-nested-compositor.md).
 

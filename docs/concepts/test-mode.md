@@ -1,12 +1,12 @@
 ---
 sidebar_position: 12
-title: Test Mode
+title: Test mode
 description: What nested and headless test instances isolate, and how their lifecycle works.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Test Mode <SomewmOnly />
+# Test mode <SomewmOnly />
 
 `somewm-client test` runs another SomeWM process in a window or with a headless backend. It gives that process separate runtime and IPC sockets so you can test a configuration without replacing your desktop session.
 

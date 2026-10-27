@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2.6
-title: "Carousel: Column Widths"
+title: "Carousel: set column widths"
 description: Resize, cycle, and customize carousel column widths
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Carousel: Column Widths <SomewmOnly />
+# Carousel: set column widths <SomewmOnly />
 
 Set column sizes as fractions of the effective viewport, after peek space is removed. For the vertical carousel, the same settings control row height.
 

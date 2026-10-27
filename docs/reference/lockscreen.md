@@ -1,12 +1,12 @@
 ---
 sidebar_position: 6
-title: lockscreen (module)
+title: lockscreen
 description: Default lockscreen module reference
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# lockscreen (module) <SomewmOnly />
+# lockscreen <SomewmOnly />
 
 `lockscreen.init()` creates a password prompt and cover surfaces using the [Lock API](lock.md). The default config calls it after loading the theme.
 

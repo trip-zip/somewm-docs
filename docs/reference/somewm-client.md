@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2
-title: somewm-client Reference
+title: somewm-client
 description: Complete command reference for the somewm-client IPC tool
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# somewm-client Reference <SomewmOnly />
+# somewm-client <SomewmOnly />
 
 IPC command-line tool for controlling SomeWM. This is SomeWM's equivalent to AwesomeWM's `awesome-client`, but uses a different protocol and command set.
 

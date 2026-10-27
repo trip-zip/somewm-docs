@@ -1,10 +1,10 @@
 ---
 sidebar_position: 1
-title: Why somewm
+title: Why SomeWM
 description: A Wayland desktop built from Lua widgets, layouts, tags and rules.
 ---
 
-# Why somewm
+# Why SomeWM
 
 <span id="not-part-of-the-api" />
 <span id="where-wayland-forces-a-difference" />

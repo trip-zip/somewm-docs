@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2.8
-title: "Carousel: Gestures"
+title: "Carousel: scroll with gestures"
 description: Set up touchpad gesture scrolling for the carousel layout
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Carousel: Gestures <SomewmOnly />
+# Carousel: scroll with gestures <SomewmOnly />
 
 Register a three-finger touchpad swipe in `rc.lua` to pan the carousel viewport.
 

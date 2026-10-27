@@ -1,10 +1,10 @@
 ---
 sidebar_position: 4
-title: Theme
+title: Make a theme
 description: Customize SomeWM colors, fonts, and appearance
 ---
 
-# Theme
+# Make a theme
 
 Create a theme that changes the default desktop's colours, font, borders, and gaps. Start with the default 2.1 `rc.lua`.
 

@@ -1,10 +1,10 @@
 ---
 sidebar_position: 100
-title: AwesomeWM compatibility reference
+title: AwesomeWM compatibility
 description: Supported behaviour, platform differences and compatibility limits in SomeWM 2.1.
 ---
 
-# AwesomeWM compatibility reference
+# AwesomeWM compatibility
 
 SomeWM 2.1 develops independently of AwesomeWM. Shared Lua names do not guarantee identical behaviour. The reference for this version defines the supported API.
 

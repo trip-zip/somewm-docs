@@ -1,12 +1,12 @@
 ---
 sidebar_position: 5
-title: Lock, Idle, and DPMS
+title: Lock, idle and DPMS
 description: Session locking, idle timeouts, and display power management
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Lock, Idle, and DPMS <SomewmOnly />
+# Lock, idle and DPMS <SomewmOnly />
 
 The `awesome` global exposes session locking, idle timeouts, and display power controls. An idle callback can lock the session or turn displays off. User activity wakes displays and resets idle timers.
 

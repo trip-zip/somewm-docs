@@ -1,12 +1,12 @@
 ---
 sidebar_position: 10
-title: Shadows
+title: Add shadows
 description: Add compositor-level shadows to windows and wiboxes
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Shadows <SomewmOnly />
+# Add shadows <SomewmOnly />
 
 Enable compositor shadows in your theme, then override them for individual clients or wiboxes. These settings affect whole surfaces, not widgets inside them.
 

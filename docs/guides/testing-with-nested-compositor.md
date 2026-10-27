@@ -1,12 +1,12 @@
 ---
 sidebar_position: 4
-title: Testing with a Nested Compositor
+title: Test in a nested compositor
 description: Test configuration changes in a separate compositor instance.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Testing with a Nested Compositor <SomewmOnly />
+# Test in a nested compositor <SomewmOnly />
 
 Run `somewm-client test` to try configuration changes in a separate compositor. A crash there leaves your desktop running. The instance still shares your user account, files and D-Bus session, so it is not a security sandbox.
 

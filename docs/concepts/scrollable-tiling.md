@@ -1,12 +1,12 @@
 ---
 sidebar_position: 4.5
-title: Scrollable Tiling
+title: Scrollable tiling
 description: How carousel sizes columns and scrolls them into view.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly';
 
-# Scrollable Tiling <SomewmOnly />
+# Scrollable tiling <SomewmOnly />
 
 Carousel arranges clients in columns on a scrollable strip. Each column’s `width_fraction` sets its share of the viewport width. [Clay computes the geometry](./clients-in-the-tree.md#a-layout-is-a-tree) and stores the scroll offset, labelled `scroll` in the dump.
 

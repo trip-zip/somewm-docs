@@ -1,10 +1,10 @@
 ---
 sidebar_position: 24
-title: Keybinding patterns
+title: Organize keybindings
 description: Register media keys, tag keygroups and mouse bindings, and move bindings into modules
 ---
 
-# Keybinding patterns
+# Organize keybindings
 
 Add these bindings to `rc.lua` after requiring `awful` and defining `modkey`. Replace existing bindings for the same keys to avoid conflicts. For the basics, start with the [Keybindings Tutorial](../tutorials/keybindings.md).
 

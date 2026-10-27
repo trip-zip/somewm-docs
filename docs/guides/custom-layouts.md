@@ -1,10 +1,10 @@
 ---
 sidebar_position: 2.5
-title: Custom Layouts
+title: Write a client layout
 description: Create your own tiling layout from scratch
 ---
 
-# Custom Layouts
+# Write a client layout
 
 Create a Lua table with a `name` and an `arrange(p)` function. In SomeWM 2.1, the function assigns rectangles to `p.geometries[client]`. The layout library applies borders and gaps afterward. SomeWM converts these rectangles to Clay elements labelled `legacy`. Built-in layouts instead supply Clay descriptions. See [client layouts](../concepts/clients-in-the-tree.md#a-layout-is-a-tree).
 

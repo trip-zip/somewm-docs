@@ -1,12 +1,12 @@
 ---
 sidebar_position: 6
-title: Session Locking
+title: Session locking
 description: Built-in and external session locks, input routing and failure behaviour.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Session Locking <SomewmOnly />
+# Session locking <SomewmOnly />
 
 <span id="what-c-guarantees" />
 <span id="idle-and-dpms" />

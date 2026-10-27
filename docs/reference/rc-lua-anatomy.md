@@ -4,7 +4,7 @@ title: Anatomy of rc.lua
 description: Section-by-section map of the default SomeWM config
 ---
 
-# Anatomy of `rc.lua`
+# Anatomy of rc.lua
 
 The default [`somewmrc.lua`](https://github.com/trip-zip/somewm/blob/v2.1.0/somewmrc.lua) contains the theme, widgets, bindings, and rules for SomeWM 2.1. To edit your own copy, start with the [basics tutorial](../tutorials/basics.md).
 

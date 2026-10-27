@@ -1,12 +1,12 @@
 ---
 sidebar_position: 9
-title: Lockscreen
+title: Set up the lock screen
 description: Set up and customize session locking, idle timeouts, and DPMS
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Lockscreen <SomewmOnly />
+# Set up the lock screen <SomewmOnly />
 
 Initialise the bundled lockscreen after `beautiful.init()` in `rc.lua`. The default config already does this:
 

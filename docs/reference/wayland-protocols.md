@@ -1,10 +1,10 @@
 ---
 sidebar_position: 12
-title: Wayland Protocols
+title: Wayland protocols
 description: Wayland protocols somewm advertises to clients
 ---
 
-# Wayland Protocols
+# Wayland protocols
 
 Interfaces advertised by SomeWM 2.1.0. Versions below were checked with wlroots 0.20.2. Clients can bind an older version. Renderer-dependent interfaces are noted separately.
 

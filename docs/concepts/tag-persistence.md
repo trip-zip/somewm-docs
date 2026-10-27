@@ -1,12 +1,12 @@
 ---
 sidebar_position: 11
-title: Tag Persistence
+title: Why tags persist
 description: How the default config restores tags after a monitor reconnects.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Tag Persistence <SomewmOnly />
+# Why tags persist <SomewmOnly />
 
 The default configuration saves tag settings when a screen disappears and restores them when the same connector returns. Clients temporarily moved to another screen can return to their original tags.
 

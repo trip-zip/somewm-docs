@@ -1,12 +1,12 @@
 ---
 sidebar_position: 5
-title: Tag Persistence
+title: Tag persistence
 description: Signals and state structure for tag save/restore across hotplug
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Tag Persistence <SomewmOnly />
+# Tag persistence <SomewmOnly />
 
 Tag persistence saves and restores tag state across monitor hotplug. The save handler lives in `awful.permissions` (connected automatically), and the restore handler lives in `somewmrc.lua`. Saved state is in memory and is lost when the configuration reloads or the compositor exits.
 

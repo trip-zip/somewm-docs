@@ -1,12 +1,12 @@
 ---
 sidebar_position: 6
-title: Screenshots
+title: Take screenshots
 description: Taking screenshots with SomeWM
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Screenshots
+# Take screenshots
 
 Use `somewm-client` for a direct capture, `awful.screenshot` for Lua integration, or `grim` with `slurp` for shell-based region selection.
 

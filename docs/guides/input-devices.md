@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
-title: Input Device Configuration
+title: Configure input devices
 description: Configure pointer and keyboard settings at runtime
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
-# Input Device Configuration <SomewmOnly />
+# Configure input devices <SomewmOnly />
 
 Set pointer and keyboard defaults through `awful.input` in `rc.lua`. Use per-device rules when a mouse and touchpad need different settings.
 
