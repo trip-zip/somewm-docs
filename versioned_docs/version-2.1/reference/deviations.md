@@ -216,7 +216,7 @@ These values produce one warning naming the class, property and resulting behavi
 | a padding, gap or border width below 0 | it is 0, with a warning. |
 | a colour that is not a solid or a gradient (a surface or mesh pattern) | transparent, with a warning naming the property. |
 
-Textboxes wrap at words. `wrap = "char"` warns that character wrapping is not applied. `wibox.container.tile` draws one copy of its widget and warns that tiling is not applied.
+A textbox with `ellipsize = "none"` wraps at words; with it set, the default, it keeps one line per newline and is cut with an ellipsis instead. `wrap = "char"` warns that character wrapping is not applied. `wibox.container.tile` draws one copy of its widget and warns that tiling is not applied.
 
 ### Layout, rendering and client behaviour
 

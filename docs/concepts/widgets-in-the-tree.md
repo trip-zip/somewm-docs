@@ -68,5 +68,8 @@ These differences can affect an existing configuration:
 - A wibox with `opacity` below 1 blends each fill at that opacity, so overlapping fills add up: a blue container on a blue wibox at 0.5 is denser than either alone. The renderer draws each fill as its own rect and has no step that blends a finished wibox.
 - A `bgimage` set to a function is not drawn and warns, because SomeWM no longer calls it to paint the wibox. A file path or image surface is still supported.
 - A `shape` function that does more than trace a path is used as the path it traces. A colour it sets or anything it paints is dropped.
+- A textbox's `ellipsize` picks one of two behaviors. The default, `"end"`, keeps the text on one line and cuts it with an ellipsis when it is squeezed. `"none"` wraps it. AwesomeWM did both, wrapping to the width and ellipsizing at the height, which Clay cannot. A paragraph that relied on the default to wrap needs `ellipsize = "none"`; notification titles and bodies set it.
+
+![The same title in a 260 px box. With ellipsize "end" it is one line cut with an ellipsis; with "none" it wraps onto two lines.](/img/concepts/textbox-ellipsize.png)
 
 [Upgrading from 2.0 to 2.1](../getting-started/upgrading-from-2.0.md) lists removed properties and methods, with migration advice.

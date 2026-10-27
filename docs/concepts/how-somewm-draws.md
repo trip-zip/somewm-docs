@@ -20,7 +20,7 @@ For example, if a textbox changes from `"9%"` to `"100%"`:
 
 1. The textbox setter requests an update.
 2. Its describer supplies the new text and font.
-3. Clay measures the text and calculates its size within the parent's constraints. A content-sized parent may grow. A constrained textbox may wrap or ellipsize.
+3. Clay measures the text and calculates its size within the parent's constraints. A content-sized parent may grow. A constrained textbox wraps when `ellipsize = "none"`, and is otherwise cut with an ellipsis.
 4. SomeWM updates the text and any affected positions on screen.
 
 Client layouts use the same calculation. A wibar reserves space on its edge of the output. The remaining workarea contains the tiled windows. In the tile layout, `tag.master_width_factor` sets the master's share of the available width. Changing that value changes the client rectangles at the next layout pass. See the [client layout example](./clients-in-the-tree.md#see-it).
