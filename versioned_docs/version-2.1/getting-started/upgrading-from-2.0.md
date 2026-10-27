@@ -6,6 +6,8 @@ description: Identify affected widgets, replace removed APIs, and check a SomeWM
 
 # Upgrading from 2.0 to 2.1
 
+Upgrading from 1.4: read [Upgrading from 1.4 to 2.0](/docs/2.0/getting-started/upgrading-from-1.4) first, then this page.
+
 Custom widgets are still supported. In 2.1, widgets describe their content and sizing, Clay calculates layout, and SomeWM renders the resulting tree.
 
 We removed per-widget `fit`, `layout` and `draw` callbacks so Clay is the single authority for layout. This keeps a single flow, **define state → compute layout → render**, with the renderer using the sizes and positions Clay calculated.
