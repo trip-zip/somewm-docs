@@ -37,7 +37,7 @@ The [compatibility page](./deviations.md) lists what SomeWM removes, adds and ch
 | [Default keybindings](./default-keybindings.md) | Every shortcut in the default config |
 | [Key names](./key-names.md) | Modifiers and the common key names |
 | [Lock, idle and DPMS](./lock.md) | Session locking and display power |
-| [lockscreen](./lockscreen.md) | The bundled lock screen module |
+| [Lockscreen module](./lockscreen.md) | The bundled lock screen module |
 | [Shadows](./shadows.md) | Shadow properties on clients and wiboxes |
 | [Signals](./signals.md) | Every signal by object, with its arguments |
 | [somewm-client](./somewm-client.md) | Every IPC command |
