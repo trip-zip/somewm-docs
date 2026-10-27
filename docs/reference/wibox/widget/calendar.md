@@ -8,9 +8,9 @@ import FigureLua from "../_lua/widget-calendar.mdx";
 
 # wibox.widget.calendar
 
-Shows a month or a year as a grid of day cells, with the weekday names, the month name and today in bold. Every cell is a textbox you can restyle through `fn_embed`.
+Shows a month or a year as a grid of day cells, with the weekday names, the month name and today in bold. For a colored today cell, wrap the `"focus"` cell in a background container through `fn_embed`. Every cell is a textbox you can restyle through `fn_embed`. Give it `forced_width` and `forced_height`, or put it in a box with a size: in a content-sized box, such as a popup sized to its content, the cells take their own sizes and the columns do not line up.
 
-![Calendar for October 2026 four times: plain, with week numbers, starting on Sunday with long weekday names, and with wider spacing](/img/reference/wibox/widget-calendar.png)
+![Calendar for October 2026 four times: plain, with week numbers, starting on Sunday, and with wider spacing](/img/reference/wibox/widget-calendar.png)
 
 Each row sets one property. The outline is the box the widget was given.
 
@@ -22,7 +22,7 @@ Save this as `/tmp/widget-calendar.lua`, then run:
 somewm-client eval 'dofile("/tmp/widget-calendar.lua")'
 ```
 
-It opens the figure on your focused screen and closes after two minutes. Every row is a month calendar at a fixed date with one property set.
+It opens the figure on your focused screen and closes after two minutes. Every row is a month calendar at a fixed date in a sized box, with one property set.
 
 <FigureLua />
 
@@ -53,7 +53,7 @@ local cal = wibox.widget {
 | `spacing` | number | `beautiful.calendar_spacing`, else `5` | Gap between cells in pixels. | A negative value warns once and is 0. |
 | `week_numbers` | boolean | `beautiful.calendar_week_numbers`, else `false` | Adds a column with the ISO week number. | |
 | `start_sunday` | boolean | `beautiful.calendar_start_sunday`, else `false` | Starts each week on Sunday instead of Monday. | |
-| `long_weekdays` | boolean | `beautiful.calendar_long_weekdays`, else `false` | Three-letter weekday names instead of two. | |
+| `long_weekdays` | boolean | `beautiful.calendar_long_weekdays`, else `false` | Three-letter weekday names instead of two. | On a scaled output some three-letter headers collapse to an ellipsis. |
 | `flex_height` | boolean | `false` | Lets rows grow to fill extra height. | |
 | `fn_embed` | function or nil | `nil` | `function(widget, flag, date)` called for every cell and header; returns the widget to show. `flag` is `"header"`, `"weekday"`, `"weeknumber"`, `"normal"`, `"focus"`, `"month"` or `"monthheader"`. | |
 | `border_width` | number or table | `0` | Grid lines between cells, in pixels. | A dashed border draws solid; a border color that is not solid warns once and is transparent. |

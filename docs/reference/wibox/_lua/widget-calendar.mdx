@@ -155,10 +155,10 @@ local function month(extra)
     for k, v in pairs(extra or {}) do t[k] = v end
     return t
 end
-return F.scene("wibox.widget.calendar", "A month or a year, one cell per day, today highlighted", {
-    F.row('calendar.month, date = {2026, 10, 27}', month(), { fit = true }),
-    F.row('week_numbers = true', month { week_numbers = true }, { fit = true }),
-    F.row('start_sunday = true, long_weekdays = true', month { start_sunday = true, long_weekdays = true }, { fit = true }),
-    F.row('spacing = 12', month { spacing = 12 }, { fit = true }),
+return F.scene("wibox.widget.calendar", "A month or a year, one cell per day, today in bold", {
+    F.row('calendar.month, date = {2026, 10, 27}', month(), { w = 320, h = 236 }),
+    F.row('week_numbers = true', month { week_numbers = true }, { w = 360, h = 236 }),
+    F.row('start_sunday = true', month { start_sunday = true }, { w = 320, h = 236 }),
+    F.row('spacing = 12', month { spacing = 12 }, { w = 420, h = 300 }),
 })
 ```
