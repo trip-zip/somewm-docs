@@ -8,6 +8,10 @@ sidebar_position: 2
 
 kiln draws nothing until something marks a screen dirty. A dirty screen gets one fresh declaration, one Clay solve, one reconcile into the scene, and then goes idle again. An idle kiln consumes no CPU on layout; there is no periodic redraw, no polling loop.
 
+A failed declaration keeps the previous scene and pointer handlers. It does
+not undo Lua state changes or schedule a retry. See
+[declaration failures](../guides/reload-and-debugging.md#declaration-failures).
+
 ## The dirty lists
 
 Most dirtying is automatic. The stdlib listens for the property writes that change what a frame looks like and marks the affected screen.

@@ -67,9 +67,9 @@ Written by the standard library, rules, or your config. All read/write, all emit
 | `minimized` | boolean | false | The client stops being declared: not drawn, not hit, not focusable. Focus moves to the successor. |
 | `ontop` | boolean | false | Band choice; read by the layout at declare time. |
 | `urgent` | boolean | false | Drawn by the border. Set by requests, cleared by `c:focus()`. |
-| `titlebar` | boolean | false | Whether the titlebar row is declared. |
+| `titlebar` | boolean or nil | nil | The stock widget draws a titlebar unless this is explicitly false. |
 | `sticky` | boolean | false | Visible on every tag of its screen. |
-| `no_focus` | boolean | false | Set by a rule's `focus = false`; activation policy reads it. |
+| `no_focus` | boolean | false | Suppresses focus on map. Set by a rule's `focus = false`. The stock activation handler does not check it. |
 | `band` | string | unset | Explicit z-band override for the client's float (`"below"`, `"above"`, ...). Unset, the band derives from state: fullscreen while focused, `above` when `ontop`, else `normal`. See [Nodes, floats, and bands](/kiln/concepts/nodes-floats-and-bands). |
 
 :::note
@@ -80,6 +80,28 @@ There is no property allowlist. Any key you write on a client stores and emits `
 
 Writes to `floating`, `float`, `ontop`, `band`, `urgent`, `titlebar`, `sticky`, `title`, `app_id`, and `icon` mark the client's screen dirty and redraw (so do `fullscreen`, `maximized`, and `minimized`, through their own listeners). Geometry writes do not: `width` and `height` are written on every size commit, and a redraw there would pin the screen at panel rate. A write outside the list still changes state and emits its signal, but draws nothing until the next frame; call `kiln.dirty()` if you need one now.
 
+## Membership and visibility
+
+`c.tags` may contain tags on several screens. Assign a new list to change
+membership; mutating the returned list bypasses the setter. `c.screen` always
+returns the first tag's screen. It need not be the screen drawing the client.
+
+A mapped, non-minimized client is assigned at most one drawing screen:
+
+1. A sticky client uses `c.screen`, regardless of that screen's selected tags.
+2. Otherwise, if any membership on `c.screen` is selected, use that screen.
+3. Otherwise, use the first screen in `screen.all()` with a selected membership.
+4. With no eligible screen, the client is hidden.
+
+`kiln.visible_clients(s)` returns the clients eligible for declaration on `s`.
+It visits selected tags in selection order and each tag's clients in list
+order, keeping each client once. It then appends eligible sticky clients in
+screen tag order. The layout may omit clients from this list, as `max` does.
+
+The first selected tag supplies the layout and its parameters for all selected
+tags. Floating, maximized, fullscreen and override-redirect clients are handled
+separately from the tiled list.
+
 ## Methods
 
 | Method | Description |
@@ -87,7 +109,7 @@ Writes to `floating`, `float`, `ontop`, `band`, `urgent`, `titlebar`, `sticky`, 
 | `c:raise()` | Move to the tail of every tag's client list, the top of the stack. |
 | `c:lower()` | Move to the head, the bottom of the stack. |
 | `c:swap(other)` | Exchange positions with `other` in every shared tag. For tiled clients this is "promote to master". |
-| `c:focus()` | The canonical focus: activates, clears `urgent`, sets `screen.focused`, emits `focus`. |
+| `c:focus()` | Activates, clears `urgent`, sets `screen.focused`, and emits `focus` when focus changes. No-ops for hidden, minimized or stale clients, during map-time rules, or while a layer surface holds keyboard focus. Does not select tags or unminimize. |
 | `c:close()` | Polite close (the xdg close request). |
 | `c:kill()` | Force kill. See the warning below. |
 | `c:toggle_fullscreen()` | Sugar for `c.fullscreen = not c.fullscreen`. |

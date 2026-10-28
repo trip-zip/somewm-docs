@@ -109,7 +109,7 @@ Three keys are special and applied first:
 
 - `tag`: the client's home tag, by name or by tag object.
 - `screen`: by name or by screen object. With `tag` it scopes the name lookup; alone, the client goes to that screen's selected tag.
-- `focus = false`: blocks activation, so the client maps without taking focus.
+- `focus = false`: sets `c.no_focus`, suppressing focus on map. It does not block later activation requests or explicit `c:focus()` calls. A later `focus = true` does not clear it; write `no_focus = false` instead.
 
 Everything else is a plain property write (`c[k] = v`): `floating = true`, `fullscreen = true`, `ontop = true`, `titlebar = false`, and any other [client property](/kiln/reference/client). Each prop is written once, after `tag`/`screen`/`focus`.
 

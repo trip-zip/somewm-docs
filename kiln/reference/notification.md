@@ -34,7 +34,7 @@ Creates a notification, or updates one in place when `id` names a live one. Retu
 | `urgency` | string | `"normal"` | `"low"`, `"normal"`, or `"critical"`. Critical is sticky: it ignores the timeout and stays until dismissed. |
 | `timeout` | number | `theme.notification_timeout[urgency]` | Seconds until auto-dismiss; 0 is sticky. Writing it on a live notification re-arms the timer. Ignored while urgency is critical. |
 | `actions` | list | `{}` | Action buttons, each `{key = ..., label = ...}`. |
-| `screen` | screen | the focused screen | Where the popup is drawn. |
+| `screen` | screen | the focused screen | The screen dirtied by notification updates. Custom displays can use it to select an output. The stock display does not filter by it. |
 | `icon` | string | nil | Icon name or path. |
 | `value` | number | nil | Progress 0..100; the stock display draws a progress bar. |
 | `app_name` | string | nil | The sending application's name; DBus intake fills it, and rules match on it. |
@@ -55,7 +55,7 @@ All listed properties are live on the object: writing `title`, `message`, `urgen
 
 | Method | Description |
 |---|---|
-| `notification.all()` | The currently visible notifications, in arrival order. |
+| `notification.all()` | Active notifications across all screens, in arrival order. Excludes the suspension queue; does not filter by the screen being drawn. |
 | `notification.suspended` | Read/write do-not-disturb flag. While true, new notifications queue in `pending`; setting it false shows the queue in arrival order. |
 | `notification.pending` | Read only: the suspension queue. |
 | `notification.on(name, fn)` / `notification.off(name, fn)` | Class-level signals. |
@@ -72,6 +72,11 @@ All listed properties are live on the object: writing `title`, `message`, `urgen
 ## The display
 
 The entire presentation is one replaceable function: `kiln.defaults.notify_display(s)`, called during each screen's declare. Assign your own function to replace the whole UI, or nil to render nothing. The stock display is written entirely in public [ui](/kiln/reference/ui) API: an overlay-band float stacked top-right below the bar, urgency-colored border, icon, title and message, a progress bar from `value`, action buttons, and press-to-dismiss.
+
+The stock display renders every active notification on each screen that
+redraws. Setting `n.screen` alone does not restrict drawing to that output.
+For per-screen notifications, filter by `n.screen == s` as in the
+[custom display example](../guides/notifications.md#5-replace-the-display-wholesale).
 
 ## See also
 

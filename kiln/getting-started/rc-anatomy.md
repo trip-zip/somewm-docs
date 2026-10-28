@@ -39,7 +39,7 @@ Beyond the module, a config sees seven globals: `client`, `screen`, `tag`,
 
 ## Errors first
 
-The very first wiring is the error bus, so everything after it fails loudly:
+The config registers an error listener first:
 
 ```lua
 kiln.on("error", function(_, err)
@@ -47,9 +47,9 @@ kiln.on("error", function(_, err)
 end)
 ```
 
-Every config callback runs pcall-isolated; when one throws, the error surfaces
-on `kiln.on("error")` instead of vanishing into the log. With this handler it
-becomes a critical notification, which is sticky by default:
+Binding, listener, rule and spawn callback errors produce a critical
+notification through this handler. Bar, layout and direct timer errors are
+log-only. See [error reporting](../guides/reload-and-debugging.md#3-catch-errors-with-the-error-signal).
 
 ![The critical notification the error handler produces, photographed by throwing a deliberate error](/img/kiln/rc/rc-error.png)
 
@@ -1078,8 +1078,8 @@ predicate; `props` are property writes; `on` is a callback. Note:
 - Apps are named in both their Wayland (`app`) and X11 (`class`/`instance`)
   forms, so the rule fires whichever way the client arrives. The dash in
   `pop-up` is escaped because a rule string is a Lua pattern.
-- A tag assignment never auto-switches the view, so `focus = false` is the
-  whole of "do not steal my screen".
+- A tag assignment does not switch the view. `focus = false` suppresses focus
+  on map; later activation requests use a separate policy.
 
 Titlebars need no rule: they are on by default and opted out per client with
 `titlebar = false`. See [Client rules](/kiln/guides/client-rules).

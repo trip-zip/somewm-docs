@@ -77,9 +77,9 @@ Add `battery()` to your bar and reload. It shows the charge percentage, or `n/a`
 
 The callback saves the reading and calls `kiln.dirty()` to redraw. The widget needs no `every` timer.
 
-`spawn.watch` returns a handle with `:stop()`, and `kiln.reload()` stops all
-watches automatically, so an edited config never doubles its pollers. See
-[Spawn lifecycle](/kiln/guides/spawn-lifecycle).
+`spawn.watch` returns a handle with `:stop()`. Reload stops watches and drops
+their callbacks, but running children continue until they exit. See
+[pipe and watch lifetime](../guides/spawn-lifecycle.md#pipes-and-watches-across-stop-and-reload).
 
 ## 3. Reacting to signals with `watch`
 

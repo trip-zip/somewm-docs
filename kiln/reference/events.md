@@ -37,6 +37,9 @@ The envelope always carries `class` and `name`; payload fields ride flat beside 
 
 ## input
 
+Pointer `x` and `y` are global logical coordinates. `screen` names the output
+under the pointer. See [geometry and units](./screen.md#geometry-and-units).
+
 | Event | Payload | Emitted when |
 |---|---|---|
 | `key` | `keysym, key, utf8, pressed, mods` | A key went down or up. `utf8` is always present (empty string mid-compose or on release). |

@@ -6,7 +6,10 @@ sidebar_position: 10
 
 # kiln.layout
 
-A layout in kiln is a plain function: `(clients, area, tag)`, called during a frame to declare the tiled clients of the visible tag as UI elements. `t.layout` holds one; assigning it changes the tag's tiling on the next frame.
+A layout is a function `(clients, area, tag)` called during a frame. The first
+selected tag supplies the layout and its parameters for all selected tags on
+that screen. Assigning `t.layout` changes the next frame when `t` is first in
+the selection.
 
 ```lua
 local kiln = require("kiln")
@@ -22,9 +25,9 @@ screen.focused.selected_tag.layout = kiln.layout.corner.se
 
 | Argument | Meaning |
 |---|---|
-| `clients` | The tiled clients on the tag, in list order (list order is the stack). |
+| `clients` | The eligible tiled clients from all selected tags, deduplicated in selection order, then each tag's client order. Eligible sticky clients are appended in screen tag order. See [visibility](./client.md#membership-and-visibility). |
 | `area` | The workarea box from the last solve, inset by the gap: `{ x, y, width, height }`. Most layouts ignore it; carousel and magnifier use it for their arithmetic. |
-| `tag` | The tag being laid out, for reading its layout parameters. |
+| `tag` | The first selected tag, which supplies the layout parameters for the whole list. |
 
 The function declares elements (usually `kiln.widgets.client` cells inside `ui.row`/`ui.column` containers) and returns nothing. Most layouts compute no positions: a layout describes structure, and the solver produces the pixels.
 

@@ -27,6 +27,9 @@ end
 
 If no handler is connected, the request is ignored; nothing native acts on it.
 
+Reload resets the ten policies except `successor`, which retains its current
+function. The config then runs again.
+
 ## The 10 policies
 
 | Policy | Decides |

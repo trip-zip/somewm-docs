@@ -24,7 +24,11 @@ end
 
 All ten are replaced this way. `successor`, `notify_display` and the `layer` trio are looked up on `kiln.defaults` at call time. The five request defaults (`activate`, `close`, `fullscreen`, `maximize`, `minimize`) are signal listeners on `client`; assigning `kiln.defaults.fullscreen` disconnects the old function from `request::fullscreen` and connects the new one. A request default must be a function: assigning `nil` raises an error. Assign a function that does nothing to refuse a request.
 
-Config reload restores the stock defaults and then re-runs your config file, so replacements declared in the config survive reloads automatically.
+Reload restores these defaults except `successor`, which retains its current
+function. The config then runs again. Removing a successor assignment from the
+file does not restore the stock function; retain that function explicitly if
+you need to restore it without restarting. See
+[reload state](./reload-and-debugging.md#2-what-survives-what-resets).
 
 ## 3. Worked example: focus succession
 

@@ -35,6 +35,10 @@ These build the Clay element tree and error outside a frame or lock handler ("de
 
 ### Readback
 
+Coordinates and output selection are defined under
+[geometry and units](./screen.md#geometry-and-units). `core.hits` takes global
+coordinates; `core.box` returns output-local coordinates.
+
 `core.box` lets a widget turn a pointer position into a value without doing layout arithmetic; `kiln.widgets.slider` reads its solved track this way. Before the first solve it returns nil.
 
 | Function | Description |

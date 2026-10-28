@@ -111,7 +111,7 @@ A fixed desk arrangement, applied whenever the outputs appear:
 ```lua
 screen.on("added", function(s)
 	if s.name == "DP-1" then
-		core.output.set_mode("DP-1", 2560, 1440, 144)
+		core.output.set_mode("DP-1", 2560, 1440, 144000)
 		core.output.set_position("DP-1", 0, 0)
 	elseif s.name == "eDP-1" then
 		core.output.set_position("eDP-1", 2560, 0)
@@ -130,7 +130,10 @@ screen.on("added", function(s)
 end)
 ```
 
-Scale is fractional and per-output; kiln solves all layout in logical pixels, so nothing else in your config changes when scale does.
+Mode dimensions use physical pixels; refresh uses millihertz. Use an advertised
+timing from `core.output.list()`. Output positions and UI dimensions use logical
+pixels. Scaling changes the available logical size; bars and layouts reflow.
+See [geometry and units](../reference/screen.md#geometry-and-units).
 
 ## See also
 

@@ -14,7 +14,12 @@ function my_layout(clients, area, tag)
 end
 ```
 
-kiln calls it each time it redeclares the screen (after any change marks it dirty), with the selected tag's tiled clients in stacking order, inside a workarea container it has already opened. The function declares [ui containers](/kiln/reference/ui) and one `kiln.widgets.client(c)` leaf per client; the solver turns those declarations into geometry and configures every client to its cell. There is no arrange pass, no geometry storage, and nothing to invalidate.
+Kiln calls the first selected tag's layout inside the workarea container.
+`clients` contains eligible tiled clients from all selected tags, deduplicated
+in selection order. `tag` supplies the first selected tag's parameters.
+See [membership and visibility](../reference/client.md#membership-and-visibility).
+Declare [UI containers](/kiln/reference/ui) and a `kiln.widgets.client(c)` for
+each client to display. Clay solves their geometry.
 
 ## 1. The smallest layout
 

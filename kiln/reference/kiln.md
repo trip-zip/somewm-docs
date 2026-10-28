@@ -40,7 +40,7 @@ kiln.spawn("foot")
 | `kiln.launcher` | The application launcher: `open(s?)`, `close()`, `apps()`, and the replaceable `filter(text)` (default `default_filter`). See [App launcher](/kiln/guides/app-launcher). |
 | `kiln.poll` | `kiln.poll{ cmd, every, parse, screen }` re-runs `cmd` every `every` seconds (default 5), sets `.value` to `parse(lines)` (default: the first line) and `.lines`, and dirties `screen` (or every screen) when the value changes. `:stop()` ends it. |
 | `kiln.systray` | The tray registry: `items()` returns the status-notifier items (`service`, `id`, `title`, `status`, `icon`) in registration order. |
-| `kiln.visible_clients(s)` | The clients screen `s` draws: mapped, not minimized, on one of its selected tags or sticky, each owned by `s`. |
+| `kiln.visible_clients(s)` | Clients eligible for declaration on `s`. See [membership and visibility](./client.md#membership-and-visibility) for ordering and screen selection. |
 | `kiln.on_declare(fn)`, `kiln.off_declare(fn)` | Declare hooks: `fn(s)` runs on every frame of every screen after the built-in desktop elements, before tooltips. An error in a hook rejects that frame. Hooks a config adds are dropped on reload. `on_declare` returns `fn`. |
 
 Key bindings, mouse buttons, and client rules (`kiln.key`, `kiln.button`, `kiln.rule`, `kiln.focused`) have their own page: [Keys, Buttons, and Rules](/kiln/reference/keybindings-and-rules).
@@ -54,7 +54,8 @@ Key bindings, mouse buttons, and client rules (`kiln.key`, `kiln.button`, `kiln.
 | `kiln.spawn.watch(cmd, interval, cb)` | Run `cmd`, feed each stdout line to `cb`, and re-run it `interval` seconds after each exit. `cb` may also be `{ line = fn(line), done = fn(code) }`. Returns a handle; `handle:stop()` cancels the re-arm. |
 | `kiln.spawn_with_token(cmd)` | Like `spawn`, but the child gets an `XDG_ACTIVATION_TOKEN` in its environment, so its activation request arbitrates as user-initiated. |
 
-See [Spawn lifecycle](/kiln/guides/spawn-lifecycle) for how pipes and watches behave across reload.
+See [pipe and watch lifetime](../guides/spawn-lifecycle.md#pipes-and-watches-across-stop-and-reload)
+for late callbacks, stopping and reload.
 
 ## Housekeeping
 
@@ -68,7 +69,12 @@ See [Spawn lifecycle](/kiln/guides/spawn-lifecycle) for how pipes and watches be
 | `kiln.inspector(s?)` | Toggle the Clay debug inspector on a screen; default the focused screen. See [Inspect the Live Element Tree](/kiln/guides/inspector). |
 
 :::note
-`kiln.reload()` re-runs your `rc.lua`, not the library: it does NOT re-require stdlib modules, so edits to kiln's own Lua need a restart. A reload drops everything the config built (bindings, rules, listeners, grabs, watches) and keeps everything the compositor owns (screens, layer surfaces, notifications, running children, input settings). Clients survive as clients but are re-tagged by the new config's rules, and a client minimized from the config side comes back unminimized. A broken config leaves a live compositor; the error surfaces through `kiln.on("error")`.
+`kiln.reload()` schedules config execution after the current callback returns.
+It returns true when accepted, false during config loading or an existing
+reload. Required modules remain cached, including config modules. Windows
+survive, but client and tag Lua objects are replaced. See the
+[reload state table](../guides/reload-and-debugging.md#2-what-survives-what-resets)
+and [module setup recipe](../guides/reload-and-debugging.md#configs-split-across-modules).
 :::
 
 ## Signals
@@ -80,7 +86,7 @@ See [Spawn lifecycle](/kiln/guides/spawn-lifecycle) for how pipes and watches be
 
 | Signal | Payload | Emitted when |
 |---|---|---|
-| `error` | `signal, err` | Any config callback raised an error (they are pcall-isolated). |
+| `error` | `signal, err` | An error reported by a standard-library callback handler. Bar, layout and direct timer failures are log-only; see [error reporting](../guides/reload-and-debugging.md#3-catch-errors-with-the-error-signal). |
 | `idle::start` | | The armed idle timeout elapsed with no input. |
 | `idle::stop` | | Input resumed after idle. |
 | `idle::inhibit` | `on` | An idle inhibitor (a video player, for example) engaged or released. |

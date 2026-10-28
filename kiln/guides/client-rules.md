@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Client Rules
 
-A rule runs when a client maps, before it takes focus. It is the place to say "this app lives on that tag", "dialogs float", or "this window never steals focus", without touching a keybinding.
+A rule sets a new client's properties before it takes focus.
 
 ```lua
 local kiln = require("kiln")
@@ -55,6 +55,34 @@ kiln.rule {
 ```
 
 Rules only apply to normal windows; X11 override-redirect surfaces (menus, tooltips) bypass them entirely. `kiln.rule.clear()` drops every registered rule, which is what a config reload uses.
+
+## Map order and focus
+
+For a new normal client, Kiln runs these steps:
+
+1. Read protocol properties and assign the focused screen's selected tag.
+2. Apply matching rules in registration order.
+3. Emit `map` to client instance and class listeners.
+4. Emit requests for any initial fullscreen, maximized or minimized state.
+5. Focus the client if it is eligible and `c.no_focus` is false or nil.
+
+`c:focus()` does nothing while rules run. A rule can select the destination tag
+with `c.tag:view()`; the final step then focuses the client. Rules run again
+after config reload, but not on metadata changes or remaps of an existing
+client object.
+
+`props = { focus = false }` suppresses only the last step. To also refuse later
+activation requests from those clients, replace the activation policy:
+
+```lua
+kiln.defaults.activate = function(c, ctx)
+  if c.no_focus then return end
+  if ctx.valid then c:focus() else c.urgent = true end
+end
+```
+
+Explicit `c:focus()` calls, including click-to-focus, still work. A hidden or
+minimized client must first be made visible and unminimized.
 
 ## Worked example: browser to its own tag
 

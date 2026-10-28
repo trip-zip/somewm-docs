@@ -173,9 +173,11 @@ Press `super+shift+q` to quit the nested window.
 
 ## What this file does not do
 
-No floating windows, no mouse move or resize, no theme, no menus, no
-notifications display, no launcher. Each of those is more lines in the same
-API, and the default config has all of them:
+`require("kiln")` installs default policies, client borders and titlebars, and
+the notification display. This file adds tags, a bar and keybindings.
+
+It adds no floating-window rules, mouse move/resize bindings, theme overrides,
+menu bindings or launcher binding. The bundled config provides those:
 
 - [Anatomy of rc.lua](/kiln/getting-started/rc-anatomy) reads the default
   config section by section.

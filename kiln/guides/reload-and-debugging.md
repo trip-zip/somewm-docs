@@ -24,22 +24,83 @@ or trigger it from your editor via [IPC](/kiln/guides/ipc-and-scripting):
 kiln-client eval 'require("kiln").reload()'
 ```
 
-A reload only re-executes the config file. The library itself is not re-required, so editing your config is instant, while changes to kiln's own code need a compositor restart.
+A reload re-executes the config file in the same Lua VM. Modules loaded with
+`require` remain cached, including your own modules. See
+[Configs split across modules](#configs-split-across-modules).
 
 ## 2. What survives, what resets
 
-**Kept:** clients, the screens, layer surfaces, notifications, running spawned children, and input settings.
+| State | On reload |
+|---|---|
+| Application windows and running children | Kept. |
+| Client and tag Lua objects | Retired and replaced. Saved references no longer control windows or tag membership. |
+| Screens, layer surfaces, notifications | Kept. Screen custom properties and instance listeners are cleared. Layer and notification instance listeners are cleared too. |
+| Bindings, rules, config listeners, bars, declare hooks | Removed; the config must register them again. |
+| Config timers, watches, pipe callbacks, grabs, animations, scroll offsets | Cleared. Running child processes are not terminated. |
+| Config popups | Closed and unregistered; construct new ones. |
+| Focus and tag-selection histories | Cleared. |
+| Theme, input settings, globals, cached modules | Kept unless the config overwrites them. |
+| Replacements for the ten `kiln.defaults` policies | All reset except `successor`, which retains its current function. |
+| `kiln.widgets` replacements | `titlebar` resets. Other function replacements remain. |
 
-**Dropped and rebuilt:** keybindings, button binds, rules, your signal listeners, bars, tags, and the focus history. The reload re-emits `added` for every screen (so your `screen.on("added")` recreates tags and bars), then replays every client through the new config's rules.
+After running the config, Kiln emits `added` for each screen, refreshes layer
+surfaces, then replays clients through the new rules. Clients without a matching
+tag rule go to the focused screen's selected tag. Config-side minimisation and
+floating geometry are lost. To retain memberships, see
+[Keep client tags across reload](./tag-persistence.md#keep-client-tags-across-reload).
 
-- Clients survive as windows but not as arrangement: each one is re-tagged by the new config's rules, an unruled client lands on the focused screen's selected tag, and floats re-cascade. To preserve arrangements, see [Tag Persistence](/kiln/guides/tag-persistence).
-- A client you minimized comes back unminimized: that flag was config-side state, and the config just restarted.
+`kiln.reload()` schedules this work after the current callback returns. It
+returns true when accepted, false during initial config loading or while a
+reload is already pending or running. Code after the call still sees the old
+configuration.
 
-A broken config does not kill the session. The reload catches the error, reports it through the error path below, and leaves the compositor running with whatever the file managed to set before it failed; fix the file and reload again.
+A config error leaves the session running with the registrations made before
+the failure. Reload does not restore the previous config. Fix the file and
+reload again.
+
+### Configs split across modules
+
+Export a setup function from each module. Call it from `rc.lua` on every load.
+Registrations in the module body run only on the first `require`; reload removes
+them without running that body again.
+
+Save `bindings.lua` beside `rc.lua`:
+
+```lua
+local M = {}
+
+function M.setup(kiln)
+  kiln.key {
+    mods = { "mod" }, key = "Return",
+    press = function() kiln.spawn("foot") end,
+  }
+end
+
+return M
+```
+
+In `rc.lua`, after setting `kiln.modkey`:
+
+```lua
+require("bindings").setup(kiln)
+```
+
+This restores registrations but does not reread edits to `bindings.lua`. To
+reread that module, clear its cache entry before requiring it:
+
+```lua
+package.loaded["bindings"] = nil
+require("bindings").setup(kiln)
+```
+
+Dependencies remain cached. Restart Kiln after editing its standard library;
+clearing individual `kiln.*` entries can leave references to older modules.
 
 ## 3. Catch errors with the error signal
 
-Every config callback (bindings, listeners, bar functions, rules) runs isolated: an error in one is caught, reported, and does not take down dispatch. Each caught error fires the global `error` signal with the name of the failing hook and the message:
+Errors in bindings, signal listeners, rules and spawn callbacks emit the global
+`error` signal and are printed to stderr. Register a listener near the top of
+the config to display them:
 
 ```lua
 kiln.on("error", function(signal, err)
@@ -51,7 +112,21 @@ kiln.on("error", function(signal, err)
 end)
 ```
 
-Put this near the top of your config and mistakes surface as notifications instead of silently dead handlers. Every caught error is also printed, so it lands in the log regardless.
+Bar and layout declaration errors are logged as `Lua frame: ...`; they do not
+emit this signal. Direct `kiln.timer` callback errors are logged as
+`Lua timer: ...`. Always check the log when the error listener reports nothing.
+
+### Declaration failures
+
+A declaration error rejects the screen's entire new frame. The previous scene
+and its pointer handlers remain active. Lua state writes made before the error
+are not undone. A duplicate element ID has the same frame-rejection behaviour.
+
+After correcting the cause, reload the config or call `kiln.dirty()` to request
+another frame. A failed declaration does not schedule its own retry.
+`kiln.on_declare` hook errors also emit `error` before rejecting the frame.
+A failed `notify_display` function emits `error` and is skipped on later frames
+until replaced with another function or reset by reload.
 
 ## 4. Logs
 

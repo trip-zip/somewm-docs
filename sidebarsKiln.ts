@@ -34,6 +34,7 @@ const sidebars: SidebarsConfig = {
         'guides/custom-layouts',
         'guides/floating-and-placement',
         'guides/menus',
+        'guides/popups',
         'guides/notifications',
         'guides/replace-default-policies',
         'guides/multi-monitor',

@@ -28,7 +28,8 @@ kiln.notify {
 
 It returns the notification object. The [notification reference](/kiln/reference/notification) lists every accepted field. Passing the `id` of a visible notification replaces it in place, so repeated volume popups update one notification.
 
-Critical notifications never expire on their own: dismissing them is the user's (or your code's) job. `n:dismiss()` is the one way any notification ends; `notification.all()` lists the currently visible ones.
+Critical notifications never expire. `n:dismiss()` ends one;
+`notification.all()` lists active notifications across all screens.
 
 ## 3. Tune timeouts per urgency
 
@@ -70,14 +71,17 @@ kiln.key {
 
 The entire presentation is one replaceable function: `kiln.defaults.notify_display(s)` runs inside every screen's frame and declares whatever the notifications should look like. Assign your own, or set it to `nil` to render nothing at all (signals still fire, so a `nil` display plus your own listeners is a valid setup).
 
-A minimal custom display, bottom-right instead of top-right:
+A display at the bottom-right of each notification's assigned screen:
 
 ```lua
 local kiln = require("kiln")
 local ui = kiln.ui
 
 kiln.defaults.notify_display = function(s)
-	local list = notification.all()
+	local list = {}
+	for _, n in ipairs(notification.all()) do
+		if n.screen == s then list[#list + 1] = n end
+	end
 	if #list == 0 then
 		return
 	end
@@ -111,7 +115,14 @@ kiln.defaults.notify_display = function(s)
 end
 ```
 
-Every notification carries a `seq` field, a unique sequence number, which makes a stable element id. Press-to-dismiss is just an `on_press`; add action buttons as inner boxes calling `n:invoke(a.key)`, or a progress bar from `n.value`, exactly as the stock display does. The stock display is the `display` function in `lua/kiln/notification.lua`, installed as `kiln.defaults.notify_display`.
+`n.seq` is a unique sequence number suitable for an element ID. Action buttons
+can call `n:invoke(a.key)`; a progress bar can read `n.value`.
+
+The stock display does not filter by `n.screen`: it draws all active
+notifications on every output that redraws. The filter above restricts each
+notification to its assigned screen. If you change `n.screen`, also dirty the
+old screen to remove its previous drawing. Notifications assigned to a removed
+screen need reassignment before this display can show them again.
 
 ## See also
 

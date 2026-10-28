@@ -1,6 +1,6 @@
 ---
 title: Spawn Lifecycle
-description: Run apps once per session, focus running instances instead of respawning, and route new windows to the right tag.
+description: Start applications, route their windows, and manage asynchronous command callbacks across stop and reload.
 sidebar_position: 16
 ---
 
@@ -67,6 +67,7 @@ local function focus_or_spawn(app_id, cmd)
       if c.tag ~= nil and not c.tag.selected then
         c.tag:view()
       end
+      c.minimized = false
       c:focus()
       return
     end
@@ -111,9 +112,57 @@ X11 apps running through Xwayland expose `class` and `instance` instead; rules m
 
 ## Focus handoff: spawn_with_token
 
-`kiln.spawn_with_token(cmd)` launches the command with an XDG activation token in its environment. When the app maps and presents that token, its activation request arbitrates as user-initiated, and the stock policy focuses it. Without a token, an app that asks for focus out of the blue is marked urgent instead of being focused.
+`kiln.spawn_with_token(cmd)` gives the child an XDG activation token. The stock
+activation policy focuses a client presenting a valid token; an invalid request
+marks it urgent.
 
-Use `spawn_with_token` at the sites where a human just asked for the window: launcher rows, app keys, focus-or-spawn. Use plain `kiln.spawn` for autostart daemons and background jobs, which should not take focus.
+Focus on map is separate: a newly mapped window normally takes focus even when
+started with plain `kiln.spawn`. Use a rule with `focus = false` to suppress
+that step. To also refuse later activation requests, see
+[map order and focus](./client-rules.md#map-order-and-focus).
+
+## Pipes and watches across stop and reload
+
+`kiln.spawn.pipe(cmd, callbacks)` starts one command. Stdout arrives through
+`on_line(line)` after each newline; any final unterminated line arrives at exit.
+Stderr reaches `on_err(chunk)` without line splitting. `on_exit(code)` runs after
+the child is reaped and both pipes reach EOF. Descendants keeping a pipe open
+can delay it. The returned ID identifies this stream, not an OS process ID.
+
+`kiln.spawn.watch(cmd, interval, callbacks)` starts immediately, then waits
+`interval` seconds after each completed run before starting another. A command
+that never exits, or whose pipes never reach EOF, prevents another run.
+
+| Action or failure | Behaviour |
+|---|---|
+| `watch:stop()` | Cancels the next run and suppresses the current run's `done` callback. Does not terminate the child or suppress its remaining `line` callbacks. Repeated stops do nothing. |
+| `kiln.reload()` | Stops watches and drops all pipe callbacks. Running children continue. New config watches can overlap those children. |
+| Child exits nonzero | Reports the status and schedules the next watch run normally. |
+| Output or completion callback raises | Emits `error`; remaining callbacks and watch scheduling continue. |
+| Watch launch or timer registration raises | Emits `error` and stops that watch. |
+
+There is no process-termination method on a pipe ID or watch handle. Use commands
+that finish, or manage a long-running service separately. To prevent late
+output updating state after a manual stop, guard the callback:
+
+```lua
+local load, stopped = "", false
+local watcher = kiln.spawn.watch({ "cat", "/proc/loadavg" }, 5, function(line)
+  if stopped then return end
+  load = line
+  kiln.dirty()
+end)
+
+local function stop_load()
+  stopped = true
+  watcher:stop()
+end
+```
+
+Read `load` from a bar declaration. Call `stop_load()` when removing the widget.
+Reload drops its old callbacks automatically. For whole-command results,
+`kiln.poll` publishes `.lines` and `.value` after completion; its `:stop()` also
+guards against late updates.
 
 ## See also
 

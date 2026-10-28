@@ -75,7 +75,8 @@ kiln-client eval 'require("kiln").reload()'
 ```
 
 Over the socket, use `require("kiln")`, as [IPC and Scripting](/kiln/guides/ipc-and-scripting) explains. Reload re-runs the config file only;
-stdlib modules are not re-required. See [Reload and Debugging](/kiln/guides/reload-and-debugging).
+all required modules remain cached, including your own. See
+[module setup](./guides/reload-and-debugging.md#configs-split-across-modules).
 
 ## What is the difference between c:close() and c:kill()?
 

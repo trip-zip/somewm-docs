@@ -49,7 +49,7 @@ end)
 | `ui.each(items, key, declare)` | Keyed list: `key(item)` returns each element id, `declare(item, id, st)` gets a per-key state table that survives reorder. |
 | `ui.widget(spec)` | Self-updating region: `{ fn or [1], watch = { "Class::signal", ... }, every = seconds }`. Returns the declare function; `watch` and `every` mark the screen dirty. |
 | `ui.bar(s, cfg, fn)` | Register a bar on screen `s`. cfg is ordinary element cfg plus `edge`; see [Bars](#bars). |
-| `ui.popup(spec)` | Build a popup: open state, a keyboard claim, a scrim that closes on an outside press, and a per-frame declare, in one session-lived object with `show`, `close`, `toggle`. Built once at load, never inside a handler (construction registers a declare hook). |
+| `ui.popup(spec)` | Register a popup and return its controller. Construct once per config load, outside declarations. See [Popups](#popups). |
 | `ui.menu(cfg)` | Alias for `kiln.menu.show` (see [Menus](#menus)). |
 | `ui.tooltip(text)` | Alias for `kiln.tooltip.attach`: returns an `on_hover` handler that shows a tooltip. `text` is a string or a function read at declare. |
 
@@ -125,6 +125,45 @@ Handler dispatch is innermost-first with no bubbling: the deepest element with a
 | `clip` | boolean | The float inherits the clip rectangle of what it attaches to: the part outside is neither drawn nor hittable. For a menu or tooltip anchored inside a `ui.scroll`. Default off: a float extends past its parent freely. |
 | `expand` | number, or `{ w =, h = }` | Grow the float's own box outward without moving or resizing its children. One number means both axes. This is how a popup gets a margin that paints and hits, where a `pad` would have inset every child instead. |
 | `fit` | boolean | Keep the float inside the screen's workarea. An `to = "element"` float flips to the opposite side of its target when it would overflow, which is how a submenu near the right edge opens leftward; a `to = "root"` float clamps instead, since mirroring a root attach would throw it across the screen rather than beside anything. Requires an `id`, because the fit is computed from the element's solved box. |
+
+## Popups
+
+`ui.popup(spec)` registers a declare hook. Its content is declared only while
+open. Construction does not display it or claim input.
+
+| Spec field | Behaviour |
+|---|---|
+| `id` | Required unique plain string. A duplicate live popup ID raises. Reserve `id .. ":scrim"` too. |
+| `fn(popup, screen)` | Declares the content inside a column. Called on each frame while open. |
+| `screen` | Default for `:show()`. Otherwise uses the focused screen, then the first screen. |
+| `keys` | A function `(ev, popup)`, or a table mapping key names to `"close"` or functions `(ev, popup)`. `any` is the fallback table entry. Only key presses invoke handlers. |
+| `scrim` | Screen-sized background that closes on an outside press. Default absent. `true` uses `"#00000001"`; a colour spec sets its fill. |
+| `under` | Element ID to attach below. Takes precedence over `at`. Closes if the anchor has not been declared before the popup in the current frame. |
+| `at` | `{x = ..., y = ...}` in output-local logical coordinates. Attaches to the root's top-left unless `anchor` overrides it. |
+| `anchor` | A float anchor. Default centre when neither `under` nor `at` is set; below-left when using `under`. |
+| `band` | Default `"overlay"`. The popup uses z 1 and the scrim z 0 within the band. |
+| `fit` | Default true. Keeps the popup within the workarea after layout settles. |
+| `w`, `h`, `color`, `radius`, `pad`, `gap`, `align`, `border`, `clip` | Passed to the content column. |
+| `style(popup)` | Returns per-frame overrides for `fn`, `scrim`, `under`, `at`, `anchor`, `band`, `fit` and the content column fields. Missing fields use the original spec. |
+| `on_close(popup)` | Called after an open popup closes and releases its keyboard claim. |
+
+When `keys` is present, the popup claims the keyboard and consumes all keys,
+including unmatched ones. A new keyboard grab closes it. Without `keys`,
+bindings and client keyboard input continue normally. A scrim affects pointer
+input only.
+
+| Controller member | Behaviour |
+|---|---|
+| `:show(s?)` | Open on a live screen and return the controller; return nil if it cannot open. Moving an open popup redraws both screens. |
+| `:close()` | Close and release the keyboard. No-op if already closed. |
+| `:toggle(s?)` | Close if open; otherwise show on `s`. |
+| `:destroy()` | Close and unregister the declare hook. The ID can be reused. |
+| `.open` | The screen while open, otherwise nil. Read it; use methods to change state. |
+
+Removing the popup's screen closes it. Reload closes and unregisters
+config-created popups; recreate them during config setup. A retained old
+controller cannot reopen after reload or destruction.
+See [Create a popup](../guides/popups.md) for a complete example.
 
 ## Fonts
 

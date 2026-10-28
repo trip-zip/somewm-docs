@@ -1,14 +1,19 @@
 ---
 title: Tag Persistence
-description: Remember each monitor's tag arrangement across unplug and replug, and put clients back where they lived.
+description: Restore client tags after monitor reconnection or config reload.
 sidebar_position: 17
 ---
 
 # Tag Persistence
 
-Unplug a monitor and kiln keeps every window alive: the departing screen's clients are moved onto a surviving screen's selected tag, all of them, in one pile. Plug the monitor back in and it comes up as a fresh screen: your `screen.on("added")` handler builds its default tags, and the clients stay in the pile on the survivor. Nothing is lost, but nothing is remembered either.
+Unplugging a monitor moves its clients to a surviving screen's selected tag.
+Reconnecting it creates a new screen; clients stay on the survivor.
 
-The recipe below keeps a table keyed by output name that records which tags a screen had and which client lived on which tag, then restores the arrangement when the output returns. It works because output names ("eDP-1", "DP-3") are stable across replug within a session.
+The first recipe restores one tag per client when that monitor returns. It
+assumes stable output names and unique tag names per screen. It restores only
+the first selected tag and does not retain layout parameters such as gaps.
+For config reload, use the separate
+[membership recipe](#keep-client-tags-across-reload).
 
 Snippets assume the standard config preamble:
 
@@ -155,11 +160,82 @@ screen.on("added", function(s)
 end)
 ```
 
-Clients that closed while the monitor was away simply have no match and are skipped. A client spawned fresh after the replug has a new handle, which is what the `app_id` fallback catches.
+Clients that closed while the monitor was away are removed from the record.
+The `app_id` fallback can match another window of the same application; remove
+that fallback if only the original windows should return.
 
 :::note
-The record lives in Lua, so it lasts for the session. If you want arrangements to survive a compositor restart, serialize `saved` to a file (tag names and app_ids only; handles do not survive a restart) and read it back at the top of your config. The write is plain `io.open`, config space like everything else here.
+Reload recreates the local `saved` table. This recipe handles monitor
+reconnection only. To retain a record across compositor restarts, write tag
+names and application identifiers to a file; handles and Lua function values
+cannot identify clients or layouts in a new process.
 :::
+
+## Keep client tags across reload
+
+Reload announces screens before replaying clients. Save memberships before
+requesting reload, then restore each client in its `map` listener, after rules
+have run. Store screen and tag names, since reload retires the old tag objects.
+
+Add this after your existing `screen.on("added")` registration. That handler
+must recreate the named tags. This recipe preserves multiple memberships,
+including memberships on different screens. It does not preserve tag selection,
+layout settings, floating geometry or focus.
+
+```lua
+local pending_tags = kiln_reload_tags or {}
+kiln_reload_tags = nil
+
+client.on("map", function(c)
+  local saved_tags = pending_tags[c.handle]
+  if saved_tags == nil then return end
+  pending_tags[c.handle] = nil
+  local tags = {}
+  for _, entry in ipairs(saved_tags) do
+    for _, s in ipairs(screen.all()) do
+      if s.name == entry.screen then
+        for _, t in ipairs(s.tags) do
+          if t.name == entry.tag then
+            tags[#tags + 1] = t
+            break
+          end
+        end
+      end
+    end
+  end
+  if #tags > 0 then c.tags = tags end
+end)
+
+function reload_with_tags()
+  local saved = {}
+  for _, c in ipairs(client.all()) do
+    local tags = {}
+    for _, t in ipairs(c.tags) do
+      tags[#tags + 1] = { screen = t.screen.name, tag = t.name }
+    end
+    saved[c.handle] = tags
+  end
+  kiln_reload_tags = saved
+  if not kiln.reload() then kiln_reload_tags = nil end
+end
+
+kiln.key {
+  mods = { "mod", "ctrl" }, key = "r",
+  press = reload_with_tags,
+}
+```
+
+The two globals retain the snapshot across `dofile` and expose the wrapper to
+IPC. Use the wrapper for every reload that should preserve memberships:
+
+```sh
+kiln-client eval 'reload_with_tags()'
+```
+
+Calling `kiln.reload()` directly does not take a snapshot. Missing tags are
+skipped; if none remain, the client keeps the membership assigned by the new
+config. Unique tag names per screen are required. This snapshot lasts only
+within the running compositor.
 
 ## See also
 
