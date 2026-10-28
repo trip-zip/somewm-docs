@@ -7,6 +7,10 @@ slug: /
 
 # Kiln
 
+Kiln is a separate experimental playground, not a planned replacement for SomeWM.
+Some experiments may inform SomeWM's development, but there is no plan to move
+SomeWM users to Kiln.
+
 Kiln is a tiling Wayland compositor for Linux. It arranges your windows on
 each monitor, keyboard shortcuts drive it, and one Lua file configures it.
 
