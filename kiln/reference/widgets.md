@@ -1,150 +1,77 @@
 ---
 title: kiln.widgets
-description: The stock widgets, 13 of them plus the filter table, every one a composition of ui.* primitives that a config could have written itself.
-sidebar_position: 9
+description: Stock widgets, with an option reference and example for each function.
 ---
 
 # kiln.widgets
 
-`kiln.widgets` is the stock widgets: compositions of the [`ui.*`](/kiln/reference/ui) primitives that read compositor state (screens, tags, clients, the theme) and encode an opinion. None of them computes a position, because Clay solves everything. See [the two tiers](/kiln/concepts/one-tree#the-two-tiers) for the split between `ui.*` and `kiln.widgets.*`.
-
-```lua
-local kiln = require("kiln")
-local ui = kiln.ui
-local widgets = kiln.widgets
-
-screen.on("added", function(s)
-  ui.bar(s, { edge = "top" }, function()
-    widgets.taglist(s)
-    widgets.tasklist(s)
-    ui.spacer()
-    widgets.systray()
-    widgets.layoutbox(s)
-    widgets.clock()
-  end)
-end)
-```
-
-## The module table is the extension point
-
-**Widget-to-widget calls go through the module table, never a private upvalue.** `widgets.client` reaches the titlebar as `kiln.widgets.titlebar`, so a config that assigns `kiln.widgets.titlebar = fn` governs every caller, stdlib included: the tiled layouts, the floating composite, all of it. Any `kiln.widgets` symbol can be replaced the same way, and the replacement needs no registration step beyond the assignment.
-
-## Writable by a config
-
-Every stock widget uses only API a config can reach with the same spelling. `make check` runs `scripts/widget-lint.sh`, which rejects any name outside this list (beyond `ui.*` and `kiln.widgets` itself):
-
-| Name | What a widget uses it for |
-|---|---|
-| [`core.box`](/kiln/reference/core) | Read back an element's solved box. The sanctioned answer to "where did Clay put it"; the slider depends on it. |
-| [`core.dirty`](/kiln/reference/core) | Mark a screen dirty so the next frame redeclares. |
-| [`core.timer`](/kiln/reference/core), [`core.timer_cancel`](/kiln/reference/core) | One-shot timer and its cancel; the clock arms one per minute rollover. |
-| [`core.tray_activate`](/kiln/reference/core) | Forward a press or scroll to a status-notifier item. |
-| [`core.input.set_cursor`](/kiln/reference/core) | Set the pointer image; the resize handles set the edge cursors. |
-| `kiln.theme` | Colors and metrics. The same table `state.theme` names inside the stdlib. |
-| `client` | The client global: `client.focus`, the properties a row draws. |
-| `screen.all` | The screen list. |
-| `kiln.icon`, `kiln.layout`, `kiln.systray` | Icon resolution, the layout registry, the tray registry. |
-| `kiln.keygrabber`, `kiln.mousegrabber` | Grabs. The widgets reach them through `require("kiln.grab")`, the module both names come from. |
-
-:::note
-`core.box` returns nil until the element has been solved once, so a widget that reads its own box needs a stable `id`; `widgets.slider` errors without one.
-:::
+`kiln.widgets` declares bars and client decorations from `kiln.ui` elements.
+Values belong to your config; these functions do not create persistent widget
+objects. Read [widget conventions](./widgets/common.md) for state, callbacks
+and IDs.
 
 ## Form widgets
 
-`progress`, `separator`, `toggle`, and `slider` are controlled: the caller owns the value and the widget draws it. `value` and `on` come in, `changed` and `press` go out, and the widget holds no state to go stale. General element keys (`pad`, `align`, `float`, handlers) are not repeated below; each widget passes its cfg onto ordinary elements, and the full element contract lives in [the cfg contract](/kiln/reference/ui#the-cfg-contract).
+| Function | Displays |
+|---|---|
+| [progress](./widgets/progress.md) | A horizontal fill from 0 to 1. |
+| [separator](./widgets/separator.md) | A horizontal or vertical line. |
+| [toggle](./widgets/toggle.md) | A boolean switch. |
+| [slider](./widgets/slider.md) | A draggable value from 0 to 1. |
 
 ### widgets.progress(cfg)
 
-A fill across a track, both boxes named so a probe can read the ratio back.
-
-| Field | Values | Meaning |
-|---|---|---|
-| `id`, `fill_id` | element ids | Track and fill. `fill_id` is its own key rather than derived, so a caller porting an existing widget keeps its ids. |
-| `value` | 0 to 1 | Fill fraction, clamped. |
-| `w`, `h` | sizing | Defaults `"grow"` and 4. |
-| `color`, `track` | color spec | Fill (default `theme.accent`) and track (default `theme.muted`). |
-| `radius` | number | Default 2, both boxes. |
+See [progress options and example](./widgets/progress.md).
 
 ### widgets.separator(cfg?)
 
-A rule: thin on one axis, long on the other, and which is which is the whole of its configuration.
-
-| Field | Values | Meaning |
-|---|---|---|
-| `vertical` | boolean | Swaps which axis is thin. Default false, a horizontal rule. |
-| `thickness` | number | Default 1. |
-| `length` | sizing | Default `"grow"`. |
-| `color` | color spec | Default `theme.muted`. |
+See [separator options and example](./widgets/separator.md).
 
 ### widgets.toggle(cfg)
 
-A switch. The knob is placed by child alignment, so the two states differ by one word and not by any arithmetic over the track.
-
-| Field | Values | Meaning |
-|---|---|---|
-| `on` | boolean | The state, owned by the caller. |
-| `press` | `fn(ev)` | The output; flip your own state here and the next frame draws it. |
-| `id` | element id | Optional; the knob derives `id .. ":knob"`. |
-| `w`, `h`, `pad` | numbers | Defaults 32, 16, 2. The knob is `h - 2 * pad` square. |
-| `color`, `track`, `knob` | color spec | On fill (`theme.accent`), off fill (`theme.muted`), knob (`theme.fg`). |
-| `radius` | number | Default half the height, a pill. |
+See [toggle options and example](./widgets/toggle.md).
 
 ### widgets.slider(cfg)
 
-A value dragged along a track. **`id` is required**: the slider reads its own solved box to turn a pointer position into a value, and errors without one. The drag is a mousegrabber, the same claim interactive move and resize use; the value is read absolutely at every step, so a press lands where it was pressed and a long drag cannot drift. The drag ends on the release of the button that started it, not of any button.
-
-| Field | Values | Meaning |
-|---|---|---|
-| `id` | element id | Required. The fill derives `id .. ":fill"`. |
-| `value` | 0 to 1 | The position, owned by the caller. |
-| `changed` | `fn(v)` | The output, called with the new 0 to 1 value on press and on every drag step. |
-| `w`, `h` | numbers | Defaults 120, 16. |
-| `color`, `track` | color spec | Fill (`theme.accent`) and track (`theme.bg2`). |
-| `radius` | number | Default 3. |
+See [slider options and example](./widgets/slider.md).
 
 ## Bar cells
 
-The stock bar cells. Each declares under a stable id the inspector and the docs figures read back: `taglist:<screen>`, `tasklist:<screen>`, `layoutbox:<screen>`, tasklist rows `task:<handle>`, tray cells `tray:<service>`.
-
-| Widget | Description |
+| Function | Displays |
 |---|---|
-| `widgets.taglist(s, cfg?)` | One pressable cell per tag of screen `s`, accent fill when viewed, a corner mark when occupied (filled when the focused client is there). Pressing views the tag. cfg: `on` (below). |
-| `widgets.tasklist(s, cfg?)` | One row per mapped client on the screen's viewed tags, deduped across tags, icon plus ellipsized title, accent fill on the focused row. Pressing unminimizes and focuses. cfg: `filter` (default `widgets.filter.currenttags`), `width` (default `{ "grow", max = 180 }`), `on`. |
-| `widgets.systray(cfg?)` | The status-notifier items as pressable icon cells in registration order. Press activates the item, scroll forwards the delta. cfg: `size` (default 18). |
-| `widgets.layoutbox(s, cfg?)` | The viewed tag's layout, as `theme.layout_icons[family]` when set, else the layout name as text. Pressing cycles to the next layout. cfg: `on`. |
-| `widgets.layoutlist(s, cfg?)` | Layout picker: a [menu](/kiln/reference/ui#menus) over `kiln.layout.list`. cfg is menu cfg (`under` is the usual key). |
-| `widgets.clock()` | Minute-aligned clock text. The redraw timer arms on the rollover the first time the clock is declared, so the displayed minute is never stale. |
+| [taglist](./widgets/taglist.md) | Tags on a screen. |
+| [tasklist](./widgets/tasklist.md) | Client titles and icons. |
+| [systray](./widgets/systray.md) | Status-notifier items. |
+| [layoutbox](./widgets/layoutbox.md) | The selected layout. |
+| [layoutlist](./widgets/layoutlist.md) | A menu for selecting layouts. |
+| [clock](./widgets/clock.md) | Date and time, updated each minute. |
 
 ### widgets.filter
 
-A tasklist filter is a predicate `(client, screen)`, not a class and not a registry: the extension point is "write a function", and a config's own predicate works the same way.
-
-| Filter | Keeps |
-|---|---|
-| `widgets.filter.currenttags` | Clients on any viewed tag of the screen. The default. |
-| `widgets.filter.alltags` | Every client. |
-| `widgets.filter.minimized` | Minimized clients on the screen's viewed tags. |
+See [tasklist filters](./widgets/tasklist.md#filters).
 
 ### The handler table
 
-`widgets.taglist`, `widgets.tasklist`, and `widgets.layoutbox` take an `on` sub-table of named gestures: `press(item, ev)` (the tag, client, or tag under the pointer, plus the ordinary press event with `button` and `mods`) and `scroll(ev)`. A handler preempts: returning a truthy value means handled and the stdlib default (view the tag, focus the client, cycle the layout) does not run; returning nil declines to it. `on` is a sub-table because `on_press` on an element cfg already means the box's own edge.
+See [press and scroll callbacks](./widgets/common.md#the-handler-table).
 
 ## Client widgets
 
-What the stock layouts declare per client. A custom layout composes these the same way; see [Custom Layouts](/kiln/guides/custom-layouts).
-
-| Widget | Description |
+| Function | Declares |
 |---|---|
-| `widgets.titlebar(c, focused?)` | The titlebar row: icon slot, live title riding one growing cell that centers it, maximize and close buttons. Pressing the empty bar starts a move drag. The replaceability exemplar: assign `kiln.widgets.titlebar = fn` and every layout draws yours. |
-| `widgets.resize_handles(c, z?)` | Eight invisible edge and corner handles floated over a floating client, one z above the client's own float. A press starts the edge's resize grab, a hover sets the edge cursor. |
-| `widgets.client(c, cfg?)` | The composite: bordered, rounded column of titlebar over surface, colored by focus, resize handles added when the client floats. A client with `c.titlebar == false` is just the surface in the same bordered column. cfg: `w`, `h` (default `"grow"`), `z` (the layout's band slot, threaded to the handles). |
+| [client](./widgets/client.md) | Border, titlebar, surface and resize handles. |
+| [titlebar](./widgets/titlebar.md) | Title and window buttons. |
+| [resize_handles](./widgets/resize_handles.md) | Eight invisible resize targets. |
+
+## The module table is the extension point
+
+See [replacing a widget](./widgets/common.md#replacing-a-widget).
+
+## Writable by a config
+
+See [the API available to widgets](./widgets/common.md#api-available-to-widgets).
 
 ## See also
 
-- [kiln.ui](/kiln/reference/ui)
-- [core](/kiln/reference/core)
-- [Widgets tutorial](/kiln/tutorials/widgets)
-- [Data widgets](/kiln/guides/data-widgets)
-- [Custom layouts](/kiln/guides/custom-layouts)
-- [Replacing default policies](/kiln/guides/replace-default-policies)
+- [UI elements](./ui.md)
+- [Widgets tutorial](../tutorials/widgets.md)
+- [Data widgets](../guides/data-widgets.md)

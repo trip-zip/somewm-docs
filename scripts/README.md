@@ -3,6 +3,7 @@
 Scripts that produce documentation assets from upstream sources of truth.
 
 - **Reference pages** (below) - the long enumerated reference pages.
+- **[Kiln reference figures](figures/kiln/README.md)** - nested captures, runnable Lua and source checks.
 - **[Clay Bet figures](figures/README.md)** - `npm run generate:figures` renders
   every image under `static/img/kiln/clay/` from a real headless kiln. Safe to run
   while kiln is your live session; see that README for how.
@@ -70,3 +71,14 @@ node scripts/generate-keysyms.mjs \
 ## Updating the sync log
 
 After regenerating, append a line to `ideas/sync-log.md` with the SomeWM SHA the docs are now in sync with. The `Last sync:` line in each generated page records this automatically; the log captures it at the repo level.
+
+## Kiln reference checks
+
+```sh
+node scripts/check-kiln-reference.mjs --source /path/to/kiln
+```
+
+Checks the option tables in `kiln/reference/widgets/` and the UI wrappers
+against fields read by Kiln's Lua source. Reports missing and extra fields,
+missing widget pages and pages without a source function. Defaults, callbacks
+and native behaviour still require source review.

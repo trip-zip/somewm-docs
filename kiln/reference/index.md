@@ -1,6 +1,6 @@
 ---
 title: Reference
-description: The complete kiln API surface, page by page, objects, modules, and the system underneath.
+description: Kiln objects, libraries and system APIs.
 sidebar_position: 1
 ---
 
@@ -12,11 +12,11 @@ A config loads the stdlib once:
 local kiln = require("kiln")
 ```
 
-and the classes `client`, `screen`, `tag`, `layer`, `drag`, `notification`, and `core` are globals, available without requiring anything.
+`client`, `screen`, `tag`, `layer`, `drag`, `notification` and `core` are globals.
 
 ## Objects
 
-The live things the compositor manages. Declarations read properties each frame; see [Frames and Dirty State](/kiln/concepts/frames-and-dirty) for which writes schedule one.
+Declarations read object properties each frame. See [Frames and Dirty State](/kiln/concepts/frames-and-dirty) for which writes schedule one.
 
 | Module | Description |
 |--------|-------------|
@@ -26,15 +26,13 @@ The live things the compositor manages. Declarations read properties each frame;
 | [layer](layer.md) | A layer-shell surface: panels, launchers, and lockers from other programs. |
 | [notification](notification.md) | A desktop notification: urgency, actions, timeout, and its lifecycle. |
 
-## Modules
-
-The `kiln` stdlib: everything a config composes with.
+## Libraries {#modules}
 
 | Module | Description |
 |--------|-------------|
 | [kiln](kiln.md) | The top-level module: spawn, rules, key, button, and what it re-exports. |
-| [kiln.ui](ui.md) | The declarative UI layer: every constructor, the cfg contract, floats, bands, and menus. |
-| [kiln.widgets](widgets.md) | The stock widgets: taglist, tasklist, clock, titlebar and their kin, built from `ui.*`. |
+| [kiln.ui](ui.md) | Constructors with per-function options and examples. Shared sizing, input, floats and bands. |
+| [kiln.widgets](widgets.md) | Form controls, bar cells and client decorations. Options, defaults and callbacks for each function. |
 | [kiln.layout](layout.md) | The layout contract, the nine built-in families, and the tag properties they read. |
 | [Keys, Buttons, and Rules](keybindings-and-rules.md) | Binding keys and pointer buttons, and matching clients with rules. |
 | [kiln.defaults](defaults.md) | The replaceable default policies the runtime installs. |
@@ -44,7 +42,7 @@ The `kiln` stdlib: everything a config composes with.
 
 ## System
 
-The layer under the stdlib. Everyday configs rarely need these pages; scripting, debugging, and extension work does.
+Native APIs, signals and commands for scripting and debugging.
 
 | Module | Description |
 |--------|-------------|

@@ -1,0 +1,39 @@
+```lua
+local kiln = require("kiln")
+local ui, widgets = kiln.ui, kiln.widgets
+local muted, volume = false, 0.6
+
+if kiln_reference_forms then kiln_reference_forms:destroy() end
+
+kiln_reference_forms = ui.popup {
+  id = "kiln-reference-forms",
+  w = 440, pad = 20, gap = 16,
+  color = kiln.theme.bg, radius = 8,
+  border = { width = 1, color = kiln.theme.accent },
+  keys = { Escape = "close" },
+  fn = function()
+    ui.text("Form widgets", { size = 20 })
+    ui.text("progress: value = 0.6, h = 8")
+    widgets.progress { value = 0.6, h = 8 }
+    widgets.separator { color = kiln.theme.muted }
+    ui.row({ w = "grow", align = { y = "center" } }, function()
+      ui.text("toggle: " .. (muted and "on" or "off"))
+      ui.spacer()
+      widgets.toggle {
+        id = "reference-mute", on = muted,
+        press = function()
+          muted = not muted
+          kiln.dirty()
+        end,
+      }
+    end)
+    ui.text(string.format("slider: value = %.2f", volume))
+    widgets.slider {
+      id = "reference-volume", value = volume, w = "grow",
+      changed = function(value) volume = value end,
+    }
+    ui.text("Press Escape to close", { color = kiln.theme.muted })
+  end,
+}
+kiln_reference_forms:show()
+```

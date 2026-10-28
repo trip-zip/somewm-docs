@@ -1,0 +1,198 @@
+{
+  "backend": "nested",
+  "host_output": "DP-1",
+  "scale": 1.5,
+  "source": "0e570f6564e837bc7efa8dad6a38ac1221fc6e36",
+  "figures": {
+    "ui-box": {
+      "width": 1407,
+      "height": 819,
+      "logical_box": [
+        63.0,
+        91.0,
+        940.0,
+        548.0
+      ]
+    },
+    "ui-image": {
+      "width": 1407,
+      "height": 677,
+      "logical_box": [
+        63.0,
+        138.0,
+        940.0,
+        454.0
+      ]
+    },
+    "ui-popup": {
+      "width": 1407,
+      "height": 545,
+      "logical_box": [
+        63.0,
+        182.0,
+        940.0,
+        366.0
+      ]
+    },
+    "ui-scroll": {
+      "width": 1407,
+      "height": 689,
+      "logical_box": [
+        63.0,
+        134.0,
+        940.0,
+        462.0
+      ]
+    },
+    "ui-surface": {
+      "width": 1407,
+      "height": 635,
+      "logical_box": [
+        63.0,
+        152.0,
+        940.0,
+        426.0
+      ]
+    },
+    "ui-text": {
+      "width": 1407,
+      "height": 789,
+      "logical_box": [
+        63.0,
+        101.0,
+        940.0,
+        528.0
+      ]
+    },
+    "widget-client": {
+      "width": 1407,
+      "height": 635,
+      "logical_box": [
+        63.0,
+        152.0,
+        940.0,
+        426.0
+      ]
+    },
+    "widget-clock": {
+      "width": 1407,
+      "height": 311,
+      "logical_box": [
+        63.0,
+        260.0,
+        940.0,
+        210.0
+      ]
+    },
+    "widget-layoutbox": {
+      "width": 1407,
+      "height": 311,
+      "logical_box": [
+        63.0,
+        260.0,
+        940.0,
+        210.0
+      ]
+    },
+    "widget-layoutlist": {
+      "width": 1407,
+      "height": 785,
+      "logical_box": [
+        63.0,
+        102.0,
+        940.0,
+        526.0
+      ]
+    },
+    "widget-progress": {
+      "width": 1407,
+      "height": 731,
+      "logical_box": [
+        63.0,
+        120.0,
+        940.0,
+        490.0
+      ]
+    },
+    "widget-resize_handles": {
+      "width": 1407,
+      "height": 641,
+      "logical_box": [
+        63.0,
+        150.0,
+        940.0,
+        430.0
+      ]
+    },
+    "widget-separator": {
+      "width": 1407,
+      "height": 647,
+      "logical_box": [
+        63.0,
+        148.0,
+        940.0,
+        434.0
+      ]
+    },
+    "widget-slider": {
+      "width": 1407,
+      "height": 647,
+      "logical_box": [
+        63.0,
+        148.0,
+        940.0,
+        434.0
+      ]
+    },
+    "widget-systray": {
+      "width": 1407,
+      "height": 311,
+      "logical_box": [
+        63.0,
+        260.0,
+        940.0,
+        210.0
+      ]
+    },
+    "widget-taglist": {
+      "width": 1407,
+      "height": 311,
+      "logical_box": [
+        63.0,
+        260.0,
+        940.0,
+        210.0
+      ]
+    },
+    "widget-tasklist": {
+      "width": 1407,
+      "height": 311,
+      "logical_box": [
+        63.0,
+        260.0,
+        940.0,
+        210.0
+      ]
+    },
+    "widget-titlebar": {
+      "width": 1407,
+      "height": 395,
+      "logical_box": [
+        63.0,
+        232.0,
+        940.0,
+        266.0
+      ]
+    },
+    "widget-toggle": {
+      "width": 1407,
+      "height": 731,
+      "logical_box": [
+        63.0,
+        120.0,
+        940.0,
+        490.0
+      ]
+    }
+  }
+}
