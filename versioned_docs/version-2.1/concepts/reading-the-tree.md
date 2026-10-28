@@ -95,7 +95,7 @@ output HEADLESS-1 scale 1.00 inspector on frames 9 elements 663/65536 map 663 fr
 | Geometry is correct but content is cut off | Check ancestor clipping and the render command's `rbox`, which describes the box after clipping. See [The realized list](#the-realized-list). |
 | A client is misplaced | Find its `CLIENT` line under `WORKAREA`, or its `SURFACE` root, and inspect the geometry and source labels. [Client layouts](./clients-in-the-tree.md) explains their declarations. |
 
-The dump describes compiled elements. SomeWM can combine compatible containers into one element, so it need not contain a separate line for every Lua widget. A missing class name alone does not prove the widget was rejected. An explicit warning ending `is left out of the tree` identifies a rejected widget and its reason. See [unsupported widget callbacks](./widgets-in-the-tree.md#a-widget-that-paints-itself).
+The dump describes compiled elements. SomeWM can combine compatible containers into one element, so it need not contain a separate line for every Lua widget. A missing class name alone does not prove the widget was rejected. An explicit warning containing `left out of the tree` identifies a rejected widget and its reason. See [unsupported widget callbacks](./widgets-in-the-tree.md#a-widget-that-paints-itself).
 
 ## Sizing
 

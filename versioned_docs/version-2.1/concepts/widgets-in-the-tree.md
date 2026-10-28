@@ -39,13 +39,13 @@ Cairo can also draw into an image surface that an imagebox displays. This is use
 
 SomeWM 2.0 and AwesomeWM ask widgets to measure themselves with `fit`, place children with `layout`, and paint with `draw`. SomeWM 2.1 calculates placement from descriptions and draws the result centrally. It does not run those widget callbacks.
 
-An instance with its own `draw`, `fit`, `layout`, `before_draw_children` or `after_draw_children` method is omitted, including all its children. The containing wibox can remain visible with just its background. SomeWM logs a warning once per class:
+An instance with its own `draw`, `fit`, `layout`, `before_draw_children` or `after_draw_children` method is omitted, including all its children. The containing wibox can remain visible with just its background. SomeWM logs a warning once per class and definition line:
 
 ```text
-W: awesome: wibox.clay: badge draws itself (:draw, :fit) and is left out of the tree
+W: awesome: wibox.clay: badge defines :draw, :fit at ~/.config/somewm/badge.lua:4, which 2.1 never calls. The widget and its children are left out of the tree. See https://somewm.org/docs/guides/custom-widgets
 ```
 
-Here `badge` is the name passed to `wibox.widget.base.make_widget`. Without an explicit name, the warning uses the module name derived from the source file. The methods in parentheses identify what must be replaced. Adding a description without removing these methods does not restore the widget.
+Here `badge` is the name passed to `wibox.widget.base.make_widget`. Without an explicit name, the warning uses the module name derived from the source file, relative to `~/.config/somewm/` for your own modules. The methods listed identify what must be replaced, and the file and line show where the first one is defined. Adding a description without removing these methods does not restore the widget.
 
 This affects custom and third-party widgets that use those callbacks. A custom widget that only combines supported built-in components does not need a new drawing implementation. Custom **client layouts** with `arrange` are a separate API and still work. See [client layouts](./clients-in-the-tree.md).
 

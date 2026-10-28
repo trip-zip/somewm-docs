@@ -55,7 +55,7 @@ The bundled config uses **Mod4**, usually the Super key, and `foot` as its termi
 | --- | --- |
 | `FATAL: no working Lua config found!` | Read the preceding errors. Check the configuration path and Lua library installation. From a source checkout, run `./build/somewm` in the repository root. |
 | Configuration errors or a crash | Run `somewm -d 2>&1 \| tee somewm.log`. `WLR_DEBUG=1 somewm` adds wlroots diagnostics. |
-| A widget is missing | Look for a warning ending `is left out of the tree`. Widgets with old drawing or sizing callbacks need [porting](upgrading-from-2.0.md#port-a-custom-widget). |
+| A widget is missing | Look for a warning containing `left out of the tree`. Widgets with old drawing or sizing callbacks need [porting](upgrading-from-2.0.md#port-a-custom-widget). |
 
 ## Next
 

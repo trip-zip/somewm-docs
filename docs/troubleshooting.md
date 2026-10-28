@@ -20,10 +20,10 @@ description: Known failures and their fixes, grouped by startup, widgets, test m
 
 ### A widget is not showing
 
-A widget with its own `draw`, `fit` or `layout` method, or a class with no describer, is left out of the tree with everything inside it, once per class in the log:
+A widget with its own `draw`, `fit` or `layout` method, or a class with no describer, is left out of the tree with everything inside it. The log names the file and line of the method, once per class and line:
 
 ```
-W: awesome: wibox.clay: badge draws itself (:draw, :fit) and is left out of the tree
+W: awesome: wibox.clay: badge defines :draw, :fit at ~/.config/somewm/badge.lua:4, which 2.1 never calls. The widget and its children are left out of the tree. See https://somewm.org/docs/guides/custom-widgets
 ```
 
 `somewm-client clay tree` prints what was drawn and `screen.primary.inspector = true` shows it over the desktop; a left-out widget is absent from both. A property the tree cannot hold warns the same way and names what happened instead. [Upgrading from 2.0 to 2.1](getting-started/upgrading-from-2.0.md#what-you-will-see) has the cases; [Reading the tree](concepts/reading-the-tree.md) the output.

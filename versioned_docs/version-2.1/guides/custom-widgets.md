@@ -190,6 +190,30 @@ The fields used here mean:
 
 Register the description before putting the widget in a wibox. Keep the callback free of state changes: SomeWM caches descriptions and may reuse them until a widget emits an update signal. The built-in implementations in `lua/wibox/widget/` and `lua/wibox/layout/` show more complex descriptions. A description can only use features supported by SomeWM's compiler and renderer. It is not a replacement Cairo drawing context.
 
+### Choose children from the available size
+
+The callback's fifth argument, `offer`, holds the size the wibox and its containers give the widget before Clay solves the layout. `offer.w` and `offer.h` are in logical pixels, less any margins. An axis is `nil` where its size depends on the solve: along a layout's direction, such as the width inside `wibox.layout.flex.horizontal`, and inside a container that sizes to its content, such as `wibox.container.place`. SomeWM calls the callback again when the offer changes.
+
+This replaces a 2.0 `layout` method that arranged its children by the width it was given:
+
+```lua
+local clay = require("wibox.clay")
+local wibox = require("wibox")
+
+local function columns(left, right, breakpoint)
+    local side_by_side = wibox.layout.flex.horizontal(left, right)
+    local stacked = wibox.layout.fixed.vertical(left, right)
+    local widget = wibox.widget.base.make_widget(nil, "columns")
+    clay.describe_widget(widget, function(self, _, _, _, offer)
+        local narrow = offer.w and offer.w < breakpoint
+        return { specs = { { widget = narrow and stacked or side_by_side, w = "grow", h = "grow" } } }
+    end, "columns")
+    return widget
+end
+```
+
+In a 600-pixel wibox, `columns(left, right, 400)` places the two widgets side by side. In a 300-pixel wibox it stacks them. Where `offer.w` is `nil`, they stay side by side.
+
 ## Draw to an image surface
 
 An imagebox accepts a Cairo image surface. You can keep custom drawing code by rendering into a surface of a size you choose, then assigning that surface to the imagebox:
@@ -236,6 +260,12 @@ Under `somewm-session`, watch the log while reloading the configuration:
 journalctl --user -u somewm.service -f
 ```
 
-When SomeWM runs directly from a terminal, read its standard error there. A warning such as `badge draws itself (:draw, :fit) and is left out of the tree` identifies unsupported methods on that widget. `has no describer` means the widget has no registered description. A plain `make_widget()` has an empty description, so it needs a proxy child or a description of its own to display content.
+When SomeWM runs directly from a terminal, read its standard error there. A warning like this names the widget, its unsupported methods, and the file and line of the first one:
+
+```text
+W: awesome: wibox.clay: badge defines :draw, :fit at ~/.config/somewm/badge.lua:4, which 2.1 never calls. The widget and its children are left out of the tree. See https://somewm.org/docs/guides/custom-widgets
+```
+
+SomeWM 2.1.0 prints `badge draws itself (:draw, :fit) and is left out of the tree` instead. `has no describer` means the widget has no registered description. A plain `make_widget()` has an empty description, so it needs a proxy child or a description of its own to display content.
 
 Run `somewm-client clay tree` to inspect the displayed widgets and their sizes. [Reading the tree](../concepts/reading-the-tree.md) explains the output. The [upgrade guide](../getting-started/upgrading-from-2.0.md) lists other removed methods and changed properties.
