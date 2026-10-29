@@ -54,7 +54,7 @@ local sep = wibox.widget {
 | `span_ratio` | number | `1` | How much of the box length the line covers, 0 to 1, centered. | Values above 1 are 1. |
 | `color` | color | `beautiful.separator_color`, else `beautiful.fg_normal` | Line or shape color. | A value that is not solid or a gradient warns once and is transparent. |
 | `shape` | function | `beautiful.separator_shape` | A `gears.shape` drawn across the box instead of a line. | |
-| `border_width` | number | `beautiful.separator_border_width`, else `0` | Outline of the shape. | Only with a `shape`. A plain line has no border. |
+| `border_width` | number | `beautiful.separator_border_width`, else `0` | Outline of the line or shape, drawn inside it. | With no `border_color`, a shape draws nothing and a line draws without a border. |
 | `border_color` | color | `beautiful.separator_border_color` | Outline color. | Must be solid or it warns once and is transparent. |
 
 Setting a property emits `property::<name>`.

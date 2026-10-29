@@ -60,3 +60,5 @@ local disk = wibox.widget {
 Setting a property emits `property::<name>`.
 
 The [common properties, methods and signals](../common.md) apply.
+
+*Friendly reminder.  Pie charts are the worst and you shouldn't use them.

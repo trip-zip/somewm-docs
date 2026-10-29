@@ -49,7 +49,7 @@ local vertical = wibox.widget {
 | Property | Type | Default | What it does | In SomeWM |
 | --- | --- | --- | --- | --- |
 | `widget` | widget or nil | `nil` | The child. | |
-| `direction` | `"north"`, `"east"`, `"south"`, `"west"` | `"north"` | Where the child's top ends up. `"east"` is a quarter turn clockwise, `"south"` a half, `"west"` three quarters. | `"east"` and `"west"` currently draw the same turn, as the figure shows. A textbox inside draws as one line; one with several lines is left out with a warning. A rotate or a scroll container inside is left out with a warning. Press coordinates reach the child relative to its rotated box. |
+| `direction` | `"north"`, `"east"`, `"south"`, `"west"` | `"north"` | The turn. `"east"` is a quarter turn counterclockwise, so text reads bottom to top. `"south"` is a half turn. `"west"` is a quarter turn clockwise, so text reads top to bottom. | A textbox inside draws as one line; one with several lines is left out with a warning. A rotate or a scroll container inside is left out with a warning. Press coordinates reach the child relative to its rotated box. |
 
 Setting a property emits `property::<name>`.
 

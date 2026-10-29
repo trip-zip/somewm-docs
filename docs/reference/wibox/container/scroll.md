@@ -39,10 +39,8 @@ Constructors: `wibox.container.scroll.horizontal(widget, fps, speed, extra_space
 ```lua
 local title = wibox.widget {
     {
-        text         = "A long window title that does not fit the bar",
-        ellipsize    = "none",
-        forced_width = 400,
-        widget       = wibox.widget.textbox,
+        text   = "A long window title that does not fit the bar",
+        widget = wibox.widget.textbox,
     },
     max_size      = 200,
     speed         = 40,
@@ -50,8 +48,6 @@ local title = wibox.widget {
     layout        = wibox.container.scroll.horizontal,
 }
 ```
-
-A textbox child with the default `ellipsize = "end"` is cut with an ellipsis at the box edge, because SomeWM ellipsizes a line at its nearest clip. For a textbox that scrolls whole, set `ellipsize = "none"` and give it a `forced_width` at least its preferred width, as the example does.
 
 ## Properties
 
