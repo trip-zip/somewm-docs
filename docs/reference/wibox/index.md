@@ -12,6 +12,8 @@ SomeWM has three layers. **Primitives** are the objects C gives Lua: `wibox`, `c
 
 Each class below has its own page with every property, method and signal, and what SomeWM does differently from AwesomeWM. Properties and signals shared by every class are on the [common page](./common.md). Every widget and container has a page. Layout pages wait for the Clay documentation, since a layout's behavior is a Clay sizing rule; until then the upstream page is the property list and the [compatibility list](../deviations.md) has the SomeWM differences.
 
+The [animation reference](../animation.md) covers frame transitions on wiboxes, popups and wibars, and property animations on their widgets.
+
 ## Widgets
 
 Show content: text, an image, a value.

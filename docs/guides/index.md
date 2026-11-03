@@ -15,6 +15,7 @@ Each guide solves one task on a configuration that already works. It gives the s
 | [Update widgets from timers and commands](widget-timers.md) | Timers, shell commands and signals as sources of change |
 | [Put a PNG texture on your wibar](wibar-background-image.md) | A background image at the bar's size |
 | [Configure notifications](notifications.md) | Position, timeout, look and rules for naughty |
+| [Customise the systray](customise-systray.md) | Per-application styles, hover and attention backgrounds, and badges |
 | [Animate clients, popups and widgets](animation.md) | Entrance, exit and property animations |
 
 ## Windows and layouts

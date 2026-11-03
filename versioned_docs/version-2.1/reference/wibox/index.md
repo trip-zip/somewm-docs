@@ -10,6 +10,8 @@ description: Widgets, containers, and the wibar
 
 **Upstream documentation:** [awesomewm.org/apidoc/popups_and_bars/wibox.html](https://awesomewm.org/apidoc/popups_and_bars/wibox.html)
 
+The [animation reference](../animation.md) covers frame transitions on wiboxes, popups and wibars, and property animations on their widgets.
+
 ## Widget Types
 
 Widgets come in three categories: primitives that display content, containers that modify a single widget, and layouts that arrange multiple widgets. None of them draws or sizes itself: each declares what it holds and how it is sized, Clay calculates the output tree when layout is dirty, and SomeWM renders the result. [Widgets in SomeWM 2.1](../../concepts/widgets-in-the-tree.md) explains what each class declares, and [Reading the tree](../../concepts/reading-the-tree.md#sizing) maps the layouts and containers below onto the sizing words.
@@ -24,7 +26,7 @@ Widgets come in three categories: primitives that display content, containers th
 | `wibox.widget.slider` | Draggable slider controls |
 | `wibox.widget.checkbox` | Checkboxes and toggle indicators |
 | `wibox.widget.graph` | Line/bar graphs for time series data |
-| `wibox.widget.systray` | System tray (SNI on Wayland) |
+| [`wibox.widget.systray`](./widget/systray.md) | System tray (SNI on Wayland) |
 | `wibox.widget.separator` | Visual separator between widgets |
 | `wibox.widget.calendar` | Calendar display |
 

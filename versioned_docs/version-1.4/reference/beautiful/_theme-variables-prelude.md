@@ -22,6 +22,10 @@ Common theme values. Widgets read them as defaults unless configured otherwise.
 | `useless_gap` | `number` | Gap between tiled windows |
 | `wallpaper` | `string` | Path to wallpaper image |
 
+## Systray styles
+
+The [systray reference](../wibox/widget/systray.md#styling-options) groups all tray styles by effect, with accepted values, defaults, per-application fields and version limits. It includes dot, ring and glow attention indicators and replacing application badges with a ring.
+
 ## Cursors
 
 Standard X cursor names like `"left_ptr"`, `"fleur"`, `"cross"`, `"watch"` are accepted.

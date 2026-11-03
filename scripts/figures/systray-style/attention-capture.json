@@ -1,0 +1,26 @@
+{
+  "version": "OK\nsomewm v2.1.1-11-g8edb69dd0-dirty\nRelease: somewm\nConfig: ./somewmrc.lua\n\n",
+  "output": "DP-3",
+  "screen": "2",
+  "output_geometry": [
+    1920,
+    0,
+    3840,
+    2160
+  ],
+  "scale": 1.0,
+  "item": "docs-systray-example",
+  "normal_crop": [
+    3728,
+    0,
+    80,
+    32
+  ],
+  "highlighted_crop": [
+    3728,
+    0,
+    80,
+    32
+  ],
+  "effect": "attention"
+}

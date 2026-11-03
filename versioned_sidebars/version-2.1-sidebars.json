@@ -52,6 +52,7 @@
         "guides/multi-monitor",
         "guides/tag-persistence",
         "guides/notifications",
+        "guides/customise-systray",
         "guides/screenshots",
         "guides/shadows",
         "guides/animation",
@@ -91,12 +92,14 @@
           "label": "wibox",
           "items": [
             "reference/wibox/index",
-            "reference/wibox/wibar"
+            "reference/wibox/wibar",
+            "reference/wibox/widget/systray"
           ]
         },
         "reference/output",
         "reference/default-keybindings",
         "reference/rc-lua-anatomy",
+        "reference/animation",
         "reference/deviations",
         "reference/key-names",
         "reference/key-names-all",

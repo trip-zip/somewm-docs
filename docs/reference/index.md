@@ -33,6 +33,7 @@ The [compatibility page](./deviations.md) lists what SomeWM removes, adds and ch
 | --- | --- |
 | [All keysyms](./key-names-all.md) | Every key name SomeWM accepts |
 | [Anatomy of rc.lua](./rc-lua-anatomy.md) | A map of the default config, section by section |
+| [Animation](./animation.md) | Configuration locations, properties, effects, defaults and limits |
 | [AwesomeWM compatibility](./deviations.md) | Removed, added and changed behavior |
 | [Default keybindings](./default-keybindings.md) | Every shortcut in the default config |
 | [Key names](./key-names.md) | Modifiers and the common key names |

@@ -65,6 +65,7 @@
         "guides/multi-monitor",
         "guides/tag-persistence",
         "guides/notifications",
+        "guides/customise-systray",
         "guides/screenshots",
         "guides/shadows",
         "guides/wallpaper-caching",
@@ -103,7 +104,8 @@
           "label": "wibox",
           "items": [
             "reference/wibox/index",
-            "reference/wibox/wibar"
+            "reference/wibox/wibar",
+            "reference/wibox/widget/systray"
           ]
         },
         "reference/output",

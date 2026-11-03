@@ -24,7 +24,7 @@ Widgets come in three categories: primitives that display content, containers th
 | `wibox.widget.slider` | Draggable slider controls |
 | `wibox.widget.checkbox` | Checkboxes and toggle indicators |
 | `wibox.widget.graph` | Line/bar graphs for time series data |
-| `wibox.widget.systray` | System tray (SNI on Wayland) |
+| [`wibox.widget.systray`](./widget/systray.md) | System tray (SNI on Wayland) |
 | `wibox.widget.separator` | Visual separator between widgets |
 | `wibox.widget.calendar` | Calendar display |
 

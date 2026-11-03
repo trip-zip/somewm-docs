@@ -10,9 +10,11 @@ import AnimationComparison from '@site/src/components/AnimationComparison.mdx'
 
 # Animate clients, popups and widgets <SomewmOnly />
 
-Set a duration in seconds to enable animation. Use 0 to disable it. SomeWM uses Clay transitions for layout, visibility and widget-property changes.
+Set a duration in seconds to animate layout or widget-property changes. Appearance and disappearance also need an effect, such as `fade` or `grow`. A duration of 0 applies the change immediately.
 
 Use `.animation` for a persistent policy and `widget:animate{...}` for a single change. See [Updating a policy](#updating-a-policy) to edit an existing policy.
+
+The [animation reference](../reference/animation.md) lists every configuration location, property, effect, default and limit.
 
 ## Layout changes
 
@@ -30,18 +32,19 @@ theme.animation_layout_duration = 0.15   -- seconds
 
 ## Clients
 
-A client reads its durations and entrances from `c.animation`, a table with one key per trigger, and falls back to the theme.
+A client reads its durations and effects from `c.animation`, a table with one key per event, and falls back to the theme.
 
 <div style={{overflowX: 'auto', marginBottom: '1rem'}} tabIndex={0} role="region" aria-label="Client animation triggers">
 
-| Trigger | When | Theme duration | Theme entrance |
+| Event | What animates | Theme duration | Theme effect |
 | --- | --- | --- | --- |
-| `appear` | the client maps | `animation_appear_duration` | `animation_appear` |
-| `disappear` | the client closes | `animation_disappear_duration` | `animation_disappear` |
-| `tag` | the client enters or leaves the view with a tag switch | `animation_tag_duration` | `animation_tag`. Default `grow` |
-| `focus` | the border colour changes with focus | `animation_focus_duration` | |
-| `maximize` | maximized or fullscreen toggles | `animation_maximize_duration` | |
-| `floating` | floating toggles | `animation_floating_duration` | |
+| `appear` | The chosen effect brings a newly opened window into view. | `animation_appear_duration` | `animation_appear` |
+| `disappear` | The chosen effect removes a closing window's frame. Its application image disappears immediately. | `animation_disappear_duration` | `animation_disappear` |
+| `tag` | Windows enter or leave the view when switching tags. | `animation_tag_duration` | `animation_tag`, default `grow` |
+| `focus` | The border blends to its new focus colour if the configuration changes it. | `animation_focus_duration` | None |
+| `layout` | Tiled windows move and resize into new positions, including during carousel scrolling. | `animation_layout_duration` | None |
+| `maximize` | The window moves and resizes when entering or leaving maximised or fullscreen states. | `animation_maximize_duration` | None |
+| `floating` | The window moves and resizes when switching between floating and tiled states. | `animation_floating_duration` | None |
 
 </div>
 
@@ -89,7 +92,7 @@ ruled.client.append_rule {
 }
 ```
 
-Each `c.animation` trigger accepts an effect name, a list of effects, or a duration. Effects use their trigger’s theme duration, falling back to `theme.animation_duration`. The duration must be above 0.
+The `appear`, `disappear` and `tag` triggers accept an effect name, a list of effects, or a duration. Other triggers accept durations. Effects use their trigger’s theme duration, falling back to `theme.animation_duration`. The duration must be above 0.
 
 <AnimationDemo name="fade" title="Fade">
   A client fades in and out, followed by a popup using the same entrance and exit style.
@@ -149,7 +152,7 @@ The dump reports both `fade_alpha` and `scale`. They complete together. `grow` a
 
 ## Wiboxes and popups
 
-A wibox or `awful.popup` animates its visibility:
+A wibox or `awful.popup` uses `animation.visible` for its frame transition. With entrance and exit effects, it animates visibility:
 
 ```lua
 local popup = awful.popup {
@@ -165,6 +168,60 @@ popup.visible = true
 <AnimationDemo name="slides" title="Directional slides">
   A popup enters and exits using `slide_left`, `slide_right`, `slide_up` and `slide_down`.
 </AnimationDemo>
+
+The same policy animates frame changes while the popup stays visible. Select the fields to interpolate, then assign a new target:
+
+```lua
+popup.animation = {
+    visible = { duration = 0.3, properties = { "width" } },
+}
+popup.maximum_width = 300
+```
+
+`maximum_width` is a limit, not a forced size. The contents must request that much width. See the [complete selector list](../reference/animation.md#transition-property-selectors).
+
+### Animate a viewport
+
+Keep the contents at a fixed size and animate the frame that clips them. This lets a panel open without reflowing its text or moving its buttons. The border follows the visible frame.
+
+Add this after loading your theme in `rc.lua`, or in a module required from there. Left-click the panel to toggle its width; right-click to hide it.
+
+```lua
+local awful = require("awful")
+local wibox = require("wibox")
+local shape = require("gears.shape")
+
+local s = awful.screen.focused()
+local area = s.workarea
+local contents = wibox.container.background(
+    wibox.widget.textbox("The contents keep their full width"), "#282828")
+contents.fg = "#ffffff"
+
+local panel = awful.popup {
+    screen = s, x = area.x + 24, y = area.y + 24,
+    visible = true, ontop = true, shadow = false,
+    bg = "#00000000", border_color = "#ffffff", border_width = 2,
+    maximum_width = 60,
+    widget = wibox.container.constraint(contents, "exact", 300, 100),
+    animation = {
+        visible = { duration = 0.3, properties = { "width" } },
+    },
+}
+panel.shape = shape.transform(shape.rounded_rect)
+
+local expanded = false
+panel:buttons {
+    awful.button({}, 1, function()
+        expanded = not expanded
+        panel.maximum_width = expanded and 300 or 60
+    end),
+    awful.button({}, 3, function() panel.visible = false end),
+}
+```
+
+The exact constraint keeps the contents at 300 × 100. The popup limits the visible width to 60 or 300. SomeWM interpolates between those targets; no Lua timer is needed.
+
+The transparent popup puts the fill on the fixed-size child. Assigning the transformed shape after construction keeps clipping on the animated frame's path. A plain `shape.rounded_rect` uses an optimised radius representation whose child clipping can jump to the target width during closing. The transformed shape avoids that jump. Assign it after construction because the constructor does not accept this callable shape table.
 
 ## Widgets
 
@@ -182,12 +239,12 @@ Properties that animate:
 
 <div style={{overflowX: 'auto', marginBottom: '1rem'}} tabIndex={0} role="region" aria-label="Animated widget properties">
 
-| Widget | Properties |
-| --- | --- |
-| `wibox.container.background` | `bg`, `border_color`, `border_width` |
-| any widget | `forced_width`, `forced_height` |
-| `wibox.widget.progressbar` | `value` |
-| `wibox.widget.slider` | `value` |
+| Widget | Properties | What animates |
+| --- | --- | --- |
+| `wibox.container.background` | `bg`, `border_color`, `border_width` | The fill and outline blend to their new colours; the outline thickens or thins to its new width. |
+| Supported widgets, containers and layouts | `forced_width`, `forced_height` | The widget expands or contracts to its new size, subject to its surrounding layout's sizing rules. |
+| `wibox.widget.progressbar` | `value` | The filled portion lengthens or shortens to represent the new value. |
+| `wibox.widget.slider` | `value` | The filled portion lengthens or shortens. The handle moves to the new value immediately. |
 
 </div>
 
@@ -199,7 +256,7 @@ For a single change:
 box:animate { bg = "#ff0000", duration = 0.3 }
 ```
 
-It sets each named property and eases it once. The next plain assignment snaps again.
+It sets each named property and eases it once. Later plain assignments use the persistent `.animation` policy, or snap if none is set.
 
 <AnimationDemo name="widgets" title="Widget timing and pulse">
   Three widgets change size and colour at different speeds. The heart then grows and shrinks twice to make a gentle pulse.

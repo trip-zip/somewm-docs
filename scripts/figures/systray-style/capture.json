@@ -1,0 +1,25 @@
+{
+  "version": "OK\nsomewm v2.1.1-11-g8edb69dd0-dirty\nRelease: somewm\nConfig: ./somewmrc.lua\n\n",
+  "output": "DP-3",
+  "screen": "2",
+  "output_geometry": [
+    1920,
+    0,
+    3840,
+    2160
+  ],
+  "scale": 1.0,
+  "item": "discord_status_icon_1",
+  "spacing_crop": [
+    3748,
+    0,
+    60,
+    32
+  ],
+  "hover_crop": [
+    3748,
+    0,
+    60,
+    32
+  ]
+}

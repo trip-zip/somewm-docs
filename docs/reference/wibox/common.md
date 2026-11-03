@@ -19,7 +19,7 @@ Every class in `wibox.widget`, `wibox.container` and `wibox.layout` is built on 
 | `buttons` | table | `{}` | The `awful.button` bindings that fire on a click. | |
 | `children` | table | `{}` | The direct children. Setting it replaces them on classes that hold children. | |
 | `all_children` | table | `{}` | Every descendant, found by walking `children`. Read only. | |
-| `animation` | table, false or nil | `nil` | Durations by property for animated changes, `false` to disable animation in this subtree. See [Animation](../../guides/animation.md). | |
+| `animation` | table, false or nil | `nil` | Durations by property for animated changes, `false` to disable animation in this subtree. See the [animation reference](../animation.md#widgets). | |
 
 Setting any property, here or on a class page, emits `property::<name>` with the new value.
 
@@ -28,7 +28,7 @@ Setting any property, here or on a class page, emits `property::<name>` with the
 | Method | What it does |
 | --- | --- |
 | `:add_button(button)` | Appends an `awful.button` to `buttons`. |
-| `:animate { property = value, ... }` | Changes the named properties with the widget's animation policy. With animation disabled the values apply at once. |
+| `:animate { property = value, duration = seconds, ... }` | Sets target values and animates this change with the required duration. Leaves the persistent policy unchanged. With animation disabled the values apply at once. See [one change with `:animate`](../animation.md#one-change-with-animate). |
 | `:get_children_by_id(id)` | Returns the list of descendants declared with that `id`. Only on the root returned by `wibox.widget { ... }` or `:setup`. |
 | `:setup { ... }` | Replaces the widget's children from a declarative table. |
 | `:index(widget, recursive)` | Returns the position of `widget` among the children, the parent, and the path to it. |
