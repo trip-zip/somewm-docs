@@ -39,6 +39,7 @@ The [compatibility page](./deviations.md) lists what SomeWM removes, adds and ch
 | [Key names](./key-names.md) | Modifiers and the common key names |
 | [Lock, idle and DPMS](./lock.md) | Session locking and display power |
 | [Lockscreen module](./lockscreen.md) | The bundled lock screen module |
+| [Client corners](./client-corners.md) | Frame shapes and independent content radii |
 | [Shadows](./shadows.md) | Shadow properties on clients and wiboxes |
 | [Signals](./signals.md) | Every signal by object, with its arguments |
 | [somewm-client](./somewm-client.md) | Every IPC command |

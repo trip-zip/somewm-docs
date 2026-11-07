@@ -50,8 +50,9 @@ Bands determine drawing order. [the client stack](./client-stack.md) orders clie
 
 See [Rounded Corners](../guides/rounded-corners.md) to set a client radius with a rule.
 
-- `client.shape` is nil, a corner radius in pixels, or a `gears.shape` function. `gears.shape.rounded_rect`, or a function that draws its path, is read as that radius. Any other function warns once and the client stays square.
-- A titlebar on an edge takes that edge's corners and the surface takes the rest, each less the border width. The border stays square.
+- `client.shape` is nil, a corner radius in pixels, or a `gears.shape` function. `gears.shape.rounded_rect`, or a function that draws its path, is read as that radius. Other shape functions clip the whole frame and its children to a path.
+- A positive `client.content_radius` replaces the surface's derived corners and paints `border_color` underneath. Titlebars retain their own corners. Nil or zero leaves the shape allocation unchanged. See [Client corners](../reference/client-corners.md).
+- For a numeric or recognized rounded-rectangle shape, a titlebar on an edge takes that edge's corners and the surface takes the rest, each less the border width. The border stays square.
 - A shadow is drawn by the renderer around the frame's solved box. It declares no box and takes no room from the slot.
 - With `theme.animation_layout_duration` above 0, each frame declares a Clay transition on the client's box, and Clay moves it over that duration. At 0, a client snaps to its new box in one frame. [Animation](../guides/animation.md) has the client, wibox and widget triggers.
 

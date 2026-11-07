@@ -1,18 +1,84 @@
 ---
 sidebar_position: 3
 title: Round client corners
-description: Round client corners with a rule, remove the square border, and try a radius on open windows without reloading.
+description: Round application content independently of its frame, or use the shared shape radius.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Round client corners <SomewmOnly />
 
-Set `client.shape` in a rule to round window corners.
+Set `client.content_radius` to round all four application corners inside a rectangular frame. Use `client.shape` for the shared window and titlebar shape.
+
+`content_radius` requires a build containing this property; it is not in the 2.1.2 release.
+
+## Round content inside square titlebars
+
+Add a rule after your general client rules:
+
+```lua
+local ruled = require("ruled")
+
+ruled.client.connect_signal("request::rules", function()
+    ruled.client.append_rule {
+        id = "rounded-content",
+        rule = { class = "firefox" },
+        properties = {
+            content_radius = 18,
+            border_width = 0,
+            border_color = "#65517f",
+        },
+        callback = function(c)
+            c.shape = nil
+        end,
+    }
+end)
+```
+
+The callback clears any shape set by an earlier rule. A `nil` entry in a Lua table does not override that rule.
+
+All four content corners reveal `border_color`, including when the border width is zero. Set your titlebars' backgrounds to that same color to make the frame continuous. A different titlebar background remains visible as a different color.
+
+![Rounded terminal content inside a square purple frame at 1.5× output scale](/img/clients/content-radius.png)
+
+*Live SomeWM capture at 1.5× scale, with a 27-pixel content radius and four rectangular titlebars. The pale outline is a separate widget in the demo.*
+
+For a complete titlebar setup, download [rounded-content.lua](/examples/rounded-content.lua) into your configuration directory. It returns a function that sets the frame color, content radius, four titlebars, and move, resize, minimize, maximize and close controls. Use it as the rule's callback:
+
+```lua
+local decorate = dofile(require("gears.filesystem").get_configuration_dir()
+    .. "rounded-content.lua")
+
+ruled.client.append_rule {
+    id = "rounded-content-frame",
+    rule = { class = "firefox" },
+    properties = { titlebars_enabled = false },
+    callback = decorate,
+}
+```
+
+Place this rule inside your existing `request::rules` handler, after general rules. The function replaces the matched client's titlebars; it does not change its tags or floating state.
+
+The radius uses logical pixels. At 1.5× output scale, a radius of 18 occupies 27 device pixels; do not multiply it by the output scale yourself.
+
+## Change or remove content rounding
+
+For a client `c`:
+
+```lua
+c.content_radius = 24
+c.content_radius = nil
+```
+
+Nil or zero restores the corners derived from `shape`, border width and titlebars. It does not force square content when `shape` supplies a radius. With `shape = nil`, removing `content_radius` makes the content square.
+
+Fullscreen suppresses both radii and restores them on exit. The exposed inner corner belongs to the client's frame, so pointing there stays on the client. Shadows continue to follow the outer frame.
+
+See [Client corners](../reference/client-corners.md) for property types, defaults and signals.
 
 ## Set a rule
 
-Add this to your `rc.lua`:
+For a shared shape radius instead of independent content rounding, add this to your `rc.lua`:
 
 ```lua
 local ruled = require("ruled")
@@ -66,7 +132,7 @@ This leaves their border width at zero. See [somewm-client](../reference/somewm-
 ## If corners stay square
 
 - Use a number, `gears.shape.rounded_rect`, or a function that draws the same rounded rectangle path.
-- A squircle or another custom path stays square. SomeWM warns once per client and function, naming the client's class or name.
+- Custom shape functions clip the whole frame and its children to their path. Inner content rounding is also clipped by that path.
 - `gears.shape.rectangle` stays square without a warning.
 - `shape_bounding`, `shape_clip` and `shape_input` accept assignments but are never read. They return `nil`.
-- `client.shape` is the only property that sets client corners. `gears.surface.apply_shape_bounding` with a rounded rectangle sets it too.
+- `client.content_radius` sets an independent radius on the content. `gears.surface.apply_shape_bounding` sets `client.shape`.
