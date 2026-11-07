@@ -194,6 +194,7 @@ const sidebars: SidebarsConfig = {
         'reference/key-names',
         'reference/lock',
         'reference/lockscreen',
+        'reference/client-corners',
         'reference/shadows',
         'reference/signals',
         'reference/somewm-client',
