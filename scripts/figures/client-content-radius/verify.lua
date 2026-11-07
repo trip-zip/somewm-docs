@@ -91,7 +91,9 @@ steps[#steps + 1] = mapped
 steps[#steps + 1] = shot.wait(function()
     assert(type(c.shape) == 'function' and c.border_width == 0)
     for command in guide:gmatch("somewm%-client eval '(.-)'") do
+        c.content_radius = 18
         assert(load(command, 'guide-eval'))()
+        assert(c.content_radius == nil, 'guide shell example left independent rounding enabled')
     end
     assert(c.shape == nil, 'guide shell examples did not reset the shape')
     io.stderr:write('[PASS] guide rules, helper pixels at scale 1.5, nil reset and shell examples\n')

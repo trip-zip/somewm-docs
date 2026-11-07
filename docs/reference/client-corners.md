@@ -17,13 +17,13 @@ SomeWM-only, unreleased. Read/write, `number` or `nil`, default `nil`. Values us
 | Positive number | Apply that radius to all four content corners, independent of titlebars and border width. |
 | Negative number or another type | Raise a Lua error. |
 
-Positive values paint `border_color` behind the content. The exposed corners show that color even with `border_width = 0`. Titlebar colors remain independently configured. No backing is added when the value is nil or zero.
+Positive values paint `border_color` behind the content, even with `border_width = 0`. Titlebar colors are independent. Nil or zero adds no backing.
 
-Changing the stored value emits `property::content_radius` and updates the layout. Assigning the same value again emits no signal. `ruled.client` accepts the number unchanged.
+Changing the stored value emits `property::content_radius` and updates the layout. Reassigning the same value emits no signal. `ruled.client` passes the number unchanged.
 
-Fullscreen ignores the radius without clearing the property. Leaving fullscreen restores the configured rounding. A custom outer shape still clips the content to its path. Shadows are unaffected by the inner radius.
+Fullscreen suppresses the radius until exit without clearing the property. Custom outer shapes clip the rounded content. The inner radius does not affect shadows.
 
-An exposed inner corner belongs to the client frame. It does not send pointer events to the clipped application content or expose the window below.
+Exposed inner corners belong to the client frame. They do not pass pointer events to the application or the window below.
 
 ## `client.shape`
 
@@ -35,6 +35,6 @@ Other shape functions define a path around the whole frame, including the border
 
 Nil clears the shape. Negative numeric radii and values other than numbers, functions or nil raise a Lua error.
 
-`shape_bounding`, `shape_clip` and `shape_input` accept assignments but return nil and do not affect drawing. `gears.surface.apply_shape_bounding` assigns `client.shape`.
+`shape_bounding`, `shape_clip` and `shape_input` accept assignments but have no effect and return `nil`. `gears.surface.apply_shape_bounding` assigns `client.shape`.
 
 For configuration examples, see [Round client corners](../guides/rounded-corners.md).
