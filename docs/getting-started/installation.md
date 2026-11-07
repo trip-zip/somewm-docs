@@ -10,11 +10,11 @@ Install dependencies for your distribution, then build the development version b
 
 ## Dependencies
 
-SomeWM downloads and builds wlroots 0.20.2. It does not use an installed wlroots package. The first build needs network access.
+SomeWM uses system wlroots 0.20.2 or newer in the 0.20 series, including development headers. No wlroots patch is needed.
 
-The build uses system Wayland 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0, pixman 0.46.0 and wayland-protocols 1.47 or newer. Older dependencies are downloaded at pinned versions and built alongside wlroots. Ubuntu 24.04 also needs the libdisplay-info fallback.
+Install Wayland 1.24.0, libdrm 2.4.129, xkbcommon 1.8.0 and wayland-protocols 1.47 or newer, plus the packages below.
 
-XWayland support is always built in. Install its build dependencies and the Xwayland binary to run X11 applications.
+XWayland support is always built in. Install the Xwayland binary to run X11 applications.
 
 ### Arch Linux
 
@@ -40,28 +40,23 @@ SOMEWM_LUA=5.4 yay -S somewm-git
 #### Manual Build
 
 ```bash
-sudo pacman -S base-devel git meson ninja pkgconf luajit lua51-lgi \
+sudo pacman -S --needed base-devel git meson ninja pkgconf luajit lua51-lgi \
     cairo pango gdk-pixbuf2 librsvg glib2 dbus wayland wayland-protocols \
-    libinput libxkbcommon pixman libdrm seatd libdisplay-info libliftoff \
-    hwdata mesa libglvnd lcms2 xorg-xwayland libxcb xcb-util \
-    xcb-util-wm xcb-util-renderutil xcb-util-errors
+    wlroots0.20 libinput libxkbcommon pixman libdrm mesa libglvnd libffi \
+    xorg-xwayland libxcb xcb-util-wm
 ```
 
 ### Debian/Ubuntu
+
+If your release does not package `libwlroots-0.20-dev` at the required version, install it separately or upgrade your distribution.
 
 ```bash
 sudo apt install build-essential git meson ninja-build pkg-config \
     luajit libluajit-5.1-dev lua-lgi libcairo2-dev libpango1.0-dev \
     libgdk-pixbuf-2.0-dev librsvg2-dev libglib2.0-dev libdbus-1-dev \
-    libwayland-dev libwayland-bin wayland-protocols libdrm-dev \
-    libinput-dev libxkbcommon-dev libgbm-dev libegl-dev libgles-dev \
-    libpixman-1-dev libudev-dev libseat-dev libdisplay-info-dev \
-    libliftoff-dev liblcms2-dev hwdata libffi-dev libexpat1-dev \
-    xwayland libxcb1-dev libxcb-util-dev libxcb-icccm4-dev \
-    libxcb-composite0-dev libxcb-ewmh-dev libxcb-res0-dev \
-    libxcb-render0-dev libxcb-render-util0-dev libxcb-errors-dev \
-    libxcb-xfixes0-dev libxcb-xinput-dev libxcb-dri3-dev \
-    libxcb-present-dev libxcb-shm0-dev
+    libwlroots-0.20-dev libwayland-dev libwayland-bin wayland-protocols \
+    libdrm-dev libinput-dev libxkbcommon-dev libegl-dev libgles-dev \
+    libpixman-1-dev libffi-dev xwayland libxcb1-dev libxcb-icccm4-dev
 ```
 
 Optional packages:
@@ -75,12 +70,9 @@ Optional packages:
 sudo dnf install gcc make git meson ninja-build pkgconf-pkg-config \
     luajit luajit-devel lua-lgi cairo-devel pango-devel gdk-pixbuf2-devel \
     librsvg2-devel glib2-devel dbus-devel wayland-devel wayland-protocols-devel \
-    libdrm-devel libinput-devel libxkbcommon-devel mesa-libgbm-devel \
-    libglvnd-egl-devel libglvnd-gles-devel pixman-devel systemd-devel \
-    libseat-devel libdisplay-info-devel libliftoff-devel lcms2-devel hwdata \
-    xorg-x11-server-Xwayland xorg-x11-server-Xwayland-devel \
-    libxcb-devel xcb-util-devel xcb-util-wm-devel \
-    xcb-util-renderutil-devel xcb-util-errors-devel
+    wlroots-devel libdrm-devel libinput-devel libxkbcommon-devel \
+    libglvnd-egl-devel libglvnd-gles-devel pixman-devel libffi-devel \
+    systemd-devel xorg-x11-server-Xwayland libxcb-devel xcb-util-wm-devel
 ```
 
 ### Gentoo
@@ -120,9 +112,11 @@ If startup reports `module 'lgi' not found`, check the interpreter and module pa
 From the source checkout:
 
 ```bash
-nix-build
+nix build .
 ./result/bin/somewm
 ```
+
+`nix-build` also works if your nixpkgs channel provides a compatible `wlroots_0_20`.
 
 The package installs the default configuration and Lua libraries, and wraps the binary with its Lua and typelib paths.
 

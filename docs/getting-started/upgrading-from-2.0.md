@@ -72,7 +72,7 @@ Test widget updates and pointer input. To diagnose sizing or positioning, [inspe
 
 ## Building 2.1
 
-- SomeWM builds wlroots 0.20.2. Remove `-Dwlroots_version` and update dependencies using [Installation](installation.md).
+- Development builds use system wlroots without patches. Remove `-Dwlroots_version` and update dependencies using [Installation](installation.md).
 - XWayland is always built in. Remove `-Dxwayland` from build commands and install xcb, xcb-icccm and Xwayland.
 - `make install` replaces the installed Lua tree, removing obsolete modules.
 
