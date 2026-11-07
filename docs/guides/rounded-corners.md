@@ -10,7 +10,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly'
 
 Set `client.content_radius` to round all four application corners inside a rectangular frame. Use `client.shape` for the shared window and titlebar shape.
 
-`content_radius` requires a build containing this property; it is not in the 2.1.2 release.
+`content_radius` is unreleased and unavailable in 2.1.2.
 
 ## Round content inside square titlebars
 
@@ -35,15 +35,15 @@ ruled.client.connect_signal("request::rules", function()
 end)
 ```
 
-The callback clears any shape set by an earlier rule. A `nil` entry in a Lua table does not override that rule.
+The callback clears an earlier rule's shape. Setting `shape = nil` in the properties table would omit the entry, leaving that shape unchanged.
 
-All four content corners reveal `border_color`, including when the border width is zero. Set your titlebars' backgrounds to that same color to make the frame continuous. A different titlebar background remains visible as a different color.
+All four content corners reveal `border_color`, even with `border_width = 0`. Match your titlebar backgrounds to this color for a continuous frame.
 
 ![Rounded terminal content inside a square purple frame at 1.5× output scale](/img/clients/content-radius.png)
 
-*Live SomeWM capture at 1.5× scale, with a 27-pixel content radius and four rectangular titlebars. The pale outline is a separate widget in the demo.*
+*Live capture at 1.5× scale with a radius of 27 logical pixels and four square titlebars. The pale outline is a separate widget.*
 
-For a complete titlebar setup, download [rounded-content.lua](/examples/rounded-content.lua) into your configuration directory. It returns a function that sets the frame color, content radius, four titlebars, and move, resize, minimize, maximize and close controls. Use it as the rule's callback:
+For four titlebars with move, resize, minimise, maximise and close controls, download [rounded-content.lua](/examples/rounded-content.lua) into your configuration directory. Use its returned function as the rule callback:
 
 ```lua
 local decorate = dofile(require("gears.filesystem").get_configuration_dir()
@@ -57,9 +57,9 @@ ruled.client.append_rule {
 }
 ```
 
-Place this rule inside your existing `request::rules` handler, after general rules. The function replaces the matched client's titlebars; it does not change its tags or floating state.
+Place this rule inside your existing `request::rules` handler, after general rules. The function sets the frame color and radius and replaces the titlebars. Tags and floating state are unchanged.
 
-The radius uses logical pixels. At 1.5× output scale, a radius of 18 occupies 27 device pixels; do not multiply it by the output scale yourself.
+The radius uses logical pixels: 18 becomes 27 device pixels at 1.5× scale. Do not scale the value yourself.
 
 ## Change or remove content rounding
 
@@ -70,15 +70,15 @@ c.content_radius = 24
 c.content_radius = nil
 ```
 
-Nil or zero restores the corners derived from `shape`, border width and titlebars. It does not force square content when `shape` supplies a radius. With `shape = nil`, removing `content_radius` makes the content square.
+Nil or zero restores the corners derived from `shape`, border width and titlebars. Content becomes square only if `shape` supplies no rounding.
 
-Fullscreen suppresses both radii and restores them on exit. The exposed inner corner belongs to the client's frame, so pointing there stays on the client. Shadows continue to follow the outer frame.
+Fullscreen suppresses rounding until exit. Exposed inner corners belong to the client frame; they do not pass pointer events to the application or the window below. Shadows follow the outer frame.
 
 See [Client corners](../reference/client-corners.md) for property types, defaults and signals.
 
-## Set a rule
+## Share a radius between content and titlebars
 
-For a shared shape radius instead of independent content rounding, add this to your `rc.lua`:
+With `content_radius` unset, use `shape` in your `rc.lua`:
 
 ```lua
 local ruled = require("ruled")
@@ -101,13 +101,13 @@ end)
 - For a radius of 14 pixels without DPI adjustment, replace the `shape` line with `shape = 14,`.
 - For the default radius of 10 pixels, use `shape = gears.shape.rounded_rect,`.
 
-## Remove the square border
+### Remove the square border
 
-Set `border_width = 0` to remove the rectangular border around rounded clients. Otherwise, SomeWM subtracts the border width from the corner radius, down to zero. Explicit border widths survive focus changes.
+Set `border_width = 0` to remove the rectangular border. Border width reduces the shared shape radius, down to zero; it does not reduce `content_radius`. Explicit border widths survive focus changes.
 
-Without a border, a click in a cut corner reaches what is below the window.
+With no border and no `content_radius`, clicks in the shared shape's cut corners reach the window below.
 
-## Keep titlebars
+### Keep titlebars
 
 - A titlebar on an edge takes that edge's corners. The window takes the remaining corners.
 - With a top titlebar, the titlebar has rounded top corners and the window has rounded bottom corners.
@@ -115,24 +115,24 @@ Without a border, a click in a cut corner reaches what is below the window.
 
 ## Try open windows
 
-Run this from a shell to round every open client without reloading:
+Apply a shared radius to every open client without reloading:
 
 ```bash
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shape = 14; c.border_width = 0 end'
+somewm-client eval 'for _, c in ipairs(client.get()) do c.content_radius = nil; c.shape = 14; c.border_width = 0 end'
 ```
 
-Set `shape` back to `nil` to make them square again:
+Clear both properties to make them square:
 
 ```bash
-somewm-client eval 'for _, c in ipairs(client.get()) do c.shape = nil end'
+somewm-client eval 'for _, c in ipairs(client.get()) do c.shape = nil; c.content_radius = nil end'
 ```
 
-This leaves their border width at zero. See [somewm-client](../reference/somewm-client.md#eval-constraints) for the `eval` constraints.
+Border width stays at zero. See [somewm-client](../reference/somewm-client.md#eval-constraints) for `eval` constraints.
 
 ## If corners stay square
 
 - Use a number, `gears.shape.rounded_rect`, or a function that draws the same rounded rectangle path.
-- Custom shape functions clip the whole frame and its children to their path. Inner content rounding is also clipped by that path.
+- Custom shape functions clip the whole frame, including rounded content, to their path.
 - `gears.shape.rectangle` stays square without a warning.
-- `shape_bounding`, `shape_clip` and `shape_input` accept assignments but are never read. They return `nil`.
+- `shape_bounding`, `shape_clip` and `shape_input` have no effect and return `nil`.
 - `client.content_radius` sets an independent radius on the content. `gears.surface.apply_shape_bounding` sets `client.shape`.
