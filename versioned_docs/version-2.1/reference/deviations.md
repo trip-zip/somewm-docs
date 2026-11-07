@@ -139,6 +139,7 @@ These limits concern X11 applications running through XWayland, not native Wayla
 | Input devices and NumLock | [`awful.input`](awful/input.md). [`awesome._set_keyboard_setting`](awful/input.md) for NumLock |
 | Lua utilities | `gears.xresources` reads resource files. `gears.bitwise` provides bitwise operations on Lua versions without the operators |
 | IPC | [`somewm-client`](somewm-client.md), backed by `awful.ipc` |
+| Identifying SomeWM | `awesome.release` is `"somewm"` and `awesome.version` holds SomeWM's own version, not an AwesomeWM one. Check the release before comparing versions: the two projects' numbers overlap. |
 | Outputs and scaling | [`output`](output.md), [`screen.scale`](screen.md) |
 | Capture | [`screen.content`](screen.md), [`awful.screenshot`](awful/screenshot.md) |
 | Cursor themes | `root.cursor_theme`, `root.cursor_size`. [input devices](../guides/input-devices.md#cursor-theming) |
@@ -225,6 +226,8 @@ A textbox with `ellipsize = "none"` wraps at words; with it set, the default, it
 | Client shape | Changing `c.shape` emits `property::shape` and arranges the screen. |
 | Entrance input | Widgets receive pointer events during their wibox or popup’s entrance animation. |
 | Bordered popups | Content larger than the slot is clipped while the popup keeps its slot geometry. |
+| Popup placement | A popup placed next to a widget takes the first entry of `preferred_positions` and of `preferred_anchors`, whether or not it fits, and nothing keeps it on screen. 2.0 tried each entry in turn. The default order starts with `"right"`, so a popup opened from a top wibar sits beside its widget, over the bar, and can run past the screen edge. Set `preferred_positions = "bottom"` and `preferred_anchors = "back"` to open it below the widget, right-aligned. |
+| Popup geometry | `move_next_to` declares an attachment and the frame solves it. Until then a popup's `x`, `y`, `width` and `height` hold their earlier values, 1x1 at 0,0 for a popup not yet shown, so don't read them straight after the call. |
 | Size-hint signals | `property::size_hints` fires when a Wayland client’s committed bounds change. |
 | Layout leaves | A leaf placed and sized with grow, fit or percent on one axis is omitted with a warning naming the client. |
 | Fractional dimensions | Padding, gaps, offsets and border widths round to the nearest whole pixel. |
