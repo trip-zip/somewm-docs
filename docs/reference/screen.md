@@ -141,17 +141,27 @@ if screen[2] then screen[1]:swap(screen[2]) end
 
 In 2.1, `s:get_bounding_geometry()` honours `honor_workarea` but ignores `honor_padding` and `margins`. It also ignores `tag`, `parent`, and `bounding_rect`, unlike the upstream Lua helper.
 
-### Virtual Screens
+### Virtual screens
 
-`screen.fake_add()` creates a Lua screen object and emits `added`, but it does not create a monitor-backed layout area in 2.1. Clients moved there are hidden and wibars cannot attach to it. It cannot split a monitor into working virtual screens.
+`screen.fake_add()` splits an output into independent screens. Each virtual screen gets its own bars, tags, layouts and workarea, and clients tile inside it. Use it to carve one wide monitor into columns.
 
 | Method | Result |
 | --- | --- |
-| `screen.fake_add(x, y, width, height)` | Create and return a screen object |
-| `s:fake_resize(x, y, width, height)` | Change its geometry |
-| `s:fake_remove()` | Remove it |
+| `screen.fake_add(x, y, width, height)` | Create and return a screen covering that rectangle |
+| `s:fake_resize(x, y, width, height)` | Change a screen's geometry, real or virtual |
+| `s:fake_remove()` | Remove a virtual screen. Its clients move to the screen under their center |
 
-These methods create no output or monitor. Use a nested compositor to test code that creates fake screens.
+```lua
+-- Split screen 1 into three equal columns
+local s = screen[1]
+local g = s.geometry
+local third = math.floor(g.width / 3)
+s:fake_resize(g.x, g.y, third, g.height)
+screen.fake_add(g.x + third, g.y, third, g.height)
+screen.fake_add(g.x + 2 * third, g.y, g.width - 2 * third, g.height)
+```
+
+Coordinates are in output space. `fake_add` emits `added` and `list` immediately, so an `awful.screen.connect_for_each_screen` handler runs for the new screen and builds its bar.
 
 ## Signals
 
