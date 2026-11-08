@@ -13,7 +13,7 @@ end
 local guide = read(repo .. '/docs/guides/rounded-corners.md')
 local blocks = {}
 for block in guide:gmatch('```lua\n(.-)```') do blocks[#blocks + 1] = block end
-assert(#blocks == 4, 'Update the verifier for changed guide examples')
+assert(#blocks == 6, 'Update the verifier for changed guide examples')
 local helper = filesystem.get_configuration_dir() .. 'rounded-content.lua'
 local f = assert(io.open(helper, 'w'))
 f:write(read(repo .. '/static/examples/rounded-content.lua')); f:close()
@@ -54,8 +54,34 @@ steps[#steps + 1] = shot.wait(function()
     assert(c.content_radius == 18 and c.shape == nil and c.border_width == 0,
         'first rule must clear an earlier shape and set the independent radius')
     ruled.client.remove_rule('earlier-shape'); ruled.client.remove_rule('rounded-content')
-    assert(load('local c = ...\n' .. blocks[3], 'guide-clear'))(c)
+    ruled.client.append_rule {
+        id = 'rounded-content', rule = {class = 'firefox'},
+        properties = assert(load('return {\n' .. blocks[3] .. '}', 'guide-corner-rule'))(),
+    }
+    assert(load('local c = ...\n' .. blocks[4], 'guide-distinct-corners'))(c)
+    local radii = c.content_radius
+    assert(radii.top_left == 12 and radii.top_right == 18
+        and radii.bottom_right == 26 and radii.bottom_left == 34)
+    local reference = read(repo .. '/docs/reference/client-corners.md')
+    for block in reference:gmatch('```lua\n(.-)```') do
+        assert(load('local c = ...\n' .. block, 'reference-corners'))(c)
+    end
+    radii = c.content_radius
+    assert(radii.top_left == 18 and radii.top_right == 18
+        and radii.bottom_right == 0 and radii.bottom_left == 12)
+    assert(load('local c = ...\n' .. blocks[5], 'guide-clear'))(c)
     assert(c.content_radius == nil, 'nil did not clear the radius')
+end)
+steps[#steps + 1] = close
+steps[#steps + 1] = gone
+steps[#steps + 1] = spawn
+steps[#steps + 1] = mapped
+steps[#steps + 1] = shot.wait(function()
+    local radii = c.content_radius
+    assert(radii.top_left == 18 and radii.top_right == 18
+        and radii.bottom_right == 0 and radii.bottom_left == 0,
+        'corner rule must leave omitted corners square')
+    ruled.client.remove_rule('rounded-content')
 end)
 steps[#steps + 1] = close
 steps[#steps + 1] = gone
@@ -81,7 +107,7 @@ steps[#steps + 1] = function()
 end
 steps[#steps + 1] = gone
 steps[#steps + 1] = function()
-    assert(load(blocks[4], 'guide-shape-rule'))()
+    assert(load(blocks[6], 'guide-shape-rule'))()
     ruled.client.emit_signal('request::rules')
     ruled.client.remove_rule('rounded-content')
     return true
@@ -96,7 +122,7 @@ steps[#steps + 1] = shot.wait(function()
         assert(c.content_radius == nil, 'guide shell example left independent rounding enabled')
     end
     assert(c.shape == nil, 'guide shell examples did not reset the shape')
-    io.stderr:write('[PASS] guide rules, helper pixels at scale 1.5, nil reset and shell examples\n')
+    io.stderr:write('[PASS] guide rules, named corners, reference table edits, helper pixels at scale 1.5, nil reset and shell examples\n')
 end)
 steps[#steps + 1] = function()
     close(); os.remove(helper); return true

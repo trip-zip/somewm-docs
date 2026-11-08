@@ -79,7 +79,7 @@ Each `property::*` fires after the property changes. Read the new value off the 
 | Signal | Notes |
 |--------|-------|
 | `property::shape` | Client shape changed. |
-| `property::content_radius` | Independent content radius changed. See [Client corners](./client-corners.md). |
+| `property::content_radius` | Content radii changed, or the property switched between numeric and table forms. See [Client corners](./client-corners.md). |
 | `property::animation` | Animation policy assigned. |
 | `property::size_hints` | Size hints changed, including committed Wayland min/max bounds. |
 | `property::border_color` | Border colour changed, including focus recolouring. |

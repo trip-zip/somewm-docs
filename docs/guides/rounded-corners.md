@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Round client corners <SomewmOnly />
 
-Set `client.content_radius` to round all four application corners inside a rectangular frame. Use `client.shape` for the shared window and titlebar shape.
+Set `client.content_radius` to round application corners inside a rectangular frame. Use a number for all four corners or a table for individual corners. Use `client.shape` for the shared window and titlebar shape.
 
 `content_radius` is unreleased and unavailable in 2.1.2.
 
@@ -61,16 +61,38 @@ Place this rule inside your existing `request::rules` handler, after general rul
 
 The radius uses logical pixels: 18 becomes 27 device pixels at 1.5× scale. Do not scale the value yourself.
 
+## Round selected content corners
+
+To round only the top corners, replace `content_radius = 18` in the rule above with:
+
+```lua
+content_radius = { top_left = 18, top_right = 18 },
+```
+
+For an existing client `c`, assign different radii to each corner:
+
+```lua
+c.content_radius = {
+    top_left = 12,
+    top_right = 18,
+    bottom_right = 26,
+    bottom_left = 34,
+}
+```
+
+Each table assignment replaces all four corners. Omitted or `nil` corners become square. Titlebars and the outer shape keep their existing corners.
+
 ## Change or remove content rounding
 
 For a client `c`:
 
 ```lua
 c.content_radius = 24
+c.content_radius = {}
 c.content_radius = nil
 ```
 
-Nil or zero restores the corners derived from `shape`, border width and titlebars. Content becomes square only if `shape` supplies no rounding.
+The number rounds all four corners equally. An empty table makes the content corners square. Nil or numeric zero restores the corners derived from `shape`, border width and titlebars. A custom outer shape still clips the content.
 
 Fullscreen suppresses rounding until exit. Exposed inner corners belong to the client frame; they do not pass pointer events to the application or the window below. Shadows follow the outer frame.
 
@@ -135,4 +157,4 @@ Border width stays at zero. See [somewm-client](../reference/somewm-client.md#ev
 - Custom shape functions clip the whole frame, including rounded content, to their path.
 - `gears.shape.rectangle` stays square without a warning.
 - `shape_bounding`, `shape_clip` and `shape_input` have no effect and return `nil`.
-- `client.content_radius` sets an independent radius on the content. `gears.surface.apply_shape_bounding` sets `client.shape`.
+- `client.content_radius` sets independent content radii using a number or named corner table. `gears.surface.apply_shape_bounding` sets `client.shape`.
