@@ -17,7 +17,7 @@ sidebar_position: 8
 | [box, row, column, spacer](./ui/box.md) | Containers and flexible space. |
 | [text](./ui/text.md) | Text, including font selection and truncation. |
 | [image](./ui/image.md) | An image file, optionally recoloured. |
-| [surface](./ui/surface.md) | A client's surface tree. |
+| [surface](./ui/surface.md) | Client content displayed through its surface tree. |
 | [scroll](./ui/scroll.md) | A vertically scrolling column. |
 | [each](./ui/each.md) | List items with retained per-key state. |
 

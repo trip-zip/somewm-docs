@@ -1,6 +1,6 @@
 ---
 title: Binding Clay (C baseline)
-description: "How the retired C implementation drove Clay from Lua: one context per output, declarations over FFI, and a client window as a CUSTOM leaf."
+description: "How the retired C implementation drove Clay from Lua: one context per output, declarations over FFI, and client content as a CUSTOM leaf."
 sidebar_position: 9
 ---
 
@@ -89,14 +89,14 @@ Every field of the declaration was reachable except `userData`. `floating` was c
 
 Declaration fields were not validated the way arguments were: a wrong-typed field meant "use the default", silently. The one exception was a table id whose index was not a number, which was rejected because hashing it as 0 would have collapsed every such id onto one hash and tripped `CLAY_ERROR_TYPE_DUPLICATE_ID`.
 
-## A client window was a CUSTOM leaf {#a-client-window-is-a-custom-leaf}
+## Client content was a CUSTOM leaf {#a-client-window-is-a-custom-leaf}
 
 This is where Clay stopped laying out a UI and started laying out a desktop. In `core.c`, the place-leaf set:
 
 - `custom.customData` to the 64-bit client handle, cast through a pointer.
 - `id` to `Clay__HashString("core.surface", handle)`, so the retained key was stable frame to frame.
 
-Open, configure and close happened together, because nothing may be a surface's child. Declaring one handle twice in a frame was an error.
+Open, configure and close happened together, because a Clay surface leaf could not have child elements. Declaring one handle twice in a frame was an error.
 
 At reconcile time, in `render.c`, a `CLAY_RENDER_COMMAND_TYPE_CUSTOM` command cast that pointer back to a handle, resolved it to the client's `wlr_scene_tree`, and:
 
@@ -104,7 +104,7 @@ At reconcile time, in `render.c`, a `CLAY_RENDER_COMMAND_TYPE_CUSTOM` command ca
 - sent the client an xdg configure when the **size** of the solved box changed
 - let position fall out of the same generic node placement every other command got
 
-kiln never drew into a client. A titlebar and the window under it were siblings that differed only in who supplied the pixels.
+kiln never drew into a client. A titlebar and the client content were siblings that differed only in who supplied the pixels.
 
 There was one deliberate asymmetry: `CUSTOM` was exempt from the scissor stack, so a client popup that overhung its box was not cropped. Only rectangles, text and images clipped.
 

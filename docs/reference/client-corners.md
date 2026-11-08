@@ -5,7 +5,7 @@ description: Client shape and content radius, their defaults, colors and pointer
 
 # Client corners
 
-`client.shape` supplies the frame's shape. `client.content_radius` supplies an independent rounded rectangle for the application content.
+`client.shape` supplies the frame's shape. `client.content_radius` supplies an independent rounded rectangle for the [client content](../concepts/object-model.md#client).
 
 ## `client.content_radius`
 

@@ -39,7 +39,7 @@ A client reads its durations and effects from `c.animation`, a table with one ke
 | Event | What animates | Theme duration | Theme effect |
 | --- | --- | --- | --- |
 | `appear` | The chosen effect brings a newly opened window into view. | `animation_appear_duration` | `animation_appear` |
-| `disappear` | The chosen effect removes a closing window's frame. Its application image disappears immediately. | `animation_disappear_duration` | `animation_disappear` |
+| `disappear` | The chosen effect removes a closing window's remaining frame. Its client content disappears immediately. | `animation_disappear_duration` | `animation_disappear` |
 | `tag` | Windows enter or leave the view when switching tags. | `animation_tag_duration` | `animation_tag`, default `grow` |
 | `focus` | The border blends to its new focus colour if the configuration changes it. | `animation_focus_duration` | None |
 | `layout` | Tiled windows move and resize into new positions, including during carousel scrolling. | `animation_layout_duration` | None |
@@ -115,7 +115,7 @@ policy.focus = 0.3
 c.animation = policy
 ```
 
-Tag transitions default to `grow`. Override the effect with `c.animation.tag` or `theme.animation_tag`. On exit, the frame, border and titlebars animate, but the application’s pixels disappear on the first frame.
+Tag transitions default to `grow`. Override the effect with `c.animation.tag` or `theme.animation_tag`. On exit, the remaining frame, including the border and titlebars, animates. The client content disappears on the first frame.
 
 <AnimationDemo name="grow-shrink" title="Grow and shrink">
   Growing entrances and shrinking exits on clients, tag changes and a popup, shown with different durations.
@@ -125,7 +125,7 @@ Tag transitions default to `grow`. Override the effect with `c.animation.tag` or
 
 <AnimationComparison />
 
-`scale` transforms the surface, border and titlebars together. Its directional variants keep the named edge’s midpoint fixed. Layout and configure sizes stay unchanged, so neighbours stay in place and clients need not redraw. Pointer events follow the scaled image, including `mouse::enter`.
+`scale` transforms the client content, border and titlebars together. Its directional variants keep the named edge’s midpoint fixed. Layout and configure sizes stay unchanged, so neighbours stay in place and clients need not redraw. Pointer events follow the scaled image, including `mouse::enter`.
 
 ```lua
 ruled.client.append_rule {

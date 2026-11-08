@@ -42,6 +42,12 @@ A tag is a label assigned to clients on a screen. A client can have several tags
 
 A `client` represents a managed application window. It has a screen, tag membership and properties such as `name`, `class`, `floating`, `minimized` and `fullscreen`.
 
+**Client content** is the application-drawn part of the window, including application-drawn decorations but excluding SomeWM titlebars and borders. The **content area** is the rectangle allocated to it. The **client frame** includes the content, SomeWM titlebars and border.
+
+SomeWM presents Wayland client content through a **surface tree**, the main surface and its subsurfaces. A **buffer** supplies pixel data to a surface. A surface or buffer is not the whole client frame.
+
+`c:geometry()` includes SomeWM titlebar space and excludes the border. It is not the content area.
+
 `client.get()` lists managed clients. `client.focus` is the client selected for keyboard focus, or `nil`. Layer-shell panels and launchers are separate surfaces, not clients.
 
 ```lua

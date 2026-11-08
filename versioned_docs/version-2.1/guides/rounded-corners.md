@@ -43,8 +43,8 @@ Without a border, a click in a cut corner reaches what is below the window.
 
 ## Keep titlebars
 
-- A titlebar on an edge takes that edge's corners. The window takes the remaining corners.
-- With a top titlebar, the titlebar has rounded top corners and the window has rounded bottom corners.
+- A titlebar on an edge takes that edge's corners. The client content takes the remaining corners.
+- With a top titlebar, the titlebar has rounded top corners and the client content has rounded bottom corners.
 - Fullscreen clients stay square, even when `shape` is set.
 
 ## Try open windows

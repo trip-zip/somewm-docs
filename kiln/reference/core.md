@@ -31,7 +31,7 @@ These build the Clay element tree and error outside a frame or lock handler ("de
 | `core.close()` | Close the innermost open element. Errors without a matching `core.open`. |
 | `core.text(str, cfg)` | Declare a text leaf. `cfg` fields: `textColor`, `fontId` (an id from `core.font`; 0 is the default font), `fontSize` (default 16), `letterSpacing`, `lineHeight`, `wrapMode`, `textAlignment`, `ellipsize`. |
 | `core.font(desc)` | Intern a Pango font description ("Sans Bold", "Monospace") to the id a text declaration carries as `fontId`. The same description always returns the same id. A size in `desc` raises; pass size on the text cfg. Callable outside a frame, unlike the declare primitives; `ui.text` calls it through a cache for its `font` cfg. |
-| `core.surface(handle, decl?)` | Place a client surface as a self-closing leaf. Without `decl` it grows in both axes. The element id derives from the handle, so the key is stable across frames. Declaring the same handle twice in one frame is an error. |
+| `core.surface(handle, decl?)` | Place the client’s surface tree as a self-closing leaf to display client content. Without `decl` it grows in both axes. The element id derives from the handle, so the key is stable across frames. Declaring the same handle twice in one frame is an error. |
 
 ### Readback
 

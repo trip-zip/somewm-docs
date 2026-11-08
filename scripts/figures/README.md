@@ -35,7 +35,7 @@ are sitting in kiln:
 | `01-sizing.png` | `01-sizing.lua` | `fixed` / `grow` / `percent`, each cell drawn at the width Clay solved for it |
 | `02-nesting.png` | `02-nesting.lua` | One card twice, plain and with every container named by a badge |
 | `03-bar.png` | stock `kilnrc.lua` | The real bar, each cell outlined and labelled with the constructor that made it |
-| `04-leaf.png` | stock `kilnrc.lua` | The leaf fork: `ui.titlebar` that Clay draws beside `ui.surface` that the client draws |
+| `04-leaf.png` | stock `kilnrc.lua` | The titlebar declared by `widgets.titlebar` beside the client content placed by `ui.surface` |
 | `05-mwfact.png` | stock `kilnrc.lua` | The same layout function at `master_width_factor` 0.4 and 0.75 |
 
 Figures 1 and 2 use **Clay's own palette** (sampled from nicbarker.com/clay:

@@ -41,7 +41,7 @@ SomeWM 1.4 leaves some compatibility methods as stubs and omits others. Check th
 
 ### Titlebar Border Positioning
 
-`c:geometry()` excludes the border. A border of width `b` adds `b` to each side of the client's visible footprint. Compositor-drawn titlebars occupy space inside the decorated client geometry. Application-drawn decorations belong to the application's own buffer.
+`c:geometry()` excludes the border. A border of width `b` adds `b` to each side of the client's visible footprint. Compositor-drawn titlebars occupy space inside the decorated client geometry. Application-drawn decorations are part of the [client content](./object-model.md#client).
 
 ## Partially Working Features
 

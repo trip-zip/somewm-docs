@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # client
 
-A client is one application window. The `client` global is the class: it carries the class-level signal bus, the focus field, and the history helpers, while each mapped window is an instance you read, write, and call methods on.
+A client is one application window. Its [client frame](../concepts/object-model.md#client-content) includes client content, Kiln titlebars and a border. The `client` global is the class: it carries the class-level signal bus, the focus field, and the history helpers, while each mapped window is an instance you read, write, and call methods on.
 
 ```lua
 client.on("map", function(c)

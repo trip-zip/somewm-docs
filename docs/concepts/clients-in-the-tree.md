@@ -1,12 +1,12 @@
 ---
 sidebar_position: 5
 title: Clients and layouts in the same tree
-description: How Clay lays out window frames, titlebars and application surfaces.
+description: How Clay lays out client frames, titlebars and client content.
 ---
 
 # Clients and layouts in the same tree
 
-A tag’s layout is a subtree under `WORKAREA`, using [the same sizing modes as widgets](./reading-the-tree.md#sizing). Each client has a frame, titlebars, a slot, and an application surface attached to that slot.
+A tag’s layout is a subtree under `WORKAREA`, using [the same sizing modes as widgets](./reading-the-tree.md#sizing). Each [client frame](./object-model.md#client) contains client content, titlebars and a border. A slot reserves the content area, and a surface element attached to that slot places the client's surface tree.
 
 ## A layout is a tree
 
@@ -30,19 +30,19 @@ Custom layouts using `arrange` still work. SomeWM converts their client geometry
 | --- | --- |
 | `CLIENT` | the frame: a column with the layout's sizing. Border padding belongs to `CHROME` and `PROBE` when present, otherwise to `CLIENT`. A floating client's frame has explicit geometry, marked `user`. A fullscreen one `grow`s to the output. |
 | `TITLEBAR`, `TITLEBAR_LEFT`, `_RIGHT`, `_BOTTOM` | widget trees like a wibar's. A top or bottom bar spans the frame's width and a side bar its height. Its thickness is `fixed`, marked `theme`. |
-| `SLOT` | `grow`s into what is left inside the frame |
-| `SURFACE` | the client's pixels: a floating element attached to the slot at the client's band, with the client's size hints as `min` and `max`, marked `protocol` |
+| `SLOT` | reserves the content area: `grow`s into the space left after borders and titlebars |
+| `SURFACE` | places the client's surface tree to display client content: a floating element attached to the slot at the client's band, with the client's size hints as `min` and `max`, marked `protocol` |
 
 When a client draws at a different size from the one requested, the frame adds two elements:
 
-- `CHROME` fits the drawn size and clips the titlebars and surface at the frame’s top-left corner. Drawing is clipped at the layout cell. It does not enlarge the cell or workarea.
+- `CHROME` fits the drawn size and clips the titlebars and client content at the frame’s top-left corner. Drawing is clipped at the layout cell. It does not enlarge the cell or workarea.
 - `PROBE` is invisible at band 0. It represents the requested size minus borders and titlebars, with size hints on a `CONFIGURE` leaf.
 
 Terminals commonly differ from the requested size because they snap to a character grid.
 
 ## Floating, fullscreen, ontop, and order
 
-Floating clients use their own geometry plus border, marked `user`. Fullscreen clients grow to `OUTPUT`. Tiled clients remain in their layout slots when marked ontop, above or below. Only their surface band changes. See [stacking exceptions for max and magnifier](./scene-graph.md#stacking-within-a-band).
+Floating clients use their own geometry plus border, marked `user`. Fullscreen clients grow to `OUTPUT`. Tiled clients remain in their layout slots when marked ontop, above or below. Only the band of their `SURFACE` element changes. See [stacking exceptions for max and magnifier](./scene-graph.md#stacking-within-a-band).
 
 Bands determine drawing order. [the client stack](./client-stack.md) orders clients within a band. See the [band table](./scene-graph.md#bands).
 
@@ -51,8 +51,8 @@ Bands determine drawing order. [the client stack](./client-stack.md) orders clie
 See [Rounded Corners](../guides/rounded-corners.md) to set a client radius with a rule.
 
 - `client.shape` is nil, a corner radius in pixels, or a `gears.shape` function. `gears.shape.rounded_rect`, or a function that draws its path, is read as that radius. Other shape functions clip the whole frame and its children to a path.
-- `client.content_radius` replaces the surface's derived corners with one radius or a table of named corner radii. Any positive radius paints `border_color` underneath. An empty table makes the surface corners square. Titlebars retain their own corners. Nil or numeric zero restores the shape allocation. See [Client corners](../reference/client-corners.md).
-- For a numeric or recognized rounded-rectangle shape, a titlebar on an edge takes that edge's corners and the surface takes the rest, each less the border width. The border stays square.
+- `client.content_radius` replaces the client content's derived corners with one radius or a table of named corner radii. Any positive radius paints `border_color` underneath. An empty table makes the content corners square. Titlebars retain their own corners. Nil or numeric zero restores the shape allocation. See [Client corners](../reference/client-corners.md).
+- For a numeric or recognized rounded-rectangle shape, a titlebar on an edge takes that edge's corners and the client content takes the rest, each less the border width. The border stays square.
 - A shadow is drawn by the renderer around the frame's solved box. It declares no box and takes no room from the slot.
 - With `theme.animation_layout_duration` above 0, each frame declares a Clay transition on the client's box, and Clay moves it over that duration. At 0, a client snaps to its new box in one frame. [Animation](../guides/animation.md) has the client, wibox and widget triggers.
 

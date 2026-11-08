@@ -1,14 +1,14 @@
 ---
 sidebar_position: 3
 title: Round client corners
-description: Round application content independently of its frame, or use the shared shape radius.
+description: Round client content independently of its frame, or use the shared shape radius.
 ---
 
 import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Round client corners <SomewmOnly />
 
-Set `client.content_radius` to round application corners inside a rectangular frame. Use a number for all four corners or a table for individual corners. Use `client.shape` for the shared window and titlebar shape.
+Set `client.content_radius` to round [client content](../concepts/object-model.md#client) inside a rectangular frame. Use a number for all four corners or a table for individual corners. Use `client.shape` for the client frame's shape.
 
 `content_radius` is unreleased and unavailable in 2.1.2.
 
@@ -57,7 +57,7 @@ ruled.client.append_rule {
 }
 ```
 
-Place this rule inside your existing `request::rules` handler, after general rules. The function sets the frame color and radius and replaces the titlebars. Tags and floating state are unchanged.
+Place this rule inside your existing `request::rules` handler, after general rules. The function sets the frame colour and content radius and replaces the titlebars. Tags and floating state are unchanged.
 
 The radius uses logical pixels: 18 becomes 27 device pixels at 1.5× scale. Do not scale the value yourself.
 
@@ -131,8 +131,8 @@ With no border and no `content_radius`, clicks in the shared shape's cut corners
 
 ### Keep titlebars
 
-- A titlebar on an edge takes that edge's corners. The window takes the remaining corners.
-- With a top titlebar, the titlebar has rounded top corners and the window has rounded bottom corners.
+- A titlebar on an edge takes that edge's corners. The client content takes the remaining corners.
+- With a top titlebar, the titlebar has rounded top corners and the client content has rounded bottom corners.
 - Fullscreen clients stay square, even when `shape` is set.
 
 ## Try open windows

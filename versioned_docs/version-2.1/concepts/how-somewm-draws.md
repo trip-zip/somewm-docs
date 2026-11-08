@@ -8,7 +8,7 @@ description: How widget properties become sizes, positions and pixels on the scr
 
 SomeWM 2.1 uses Clay to calculate sizes and positions from widget descriptions. Its renderer draws the resulting tree. Changing a textbox's text can therefore resize its containers and move neighbouring widgets.
 
-This also applies to wibars, popups, notifications and window frames. Applications still draw their own contents. SomeWM decides where to put those contents and their borders on the screen.
+This also applies to wibars, popups, notifications and window frames. Applications draw their own [client content](./object-model.md#client). SomeWM places that content, titlebars and borders on the screen.
 
 ## How sizes and positions are calculated {#what-computing-layout-means}
 

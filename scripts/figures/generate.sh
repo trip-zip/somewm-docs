@@ -135,9 +135,7 @@ if run 04; then
 	cx=$(f1 "$cl"); cy=$(f2 "$cl"); cw=$(f3 "$cl"); chh=$(f4 "$cl")
 	tx=$(f1 "$tb"); ty=$(f2 "$tb"); tw=$(f3 "$tb"); th=$(f4 "$tb")
 
-	# The surface is what is left of the client once the titlebar is taken off
-	# the top: kiln has no id for it, but the fork this figure is about is
-	# exactly this split, and both halves come from Clay's solved boxes.
+	# Derive the content area from the solved frame and titlebar boxes.
 	sx=$tx
 	sy=$((ty + th))
 	sw=$tw
@@ -148,7 +146,7 @@ if run 04; then
 	magick "$KH_WORK/04.png" -crop "$((cw + m + m))x$((chh + m + m))+$ox+$oy" +repage "$KH_WORK/04-c.png"
 	"$here/annotate.sh" "$KH_WORK/04-c.png" "$out/04-leaf.png" \
 		"$((tx - ox)),$((ty - oy)),$tw,$th,below,widgets.titlebar - Clay draws this" \
-		"$((sx - ox)),$((sy - oy)),$sw,$sh,center,ui.surface - the client's own pixels"
+		"$((sx - ox)),$((sy - oy)),$sw,$sh,center,ui.surface - client content"
 	echo "  04-leaf.png"
 	kh_halt
 fi

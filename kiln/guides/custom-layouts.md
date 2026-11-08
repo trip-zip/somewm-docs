@@ -47,7 +47,7 @@ Two things every layout should copy from this:
 - Guard the empty case. An empty `"grow"` container is not invisible to the solver: it is a sibling that takes its share of space. Declaring one next to real cells hands half the screen to a hole.
 - Read the gap from the tag with a theme fallback, so per-tag `t.gap` overrides work.
 
-`kiln.widgets.client(c)` declares the full composite (border, titlebar, surface). Sizing accepts numbers (pixels), `"grow"`, `"fit"`, and percent strings like `"60%"`.
+`kiln.widgets.client(c)` declares the full client frame (client content, titlebar and border). Sizing accepts numbers (pixels), `"grow"`, `"fit"`, and percent strings like `"60%"`.
 
 ## 2. A two-column layout
 

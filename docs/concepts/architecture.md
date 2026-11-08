@@ -46,7 +46,7 @@ A state change marks affected outputs for an update. Lua prepares widget and cli
 
 ![Lua declarations feed Clay layout, then SomeWM updates the scene before presentation.](/img/architecture/clay-frame-pipeline.svg)
 
-Applications supply their own pixels. SomeWM places those surfaces alongside widget content, borders and decorations. [How SomeWM draws](how-somewm-draws.md) explains the layout and rendering stages.
+Applications draw their own [client content](./object-model.md#client). SomeWM places their surface trees alongside widget content, borders and decorations. [How SomeWM draws](how-somewm-draws.md) explains the layout and rendering stages.
 
 ## Startup and reload
 

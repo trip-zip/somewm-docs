@@ -60,6 +60,7 @@ PNGs, runnable Lua and capture metadata go to `static/img/reference/kiln/`.
 The same Lua is included through `_lua/*.mdx` partials beside the reference
 pages. `assets.py` rejects captures whose Lua differs from the current scene.
 The manifest records the Kiln source revision, scale, output and image sizes.
+Per-figure `host_output` values override the shared output for recaptured scenes.
 
 ## Scene files
 

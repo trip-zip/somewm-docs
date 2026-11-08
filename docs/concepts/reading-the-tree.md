@@ -216,5 +216,5 @@ The realized list contains one line per render command, in draw order, with the 
 
 - `RECTANGLE` and `BORDER` use scene rectangles without raster buffers. Only rectangles report their band as `z=`.
 - `TEXT` and `IMAGE` use rasters. `raster=` reports their bytes.
-- `CUSTOM` represents a client surface, shadow, or clipped fill. Entries ending in `clip` or `configure` are markers without scene nodes.
+- `CUSTOM` represents a client surface tree, shadow, or clipped fill. A client surface tree displays [client content](./object-model.md#client). Entries ending in `clip` or `configure` are markers without scene nodes.
 - `SCISSOR_START` and `SCISSOR_END` delimit clipping. `rbox` is the box after clipping.

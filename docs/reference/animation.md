@@ -223,7 +223,7 @@ This client moves and resizes over 0.15 seconds when its layout changes. Focus b
 | Event | Accepted value | Description |
 | --- | --- | --- |
 | `appear` | Duration, effect, effect list or `false` | First appearance. Requires an effect to animate. |
-| `disappear` | Duration, effect, effect list or `false` | Closing. Requires an effect to animate. The frame, border and titlebars can animate, but the application's image disappears on the first frame. |
+| `disappear` | Duration, effect, effect list or `false` | Closing. Requires an effect to animate. The remaining frame, including the border and titlebars, can animate. The client content disappears on the first frame. |
 | `floating` | Duration | Moves and resizes the window to its new geometry when switching between floating and tiled states. |
 | `focus` | Duration | Focus changes. Animates border colour if the configuration changes it. |
 | `layout` | Duration | Moves and resizes tiled windows into their new positions, including tiled resizing and carousel scrolling. |

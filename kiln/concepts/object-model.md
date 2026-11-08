@@ -8,6 +8,12 @@ sidebar_position: 3
 
 Clients, screens, tags, layer surfaces, and notifications use the same class mixin. Properties are not restricted to a fixed list.
 
+## Client content and frame {#client-content}
+
+A client represents a managed application window. **Client content** is the application-drawn part of that window, including application-drawn decorations but excluding Kiln titlebars and borders. The **content area** is the rectangle allocated to it. The **client frame** includes the content, Kiln titlebars and border.
+
+Kiln presents Wayland client content through a **surface tree**, the main surface and its subsurfaces. A **buffer** supplies pixel data to a surface. `ui.surface` places client content; `widgets.client` adds the titlebar, border and floating resize handles.
+
 ## Reads and writes
 
 Reading `obj.key` consults, in order: the class's methods, then any declared getter, then plain storage in the object's `_data` table. Writing `obj.key = value` consults any declared setter, else stores the value in `_data`.

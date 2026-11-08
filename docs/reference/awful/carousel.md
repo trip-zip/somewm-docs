@@ -80,7 +80,7 @@ beautiful.carousel_peek_width = 40
 
 ## Column Width Functions
 
-These functions act on the focused column of the selected carousel tag. In the vertical variant, width fractions control column height and clients stack horizontally. Fractions apply to the space inside the carousel viewport’s peek padding. The workarea has an outer gap, and a positive peek adds `peek_width + gap` on each side. Column padding and client borders further reduce the application’s content size.
+These functions act on the focused column of the selected carousel tag. In the vertical variant, width fractions control column height and clients stack horizontally. Fractions apply to the space inside the carousel viewport’s peek padding. The workarea has an outer gap, and a positive peek adds `peek_width + gap` on each side. Column padding and client borders further reduce the available client content area.
 
 ### `carousel.cycle_column_width()`
 

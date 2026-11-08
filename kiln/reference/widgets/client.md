@@ -1,6 +1,6 @@
 ---
 title: kiln.widgets.client
-description: A client surface, titlebar, border and resize handles.
+description: Client content, a titlebar, border and resize handles.
 ---
 
 import WidgetSource from "@site/src/components/WidgetSource";
@@ -8,11 +8,11 @@ import FigureLua from "./_lua/widget-client.mdx";
 
 # kiln.widgets.client
 
-A client surface, titlebar, border and resize handles.
+Client content, a titlebar, border and resize handles.
 
 ![A client composite with a border, titlebar and terminal displaying Lua source](/img/reference/kiln/widget-client.png)
 
-The terminal content comes from the client’s buffer.
+The application supplies the [client content](../../concepts/object-model.md#client-content).
 
 <WidgetSource>
 

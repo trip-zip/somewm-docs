@@ -10,7 +10,7 @@ description: How desktop, screen and client captures use the rendered scene and 
 
 The result is a Cairo image surface at logical resolution, the size of `root.size()`. `root.content(true)` omits the wallpaper and starts with a transparent background. Other opaque content still covers that background.
 
-`screen.content` captures a single screen. `client.content` captures an application's content without compositor titlebars or borders. `awful.screenshot` selects among these sources according to its options.
+`screen.content` captures a single screen. `client.content` captures [client content](./object-model.md#client) without compositor titlebars or borders. `awful.screenshot` selects among these sources according to its options.
 
 ## HiDPI
 

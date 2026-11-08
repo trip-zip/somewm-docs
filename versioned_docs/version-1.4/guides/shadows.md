@@ -8,7 +8,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly'
 
 # Shadows <SomewmOnly />
 
-Enable compositor shadows in your theme, then override them for individual clients or wiboxes. These settings affect whole surfaces, not widgets inside them.
+Enable compositor shadows in your theme, then override them for individual clients or wiboxes. These settings apply to client and wibox frames.
 
 ## Enabling Shadows
 
@@ -38,7 +38,7 @@ Reload the configuration to apply theme defaults. For all available settings and
 | `shadow_radius` | Blur radius. Larger values soften the edge. |
 | `shadow_opacity` | Opacity from `0` to `1`. |
 | `shadow_offset_x`, `shadow_offset_y` | Position relative to the window. Positive values move right and down. |
-| `shadow_spread` | Expansion beyond the surface edges before blurring. |
+| `shadow_spread` | Expansion beyond the frame edges before blurring. |
 | `shadow_corner_radius` | Rounding of the shadow's corners. Does not round the window itself. |
 | `shadow_color` | Hex colour. An alpha byte multiplies the opacity. |
 

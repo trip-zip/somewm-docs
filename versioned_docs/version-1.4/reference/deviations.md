@@ -43,7 +43,7 @@ Widgets paint into drawable surfaces. The compositor places these surfaces along
 
 Client X11 shape masks have no Wayland implementation. See the [wibox reference](wibox/index.md) for widget and wibox shapes.
 
-Client geometry excludes the border. Titlebars occupy space inside the decorated client geometry. The border surrounds the client frame.
+Client geometry excludes the border. Titlebars occupy space inside the decorated client geometry. The border surrounds the content and titlebars. Together they form the [client frame](../concepts/object-model.md#client).
 
 ### Restart and reload
 

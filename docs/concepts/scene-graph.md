@@ -36,7 +36,7 @@ Lower bands draw first. Within a band, roots draw in declaration order, so a lat
 | 32765, 32766 | Clay's inspector panel |
 | 32767 | the pointer |
 
-A wibar in the flow has no band: it is part of the output's column with the workarea. A tiled client has none either. Its frame is a cell of the workarea and only its surface floats, at the client's band, attached to its slot. The dump prints the band after `band` on a root line, and the inspector shows it as the floating element's z-index.
+A wibar in the flow has no band: it is part of the output's column with the workarea. A tiled client has none either. Its frame is a cell of the workarea. Its `SURFACE` element floats at the client's band, attached to its slot, and places the surface tree that displays [client content](./object-model.md#client). The dump prints the band after `band` on a root line, and the inspector shows it as the floating element's z-index.
 
 ## Where things go
 

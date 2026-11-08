@@ -36,7 +36,7 @@ local s = awful.screenshot({ screen = screen.primary })
 |----------|------|---------|-------------|
 | `interactive` | boolean | `false` | Enable mouse-driven region selection |
 | `screen` | screen | `nil` | Capture a specific screen |
-| `client` | client | `nil` | Capture a specific client window |
+| `client` | client | `nil` | Capture client content without compositor titlebars or borders |
 | `geometry` | table | `nil` | Capture a specific `{x, y, width, height}` region |
 | `directory` | string | `$HOME` | Save directory |
 | `prefix` | string | `"Screenshot-"` | Filename prefix |

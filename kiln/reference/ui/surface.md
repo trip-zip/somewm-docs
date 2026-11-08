@@ -1,6 +1,6 @@
 ---
 title: kiln.ui.surface
-description: Place a client buffer in the UI tree.
+description: Place client content in the UI tree.
 ---
 
 import WidgetSource from "@site/src/components/WidgetSource";
@@ -8,11 +8,11 @@ import FigureLua from "./_lua/ui-surface.mdx";
 
 # kiln.ui.surface
 
-Places a client's surface tree at the solved box.
+Places a client's surface tree at the solved box to display [client content](../../concepts/object-model.md#client-content).
 
-![A client surface displaying Lua source without a titlebar or border](/img/reference/kiln/ui-surface.png)
+![Client content displaying Lua source without a Kiln titlebar or border](/img/reference/kiln/ui-surface.png)
 
-Only the client’s buffer is placed inside the sample box.
+Only client content is placed inside the sample box.
 
 <WidgetSource>
 

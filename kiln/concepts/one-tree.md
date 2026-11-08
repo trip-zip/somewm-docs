@@ -78,13 +78,11 @@ The declaration is cheap and rebuilt from scratch; the reconcile is incremental.
 Every node in the tree is one of two things:
 
 - **Clay owns the content.** A rectangle, a border, text, or an image, arriving as `RECTANGLE`, `BORDER`, `TEXT`, or `IMAGE`. This is everything kiln draws itself: bars, titlebars, taglists, menus, notifications, tooltips.
-- **The node is someone else's Wayland surface.** A client's buffer tree, placed at the box Clay solved. It arrives as `CUSTOM`, which the renderer reads as "put this client's buffers here". kiln never draws into a client.
+- **The application draws the client content.** Kiln places the client's surface tree at the box Clay solved. It arrives as `CUSTOM`, which tells the renderer where to display [client content](./object-model.md#client-content). Kiln does not draw into the client's buffers.
 
 ![One window with its titlebar outlined and labelled widgets.titlebar, and its content area labelled ui.surface](/img/kiln/clay/04-leaf.png)
 
-*Figure captured from an earlier build; the layout is unchanged.*
-
-A titlebar and the window under it are siblings, differing only in who supplies the pixels. Because the fork sits at the leaf and nowhere else, everything above it (containers, sizing, alignment, floats, stacking) is uniform.
+A titlebar and the client content are siblings, differing only in who supplies the pixels. Because the fork sits at the leaf and nowhere else, everything above it (containers, sizing, alignment, floats, stacking) is uniform.
 
 ## The two tiers
 
