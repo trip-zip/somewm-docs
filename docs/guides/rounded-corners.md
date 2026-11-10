@@ -10,7 +10,7 @@ import SomewmOnly from '@site/src/components/SomewmOnly'
 
 Set `client.content_radius` to round [client content](../concepts/object-model.md#client) inside a rectangular frame. Use a number for all four corners or a table for individual corners. Use `client.shape` for the client frame's shape.
 
-`content_radius` is unreleased and unavailable in 2.1.2.
+`content_radius`, `content_background_color` and titlebar `corner_padding` are unreleased and unavailable in 2.1.2.
 
 ## Round content inside square titlebars
 
@@ -26,7 +26,7 @@ ruled.client.connect_signal("request::rules", function()
         properties = {
             content_radius = 18,
             border_width = 0,
-            border_color = "#65517f",
+            content_background_color = "#65517f",
         },
         callback = function(c)
             c.shape = nil
@@ -37,11 +37,15 @@ end)
 
 The callback clears an earlier rule's shape. Setting `shape = nil` in the properties table would omit the entry, leaving that shape unchanged.
 
-All four content corners reveal `border_color`, even with `border_width = 0`. Match your titlebar backgrounds to this color for a continuous frame.
+All four content corners reveal `content_background_color`, even with `border_width = 0`. Match your titlebar backgrounds to this colour for a continuous frame. Setting it to `nil` uses `border_color` instead.
+
+An explicit fill does not follow titlebar focus colours automatically. If your titlebars change colour on focus, update `content_background_color` from `property::active`, as the downloadable example below does.
 
 ![Rounded terminal content inside a square purple frame at 1.5× output scale](/img/clients/content-radius.png)
 
 *Live capture at 1.5× scale with a radius of 27 logical pixels and four square titlebars. The pale outline is a separate widget.*
+
+## Build a paper frame
 
 For four titlebars with move, resize, minimise, maximise and close controls, download [rounded-content.lua](/examples/rounded-content.lua) into your configuration directory. Use its returned function as the rule callback:
 
@@ -57,9 +61,17 @@ ruled.client.append_rule {
 }
 ```
 
-Place this rule inside your existing `request::rules` handler, after general rules. The function sets the frame colour and content radius and replaces the titlebars. Tags and floating state are unchanged.
+Place this rule inside your existing `request::rules` handler, after general rules. The function sets both radii to 24, removes the native border, and creates a 48-pixel top titlebar with 12-pixel sides and bottom. The titlebars and inner corner fill are blue when focused and purple when inactive or urgent. Tags and floating state are unchanged.
 
-The radius uses logical pixels: 18 becomes 27 device pixels at 1.5× scale. Do not scale the value yourself.
+For a square outer frame, change `c.shape = 24` to `c.shape = nil` in the helper. The content stays rounded. For a native border as well, set `c.border_width` and `c.border_color`; the explicit content fill remains independent.
+
+### Keep controls away from rounded edges
+
+Titlebar widgets are inset automatically when `shape` has a recognised corner radius. The background still fills the titlebar. `content_radius` does not move titlebar widgets.
+
+Add `corner_padding = false` to your existing `awful.titlebar(c, { ... })` options to keep widgets at the edges. Use a number such as `corner_padding = 12` to set the inset explicitly, including for custom shapes. Omit the option or use `true` for automatic padding. These insets are added to margins inside your widget layout.
+
+All sizes use logical pixels: a radius of 24 becomes 36 device pixels at 1.5× scale. Do not scale the value yourself.
 
 ## Round selected content corners
 
@@ -92,7 +104,7 @@ c.content_radius = {}
 c.content_radius = nil
 ```
 
-The number rounds all four corners equally. An empty table makes the content corners square. Nil or numeric zero restores the corners derived from `shape`, border width and titlebars. A custom outer shape still clips the content.
+The number rounds all four corners equally. An empty table makes the content corners square. Nil or numeric zero restores the corners derived from `shape`, border width and titlebars. The outer shape still clips the content, including explicitly square corners.
 
 Fullscreen suppresses rounding until exit. Exposed inner corners belong to the client frame; they do not pass pointer events to the application or the window below. Shadows follow the outer frame.
 
@@ -123,11 +135,11 @@ end)
 - For a radius of 14 pixels without DPI adjustment, replace the `shape` line with `shape = 14,`.
 - For the default radius of 10 pixels, use `shape = gears.shape.rounded_rect,`.
 
-### Remove the square border
+### Choose the border width {#remove-the-square-border}
 
-Set `border_width = 0` to remove the rectangular border. Border width reduces the shared shape radius, down to zero; it does not reduce `content_radius`. Explicit border widths survive focus changes.
+The border follows `shape`; rounding does not require removing it. Set `border_width = 0` when the titlebars alone should form the frame. Border width reduces the shared inner radius, down to zero; it does not reduce `content_radius`. Explicit border widths survive focus changes.
 
-With no border and no `content_radius`, clicks in the shared shape's cut corners reach the window below.
+Clicks outside the outer shape reach the window below. Exposed inner corners remain part of the client frame.
 
 ### Keep titlebars
 

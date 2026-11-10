@@ -43,7 +43,7 @@ steps[#steps + 1] = function()
     screen[1].scale = 1.5
     screen[1].selected_tag.layout = awful.layout.suit.floating
     mouse.coords{x = 0, y = 0}
-    ruled.client.append_rule{id = 'earlier-shape', rule = {class = 'firefox'}, properties = {shape = 40}}
+    ruled.client.append_rule{id = 'earlier-shape', rule = {class = 'firefox'}, properties = {shape = 40, border_color = '#ff0000'}}
     assert(load(blocks[1], 'guide-rule'))()
     ruled.client.emit_signal('request::rules')
     return true
@@ -53,6 +53,8 @@ steps[#steps + 1] = mapped
 steps[#steps + 1] = shot.wait(function()
     assert(c.content_radius == 18 and c.shape == nil and c.border_width == 0,
         'first rule must clear an earlier shape and set the independent radius')
+    assert(c.content_background_color == '#65517f' and c.border_color == '#ff0000',
+        'content fill must pass through rules without changing the border colour')
     ruled.client.remove_rule('earlier-shape'); ruled.client.remove_rule('rounded-content')
     ruled.client.append_rule {
         id = 'rounded-content', rule = {class = 'firefox'},
@@ -91,16 +93,35 @@ steps[#steps + 1] = function()
 end
 steps[#steps + 1] = spawn
 steps[#steps + 1] = mapped
-shot.check_steps(steps, function()
-    assert(c.content_radius == 18 and c.shape == nil and c.border_width == 0)
-    for _, side in ipairs{'top', 'right', 'bottom', 'left'} do
-        local _, size = c['titlebar_' .. side](c)
-        assert(size == (side == 'top' and 48 or 12), 'helper titlebar size: ' .. side)
-    end
-    return {{52, 88, '#65517f'}, {327, 88, '#65517f'},
-        {52, 247, '#65517f'}, {327, 247, '#65517f'},
-        {70, 106, '#204060'}, {309, 229, '#204060'}}
-end)
+local function check_helper(fill, shape)
+    shot.check_steps(steps, function()
+        assert(c.content_radius == 24 and c.shape == shape and c.border_width == 0)
+        assert(c.content_background_color == fill, 'helper fill does not match focus state')
+        for _, side in ipairs{'top', 'right', 'bottom', 'left'} do
+            local _, size = c['titlebar_' .. side](c)
+            assert(size == (side == 'top' and 48 or 12), 'helper titlebar size: ' .. side)
+        end
+        local dump = awesome._clay_tree(screen[1])
+        local top = assert(dump:match('\n( *TITLEBAR firefox [^\n]*)'))
+        local padding = shape and '24,24,0,0' or '16,12,0,0'
+        assert(top:find(' pad ' .. padding .. ' ', 1, true), top)
+        local pixels = assert(dump:match('\n( *SURFACE firefox [^\n]*)'))
+        assert(pixels:find(' radii 24,24,24,24 ', 1, true), pixels)
+        return {{52, 88, fill}, {327, 88, fill}, {52, 247, fill}, {327, 247, fill},
+            {70, 106, '#204060'}, {309, 229, '#204060'},
+            {42, 140, fill}, {337, 140, fill}, {190, 257, fill}, {190, 42, fill}}
+    end)
+end
+steps[#steps + 1] = function() client.focus = c; return true end
+check_helper('#65aee2', 24)
+steps[#steps + 1] = function() client.focus = nil; return true end
+check_helper('#c680d5', 24)
+steps[#steps + 1] = function() client.focus = c; return true end
+check_helper('#65aee2', 24)
+steps[#steps + 1] = function() c.urgent = true; return true end
+check_helper('#c680d5', 24)
+steps[#steps + 1] = function() c.urgent = false; c.shape = nil; return true end
+check_helper('#65aee2', nil)
 steps[#steps + 1] = function()
     ruled.client.remove_rule('rounded-content-frame')
     return close()
@@ -122,7 +143,7 @@ steps[#steps + 1] = shot.wait(function()
         assert(c.content_radius == nil, 'guide shell example left independent rounding enabled')
     end
     assert(c.shape == nil, 'guide shell examples did not reset the shape')
-    io.stderr:write('[PASS] guide rules, named corners, reference table edits, helper pixels at scale 1.5, nil reset and shell examples\n')
+    io.stderr:write('[PASS] guide rules, named corners, reference table edits, helper focus colours and padding at scale 1.5, nil reset and shell examples\n')
 end)
 steps[#steps + 1] = function()
     close(); os.remove(helper); return true

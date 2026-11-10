@@ -34,24 +34,52 @@ c.content_radius = corners
 
 The read-modify-write example requires the property to be in table form. A positive numeric assignment reads back as a number.
 
-Any positive content radius paints `border_color` behind the content, even with `border_width = 0`. Titlebar colours are independent. Nil, numeric zero and all-zero tables add no backing.
+Any positive content radius paints `content_background_color` behind the content, or `border_color` when unset, even with `border_width = 0`. Titlebar colours are independent. Nil, numeric zero and all-zero tables add no backing.
 
 Changing the stored radii or switching between numeric and table forms emits `property::content_radius` and updates the layout. Reassigning equivalent values in the same form emits no signal. Nil and numeric zero are equivalent. `ruled.client` accepts both numbers and named corner tables.
 
-Fullscreen suppresses the radii until exit without clearing the property. Custom outer shapes clip the content, including with an empty table. Content radii do not affect shadows or titlebar corners.
+Fullscreen suppresses the radii until exit without clearing the property. The outer shape clips the content, including with an empty table. Content radii do not affect shadows or titlebar corners.
 
 Exposed inner corners belong to the client frame. They do not pass pointer events to the application or the window below.
+
+## `client.content_background_color`
+
+SomeWM-only, unreleased. Read/write, solid colour string or `nil`, default `nil`.
+
+This colour fills the exposed corners of rounded content. Nil follows `border_color`, including changes caused by focus. An explicit colour does not change the border colour or follow titlebar colours automatically. It applies even when `border_width = 0`.
+
+The property has no effect unless at least one content radius is positive. Fullscreen suppresses the fill without clearing the property. The outer shape clips the fill.
+
+Colour strings accept hex values, including alpha, and named colours supported by `gears.color.parse_color`. Gradients, patterns, tables and invalid colour strings raise an error without changing the property.
+
+Changing the stored value emits `property::content_background_color`. Assigning the current value again emits no signal. `ruled.client` accepts the property.
 
 ## `client.shape`
 
 Read/write, `number`, shape function or `nil`, default `nil`. Changing it emits `property::shape`.
 
-A number, `gears.shape.rounded_rect`, or a closure drawing that function supplies native corner radii. The border remains rectangular. The radius is reduced by the border width, then assigned to titlebars on their edges and to the remaining content corners. A positive number or table assigned to `content_radius` replaces only the content's derived corners.
+A number, `gears.shape.rounded_rect`, or a closure drawing that function supplies native corner radii. The shape clips the entire frame, including the border, titlebars and content backing. The outer silhouette does not depend on `content_radius`.
+
+The radius is reduced by the border width, then assigned to titlebars on their edges and to the remaining content corners. A positive number or table assigned to `content_radius` replaces only the content's derived corners. Explicitly square content remains inside the rounded border.
 
 Other shape functions define a path around the whole frame, including the border and titlebars. Drawing and input are clipped to that path. Fullscreen ignores the shape.
 
 Nil clears the shape. Negative numeric radii and values other than numbers, functions or nil raise a Lua error.
 
 `shape_bounding`, `shape_clip` and `shape_input` accept assignments but have no effect and return `nil`. `gears.surface.apply_shape_bounding` assigns `client.shape`.
+
+## Titlebar `corner_padding`
+
+SomeWM-only, unreleased. An option in `awful.titlebar(c, args)`, default `true`. It insets widgets at both ends of a titlebar without moving its background or changing the client's content radius.
+
+| Value | Behaviour |
+| --- | --- |
+| `true` or omitted | Use the recognised outer shape radius minus border width, clamped to zero. |
+| `false` | Add no corner inset. |
+| Number from 0 to 65535 | Set both end insets in logical pixels, rounded to the nearest integer. |
+
+For automatic padding on a left or right titlebar, the top and bottom titlebar heights reduce their respective end insets, down to zero. An unrecognised custom shape has no automatic inset; a numeric option supplies one. Invalid types and numbers outside the range raise an error.
+
+Automatic padding updates when the shape, border width, or top/bottom titlebar size changes. Widget margins are added to these insets. `content_radius` does not affect them.
 
 For configuration examples, see [Round client corners](../guides/rounded-corners.md).

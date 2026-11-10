@@ -3,21 +3,28 @@ local wibox = require('wibox')
 local shape = require('gears.shape')
 
 return function(c)
-    local frame, foreground = '#65517f', '#f4f2fa'
-    c.shape = nil
-    c.content_radius = 18
-    c.border_width, c.border_color = 0, frame
+    local normal, focused, foreground = '#c680d5', '#65aee2', '#263446'
+    c.shape = 24
+    c.content_radius = 24
+    c.border_width = 0
+
+    local function update_fill()
+        c.content_background_color = not c.urgent and c.active and focused or normal
+    end
+    c:connect_signal('property::active', update_fill)
+    c:connect_signal('property::urgent', update_fill)
+    update_fill()
 
     local function button(label, action)
         local text = wibox.widget.textbox(label)
         text.font, text.halign, text.valign = 'sans 12', 'center', 'center'
-        local bg = wibox.container.background(text, '#796291')
+        local bg = wibox.container.background(text, '#d8e2ea')
         bg.fg = foreground
         bg.shape = function(cr, w, h) shape.rounded_rect(cr, w, h, 6) end
         bg.forced_width, bg.forced_height = 30, 28
         bg:buttons{awful.button({}, 1, action)}
-        bg:connect_signal('mouse::enter', function() bg.bg = '#9579b1' end)
-        bg:connect_signal('mouse::leave', function() bg.bg = '#796291' end)
+        bg:connect_signal('mouse::enter', function() bg.bg = '#ffffff' end)
+        bg:connect_signal('mouse::leave', function() bg.bg = '#d8e2ea' end)
         return wibox.container.place(bg, 'center', 'center')
     end
 
@@ -43,9 +50,8 @@ return function(c)
     row:set_right(controls)
     for _, side in ipairs{'top', 'right', 'bottom', 'left'} do
         local child = side == 'top' and wibox.container.margin(row, 16, 12, 0, 0) or nil
-        local bg = wibox.container.background(child, frame)
-        bg.fg = foreground
         awful.titlebar(c, {position = side, size = side == 'top' and 48 or 12,
-            bg_normal = frame, bg_focus = frame, bg_urgent = frame}).widget = bg
+            bg_normal = normal, bg_focus = focused, bg_urgent = normal,
+            fg_normal = foreground, fg_focus = foreground, fg_urgent = foreground}).widget = child
     end
 end

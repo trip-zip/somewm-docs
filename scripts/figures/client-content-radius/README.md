@@ -26,7 +26,7 @@ magick /tmp/content-radius-screen.png -crop 867x724+1002+609 +repage static/img/
 
 The image shows four square purple titlebars and a radius of 27 logical pixels. A separate input-transparent wibox draws the pale outline. Foot uses `monospace:size=12`, background `252b3b` and foreground `b8ddc8`.
 
-The guide's `static/examples/rounded-content.lua` helper uses an 18-pixel radius, a 48-pixel top titlebar, 12-pixel side/bottom titlebars and standard window controls, without the outline wibox. All sizes use logical pixels.
+The guide's `static/examples/rounded-content.lua` helper uses 24-pixel outer and content radii, a 48-pixel top titlebar, 12-pixel side/bottom titlebars and standard window controls, without the outline wibox. Its titlebars and inner corner fill are blue when focused and purple when inactive or urgent. Set `c.shape = nil` in the helper for a square outer frame. All sizes use logical pixels.
 
 To stop the capture scene from the command line:
 
@@ -40,4 +40,4 @@ From the SomeWM source checkout, verify the guide examples and the helper's four
 HEADLESS=1 SOMEWM_DOCS_REPO=../somewm-docs make test-one TEST=../somewm-docs/scripts/figures/client-content-radius/verify.lua
 ```
 
-The verifier uses a solid-color Wayland fixture client and reads both `screen.content` and grim pixels. It does not open or modify Firefox.
+The verifier uses a solid-colour Wayland fixture client and reads both `screen.content` and grim pixels. It checks the rule's independent fill, the helper's focus and urgent colours, automatic titlebar padding, and round/square outer frames. It does not open or modify Firefox.

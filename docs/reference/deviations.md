@@ -41,6 +41,8 @@ Widgets describe elements in one tree per output. `declare.c` declares the tree.
 
 `client.shape` controls client corners. The mask properties `shape_bounding`, `shape_clip` and `shape_input` are ignored and warn. The corresponding `client_shape_*` getters return `nil`. Wibox masks are also ignored. Use its `shape` property. See [rounded corners](../guides/rounded-corners.md) and [wibox](wibox/index.md).
 
+`client.content_radius`, `client.content_background_color` and titlebar `corner_padding` are SomeWM additions. See [Client corners](client-corners.md) for independent content rounding, corner fill and titlebar insets.
+
 Client geometry excludes the border. Titlebars occupy space inside the decorated client geometry. The border surrounds the content and titlebars. Together they form the [client frame](../concepts/object-model.md#client).
 
 ### Restart and reload
